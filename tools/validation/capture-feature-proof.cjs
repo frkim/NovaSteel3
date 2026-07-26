@@ -244,10 +244,24 @@ async function main() {
   await sleep(3000);
   const applied = await evaluate(`(() => {
     const d = document.querySelector('[role="dialog"]');
-    return d ? d.innerText.replace(/\\n/g, ' | ').slice(0, 400) : document.body.innerText.slice(0, 300);
+    if (!d) return null;
+    const select = d.querySelector('#capacity-sku-select');
+    const current = Array.from(select ? select.options : []).find((o) => /\\(current\\)/.test(o.text));
+    return JSON.stringify({
+      sku: (d.innerText.match(/SKU\\s*\\n?\\s*(F\\d+)/) || [])[1] || null,
+      currentOption: current ? current.value : null,
+      text: d.innerText.replace(/\\n/g, ' | ').slice(0, 400),
+    });
   })()`);
-  console.log('  after apply:', applied);
-  check('Applying F8 is reflected in the dialog', /F8/.test(applied || ''));
+  const state = applied ? JSON.parse(applied) : {};
+  console.log('  after apply:', state.text);
+  // `/F8/` alone is worthless here: F8 is always present as a <option>. Assert the
+  // capacity's own SKU fact and the "(current)" marker actually moved to F8.
+  check(
+    'Applying F8 changes the capacity SKU to F8',
+    state.sku === 'F8' && state.currentOption === 'F8',
+    `SKU fact=${state.sku}, current option=${state.currentOption}`,
+  );
   await shot('06-capacity-dialog-after-apply');
 
   fs.writeFileSync(path.join(OUT, 'verification.json'), JSON.stringify(results, null, 2));

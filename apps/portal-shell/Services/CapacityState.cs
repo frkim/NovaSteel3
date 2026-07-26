@@ -124,7 +124,7 @@ public sealed class CapacityState
         Notify();
 
         var effectiveReason = string.IsNullOrWhiteSpace(reason) ? "rehearsal readiness" : reason.Trim();
-        var result = await _service.RequestAsync(normalized, effectiveReason, locale);
+        var result = await _service.RequestAsync(normalized, effectiveReason, locale, Status.CapacityId);
         if (result is not null)
         {
             Source = "bff";
@@ -199,7 +199,7 @@ public sealed class CapacityState
 
         var effectiveReason = string.IsNullOrWhiteSpace(reason) ? "rehearsal readiness" : reason.Trim();
         var previousSku = Status.Sku;
-        var result = await _service.RequestSkuAsync(requested, effectiveReason, locale);
+        var result = await _service.RequestSkuAsync(requested, effectiveReason, locale, Status.CapacityId);
         if (result.Data is not null)
         {
             Source = "bff";

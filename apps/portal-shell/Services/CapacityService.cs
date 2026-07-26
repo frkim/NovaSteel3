@@ -44,10 +44,20 @@ public sealed class CapacityService
         }
     }
 
+    /// <summary>
+    /// The capacity the BFF reports is authoritative: the shell's configured id is
+    /// only a fallback for the very first render, before the status call returns.
+    /// Posting a stale build-time id gets the mutation refused by the BFF
+    /// allow-list, which is silent for start/pause.
+    /// </summary>
+    private string ResolveCapacityId(string? capacityId) =>
+        string.IsNullOrWhiteSpace(capacityId) ? _options.CapacityId : capacityId.Trim();
+
     public async Task<CapacityMutationDto?> RequestAsync(
         string action,
         string reason,
         string locale,
+        string? capacityId = null,
         CancellationToken cancellationToken = default)
     {
         var path = action == "start"
@@ -57,7 +67,7 @@ public sealed class CapacityService
         {
             using var request = new HttpRequestMessage(HttpMethod.Post, path)
             {
-                Content = JsonContent.Create(new CapacityMutationRequest(_options.CapacityId, reason)),
+                Content = JsonContent.Create(new CapacityMutationRequest(ResolveCapacityId(capacityId), reason)),
             };
             ApplyHeaders(request, locale);
             request.Headers.TryAddWithoutValidation("Idempotency-Key", Guid.NewGuid().ToString("N"));
@@ -86,13 +96,14 @@ public sealed class CapacityService
         string sku,
         string reason,
         string locale,
+        string? capacityId = null,
         CancellationToken cancellationToken = default)
     {
         try
         {
             using var request = new HttpRequestMessage(HttpMethod.Post, "/v1/platform/capacity/sku-requests")
             {
-                Content = JsonContent.Create(new CapacitySkuRequest(_options.CapacityId, sku, reason)),
+                Content = JsonContent.Create(new CapacitySkuRequest(ResolveCapacityId(capacityId), sku, reason)),
             };
             ApplyHeaders(request, locale);
             request.Headers.TryAddWithoutValidation("Idempotency-Key", Guid.NewGuid().ToString("N"));
