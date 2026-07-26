@@ -40,6 +40,7 @@ target "bff" {
     optimizer-worker = "services/optimizer-worker"
     scoring-worker   = "services/scoring-worker"
     knowledge        = "services/knowledge-orchestrator"
+    device-simulator = "services/device-simulator"
   }
   tags      = [ref("bff")]
   platforms = ["linux/amd64"]

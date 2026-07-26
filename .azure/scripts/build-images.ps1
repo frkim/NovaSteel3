@@ -8,7 +8,8 @@
   BuildKit named build contexts (the main context stays the app folder so its
   own .dockerignore is honoured):
 
-    BFF    (services/bff-api)     + optimizer-worker, scoring-worker, knowledge
+    BFF    (services/bff-api)     + optimizer-worker, scoring-worker, knowledge,
+                                  device-simulator
     Portal (apps/portal-shell)    + analytics-mfe, contracts, reporoot
 
   Python (pip) and .NET (NuGet) restores resolve ONLY from the Microsoft
@@ -113,6 +114,7 @@ try {
             "--build-context", "optimizer-worker=services/optimizer-worker",
             "--build-context", "scoring-worker=services/scoring-worker",
             "--build-context", "knowledge=services/knowledge-orchestrator",
+            "--build-context", "device-simulator=services/device-simulator",
             "-t", $ref
         )
         if (-not $Push -and -not $NoLoad -and $LocalAlias) { $buildxArgs += @("-t", (Get-Ref "bff" $LocalAlias "")) }
