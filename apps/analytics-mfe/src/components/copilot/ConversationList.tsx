@@ -44,6 +44,7 @@ export function ConversationList({
             <ListItemButton
               key={conversation.conversationId}
               selected={conversation.conversationId === activeId}
+              data-testid="copilot-conversation"
               onClick={() => onOpen(conversation.conversationId)}
               aria-label={`${t('copilot.conversations.restore')}: ${conversation.title}`}
               sx={{ borderRadius: 1, pr: 5 }}

@@ -126,7 +126,12 @@ function SourceList({ sources, t }: { sources: CopilotSource[]; t: (key: string)
       </Typography>
       <Stack spacing={0.25} sx={{ mt: 0.25 }}>
         {sources.map((source) => (
-          <Typography key={`${source.kind}-${source.sourceId}`} variant="caption" color="text.secondary">
+          <Typography
+            key={`${source.kind}-${source.sourceId}`}
+            data-testid="copilot-source"
+            variant="caption"
+            color="text.secondary"
+          >
             {label(source.kind)} ·{' '}
             {source.url ? (
               <Link href={source.url} target="_blank" rel="noopener noreferrer">
@@ -313,20 +318,23 @@ export function CopilotPanel({
             {t('copilot.subtitle')}
           </Typography>
         </Box>
-        <TextField
-          select
-          size="small"
-          value={language}
-          onChange={(event) => setLanguage(event.target.value)}
-          label={t('copilot.language')}
-          sx={{ width: 108 }}
-        >
-          {SUPPORTED_LANGUAGES.map((code) => (
-            <MenuItem key={code} value={code}>
-              {LANGUAGE_LABELS[code]}
-            </MenuItem>
-          ))}
-        </TextField>
+        <Tooltip title={t('copilot.language')}>
+          <TextField
+            select
+            size="small"
+            value={language}
+            onChange={(event) => setLanguage(event.target.value)}
+            data-testid="copilot-language"
+            slotProps={{ htmlInput: { 'aria-label': t('copilot.language') } }}
+            sx={{ width: 92, '& .MuiInputBase-input': { py: 0.5, fontSize: '0.78rem' } }}
+          >
+            {SUPPORTED_LANGUAGES.map((code) => (
+              <MenuItem key={code} value={code}>
+                {LANGUAGE_LABELS[code]}
+              </MenuItem>
+            ))}
+          </TextField>
+        </Tooltip>
         <Tooltip title={t('copilot.temporary.hint')}>
           <IconButton
             size="small"
@@ -358,7 +366,11 @@ export function CopilotPanel({
         sx={{ alignItems: 'center', px: 1.5, py: 0.75, flexWrap: 'wrap', rowGap: 0.5 }}
       >
         <GppGoodIcon fontSize="small" sx={{ color: 'success.main' }} />
-        <Typography variant="caption" sx={{ color: 'success.main', fontWeight: 600 }}>
+        <Typography
+          variant="caption"
+          data-testid="copilot-shield"
+          sx={{ color: 'success.main', fontWeight: 600 }}
+        >
           {t('copilot.shield')}
         </Typography>
       </Stack>
@@ -442,6 +454,7 @@ export function CopilotPanel({
                 size="small"
                 variant="outlined"
                 clickable
+                data-testid="copilot-suggestion"
                 label={question}
                 onClick={() => void ask(question)}
                 sx={{ justifyContent: 'flex-start', height: 'auto', py: 0.5, '& .MuiChip-label': { whiteSpace: 'normal' } }}
@@ -469,6 +482,7 @@ export function CopilotPanel({
               }
             }}
             placeholder={t('copilot.placeholder')}
+            data-testid="copilot-input"
             slotProps={{ htmlInput: { 'aria-label': t('copilot.placeholder') } }}
           />
           <Tooltip
@@ -498,6 +512,7 @@ export function CopilotPanel({
                 size="small"
                 color="primary"
                 aria-label={t('copilot.send')}
+                data-testid="copilot-send"
                 disabled={pending || !draft.trim()}
                 onClick={() => void ask(draft)}
               >

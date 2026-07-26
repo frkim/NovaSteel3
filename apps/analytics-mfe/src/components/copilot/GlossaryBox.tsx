@@ -69,6 +69,7 @@ export function GlossaryBox({ client, language, section, t }: GlossaryBoxProps) 
         onChange={(event) => setQuery(event.target.value)}
         placeholder={t('copilot.glossary.placeholder')}
         helperText={t('copilot.glossary.hint')}
+        data-testid="copilot-glossary-input"
         slotProps={{
           htmlInput: { 'aria-label': t('copilot.glossary.placeholder') },
           input: {

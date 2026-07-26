@@ -30,7 +30,11 @@ const DockSlotContext = createContext<DockSlots>({ workspace: null, copilot: nul
 
 function WorkspacePanel(_props: IDockviewPanelProps) {
   const slots = useContext(DockSlotContext)
-  return <Box sx={{ height: '100%', overflow: 'auto', p: 0.5 }}>{slots.workspace}</Box>
+  return (
+    <Box data-testid="copilot-workspace-slot" sx={{ height: '100%', overflow: 'auto', p: 0.5 }}>
+      {slots.workspace}
+    </Box>
+  )
 }
 
 function CopilotPanelHost(_props: IDockviewPanelProps) {
