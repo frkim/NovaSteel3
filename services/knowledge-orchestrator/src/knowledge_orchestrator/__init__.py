@@ -34,6 +34,34 @@ from .state_graph import (
     build_knowledge_capture_graph,
     generate_mermaid_file,
 )
+from .erasure import (
+    ErasureError,
+    ErasureNotFoundError,
+    ErasureReceipt,
+    ErasureRequest,
+    ErasureService,
+    ErasureStatus,
+    ErasureTarget,
+    SubjectType,
+)
+from .retrieval import (
+    Chunk,
+    CitationError,
+    HybridRetriever,
+    RetrievalResult,
+    ScoredChunk,
+    build_decline_answer,
+    enforce_answer_citations,
+    extract_citations,
+)
+from .pii import PiiMatch, RedactionResult, detect, pseudonymize, redact
+from .content_safety import (
+    LocalHeuristicContentSafety,
+    SafetyCategory,
+    SafetyVerdict,
+    screen_input,
+    screen_output,
+)
 
 __version__ = "0.1.0"
 
@@ -57,4 +85,30 @@ __all__ = [
     "IllegalTransitionError",
     "build_knowledge_capture_graph",
     "generate_mermaid_file",
+    "ErasureService",
+    "ErasureRequest",
+    "ErasureReceipt",
+    "ErasureTarget",
+    "ErasureStatus",
+    "ErasureError",
+    "ErasureNotFoundError",
+    "SubjectType",
+    "HybridRetriever",
+    "RetrievalResult",
+    "ScoredChunk",
+    "Chunk",
+    "CitationError",
+    "extract_citations",
+    "enforce_answer_citations",
+    "build_decline_answer",
+    "PiiMatch",
+    "RedactionResult",
+    "detect",
+    "redact",
+    "pseudonymize",
+    "SafetyCategory",
+    "SafetyVerdict",
+    "LocalHeuristicContentSafety",
+    "screen_input",
+    "screen_output",
 ]

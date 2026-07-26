@@ -678,6 +678,290 @@ def register_routes(app: FastAPI) -> None:
             primary_time="procedureId",
         )
 
+    @app.post("/v1/knowledge/query", tags=["Knowledge"])
+    async def query_knowledge(
+        request: Request,
+        body: dict[str, Any] = Body(...),
+        user: UserContext = Depends(current_user),
+    ) -> dict[str, Any]:
+        require_reader(user)
+        _require_keys(body, {"question"}, {"question", "topK"})
+        top_k = body.get("topK", 5)
+        if not isinstance(top_k, int) or isinstance(top_k, bool) or not 1 <= top_k <= 20:
+            raise ApiError(
+                400, ErrorCode.VALIDATION_ERROR, "topK must be an integer between 1 and 20."
+            )
+        result = request.app.state.services.knowledge.query(
+            _required_string(body, "question"), top_k=top_k
+        )
+        return _envelope(request, result)
+
+    @app.post("/v1/privacy/erasure-requests", tags=["Privacy"])
+    async def submit_erasure_request(
+        request: Request,
+        body: dict[str, Any] = Body(...),
+        user: UserContext = Depends(current_user),
+    ) -> dict[str, Any]:
+        require_any_role(user, "Compliance.Auditor")
+        _require_exact_keys(body, {"subjectType", "subjectId", "reason"})
+        result = request.app.state.services.privacy.submit(
+            subject_type=_required_string(body, "subjectType"),
+            subject_id=_required_string(body, "subjectId"),
+            requested_by=user.user_id,
+            reason=_required_string(body, "reason"),
+        )
+        request.app.state.services.audit.append(
+            domain="privacy",
+            entity_id=result["requestId"],
+            correlation_id=_correlation_id(request),
+            action="privacy.erasure.submit",
+            actor=user.user_id,
+            input_snapshot_ref=f"erasure:{result['requestId']}",
+            output={"status": result["status"], "targets": len(result["targets"])},
+        )
+        return _envelope(request, result)
+
+    @app.get("/v1/privacy/erasure-requests", tags=["Privacy"])
+    async def list_erasure_requests(
+        request: Request,
+        status: str | None = None,
+        user: UserContext = Depends(current_user),
+    ) -> dict[str, Any]:
+        require_any_role(user, "Compliance.Auditor")
+        result = request.app.state.services.privacy.list_requests(status=status)
+        return _table_envelope(
+            request,
+            result["items"],
+            columns={
+                "requestId": "text",
+                "subjectType": "enum",
+                "requestedBy": "text",
+                "status": "enum",
+                "createdAt": "date",
+                "completedAt": "date",
+            },
+            default_sort=("createdAt:desc",),
+            primary_time="createdAt",
+        )
+
+    @app.get("/v1/privacy/erasure-requests/{request_id}", tags=["Privacy"])
+    async def get_erasure_request(
+        request_id: str,
+        request: Request,
+        user: UserContext = Depends(current_user),
+    ) -> dict[str, Any]:
+        require_any_role(user, "Compliance.Auditor")
+        return _envelope(request, request.app.state.services.privacy.preview(request_id))
+
+    @app.post("/v1/privacy/erasure-requests/{request_id}:execute", tags=["Privacy"])
+    async def execute_erasure_request(
+        request_id: str,
+        request: Request,
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+        user: UserContext = Depends(current_user),
+    ) -> JSONResponse:
+        require_any_role(user, "Compliance.Auditor")
+        key = IdempotencyStore.require_key(idempotency_key)
+        route = "/v1/privacy/erasure-requests/{id}:execute"
+        body: dict[str, Any] = {"requestId": request_id}
+        replay = request.app.state.services.idempotency.replay_or_none(
+            route=route, key=key, body=body
+        )
+        if replay:
+            return _replay_response(replay)
+        receipt = request.app.state.services.privacy.execute(request_id)
+        record = request.app.state.services.audit.append(
+            domain="privacy",
+            entity_id=request_id,
+            correlation_id=_correlation_id(request),
+            action="privacy.erasure.execute",
+            actor=user.user_id,
+            input_snapshot_ref=f"erasure:{request_id}",
+            output={
+                "status": receipt["status"],
+                "chainVerifiedAfter": receipt["chainVerifiedAfter"],
+                "auditChainRef": receipt["auditChainRef"],
+            },
+            human_action={"decision": "ERASED"},
+        )
+        receipt["auditRef"] = record.audit_id
+        response = _envelope(request, receipt)
+        request.app.state.services.idempotency.store(
+            route=route, key=key, body=body, status_code=200, response=response
+        )
+        return JSONResponse(response)
+
+    # -- Device Operations --------------------------------------------------
+
+    @app.get("/v1/devices", tags=["Devices"])
+    async def list_devices(
+        request: Request,
+        user: UserContext = Depends(current_user),
+    ) -> dict[str, Any]:
+        require_reader(user)
+        rows = request.app.state.services.devices.devices()
+        return _table_envelope(
+            request,
+            [row for row in rows if row["site"] in user.plant_scope],
+            columns={
+                "deviceId": "text",
+                "area": "enum",
+                "description": "text",
+                "status": "enum",
+                "sensorCount": "number",
+                "healthScore": "number",
+                "uptimePct": "number",
+                "lastSampleAt": "date",
+            },
+            default_sort=("deviceId:asc",),
+            primary_time="lastSampleAt",
+        )
+
+    @app.get("/v1/devices/sensors", tags=["Devices"])
+    async def list_device_sensors(
+        request: Request,
+        deviceId: str | None = None,
+        user: UserContext = Depends(current_user),
+    ) -> dict[str, Any]:
+        require_reader(user)
+        rows = request.app.state.services.devices.sensors(device_id=deviceId)
+        return _table_envelope(
+            request,
+            rows,
+            columns={
+                "sensorId": "text",
+                "deviceId": "enum",
+                "signalCode": "text",
+                "displayName": "text",
+                "area": "enum",
+                "unit": "text",
+                "value": "number",
+                "status": "enum",
+                "quality": "enum",
+                "trend": "enum",
+                "deviationPct": "number",
+                "lastSampleAt": "date",
+            },
+            default_sort=("deviceId:asc", "signalCode:asc"),
+            primary_time="lastSampleAt",
+        )
+
+    @app.get("/v1/devices/sensors/{sensor_id}/series", tags=["Devices"])
+    async def get_device_sensor_series(
+        sensor_id: str,
+        request: Request,
+        window: str = Query(default="1h"),
+        points: int = Query(default=120, ge=1, le=1440),
+        user: UserContext = Depends(current_user),
+    ) -> dict[str, Any]:
+        require_reader(user)
+        return _envelope(
+            request,
+            request.app.state.services.devices.series(
+                sensor_id=sensor_id, window=window, points=points
+            ),
+        )
+
+    @app.get("/v1/devices/simulator", tags=["Devices"])
+    async def get_device_simulator(
+        request: Request,
+        user: UserContext = Depends(current_user),
+    ) -> dict[str, Any]:
+        require_reader(user)
+        return _envelope(request, request.app.state.services.devices.simulator())
+
+    @app.post("/v1/devices/simulator/commands", tags=["Devices"])
+    async def post_device_simulator_command(
+        request: Request,
+        body: dict[str, Any] = Body(...),
+        user: UserContext = Depends(current_user),
+    ) -> dict[str, Any]:
+        require_any_role(user, "Platform.Capacity.Manage")
+        _require_keys(
+            body, {"command"}, {"command", "scenario", "speedFactor", "seed"}
+        )
+        status = request.app.state.services.devices.command(
+            command=_required_string(body, "command"),
+            scenario=body.get("scenario"),
+            speed_factor=body.get("speedFactor"),
+            seed=body.get("seed"),
+        )
+        request.app.state.services.audit.append(
+            domain="devices",
+            entity_id="device-simulator",
+            correlation_id=_correlation_id(request),
+            action=f"devices.simulator.{body['command']}",
+            actor=user.user_id,
+            input_snapshot_ref=f"scenario:{status['scenario']}",
+            output={"state": status["state"], "speedFactor": status["speedFactor"]},
+        )
+        return _envelope(request, status)
+
+    @app.post("/v1/devices/incidents", tags=["Devices"])
+    async def post_device_incident(
+        request: Request,
+        body: dict[str, Any] = Body(...),
+        user: UserContext = Depends(current_user),
+    ) -> dict[str, Any]:
+        require_any_role(user, "Platform.Capacity.Manage")
+        _require_keys(
+            body,
+            {"incidentId"},
+            {"incidentId", "deviceId", "sensorId", "durationMinutes"},
+        )
+        result = request.app.state.services.devices.trigger_incident(
+            incident_id=_required_string(body, "incidentId"),
+            device_id=body.get("deviceId"),
+            sensor_id=body.get("sensorId"),
+            duration_minutes=body.get("durationMinutes"),
+        )
+        request.app.state.services.audit.append(
+            domain="devices",
+            entity_id=result["incident"]["activeIncidentId"],
+            correlation_id=_correlation_id(request),
+            action="devices.incident.trigger",
+            actor=user.user_id,
+            input_snapshot_ref=f"incident:{result['incident']['incidentId']}",
+            output={
+                "deviceId": result["incident"]["deviceId"],
+                "severity": result["incident"]["severity"],
+            },
+        )
+        return _envelope(request, result)
+
+    @app.delete("/v1/devices/incidents/{active_incident_id}", tags=["Devices"])
+    async def delete_device_incident(
+        active_incident_id: str,
+        request: Request,
+        user: UserContext = Depends(current_user),
+    ) -> dict[str, Any]:
+        require_any_role(user, "Platform.Capacity.Manage")
+        result = request.app.state.services.devices.clear_incident(active_incident_id)
+        request.app.state.services.audit.append(
+            domain="devices",
+            entity_id=active_incident_id,
+            correlation_id=_correlation_id(request),
+            action="devices.incident.clear",
+            actor=user.user_id,
+            input_snapshot_ref=f"activeIncident:{active_incident_id}",
+            output={"cleared": True},
+        )
+        return _envelope(request, result)
+
+    @app.get("/v1/devices/{device_id}", tags=["Devices"])
+    async def get_device(
+        device_id: str,
+        request: Request,
+        user: UserContext = Depends(current_user),
+    ) -> dict[str, Any]:
+        require_reader(user)
+        detail = request.app.state.services.devices.device(device_id)
+        if detail["site"] not in user.plant_scope:
+            raise ApiError(
+                403, ErrorCode.FORBIDDEN_SCOPE, "Device is outside your plant scope."
+            )
+        return _envelope(request, detail)
+
     @app.get("/v1/audit/decisions", tags=["Audit"])
     async def list_audit_decisions(
         request: Request,

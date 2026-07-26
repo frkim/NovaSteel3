@@ -216,4 +216,53 @@ SCREEN_SUMMARIES: Final[dict[str, dict[str, str]]] = {
             "salud de trabajos de canalización y telemetría de costes."
         ),
     },
+    "device-operations": {
+        "en": (
+            "Fleet health for every simulated device, a searchable sensor "
+            "explorer with linked charts, and the incident simulator that "
+            "drives the demo scenarios."
+        ),
+        "fr": (
+            "Santé de la flotte pour chaque équipement simulé, un explorateur "
+            "de capteurs consultable avec graphiques liés, et le simulateur "
+            "d'incidents qui pilote les scénarios de démonstration."
+        ),
+        "de": (
+            "Flottenzustand für jedes simulierte Gerät, ein durchsuchbarer "
+            "Sensor-Explorer mit verknüpften Diagrammen und der Vorfall-"
+            "Simulator, der die Demo-Szenarien steuert."
+        ),
+        "nl": (
+            "Vlootgezondheid voor elk gesimuleerd apparaat, een doorzoekbare "
+            "sensorverkenner met gekoppelde grafieken, en de incidentsimulator "
+            "die de demoscenario's aanstuurt."
+        ),
+        "es": (
+            "Salud de la flota para cada dispositivo simulado, un explorador "
+            "de sensores con búsqueda y gráficos vinculados, y el simulador de "
+            "incidentes que impulsa los escenarios de demostración."
+        ),
+    },
+    "dashboards": {
+        "en": (
+            "Curated, ordered sets of existing screens, each collection "
+            "answering one investigation question end to end."
+        ),
+        "fr": (
+            "Ensembles organisés et ordonnés d'écrans existants, chaque "
+            "collection répondant de bout en bout à une question d'investigation."
+        ),
+        "de": (
+            "Kuratierte, geordnete Sammlungen bestehender Bildschirme, wobei "
+            "jede Sammlung eine Untersuchungsfrage durchgängig beantwortet."
+        ),
+        "nl": (
+            "Samengestelde, geordende sets van bestaande schermen, waarbij "
+            "elke collectie één onderzoeksvraag end-to-end beantwoordt."
+        ),
+        "es": (
+            "Conjuntos curados y ordenados de pantallas existentes; cada "
+            "colección responde de principio a fin a una pregunta de investigación."
+        ),
+    },
 }

@@ -28,6 +28,8 @@ tags:
   - name: Telemetry
   - name: Sustainability
   - name: Copilot
+  - name: Privacy
+  - name: Devices
 paths:
   /health/live:
     get:
@@ -819,6 +821,271 @@ paths:
                 $ref: '#/components/schemas/ListEnvelope'
         default:
           $ref: '#/components/responses/ErrorResponse'
+  /v1/knowledge/query:
+    post:
+      tags: [Knowledge]
+      operationId: queryApprovedKnowledge
+      description: |
+        Grounded retrieval-augmented answer over approved procedures only.
+        Hybrid lexical (BM25) + cosine retrieval fused with reciprocal rank
+        fusion, then citation enforcement. The service declines rather than
+        answering ungrounded: when no approved source supports the question the
+        response carries `declined: true` and a `declineReason`. Input and
+        output are screened by Azure AI Content Safety and PII is redacted
+        before the answer leaves the BFF.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KnowledgeQueryRequest'
+      responses:
+        '200':
+          description: Grounded answer with citations, or an explicit decline.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeAnswerEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/privacy/erasure-requests:
+    post:
+      tags: [Privacy]
+      operationId: submitErasureRequest
+      description: |
+        Register a GDPR Art. 17 erasure request. Requires `Compliance.Auditor`.
+        The request is recorded in `PENDING` state with a resolved target list;
+        nothing is deleted until `:execute` is called. `subjectId` is write-only
+        and is never echoed back — receipts carry `subjectPseudonym` instead.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ErasureRequestSubmission'
+      responses:
+        '200':
+          description: Registered erasure request with its resolved target list.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErasureRequestEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    get:
+      tags: [Privacy]
+      operationId: listErasureRequests
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [PENDING, COMPLETED, FAILED]
+      responses:
+        '200':
+          description: Erasure request register (never contains raw subject identifiers).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/privacy/erasure-requests/{requestId}:
+    get:
+      tags: [Privacy]
+      operationId: previewErasureRequest
+      description: Dry-run preview of what execution would erase or pseudonymize.
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Erasure preview.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErasureRequestEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/privacy/erasure-requests/{requestId}:execute:
+    post:
+      tags: [Privacy]
+      operationId: executeErasureRequest
+      description: |
+        Execute the erasure. Transcripts and Copilot conversations are hard
+        deleted; procedure attribution is pseudonymized with a salted SHA-256
+        digest. The hash-chained audit log is never mutated — an
+        `erasure.executed` tombstone is appended instead, so `verify()` holds
+        both before and after. Returns `409 ERASURE_STATE_CONFLICT` if the
+        request is not `PENDING`.
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Erasure receipt with audit-chain verification evidence.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErasureReceiptEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/devices:
+    get:
+      tags: [Devices]
+      operationId: listDevices
+      description: Device fleet projection, filtered to the caller's plant scope.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Query'
+      responses:
+        '200':
+          description: Device fleet table.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/devices/sensors:
+    get:
+      tags: [Devices]
+      operationId: listDeviceSensors
+      parameters:
+        - name: deviceId
+          in: query
+          schema:
+            type: string
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Query'
+      responses:
+        '200':
+          description: Sensor table across the fleet or one device.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/devices/sensors/{sensorId}/series:
+    get:
+      tags: [Devices]
+      operationId: getDeviceSensorSeries
+      parameters:
+        - $ref: '#/components/parameters/SensorId'
+        - name: window
+          in: query
+          schema:
+            type: string
+            enum: ['15m', '1h', '4h', '8h', '24h']
+            default: '1h'
+        - name: points
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1440
+            default: 120
+      responses:
+        '200':
+          description: Down-sampled sensor time series for charting.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SensorSeriesEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/devices/simulator:
+    get:
+      tags: [Devices]
+      operationId: getDeviceSimulatorStatus
+      responses:
+        '200':
+          description: Device simulator state, scenario and active incidents.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulatorStatusEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/devices/simulator/commands:
+    post:
+      tags: [Devices]
+      operationId: postDeviceSimulatorCommand
+      description: |
+        Drive the simulator state machine. Requires `Platform.Capacity.Manage`.
+        Illegal transitions return `409 SIMULATOR_STATE_CONFLICT`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulatorCommandRequest'
+      responses:
+        '200':
+          description: Simulator status after the command.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulatorStatusEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/devices/incidents:
+    post:
+      tags: [Devices]
+      operationId: triggerDeviceIncident
+      description: |
+        Inject a catalogued fault into the simulation (for example
+        `degrading-furnace`). Requires `Platform.Capacity.Manage`. Synthetic
+        only — this never reaches an OT system.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IncidentTriggerRequest'
+      responses:
+        '200':
+          description: The activated incident plus refreshed simulator status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncidentTriggerEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/devices/incidents/{activeIncidentId}:
+    delete:
+      tags: [Devices]
+      operationId: clearDeviceIncident
+      parameters:
+        - $ref: '#/components/parameters/ActiveIncidentId'
+      responses:
+        '200':
+          description: Incident cleared; refreshed simulator status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulatorClearEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/devices/{deviceId}:
+    get:
+      tags: [Devices]
+      operationId: getDevice
+      parameters:
+        - $ref: '#/components/parameters/DeviceId'
+      responses:
+        '200':
+          description: Device detail with its full sensor list.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceDetailEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
 components:
   securitySchemes:
     EntraBearer:
@@ -871,6 +1138,30 @@ components:
         type: string
     ConversationId:
       name: conversationId
+      in: path
+      required: true
+      schema:
+        type: string
+    RequestId:
+      name: requestId
+      in: path
+      required: true
+      schema:
+        type: string
+    DeviceId:
+      name: deviceId
+      in: path
+      required: true
+      schema:
+        type: string
+    SensorId:
+      name: sensorId
+      in: path
+      required: true
+      schema:
+        type: string
+    ActiveIncidentId:
+      name: activeIncidentId
       in: path
       required: true
       schema:
@@ -1075,6 +1366,8 @@ components:
             - RATE_LIMITED
             - UPSTREAM_UNAVAILABLE
             - CAPACITY_STATE_CONFLICT
+            - ERASURE_STATE_CONFLICT
+            - SIMULATOR_STATE_CONFLICT
             - POLICY_DENIED
             - INTERNAL_ERROR
         message:
@@ -1368,3 +1661,456 @@ components:
           type: string
         reason:
           type: string
+    KnowledgeQueryRequest:
+      type: object
+      additionalProperties: false
+      required: [question]
+      properties:
+        question:
+          type: string
+          minLength: 1
+        topK:
+          type: integer
+          minimum: 1
+          maximum: 20
+          default: 5
+    KnowledgeAnswerEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/DataEnvelope'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/KnowledgeAnswer'
+    KnowledgeAnswer:
+      type: object
+      additionalProperties: true
+      required: [query, declined, answer, citations, chunks]
+      properties:
+        query:
+          type: string
+        declined:
+          type: boolean
+          description: True when no approved source grounds the question.
+        declineReason:
+          type: [string, 'null']
+          enum: [no_grounded_source, content_policy_violation, citation_enforcement_failed, null]
+        answer:
+          type: string
+          description: Every sentence carries at least one [[chunkId]] citation marker.
+        citations:
+          type: array
+          items:
+            type: string
+        chunks:
+          type: array
+          items:
+            $ref: '#/components/schemas/RetrievedChunk'
+        safety:
+          type: object
+          additionalProperties: true
+          description: Content Safety verdicts for the input and the generated answer.
+    RetrievedChunk:
+      type: object
+      additionalProperties: true
+      required: [chunkId, procedureId, procedureTitle, text]
+      properties:
+        chunkId:
+          type: string
+        procedureId:
+          type: string
+        procedureTitle:
+          type: string
+        section:
+          type: string
+        text:
+          type: string
+        fusedScore:
+          type: number
+          description: Reciprocal-rank-fusion score. Rank-derived, not an absolute relevance.
+    ErasureRequestSubmission:
+      type: object
+      additionalProperties: false
+      required: [subjectType, subjectId, reason]
+      properties:
+        subjectType:
+          type: string
+          enum: [operator, OPERATOR, expert, EXPERT, user, USER]
+        subjectId:
+          type: string
+          writeOnly: true
+          description: Never echoed back. Receipts carry subjectPseudonym instead.
+        reason:
+          type: string
+          minLength: 1
+    ErasureRequestEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/DataEnvelope'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ErasureRequest'
+    ErasureRequest:
+      type: object
+      additionalProperties: true
+      required: [requestId, subjectType, requestedBy, reason, status, createdAt, targets]
+      properties:
+        requestId:
+          type: string
+        subjectType:
+          type: string
+        requestedBy:
+          type: string
+        reason:
+          type: string
+        status:
+          type: string
+          enum: [PENDING, COMPLETED, FAILED]
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: [string, 'null']
+          format: date-time
+        targets:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErasureTarget'
+    ErasureTarget:
+      type: object
+      additionalProperties: false
+      required: [store, recordCount, action, completed]
+      properties:
+        store:
+          type: string
+          enum:
+            - interview-transcripts
+            - knowledge-procedures
+            - copilot-conversations
+            - audit-chain
+            - telemetry-attribution
+        recordCount:
+          type: integer
+          minimum: 0
+        action:
+          type: string
+          enum: [delete, pseudonymize, tombstone, retain-legal-basis]
+        legalBasis:
+          type: [string, 'null']
+          description: Populated when the record is retained under a GDPR Art. 17(3) exemption.
+        completed:
+          type: boolean
+    ErasureReceiptEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/DataEnvelope'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ErasureReceipt'
+    ErasureReceipt:
+      type: object
+      additionalProperties: true
+      required:
+        - requestId
+        - subjectPseudonym
+        - status
+        - executedAt
+        - targets
+        - chainVerifiedAfter
+        - auditChainRef
+      properties:
+        requestId:
+          type: string
+        subjectPseudonym:
+          type: string
+          description: Salted SHA-256 digest of the subject identifier; the raw value is never returned.
+        status:
+          type: string
+          enum: [COMPLETED, FAILED]
+        executedAt:
+          type: string
+          format: date-time
+        targets:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErasureTarget'
+        erasedCounts:
+          type: object
+          additionalProperties:
+            type: integer
+            minimum: 0
+        retainedCounts:
+          type: object
+          additionalProperties:
+            type: integer
+            minimum: 0
+        chainVerifiedAfter:
+          type: boolean
+          description: The hash chain still verifies after erasure — it is appended to, never rewritten.
+        auditChainRef:
+          type: string
+        auditRef:
+          type: string
+    DeviceDetailEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/DataEnvelope'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/DeviceDetail'
+    DeviceDetail:
+      type: object
+      additionalProperties: true
+      required: [deviceId, site, area, description, status, sensorCount, healthScore, sensors]
+      properties:
+        deviceId:
+          type: string
+        site:
+          type: string
+        area:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [healthy, degraded, fault, offline]
+        sensorCount:
+          type: integer
+          minimum: 0
+        activeIncidents:
+          type: array
+          items:
+            type: string
+        lastSampleAt:
+          type: [string, 'null']
+          format: date-time
+        healthScore:
+          type: number
+          minimum: 0
+          maximum: 1
+        uptimePct:
+          type: number
+        sensors:
+          type: array
+          items:
+            $ref: '#/components/schemas/SensorRow'
+    SensorRow:
+      type: object
+      additionalProperties: true
+      required: [sensorId, deviceId, signalCode, displayName, unit, value, quality, status]
+      properties:
+        sensorId:
+          type: string
+        deviceId:
+          type: string
+        signalCode:
+          type: string
+        displayName:
+          type: string
+        area:
+          type: string
+        unit:
+          type: string
+        low:
+          type: [number, 'null']
+        high:
+          type: [number, 'null']
+        samplePeriodMs:
+          type: integer
+          description: 0 marks an event-driven signal rather than a periodic one.
+        value:
+          type: [number, 'null']
+        quality:
+          type: string
+          enum: [good, uncertain, bad]
+        status:
+          type: string
+          enum: [normal, warning, alarm, stale]
+        trend:
+          type: string
+          enum: [rising, falling, flat]
+        deviationPct:
+          type: [number, 'null']
+        clamped:
+          type: boolean
+        lastSampleAt:
+          type: [string, 'null']
+          format: date-time
+    SensorSeriesEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/DataEnvelope'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/SensorSeries'
+    SensorSeries:
+      type: object
+      additionalProperties: true
+      required: [sensorId, deviceId, displayName, unit, window, pointCount, points]
+      properties:
+        sensorId:
+          type: string
+        deviceId:
+          type: string
+        displayName:
+          type: string
+        unit:
+          type: string
+        low:
+          type: [number, 'null']
+        high:
+          type: [number, 'null']
+        window:
+          type: string
+        pointCount:
+          type: integer
+          minimum: 0
+        points:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [t, v, q]
+            properties:
+              t:
+                type: string
+                format: date-time
+              v:
+                type: [number, 'null']
+              q:
+                type: string
+                enum: [good, uncertain, bad]
+    SimulatorCommandRequest:
+      type: object
+      additionalProperties: false
+      required: [command]
+      properties:
+        command:
+          type: string
+          enum: [start, pause, resume, stop, reset]
+        scenario:
+          type: string
+        speedFactor:
+          type: number
+          minimum: 0.1
+          maximum: 60
+        seed:
+          type: integer
+    SimulatorStatusEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/DataEnvelope'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/SimulatorStatus'
+    SimulatorStatus:
+      type: object
+      additionalProperties: true
+      required:
+        - state
+        - scenario
+        - seed
+        - speedFactor
+        - simulatedClock
+        - tickCount
+        - deviceCount
+        - sensorCount
+        - activeIncidents
+      properties:
+        state:
+          type: string
+          enum: [stopped, running, paused]
+        scenario:
+          type: string
+        seed:
+          type: integer
+        speedFactor:
+          type: number
+        tickIntervalSeconds:
+          type: number
+        simulatedClock:
+          type: string
+          format: date-time
+        elapsedHours:
+          type: number
+        tickCount:
+          type: integer
+        deviceCount:
+          type: integer
+        sensorCount:
+          type: integer
+        activeIncidents:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActiveIncident'
+    ActiveIncident:
+      type: object
+      additionalProperties: true
+      required: [activeIncidentId, incidentId, label, severity, deviceId, startedAt, endsAt]
+      properties:
+        activeIncidentId:
+          type: string
+        incidentId:
+          type: string
+        label:
+          type: string
+        severity:
+          type: string
+          enum: [low, medium, high, critical]
+        deviceId:
+          type: string
+        sensorId:
+          type: [string, 'null']
+        startedAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        remainingMinutes:
+          type: number
+        progress:
+          type: number
+          minimum: 0
+          maximum: 1
+    IncidentTriggerRequest:
+      type: object
+      additionalProperties: false
+      required: [incidentId]
+      properties:
+        incidentId:
+          type: string
+        deviceId:
+          type: string
+        sensorId:
+          type: string
+        durationMinutes:
+          type: number
+          minimum: 1
+    IncidentTriggerEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/DataEnvelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              additionalProperties: false
+              required: [incident, simulator]
+              properties:
+                incident:
+                  $ref: '#/components/schemas/ActiveIncident'
+                simulator:
+                  $ref: '#/components/schemas/SimulatorStatus'
+    SimulatorClearEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/DataEnvelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              additionalProperties: false
+              required: [cleared, simulator]
+              properties:
+                cleared:
+                  type: boolean
+                simulator:
+                  $ref: '#/components/schemas/SimulatorStatus'

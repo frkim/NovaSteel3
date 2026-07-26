@@ -345,6 +345,80 @@ SUGGESTIONS_BY_SECTION: Final[dict[str, dict[str, tuple[str, ...]]]] = {
             "¿Es seguro pausar ahora la capacidad no productiva?",
         ),
     },
+    "device-operations": {
+        "en": (
+            "Which devices are degraded or offline right now?",
+            "Explain what the device health score measures.",
+            "Which sensor signals are stale and why does that matter?",
+            "How do I inject the lining degradation scenario for the demo?",
+            "Search for recent industrial IoT telemetry standards relevant to steelmaking.",
+        ),
+        "fr": (
+            "Quels équipements sont dégradés ou hors ligne en ce moment ?",
+            "Explique ce que mesure le score de santé d'équipement.",
+            "Quels signaux capteurs sont obsolètes et pourquoi est-ce important ?",
+            "Comment injecter le scénario de dégradation du garnissage pour la démo ?",
+            "Recherche les standards récents de télémétrie IoT industrielle pertinents pour la sidérurgie.",
+        ),
+        "de": (
+            "Welche Geräte sind derzeit beeinträchtigt oder offline?",
+            "Erkläre, was der Gerätezustandswert misst.",
+            "Welche Sensorsignale sind veraltet und warum ist das wichtig?",
+            "Wie injiziere ich das Zustellungs-Degradationsszenario für die Demo?",
+            "Suche nach aktuellen industriellen IoT-Telemetriestandards für die Stahlerzeugung.",
+        ),
+        "nl": (
+            "Welke apparaten zijn nu verslechterd of offline?",
+            "Leg uit wat de gezondheidsscore van een apparaat meet.",
+            "Welke sensorsignalen zijn verouderd en waarom is dat belangrijk?",
+            "Hoe injecteer ik het scenario van voeringdegradatie voor de demo?",
+            "Zoek recente industriële IoT-telemetriestandaarden die relevant zijn voor staalproductie.",
+        ),
+        "es": (
+            "¿Qué dispositivos están degradados o sin conexión ahora?",
+            "Explica qué mide la puntuación de salud del dispositivo.",
+            "¿Qué señales de sensores están obsoletas y por qué importa?",
+            "¿Cómo inyecto el escenario de degradación del revestimiento para la demo?",
+            "Busca estándares recientes de telemetría IoT industrial relevantes para la siderurgia.",
+        ),
+    },
+    "dashboards": {
+        "en": (
+            "Which dashboard collection should I open for a shift handover?",
+            "What evidence does the compliance evidence pack contain?",
+            "Summarize what each curated collection is designed to answer.",
+            "Which collection best supports the furnace risk investigation?",
+            "Search for recent guidance on operational dashboard design for heavy industry.",
+        ),
+        "fr": (
+            "Quelle collection de tableaux de bord ouvrir pour un passage de consignes ?",
+            "Que contient le dossier de preuves de conformité ?",
+            "Résume ce à quoi chaque collection organisée est censée répondre.",
+            "Quelle collection soutient le mieux l'investigation du risque four ?",
+            "Recherche des recommandations récentes sur la conception de tableaux de bord opérationnels pour l'industrie lourde.",
+        ),
+        "de": (
+            "Welche Dashboard-Sammlung sollte ich für eine Schichtübergabe öffnen?",
+            "Welche Nachweise enthält das Compliance-Evidenzpaket?",
+            "Fasse zusammen, welche Frage jede kuratierte Sammlung beantworten soll.",
+            "Welche Sammlung unterstützt die Ofenrisiko-Untersuchung am besten?",
+            "Suche nach aktuellen Empfehlungen zum Design operativer Dashboards für die Schwerindustrie.",
+        ),
+        "nl": (
+            "Welke dashboardcollectie moet ik openen voor een ploegenoverdracht?",
+            "Welk bewijs bevat het compliance-bewijspakket?",
+            "Vat samen welke vraag elke samengestelde collectie beantwoordt.",
+            "Welke collectie ondersteunt het onderzoek naar ovenrisico het best?",
+            "Zoek recente richtlijnen over het ontwerp van operationele dashboards voor de zware industrie.",
+        ),
+        "es": (
+            "¿Qué colección de paneles debo abrir para un cambio de turno?",
+            "¿Qué evidencias contiene el paquete de evidencia de cumplimiento?",
+            "Resume a qué pregunta responde cada colección curada.",
+            "¿Qué colección apoya mejor la investigación del riesgo del horno?",
+            "Busca guías recientes sobre diseño de paneles operativos para la industria pesada.",
+        ),
+    },
 }
 
 # Fallback used when the section is unknown.

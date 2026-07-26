@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "novasteel-device-simulator"
+version = "0.1.0"
+description = "Live deterministic device simulator runtime for NovaSteel synthetic industrial-steel demo"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+# Resolve ONLY from the approved feed (see pip.conf). Never from public PyPI.
+serve = ["fastapi", "uvicorn"]
+test = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["../../tests/devices"]

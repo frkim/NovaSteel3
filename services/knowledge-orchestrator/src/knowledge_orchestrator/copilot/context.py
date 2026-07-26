@@ -276,6 +276,37 @@ COST_TELEMETRY = _concept(
     glossary_id="fabric-capacity-unit",
 )
 
+DEVICE_HEALTH = _concept(
+    "device_health",
+    "Device health",
+    "device", "devices", "equipment", "asset", "assets", "appareil",
+    "appareils", "equipement", "equipements", "gerat", "gerate", "anlage",
+    "anlagen", "apparaat", "apparaten", "dispositivo", "dispositivos",
+    "equipo", "equipos", "fleet", "parc", "flotte", "flotta", "vloot",
+    "health", "sante", "gesundheit", "gezondheid", "salud",
+    glossary_id="device-health-score",
+)
+SENSOR_SIGNAL = _concept(
+    "sensor_signal",
+    "Sensor signal",
+    "sensor", "sensors", "capteur", "capteurs", "sensoren", "sensores",
+    "signal", "signals", "signaux", "signale", "signalen", "senales",
+    "measurement", "messung", "messwert", "meting",
+    "metingen", "medicion", "mediciones", "tag", "tags", "telemetry",
+    glossary_id="sensor-signal",
+)
+SIMULATOR_INCIDENT = _concept(
+    "simulator_incident",
+    "Simulated incident",
+    "simulator", "simulateur", "simulador", "simulation",
+    "simulatie", "simulacion", "inject", "injection", "injected",
+    "injecte", "injection", "injiziert", "geinjecteerd", "inyectado",
+    "scenario", "scenarios", "szenario", "szenarien", "escenario",
+    "escenarios", "synthetic", "synthetique", "synthetisch",
+    "sintetico", "seed", "graine", "semilla",
+    glossary_id="injected-incident",
+)
+
 TARGET_VS_EVIDENCE = _concept(
     "target_vs_evidence",
     "Target versus measured evidence",
@@ -418,6 +449,33 @@ _PROFILES: tuple[ScreenProfile, ...] = (
             "overview": (TARGET_VS_EVIDENCE, ENERGY_COST, EMISSIONS),
             "board-report": (TARGET_VS_EVIDENCE, EMISSIONS, ENERGY_COST),
         },
+    ),
+    ScreenProfile(
+        section="device-operations",
+        title="Device Operations",
+        persona="OT Systems Engineer",
+        summary=(
+            "Fleet health for every simulated device, a searchable sensor "
+            "explorer with linked charts, and the incident simulator that "
+            "drives the demo scenarios."
+        ),
+        concepts=(DEVICE_HEALTH, SENSOR_SIGNAL, SIMULATOR_INCIDENT, THROUGHPUT),
+        sub_views={
+            "fleet": (DEVICE_HEALTH, SENSOR_SIGNAL),
+            "sensors": (SENSOR_SIGNAL, DEVICE_HEALTH),
+            "simulator": (SIMULATOR_INCIDENT, DEVICE_HEALTH),
+        },
+    ),
+    ScreenProfile(
+        section="dashboards",
+        title="Dashboard Collections",
+        persona="All personas",
+        summary=(
+            "Curated, ordered sets of existing screens, each collection "
+            "answering one investigation question end to end."
+        ),
+        concepts=(TARGET_VS_EVIDENCE, DEVICE_HEALTH, ENERGY_COST, EMISSIONS),
+        sub_views={"collections": (TARGET_VS_EVIDENCE, DEVICE_HEALTH)},
     ),
     ScreenProfile(
         section="platform-ops",

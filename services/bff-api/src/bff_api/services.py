@@ -13,8 +13,10 @@ from .auth import Authenticator
 from .capacity import CapacityAdapter, LocalCapacityAdapter, UnconfiguredArmCapacityAdapter
 from .config import Settings
 from .copilot_adapter import CopilotAdapter
+from .device_adapter import DeviceAdapter
 from .events import AlertEventBuffer
 from .knowledge_adapter import KnowledgeAdapter
+from .privacy_adapter import PrivacyAdapter
 from .repository import DemoRepository
 
 
@@ -45,6 +47,8 @@ class BffServices:
     capacity: CapacityAdapter
     knowledge: KnowledgeAdapter
     copilot: CopilotAdapter
+    privacy: PrivacyAdapter
+    devices: DeviceAdapter
     optimizer: EnergyDispatchOptimizer = field(default_factory=EnergyDispatchOptimizer)
     scorer: ScoringWorker = field(default_factory=ScoringWorker)
     recommendations: dict[str, dict[str, Any]] = field(default_factory=dict)
@@ -68,6 +72,8 @@ class BffServices:
             capacity = UnconfiguredArmCapacityAdapter(
                 capacity_id=capacity_id, environment=settings.environment
             )
+        knowledge = KnowledgeAdapter(demo_mode=settings.is_demo_mode)
+        copilot = CopilotAdapter()
         return cls(
             settings=settings,
             repository=repository,
@@ -76,8 +82,14 @@ class BffServices:
             idempotency=create_idempotency_store(),
             events=AlertEventBuffer(repository.alerts_rows()),
             capacity=capacity,
-            knowledge=KnowledgeAdapter(demo_mode=settings.is_demo_mode),
-            copilot=CopilotAdapter(),
+            knowledge=knowledge,
+            copilot=copilot,
+            privacy=PrivacyAdapter(
+                knowledge=knowledge,
+                copilot=copilot,
+                salt=f"novasteel-erasure-{settings.environment}",
+            ),
+            devices=DeviceAdapter(demo_mode=settings.is_demo_mode),
         )
 
     def lining_forecast(self, *, asset_id: str, correlation_id: str) -> dict[str, Any]:

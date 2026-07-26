@@ -140,6 +140,16 @@ class ConversationStore:
             else:
                 self._by_owner.pop(owner, None)
 
+    # -- GDPR Art. 17 erasure surface (CopilotStoreProtocol) ---------------
+
+    def count_subject_conversations(self, owner_id: str) -> int:
+        with self._lock:
+            return len(self._by_owner.get(owner_id, {}))
+
+    def erase_subject_conversations(self, owner_id: str) -> int:
+        with self._lock:
+            return len(self._by_owner.pop(owner_id, {}))
+
     # -- internals --------------------------------------------------------
 
     def _save_locked(self, conversation: Conversation) -> None:

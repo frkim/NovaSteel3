@@ -1,0 +1,6 @@
+# Device simulator dependencies.
+# Core library uses only the standard library; fastapi/uvicorn for the
+# optional HTTP service layer; azure-monitor-opentelemetry for observability.
+azure-monitor-opentelemetry==1.8.9
+fastapi==0.139.2
+uvicorn==0.51.0

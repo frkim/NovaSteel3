@@ -99,6 +99,18 @@ class KnowledgeAdapter:
         except self._errors as exc:
             raise _map_error(exc) from exc
 
+    def query(self, q: str, *, top_k: int = 5) -> dict[str, Any]:
+        """Grounded RAG answer with content-safety screening and PII redaction."""
+        try:
+            return self._orchestrator.answer_query(q, top_k=top_k)
+        except self._errors as exc:
+            raise _map_error(exc) from exc
+
+    @property
+    def orchestrator(self) -> Any:
+        """Exposes the orchestrator so the privacy adapter can erase its stores."""
+        return self._orchestrator
+
     def approve(
         self,
         *,

@@ -133,6 +133,11 @@ class CopilotService:
 
     # -- conversations ------------------------------------------------------
 
+    @property
+    def conversation_store(self) -> ConversationStore:
+        """Exposes the store so GDPR erasure can reach copilot conversations."""
+        return self._store
+
     def list_conversations(self, owner: str) -> list[Conversation]:
         return self._store.list(owner)
 

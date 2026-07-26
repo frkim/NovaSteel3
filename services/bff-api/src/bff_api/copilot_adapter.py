@@ -85,6 +85,11 @@ class CopilotAdapter:
         except self._not_found as exc:
             raise ApiError(404, ErrorCode.NOT_FOUND, str(exc)) from exc
 
+    @property
+    def conversation_store(self) -> Any:
+        """Exposes the store so the privacy adapter can erase subject chat history."""
+        return self._service.conversation_store
+
     # -- chat ---------------------------------------------------------------
 
     def chat(

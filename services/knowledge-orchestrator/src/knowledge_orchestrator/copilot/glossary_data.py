@@ -625,4 +625,55 @@ GLOSSARY_DATA: Final[dict[str, dict[str, object]]] = {
         },
         "screens": ("knowledge-hub",),
     },
+    "device-health-score": {
+        "term": {
+            "en": "Device health score",
+            "fr": "Indice de santé de l'équipement",
+            "de": "Anlagen-Gesundheitswert",
+            "nl": "Gezondheidsscore van apparaat",
+            "es": "Índice de salud del equipo",
+        },
+        "definition": {
+            "en": "A 0-to-1 roll-up of every sensor attached to one device, weighted by how far each signal sits outside its plausible operating band. A score of 1.0 means every signal is inside its band; alarms pull it down far more sharply than warnings, so the number tracks urgency rather than a simple fault count.",
+            "fr": "Agrégat de 0 à 1 de tous les capteurs d'un équipement, pondéré par l'écart de chaque signal hors de sa plage de fonctionnement plausible. Un score de 1,0 signifie que tous les signaux sont dans leur plage ; les alarmes le font chuter bien plus fortement que les avertissements, de sorte que le chiffre reflète l'urgence et non un simple décompte de défauts.",
+            "de": "Ein Wert von 0 bis 1, der alle Sensoren eines Geräts zusammenfasst, gewichtet danach, wie weit jedes Signal außerhalb seines plausiblen Betriebsbands liegt. Ein Wert von 1,0 bedeutet, dass alle Signale im Band liegen; Alarme senken ihn deutlich stärker als Warnungen, sodass die Zahl die Dringlichkeit abbildet und nicht bloß Fehler zählt.",
+            "nl": "Een samenvatting van 0 tot 1 van alle sensoren op één apparaat, gewogen naar hoe ver elk signaal buiten zijn plausibele bedrijfsband ligt. Een score van 1,0 betekent dat alle signalen binnen hun band vallen; alarmen drukken de score veel sterker dan waarschuwingen, zodat het getal urgentie weergeeft in plaats van een simpel fouttotaal.",
+            "es": "Agregado de 0 a 1 de todos los sensores de un equipo, ponderado por cuánto se aleja cada señal de su banda operativa plausible. Un valor de 1,0 indica que todas las señales están dentro de banda; las alarmas lo reducen mucho más que los avisos, de modo que la cifra refleja urgencia y no un simple recuento de fallos.",
+        },
+        "screens": ("device-operations", "operations"),
+    },
+    "sensor-signal": {
+        "term": {
+            "en": "Sensor signal",
+            "fr": "Signal de capteur",
+            "de": "Sensorsignal",
+            "nl": "Sensorsignaal",
+            "es": "Señal de sensor",
+        },
+        "definition": {
+            "en": "One named measurement published by a device, carrying a unit, a plausible low/high range, a sample period and a quality flag. NovaSteel identifies each signal as deviceId:signalCode, and derives its status by comparing the current value with its range: inside is normal, just outside is a warning, well outside is an alarm, and no fresh sample is stale.",
+            "fr": "Mesure nommée publiée par un équipement, avec une unité, une plage basse/haute plausible, une période d'échantillonnage et un indicateur de qualité. NovaSteel identifie chaque signal par deviceId:signalCode et déduit son état en comparant la valeur courante à sa plage : à l'intérieur c'est normal, juste au-delà c'est un avertissement, largement au-delà c'est une alarme, et l'absence d'échantillon récent est un état obsolète.",
+            "de": "Eine benannte Messgröße, die ein Gerät veröffentlicht, mit Einheit, plausiblem Unter-/Obergrenzwert, Abtastperiode und Qualitätskennzeichen. NovaSteel identifiziert jedes Signal als deviceId:signalCode und leitet den Status aus dem Vergleich des aktuellen Werts mit dem Band ab: innerhalb ist normal, knapp außerhalb eine Warnung, deutlich außerhalb ein Alarm, und ohne frischen Messwert gilt es als veraltet.",
+            "nl": "Eén benoemde meting die een apparaat publiceert, met eenheid, plausibel laag/hoog bereik, bemonsteringsperiode en kwaliteitsvlag. NovaSteel identificeert elk signaal als deviceId:signalCode en leidt de status af door de huidige waarde met het bereik te vergelijken: binnen is normaal, net erbuiten is een waarschuwing, ver erbuiten een alarm, en zonder verse meting is het verouderd.",
+            "es": "Medición con nombre publicada por un equipo, con unidad, rango plausible mínimo/máximo, periodo de muestreo e indicador de calidad. NovaSteel identifica cada señal como deviceId:signalCode y deduce su estado comparando el valor actual con su rango: dentro es normal, justo fuera es aviso, muy fuera es alarma, y la falta de muestra reciente es obsolescencia.",
+        },
+        "screens": ("device-operations", "furnace-health", "quality"),
+    },
+    "injected-incident": {
+        "term": {
+            "en": "Injected incident",
+            "fr": "Incident injecté",
+            "de": "Injizierter Vorfall",
+            "nl": "Geïnjecteerd incident",
+            "es": "Incidente inyectado",
+        },
+        "definition": {
+            "en": "A named, time-bounded fault deliberately applied to the simulator so a scenario can be rehearsed on demand, such as accelerated furnace lining wear or a cooling-water loss. Every injected incident is labelled as such in the simulator status, so an anomaly on a dashboard can always be traced back to a deliberate injection rather than mistaken for real plant behaviour.",
+            "fr": "Défaut nommé et limité dans le temps, appliqué volontairement au simulateur pour rejouer un scénario à la demande, par exemple une usure accélérée du garnissage ou une perte d'eau de refroidissement. Chaque incident injecté est signalé comme tel dans l'état du simulateur, afin qu'une anomalie affichée puisse toujours être rattachée à une injection délibérée plutôt que prise pour un comportement réel de l'usine.",
+            "de": "Eine benannte, zeitlich begrenzte Störung, die dem Simulator absichtlich aufgeprägt wird, damit ein Szenario auf Abruf geprobt werden kann, etwa beschleunigter Zustellungsverschleiß oder ein Kühlwasserverlust. Jeder injizierte Vorfall ist im Simulatorstatus als solcher gekennzeichnet, sodass eine Anomalie im Dashboard stets auf eine bewusste Injektion zurückgeführt und nicht für echtes Anlagenverhalten gehalten wird.",
+            "nl": "Een benoemde, in tijd begrensde storing die bewust op de simulator wordt toegepast zodat een scenario op afroep geoefend kan worden, zoals versnelde slijtage van de ovenbekleding of verlies van koelwater. Elk geïnjecteerd incident wordt als zodanig gemarkeerd in de simulatorstatus, zodat een afwijking op een dashboard altijd herleidbaar is tot een bewuste injectie en niet voor echt fabrieksgedrag wordt aangezien.",
+            "es": "Fallo con nombre y duración acotada que se aplica deliberadamente al simulador para ensayar un escenario cuando se desee, como el desgaste acelerado del revestimiento o una pérdida de agua de refrigeración. Todo incidente inyectado se marca como tal en el estado del simulador, de modo que cualquier anomalía en un panel siempre pueda atribuirse a una inyección intencionada y no confundirse con el comportamiento real de la planta.",
+        },
+        "screens": ("device-operations", "operations", "platform-ops"),
+    },
 }

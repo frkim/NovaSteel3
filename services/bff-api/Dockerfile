@@ -9,12 +9,14 @@
 #   optimizer-worker   : services/optimizer-worker
 #   scoring-worker     : services/scoring-worker
 #   knowledge          : services/knowledge-orchestrator
+#   device-simulator   : services/device-simulator
 #
 # Build (see .azure/scripts/build-images.ps1 or .azure/docker/docker-bake.hcl):
 #   docker buildx build `
 #     --build-context optimizer-worker=../optimizer-worker `
 #     --build-context scoring-worker=../scoring-worker `
 #     --build-context knowledge=../knowledge-orchestrator `
+#     --build-context device-simulator=../device-simulator `
 #     -t novasteelv3/bff:<immutable-tag> --load services/bff-api
 #
 # Python/NuGet restores use ONLY the Microsoft protected feed with no public
@@ -51,6 +53,7 @@ COPY --from=optimizer-worker src /app/services/optimizer-worker/src
 COPY --from=scoring-worker src /app/services/scoring-worker/src
 COPY --from=knowledge src /app/services/knowledge-orchestrator/src
 COPY --from=knowledge fixtures /app/services/knowledge-orchestrator/fixtures
+COPY --from=device-simulator src /app/services/device-simulator/src
 
 # Deterministic cloud demo defaults. Container Apps overrides BFF_CORS_ORIGINS
 # with the deployed portal origin and may set additional Azure env vars; demo

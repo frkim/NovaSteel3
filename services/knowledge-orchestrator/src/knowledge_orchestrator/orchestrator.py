@@ -11,7 +11,8 @@ with the local adapters.
 from __future__ import annotations
 
 import itertools
-from dataclasses import dataclass, field
+import re
+from dataclasses import dataclass, field, replace
 from typing import Optional
 
 from . import audio as audio_mod
@@ -22,6 +23,16 @@ from .adapters.base import FoundryAgentAdapter, SpeechTranscriptionAdapter
 from .adapters.local_foundry import LocalFoundryKnowledgeAgent
 from .adapters.local_speech import LocalSpeechTranscriptionAdapter
 from .audit import AuditLog
+from .content_safety import LocalHeuristicContentSafety, screen_input, screen_output
+from .pii import redact as _pii_redact
+from .retrieval import (
+    CitationError,
+    HybridRetriever,
+    _tokenize,
+    build_decline_answer,
+    enforce_answer_citations,
+    extract_citations,
+)
 from .models import (
     AudioMetadata,
     ConsentRecord,
@@ -50,6 +61,21 @@ class ForbiddenError(OrchestratorError):
     code = "FORBIDDEN"
 
 
+_MIN_CONTENT_TERM_LEN = 4
+
+
+def _shares_content_term(query: str, text: str) -> bool:
+    """True when the question and the candidate chunk share a content term.
+
+    Guards the RRF ranking, which is rank-only and therefore always returns a
+    "best" chunk even for a completely unrelated question.
+    """
+    q_terms = {t for t in _tokenize(query) if len(t) >= _MIN_CONTENT_TERM_LEN}
+    if not q_terms:
+        return False
+    return bool(q_terms & set(_tokenize(text)))
+
+
 @dataclass
 class _Repos:
     consents: dict[str, ConsentRecord] = field(default_factory=dict)
@@ -72,6 +98,9 @@ class KnowledgeOrchestrator:
         self.audit = audit or AuditLog()
         self._repos = _Repos()
         self._seq = itertools.count(1)
+        self._retriever = HybridRetriever()
+        self._retriever_fingerprint: tuple[tuple[str, int], ...] | None = None
+        self._safety = LocalHeuristicContentSafety()
 
     # -- POST /v1/knowledge/interviews --------------------------------------
     def create_interview(
@@ -249,6 +278,123 @@ class KnowledgeOrchestrator:
         ]
         return {"items": [self._procedure_view(p) for p in items], "total": len(items)}
 
+    # -- POST /v1/knowledge/query (grounded RAG, content-safety gated) ------
+    def answer_query(self, q: str, *, top_k: int = 5) -> dict:
+        """Screened, hybrid-retrieval answer over APPROVED procedures only.
+
+        Input is screened by Content Safety, PII is redacted from the echoed
+        query, retrieval fuses BM25 + cosine ranks, and an ungrounded result
+        yields an explicit decline rather than an unsourced answer.
+        """
+        query = (q or "").strip()
+        verdict = screen_input(query, self._safety)
+        if not verdict.allowed:
+            return {
+                "query": _pii_redact(query).text,
+                "declined": True,
+                "declineReason": "content_policy_violation",
+                "answer": build_decline_answer("content_policy_violation"),
+                "citations": [],
+                "chunks": [],
+                "blockedBy": list(verdict.blockedBy),
+                "providerUsed": verdict.providerUsed,
+            }
+
+        self._reindex_retriever()
+        result = self._retriever.retrieve(query, top_k=top_k)
+        redacted_query = _pii_redact(query).text
+        # RRF fusion is rank-only, so an off-topic query still returns a ranked
+        # chunk. Require the cited chunk to share at least one content term with
+        # the question; otherwise decline rather than cite an irrelevant source.
+        grounded = bool(result.chunks) and _shares_content_term(
+            query, result.chunks[0].chunk.text
+        )
+        if result.declined or not grounded:
+            reason = result.declineReason or "no_grounded_source"
+            return {
+                "query": redacted_query,
+                "declined": True,
+                "declineReason": reason,
+                "answer": build_decline_answer(reason),
+                "citations": [],
+                "chunks": [],
+                "blockedBy": [],
+                "providerUsed": result.providerUsed,
+            }
+
+        chunks = [
+            {
+                "chunkId": s.chunk.chunk_id,
+                "procedureId": s.chunk.procedure_id,
+                "procedureTitle": s.chunk.procedure_title,
+                "section": s.chunk.section,
+                "text": _pii_redact(s.chunk.text).text,
+                "fusedScore": round(s.fusedScore, 6),
+                "lexicalRank": s.lexicalRank,
+                "semanticRank": s.semanticRank,
+            }
+            for s in result.chunks
+        ]
+        top = result.chunks[0].chunk
+        # Every factual sentence must carry the marker of the chunk it came from,
+        # placed before the terminal punctuation so sentence splitting stays intact.
+        marker = f"[[{top.chunk_id}]]"
+        sentences = [
+            s.strip()
+            for s in re.split(r"(?<=[.!?])\s+", _pii_redact(top.text).text)
+            if s.strip()
+        ]
+        cited = [
+            f"{s[:-1].rstrip()} {marker}{s[-1]}" if s[-1] in ".!?" else f"{s} {marker}"
+            for s in sentences
+        ]
+        answer = " ".join(cited) or f"{_pii_redact(top.text).text} {marker}"
+        # Citation enforcement: an answer without a retrieved citation declines.
+        try:
+            enforce_answer_citations(answer, {c["chunkId"] for c in chunks})
+        except CitationError:
+            return {
+                "query": redacted_query,
+                "declined": True,
+                "declineReason": "citation_enforcement_failed",
+                "answer": build_decline_answer("citation_enforcement_failed"),
+                "citations": [],
+                "chunks": chunks,
+                "blockedBy": [],
+                "providerUsed": result.providerUsed,
+            }
+        out_verdict = screen_output(answer, self._safety)
+        if not out_verdict.allowed:
+            return {
+                "query": redacted_query,
+                "declined": True,
+                "declineReason": "content_policy_violation",
+                "answer": build_decline_answer("content_policy_violation"),
+                "citations": [],
+                "chunks": [],
+                "blockedBy": list(out_verdict.blockedBy),
+                "providerUsed": out_verdict.providerUsed,
+            }
+        return {
+            "query": redacted_query,
+            "declined": False,
+            "declineReason": None,
+            "answer": answer,
+            "citations": extract_citations(answer),
+            "chunks": chunks,
+            "blockedBy": [],
+            "providerUsed": result.providerUsed,
+        }
+
+    def _reindex_retriever(self) -> None:
+        """Re-index only when the APPROVED corpus changed (cheap, deterministic)."""
+        approved = [p for p in self._repos.procedures.values() if wf.is_retrievable(p)]
+        fingerprint = tuple(sorted((p.procedure_id, p.version) for p in approved))
+        if fingerprint == self._retriever_fingerprint:
+            return
+        self._retriever.index(approved)
+        self._retriever_fingerprint = fingerprint
+
     def get_procedure(self, procedure_id: str) -> Procedure:
         procedure = self._repos.procedures.get(procedure_id)
         if procedure is None:
@@ -367,6 +513,50 @@ class KnowledgeOrchestrator:
             }
             for r in self.audit.query(domain=domain, entity_id=entity_id)
         ]
+
+    # -- GDPR Art. 17 erasure adapter surface -------------------------------
+    # Satisfies InterviewSessionStoreProtocol and ProcedureStoreProtocol from
+    # ``knowledge_orchestrator.erasure`` without importing it (no cycle).
+
+    def scan_subject_sessions(self, subject_id: str) -> list[str]:
+        return [
+            sid
+            for sid, rec in self._repos.consents.items()
+            if rec.operator_ref == subject_id
+        ]
+
+    def erase_session_transcripts(self, session_ids: list[str]) -> int:
+        count = 0
+        for sid in session_ids:
+            if self._repos.transcripts.pop(sid, None) is not None:
+                count += 1
+        return count
+
+    def scan_subject_procedures(self, subject_id: str) -> list[str]:
+        owned_sessions = set(self.scan_subject_sessions(subject_id))
+        return [
+            pid
+            for pid, p in self._repos.procedures.items()
+            if p.created_by == subject_id
+            or (p.session_id is not None and p.session_id in owned_sessions)
+        ]
+
+    def pseudonymize_procedures(self, procedure_ids: list[str], pseudo_id: str) -> int:
+        count = 0
+        for pid in procedure_ids:
+            p = self._repos.procedures.get(pid)
+            if p is None:
+                continue
+            self._repos.procedures[pid] = replace(
+                p,
+                created_by=pseudo_id,
+                session_id=None,
+                approved_by=(
+                    pseudo_id if p.approved_by == p.created_by else p.approved_by
+                ),
+            )
+            count += 1
+        return count
 
     # -- helpers ------------------------------------------------------------
     def _require_consent(self, session_id: str) -> ConsentRecord:
