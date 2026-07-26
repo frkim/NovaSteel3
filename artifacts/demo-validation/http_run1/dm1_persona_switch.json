@@ -1,0 +1,132 @@
+{
+  "exec": {
+    "userId": "demo-exec",
+    "displayName": "Plant Manager / Executive (demo)",
+    "roles": [
+      "Compliance.Auditor"
+    ],
+    "plantScope": [
+      "NS-DEMO-LUX-01"
+    ],
+    "personas": [
+      "ComplianceAuditor"
+    ],
+    "locale": "en-LU",
+    "permittedActions": [
+      "audit.read",
+      "sustainability.read"
+    ]
+  },
+  "reliability": {
+    "userId": "demo-reliability",
+    "displayName": "Reliability Engineer (demo)",
+    "roles": [
+      "MaintenanceEngineer.Read"
+    ],
+    "plantScope": [
+      "NS-DEMO-LUX-01"
+    ],
+    "personas": [
+      "MaintenanceReliabilityEngineer"
+    ],
+    "locale": "en-LU",
+    "permittedActions": [
+      "dashboard.read",
+      "furnace.viewForecast",
+      "workorder.createSynthetic"
+    ]
+  },
+  "energy": {
+    "userId": "demo-energy",
+    "displayName": "Energy Manager (demo)",
+    "roles": [
+      "EnergyPlanner.Approve"
+    ],
+    "plantScope": [
+      "NS-DEMO-LUX-01"
+    ],
+    "personas": [
+      "EnergyManager"
+    ],
+    "locale": "en-LU",
+    "permittedActions": [
+      "dashboard.read",
+      "energy.approve",
+      "energy.read",
+      "energy.simulate"
+    ]
+  },
+  "quality": {
+    "userId": "demo-quality",
+    "displayName": "Quality Engineer (demo)",
+    "roles": [
+      "ProcessEngineer.Contribute"
+    ],
+    "plantScope": [
+      "NS-DEMO-LUX-01"
+    ],
+    "personas": [
+      "QualityEngineer"
+    ],
+    "locale": "en-LU",
+    "permittedActions": [
+      "dashboard.read",
+      "quality.read",
+      "quality.whatIf"
+    ]
+  },
+  "knowledge": {
+    "userId": "demo-knowledge",
+    "displayName": "Knowledge Engineer (demo)",
+    "roles": [
+      "Knowledge.Publisher"
+    ],
+    "plantScope": [
+      "NS-DEMO-LUX-01"
+    ],
+    "personas": [
+      "KnowledgeEngineer"
+    ],
+    "locale": "en-LU",
+    "permittedActions": [
+      "knowledge.capture",
+      "knowledge.publish",
+      "knowledge.read"
+    ]
+  },
+  "platform": {
+    "userId": "demo-platform",
+    "displayName": "Platform Operator (demo)",
+    "roles": [
+      "Platform.Capacity.Manage"
+    ],
+    "plantScope": [
+      "NS-DEMO-LUX-01"
+    ],
+    "personas": [
+      "PlatformOperator"
+    ],
+    "locale": "en-LU",
+    "permittedActions": [
+      "platform.capacity.manage"
+    ]
+  },
+  "operator": {
+    "userId": "demo-operator",
+    "displayName": "Furnace Operator (demo)",
+    "roles": [
+      "Operator.Read"
+    ],
+    "plantScope": [
+      "NS-DEMO-LUX-01"
+    ],
+    "personas": [
+      "FurnaceOperator"
+    ],
+    "locale": "en-LU",
+    "permittedActions": [
+      "dashboard.read",
+      "telemetry.read"
+    ]
+  }
+}

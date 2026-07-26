@@ -1,0 +1,11 @@
+{
+  "data": {
+    "status": "SIMULATED",
+    "state": "Paused",
+    "operationId": "cap-local-00002",
+    "capacityId": "novasteelv3fabric",
+    "auditRef": "e4b2f17f-3eb4-41b2-961a-5332cac20b18"
+  },
+  "asOf": "2026-07-25T10:48:21.003738Z",
+  "correlationId": "f2035053-fbf5-4c14-85ce-3a52ac0e54e2"
+}

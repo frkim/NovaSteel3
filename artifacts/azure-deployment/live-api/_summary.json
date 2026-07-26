@@ -1,0 +1,396 @@
+{
+  "base": "https://novasteelv3-bff.calmbeach-dbad72b1.swedencentral.azurecontainerapps.io",
+  "moments": [
+    {
+      "moment": "DM-1",
+      "title": "Command center + persona switch",
+      "seconds": 3.699
+    },
+    {
+      "moment": "TELEMETRY",
+      "title": "Live/historical telemetry and alert",
+      "seconds": 1.301
+    },
+    {
+      "moment": "DM-3",
+      "title": "Furnace RUL 21-day + uncertainty + work order",
+      "seconds": 1.832
+    },
+    {
+      "moment": "DM-2",
+      "title": "Energy dispatch optimization (equal tonnage, zero violations)",
+      "seconds": 1.296
+    },
+    {
+      "moment": "DM-4",
+      "title": "Quality genealogy + what-if + yield evidence",
+      "seconds": 0.998
+    },
+    {
+      "moment": "DM-6",
+      "title": "Sustainability / CO2 / ETS",
+      "seconds": 0.646
+    },
+    {
+      "moment": "DM-5",
+      "title": "Operator interview / STT / Foundry knowledge workflow",
+      "seconds": 1.949
+    },
+    {
+      "moment": "AUDIT",
+      "title": "Append-only audit evidence",
+      "seconds": 0.652
+    },
+    {
+      "moment": "CAPACITY",
+      "title": "Capacity start / status / pause simulation",
+      "seconds": 1.289
+    },
+    {
+      "moment": "TABLES",
+      "title": "Table search / filter / sort / pagination semantics",
+      "seconds": 3.596
+    },
+    {
+      "moment": "AUTHZ",
+      "title": "Server-side authorization boundaries",
+      "seconds": 0.964
+    }
+  ],
+  "totalSeconds": 18.222,
+  "checks": [
+    {
+      "label": "Persona switch yields distinct persona identities",
+      "ok": true,
+      "detail": "7 distinct persona sets across 7 identities"
+    },
+    {
+      "label": "Command center returns KPIs",
+      "ok": true,
+      "detail": "7 kpis"
+    },
+    {
+      "label": "Synthetic banner present",
+      "ok": true,
+      "detail": "Synthetic demo data — not for operational control"
+    },
+    {
+      "label": "Freshness present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Telemetry table returns rows",
+      "ok": true,
+      "detail": "total=2110"
+    },
+    {
+      "label": "Telemetry default sort eventTs desc",
+      "ok": true,
+      "detail": "eventTs desc"
+    },
+    {
+      "label": "Furnace telemetry returns rows",
+      "ok": true,
+      "detail": "total=1746"
+    },
+    {
+      "label": "Realtime alert SSE stream opens",
+      "ok": true,
+      "detail": "first line: id: 00000001"
+    },
+    {
+      "label": "Furnace inventory returns LUX-BF-01",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "RUL P50 == 21.0 days",
+      "ok": true,
+      "detail": "p50=21.0"
+    },
+    {
+      "label": "Uncertainty band P10 < 21 < P90",
+      "ok": true,
+      "detail": "p10=16.8 p90=27.5"
+    },
+    {
+      "label": "Risk score >= 0.80",
+      "ok": true,
+      "detail": "risk=0.87"
+    },
+    {
+      "label": "Risk level HIGH",
+      "ok": true,
+      "detail": "HIGH"
+    },
+    {
+      "label": "Forecast carries an audit reference",
+      "ok": true,
+      "detail": "fcd2dc62-d909-4643-b13d-54dc2176be51"
+    },
+    {
+      "label": "Synthetic work order created",
+      "ok": true,
+      "detail": "WO-DEMO-LUX-1042"
+    },
+    {
+      "label": "Work order is a synthetic/planned record (no OT actuation)",
+      "ok": true,
+      "detail": "PLANNED_INSPECTION"
+    },
+    {
+      "label": "Work order retrievable",
+      "ok": true,
+      "detail": "WO-DEMO-LUX-1042"
+    },
+    {
+      "label": "Energy intervals table returns rows",
+      "ok": true,
+      "detail": "total=96"
+    },
+    {
+      "label": "Optimization produced a recommendation",
+      "ok": true,
+      "detail": "REC-EB7A0DEDE29F"
+    },
+    {
+      "label": "Zero hard-constraint violations",
+      "ok": true,
+      "detail": "violations=0"
+    },
+    {
+      "label": "Equal tonnage preserved before/after",
+      "ok": true,
+      "detail": "before=960.0 after=960.0"
+    },
+    {
+      "label": "equal_planned_tonnage constraint SATISFIED",
+      "ok": true,
+      "detail": "960.0==960.0"
+    },
+    {
+      "label": "urgent_batch_fixed constraint SATISFIED",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Modeled cost reduction within 8-13% band",
+      "ok": true,
+      "detail": "costPct=9.94"
+    },
+    {
+      "label": "Modeled peak reduction reported (negative peakPct)",
+      "ok": true,
+      "detail": "peakPct=-5.16"
+    },
+    {
+      "label": "Evening scarcity peak price 280 EUR/MWh present",
+      "ok": true,
+      "detail": "peak=280.0"
+    },
+    {
+      "label": "Energy recommendation shadow-approved",
+      "ok": true,
+      "detail": "SIMULATED_APPROVED"
+    },
+    {
+      "label": "Approval recorded an audit reference",
+      "ok": true,
+      "detail": "886387f6-31f9-4504-a9fd-5ff1916b2055"
+    },
+    {
+      "label": "Quality batches table returns rows",
+      "ok": true,
+      "detail": "total=20"
+    },
+    {
+      "label": "DP780 automotive batch present",
+      "ok": true,
+      "detail": "COIL-LUX-260725-019"
+    },
+    {
+      "label": "Genealogy resolves heat/slab/coil lineage",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Quality what-if returns a predicted yield/value",
+      "ok": true,
+      "detail": "value=95.0"
+    },
+    {
+      "label": "Bounded what-if improves predicted first-pass yield toward ~95%",
+      "ok": true,
+      "detail": "88.0% -> 95.0%"
+    },
+    {
+      "label": "What-if performs NO operational write-back",
+      "ok": true,
+      "detail": "operationalWrite=False"
+    },
+    {
+      "label": "What-if carries an audit reference",
+      "ok": true,
+      "detail": "490abd5d-6850-4fdd-9a06-547ad9ace3b6"
+    },
+    {
+      "label": "Yield evidence available (manifest predicted 0.88 -> 0.95)",
+      "ok": true,
+      "detail": "scenario manifest summary: quality_predicted_yield_before/after"
+    },
+    {
+      "label": "Sustainability summary returned",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Emissions table returns rows",
+      "ok": true,
+      "detail": "total=96"
+    },
+    {
+      "label": "CO2 / carbon content present in summary",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Interview session created with recorded consent",
+      "ok": true,
+      "detail": "IV-00003"
+    },
+    {
+      "label": "Foundry draft procedure produced",
+      "ok": true,
+      "detail": "PROC-IV-00003"
+    },
+    {
+      "label": "STT transcript available",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Transcript exposes confidence/speaker labels",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Draft exists in DRAFT state (cannot self-publish)",
+      "ok": true,
+      "detail": "draft total=1"
+    },
+    {
+      "label": "Reviewer approval queue (IN_REVIEW) present",
+      "ok": true,
+      "detail": "in_review total=1"
+    },
+    {
+      "label": "Knowledge Engineer approval transitions to APPROVED",
+      "ok": true,
+      "detail": "APPROVED"
+    },
+    {
+      "label": "Knowledge retrieval search returns results",
+      "ok": true,
+      "detail": "total=2"
+    },
+    {
+      "label": "Audit decisions accumulate across the demo",
+      "ok": true,
+      "detail": "total=7"
+    },
+    {
+      "label": "Energy approval recorded in audit trail",
+      "ok": true,
+      "detail": "actions=['energy.approve', 'energy.simulate']"
+    },
+    {
+      "label": "Audit record links actor + correlation + timestamp",
+      "ok": true,
+      "detail": "actor=demo-knowledge"
+    },
+    {
+      "label": "Capacity start accepted",
+      "ok": true,
+      "detail": "SIMULATED"
+    },
+    {
+      "label": "Capacity operation status retrievable",
+      "ok": true,
+      "detail": "cap-local-00001"
+    },
+    {
+      "label": "Capacity pause accepted",
+      "ok": true,
+      "detail": "SIMULATED"
+    },
+    {
+      "label": "Enum filter (quality=GOOD) applied",
+      "ok": true,
+      "detail": "total=2110"
+    },
+    {
+      "label": "Text filter (signalCode contains 'hearth')",
+      "ok": true,
+      "detail": "total=582"
+    },
+    {
+      "label": "Numeric range filter (value=100..150)",
+      "ok": true,
+      "detail": "total=280"
+    },
+    {
+      "label": "Global search q=hearth",
+      "ok": true,
+      "detail": "total=582"
+    },
+    {
+      "label": "Sort value:asc ascending",
+      "ok": true,
+      "detail": "first5=[0.301, 0.319, 0.33, 0.331, 0.339]"
+    },
+    {
+      "label": "Pagination returns disjoint pages with stable total",
+      "ok": true,
+      "detail": "total=2110"
+    },
+    {
+      "label": "Date range filter applied",
+      "ok": true,
+      "detail": "total=516"
+    },
+    {
+      "label": "Invalid sort rejected with 400",
+      "ok": true,
+      "detail": "{\"code\":\"VALIDATION_ERROR\",\"message\":\"Invalid or unsortable column in sort 'nope"
+    },
+    {
+      "label": "size>200 rejected with 400",
+      "ok": true,
+      "detail": "{\"code\":\"VALIDATION_ERROR\",\"message\":\"size must be at most 200.\",\"correlationId\""
+    },
+    {
+      "label": "Cross-entity /v1/search returns grouped results",
+      "ok": true,
+      "detail": "groups=5"
+    },
+    {
+      "label": "Operator forbidden from energy simulate (403)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Unauthenticated request rejected (401)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Non NS-DEMO plant scope rejected (401)",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "checksPassed": 66,
+  "checksTotal": 66,
+  "allPassed": true
+}

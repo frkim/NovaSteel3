@@ -1,0 +1,25 @@
+{
+  "events": [
+    {
+      "id": "00000001",
+      "type": "alert.created",
+      "data": {
+        "alertId": "ALERT-HEARTH-SECTOR-07-260610",
+        "site": "NS-DEMO-LUX-01",
+        "assetId": "LUX-BF-01",
+        "componentId": "HEARTH-SECTOR-07",
+        "severity": "CRITICAL",
+        "status": "OPEN",
+        "message": "Demo synthetic warning: HEARTH-SECTOR-07 predicted RUL P50 21.0 days (risk 0.8706).",
+        "confidence": 0.8706,
+        "createdAt": "2026-06-11T00:00:00.000Z",
+        "updatedAt": "2026-06-11T00:00:00.000Z",
+        "sourceRef": "event:019eb3fa-8400-76ec-9cd7-c1ae5beb5258",
+        "correlationId": "run-demo-full-240725"
+      }
+    }
+  ],
+  "asOf": "2026-07-25T04:54:36.563237Z",
+  "stale": false,
+  "correlationId": "4d2f7537-0319-4f06-a01e-4b0e155e7689"
+}

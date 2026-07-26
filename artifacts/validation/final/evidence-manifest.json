@@ -1,0 +1,204 @@
+{
+  "status": "PASS",
+  "generatedAtUtc": "2026-07-25T05:44:24.4456289+00:00",
+  "repositoryRoot": "D:\\work\\20260724 - Novasteel 3",
+  "commit": "unavailable",
+  "suites": [
+    "protected-feeds",
+    "contract",
+    "simulator",
+    "backend",
+    "knowledge",
+    "frontend",
+    "portal",
+    "infra",
+    "fabric",
+    "presentation",
+    "security",
+    "sbom"
+  ],
+  "strict": false,
+  "restore": false,
+  "checks": [
+    {
+      "name": "verify-protected-feeds",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSeconds": 6.839,
+      "command": "D:\\work\\20260724 - Novasteel 3\\services\\bff-api\\.venv\\Scripts\\python.exe tools/validation/verify_protected_feeds.py --root D:\\work\\20260724 - Novasteel 3 --json D:\\work\\20260724 - Novasteel 3\\.\\artifacts\\validation\\final\\protected-feeds.json",
+      "log": "D:\\work\\20260724 - Novasteel 3\\artifacts\\validation\\final\\verify-protected-feeds.log",
+      "reason": ""
+    },
+    {
+      "name": "contract-tests",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSeconds": 3.012,
+      "command": "D:\\work\\20260724 - Novasteel 3\\services\\bff-api\\.venv\\Scripts\\python.exe -m pytest tests/contract services/bff-api/tests/test_contracts.py -q",
+      "log": "D:\\work\\20260724 - Novasteel 3\\artifacts\\validation\\final\\contract-tests.log",
+      "reason": ""
+    },
+    {
+      "name": "simulator-tests",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSeconds": 11.893,
+      "command": "D:\\work\\20260724 - Novasteel 3\\services\\bff-api\\.venv\\Scripts\\python.exe -m pytest tests/simulator -q",
+      "log": "D:\\work\\20260724 - Novasteel 3\\artifacts\\validation\\final\\simulator-tests.log",
+      "reason": ""
+    },
+    {
+      "name": "backend-and-integration-tests",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSeconds": 4.839,
+      "command": "D:\\work\\20260724 - Novasteel 3\\services\\bff-api\\.venv\\Scripts\\python.exe -m pytest services/bff-api/tests tests/backend tests/integration tests/e2e -q",
+      "log": "D:\\work\\20260724 - Novasteel 3\\artifacts\\validation\\final\\backend-and-integration-tests.log",
+      "reason": ""
+    },
+    {
+      "name": "knowledge-workflow-tests",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSeconds": 1.069,
+      "command": "D:\\work\\20260724 - Novasteel 3\\services\\bff-api\\.venv\\Scripts\\python.exe -m pytest tests/knowledge -q",
+      "log": "D:\\work\\20260724 - Novasteel 3\\artifacts\\validation\\final\\knowledge-workflow-tests.log",
+      "reason": ""
+    },
+    {
+      "name": "frontend-lint",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSeconds": 1.696,
+      "command": "C:\\Program Files\\nodejs\\npm.cmd run lint:frontend",
+      "log": "D:\\work\\20260724 - Novasteel 3\\artifacts\\validation\\final\\frontend-lint.log",
+      "reason": ""
+    },
+    {
+      "name": "frontend-tests",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSeconds": 13.325,
+      "command": "C:\\Program Files\\nodejs\\npm.cmd run test:frontend",
+      "log": "D:\\work\\20260724 - Novasteel 3\\artifacts\\validation\\final\\frontend-tests.log",
+      "reason": ""
+    },
+    {
+      "name": "frontend-build",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSeconds": 4.039,
+      "command": "C:\\Program Files\\nodejs\\npm.cmd run build:analytics",
+      "log": "D:\\work\\20260724 - Novasteel 3\\artifacts\\validation\\final\\frontend-build.log",
+      "reason": ""
+    },
+    {
+      "name": "npm-vulnerability-audit",
+      "status": "SKIPPED",
+      "exitCode": null,
+      "durationSeconds": 0,
+      "command": "",
+      "log": "",
+      "reason": "A non-public HTTPS NPM_CONFIG_REGISTRY is required to audit dependencies."
+    },
+    {
+      "name": "portal-protected-restore",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSeconds": 1.759,
+      "command": "C:\\Program Files\\dotnet\\dotnet.exe restore apps/portal-shell/PortalShell.csproj --configfile NuGet.Config --locked-mode",
+      "log": "D:\\work\\20260724 - Novasteel 3\\artifacts\\validation\\final\\portal-protected-restore.log",
+      "reason": ""
+    },
+    {
+      "name": "portal-build",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSeconds": 3.831,
+      "command": "C:\\Program Files\\dotnet\\dotnet.exe build apps/portal-shell/PortalShell.csproj --no-restore --configuration Release",
+      "log": "D:\\work\\20260724 - Novasteel 3\\artifacts\\validation\\final\\portal-build.log",
+      "reason": ""
+    },
+    {
+      "name": "portal-vulnerability-report",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSeconds": 3.947,
+      "command": "C:\\Program Files\\dotnet\\dotnet.exe package list --project apps/portal-shell/PortalShell.csproj --vulnerable --include-transitive --format json --config NuGet.Config --no-restore",
+      "log": "D:\\work\\20260724 - Novasteel 3\\artifacts\\validation\\final\\portal-vulnerability-report.log",
+      "reason": ""
+    },
+    {
+      "name": "portal-vulnerability-gate",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSeconds": 0.262,
+      "command": "D:\\work\\20260724 - Novasteel 3\\services\\bff-api\\.venv\\Scripts\\python.exe tools/validation/check_dotnet_vulnerabilities.py --input D:\\work\\20260724 - Novasteel 3\\.\\artifacts\\validation\\final\\portal-vulnerability-report.log",
+      "log": "D:\\work\\20260724 - Novasteel 3\\artifacts\\validation\\final\\portal-vulnerability-gate.log",
+      "reason": ""
+    },
+    {
+      "name": "infra-tests",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSeconds": 136.877,
+      "command": "D:\\work\\20260724 - Novasteel 3\\services\\bff-api\\.venv\\Scripts\\python.exe -m pytest tests/infra -q",
+      "log": "D:\\work\\20260724 - Novasteel 3\\artifacts\\validation\\final\\infra-tests.log",
+      "reason": ""
+    },
+    {
+      "name": "infra-static-validation",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSeconds": 94.692,
+      "command": "C:\\Program Files\\PowerShell\\7\\pwsh.exe -NoProfile -NonInteractive -File infra/scripts/validate.ps1 -Environment dev -SkipArmValidate",
+      "log": "D:\\work\\20260724 - Novasteel 3\\artifacts\\validation\\final\\infra-static-validation.log",
+      "reason": ""
+    },
+    {
+      "name": "fabric-local-validator",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSeconds": 2.43,
+      "command": "C:\\Program Files\\PowerShell\\7\\pwsh.exe -NoProfile -NonInteractive -File fabric/scripts/Test-FabricAssetsLocal.ps1",
+      "log": "D:\\work\\20260724 - Novasteel 3\\artifacts\\validation\\final\\fabric-local-validator.log",
+      "reason": ""
+    },
+    {
+      "name": "presentation-package-validator",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSeconds": 0.327,
+      "command": "D:\\work\\20260724 - Novasteel 3\\services\\bff-api\\.venv\\Scripts\\python.exe tools/validation/validate_pptx.py --presentation docs/presentation/NovaSteel-Oral-Defense.pptx --json D:\\work\\20260724 - Novasteel 3\\.\\artifacts\\validation\\final\\presentation.json",
+      "log": "D:\\work\\20260724 - Novasteel 3\\artifacts\\validation\\final\\presentation-package-validator.log",
+      "reason": ""
+    },
+    {
+      "name": "security-gates",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSeconds": 9.005,
+      "command": "D:\\work\\20260724 - Novasteel 3\\services\\bff-api\\.venv\\Scripts\\python.exe tools/validation/security_scan.py --root D:\\work\\20260724 - Novasteel 3 --json D:\\work\\20260724 - Novasteel 3\\.\\artifacts\\validation\\final\\security.json",
+      "log": "D:\\work\\20260724 - Novasteel 3\\artifacts\\validation\\final\\security-gates.log",
+      "reason": ""
+    },
+    {
+      "name": "python-dependency-integrity",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSeconds": 1.073,
+      "command": "D:\\work\\20260724 - Novasteel 3\\services\\bff-api\\.venv\\Scripts\\python.exe -m pip check",
+      "log": "D:\\work\\20260724 - Novasteel 3\\artifacts\\validation\\final\\python-dependency-integrity.log",
+      "reason": ""
+    },
+    {
+      "name": "generate-sbom",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSeconds": 1.279,
+      "command": "D:\\work\\20260724 - Novasteel 3\\services\\bff-api\\.venv\\Scripts\\python.exe tools/validation/generate_sbom.py --root D:\\work\\20260724 - Novasteel 3 --output D:\\work\\20260724 - Novasteel 3\\.\\artifacts\\validation\\final\\novasteel.sbom.cdx.json",
+      "log": "D:\\work\\20260724 - Novasteel 3\\artifacts\\validation\\final\\generate-sbom.log",
+      "reason": ""
+    }
+  ]
+}

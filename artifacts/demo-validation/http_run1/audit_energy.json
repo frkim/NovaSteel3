@@ -1,0 +1,56 @@
+{
+  "items": [
+    {
+      "auditId": "188cd8d2-36b3-46f3-9adc-32c8299fe57c",
+      "domain": "energy",
+      "entityId": "REC-EB7A0DEDE29F",
+      "correlationId": "769cebcf-6bef-4e45-bc9e-8df860f4ee03",
+      "action": "energy.approve",
+      "actor": "demo-energy",
+      "inputSnapshotRef": "recommendation:REC-EB7A0DEDE29F",
+      "modelVersion": "energy-dispatch-deterministic:1.0.0",
+      "output": {
+        "status": "SIMULATED_APPROVED"
+      },
+      "humanAction": {
+        "decision": "SIMULATED_APPROVED",
+        "reason": "Shadow approval for demo; preserves delivery + tonnage"
+      },
+      "outcome": null,
+      "recordedAt": "2026-07-25T04:54:36.610271Z",
+      "previousHash": "30dc8fe003798af21dedfa7a3b9c50bc34a1cc07e5589baf60b05eceb202169b",
+      "recordHash": "1d9e96c6d5f300b4835d07f934f60dbdadaeeaf26f4cddbb4fb1dddd9ec4d43e"
+    },
+    {
+      "auditId": "a5b1c55a-f9ad-4f6f-a28a-848ead8a9917",
+      "domain": "energy",
+      "entityId": "REC-EB7A0DEDE29F",
+      "correlationId": "64b724f2-71ce-4fc4-bfa7-eb9205be9b03",
+      "action": "energy.simulate",
+      "actor": "demo-energy",
+      "inputSnapshotRef": "simulator:simulator-fixture:demo-full",
+      "modelVersion": "energy-dispatch-deterministic:1.0.0",
+      "output": {
+        "savings": {
+          "costPct": 9.94,
+          "costEur": 3689.98,
+          "peakPct": -5.16,
+          "co2Pct": 8.35,
+          "rawFlexibleCostPct": 29.83,
+          "rawCarbonArbitragePct": -4.98
+        },
+        "hardConstraintViolations": 0
+      },
+      "humanAction": null,
+      "outcome": null,
+      "recordedAt": "2026-07-25T04:54:36.602583Z",
+      "previousHash": "5df9b6c626e60c1b0439994a898d988ee797dd812cf6c299c8a0e9449adcda7b",
+      "recordHash": "30dc8fe003798af21dedfa7a3b9c50bc34a1cc07e5589baf60b05eceb202169b"
+    }
+  ],
+  "total": 2,
+  "page": 1,
+  "size": 50,
+  "asOf": "2026-07-25T04:54:36.664506Z",
+  "correlationId": "aba5712f-935d-47a1-9a0c-e6fb25f0b356"
+}

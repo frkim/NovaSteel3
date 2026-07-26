@@ -1,0 +1,56 @@
+Driving NovaSteel demo against http://127.0.0.1:8080
+
+== DM-1: Command center + persona switch ==
+    [PASS] Persona switch yields distinct persona identities � 7 distinct persona sets across 7 identities
+    [PASS] Command center returns KPIs � 7 kpis
+    [PASS] Synthetic banner present � Synthetic demo data � not for operational control
+    [PASS] Freshness present
+   (0.04s)
+
+== TELEMETRY: Live/historical telemetry and alert ==
+    [PASS] Telemetry table returns rows � total=2110
+    [PASS] Telemetry default sort eventTs desc � eventTs desc
+    [PASS] Furnace telemetry returns rows � total=1746
+    [PASS] Realtime alert SSE stream opens � first line: id: 00000001
+   (0.02s)
+
+== DM-3: Furnace RUL 21-day + uncertainty + work order ==
+    [PASS] Furnace inventory returns LUX-BF-01
+    [PASS] RUL P50 == 21.0 days � p50=21.0
+    [FAIL] Uncertainty band P10 < 21 < P90 � p10=None p90=None
+    [PASS] Risk score >= 0.80 � risk=0.87
+    [PASS] Forecast carries an audit reference � 3c21bf08-8138-447b-800d-f5b066e5676e
+    [PASS] Synthetic work order created � WO-DEMO-LUX-1042
+    [FAIL] Work order is synthetic/planned not an OT actuation � PLANNED_INSPECTION
+    [PASS] Work order retrievable � WO-DEMO-LUX-1042
+   (0.02s)
+
+== DM-2: Energy dispatch optimization (equal tonnage, zero violations) ==
+    [PASS] Energy intervals table returns rows � total=96
+    [PASS] Optimization produced a recommendation � REC-EB7A0DEDE29F
+    [PASS] Zero hard-constraint violations � violations=0
+    [FAIL] Equal tonnage preserved before/after � before=None after=None
+    [PASS] Modeled cost reduction reported � savings={'costPct': 9.94, 'costEur': 3689.98, 'peakPct': -5.16, 'co2Pct': 8.35, 'rawFlexibleCostPct': 29.83, 'rawCarbonArbitragePct': -4.98}
+    [PASS] Energy recommendation shadow-approved � SIMULATED_APPROVED
+    [PASS] Approval recorded an audit reference � cae99f24-760b-430c-9dd6-22a1a3b66bdd
+   (0.02s)
+
+== DM-4: Quality genealogy + what-if + yield evidence ==
+    [PASS] Quality batches table returns rows � total=20
+    [PASS] DP780 automotive batch present � COIL-LUX-260725-019
+    [PASS] Genealogy resolves heat/slab/coil lineage
+    !! POST /v1/quality/what-if -> 400 (expected 200): {"code":"VALIDATION_ERROR","message":"Unsupported bounded adjustment: coilingTempBiasC.","correlationId":"2406f058-2ca3-4288-88fe-04b288068c09","retryable":false}
+Traceback (most recent call last):
+  File "D:\work\20260724 - Novasteel 3\artifacts\demo-validation\drive_demo.py", line 474, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "D:\work\20260724 - Novasteel 3\artifacts\demo-validation\drive_demo.py", line 456, in main
+    fn()
+    ~~^^
+  File "D:\work\20260724 - Novasteel 3\artifacts\demo-validation\drive_demo.py", line 91, in wrapped
+    fn()
+    ~~^^
+  File "D:\work\20260724 - Novasteel 3\artifacts\demo-validation\drive_demo.py", line 263, in dm4
+    d = wi["data"]
+        ~~^^^^^^^^
+KeyError: 'data'

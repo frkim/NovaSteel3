@@ -1,0 +1,102 @@
+Driving NovaSteel demo against http://127.0.0.1:8080
+
+== DM-1: Command center + persona switch ==
+    [PASS] Persona switch yields distinct persona identities � 7 distinct persona sets across 7 identities
+    [PASS] Command center returns KPIs � 7 kpis
+    [PASS] Synthetic banner present � Synthetic demo data � not for operational control
+    [PASS] Freshness present
+   (0.03s)
+
+== TELEMETRY: Live/historical telemetry and alert ==
+    [PASS] Telemetry table returns rows � total=2110
+    [PASS] Telemetry default sort eventTs desc � eventTs desc
+    [PASS] Furnace telemetry returns rows � total=1746
+    [PASS] Realtime alert SSE stream opens � first line: id: 00000001
+   (0.02s)
+
+== DM-3: Furnace RUL 21-day + uncertainty + work order ==
+    [PASS] Furnace inventory returns LUX-BF-01
+    [PASS] RUL P50 == 21.0 days � p50=21.0
+    [PASS] Uncertainty band P10 < 21 < P90 � p10=16.8 p90=27.5
+    [PASS] Risk score >= 0.80 � risk=0.87
+    [PASS] Risk level HIGH � HIGH
+    [PASS] Forecast carries an audit reference � 244c5480-1ae2-4d23-83ac-74cbe081b9b5
+    [PASS] Synthetic work order created � WO-DEMO-LUX-1042
+    [PASS] Work order is a synthetic/planned record (no OT actuation) � PLANNED_INSPECTION
+    [PASS] Work order retrievable � WO-DEMO-LUX-1042
+   (0.03s)
+
+== DM-2: Energy dispatch optimization (equal tonnage, zero violations) ==
+    [PASS] Energy intervals table returns rows � total=96
+    [PASS] Optimization produced a recommendation � REC-EB7A0DEDE29F
+    [PASS] Zero hard-constraint violations � violations=0
+    [PASS] Equal tonnage preserved before/after � before=960.0 after=960.0
+    [PASS] equal_planned_tonnage constraint SATISFIED � 960.0==960.0
+    [PASS] urgent_batch_fixed constraint SATISFIED
+    [PASS] Modeled cost reduction within 8-13% band � costPct=9.94
+    [PASS] Modeled peak reduction reported (negative peakPct) � peakPct=-5.16
+    [PASS] Evening scarcity peak price 280 EUR/MWh present � peak=280.0
+    [PASS] Energy recommendation shadow-approved � SIMULATED_APPROVED
+    [PASS] Approval recorded an audit reference � 188cd8d2-36b3-46f3-9adc-32c8299fe57c
+   (0.02s)
+
+== DM-4: Quality genealogy + what-if + yield evidence ==
+    [PASS] Quality batches table returns rows � total=20
+    [PASS] DP780 automotive batch present � COIL-LUX-260725-019
+    [PASS] Genealogy resolves heat/slab/coil lineage
+    [PASS] Quality what-if returns a predicted yield/value � value=95.0
+    [PASS] Bounded what-if improves predicted first-pass yield toward ~95% � 88.0% -> 95.0%
+    [PASS] What-if performs NO operational write-back � operationalWrite=False
+    [PASS] What-if carries an audit reference � b61df689-cdc8-4779-9ba1-70cd4b1a302e
+    [PASS] Yield evidence available (manifest predicted 0.88 -> 0.95) � scenario manifest summary: quality_predicted_yield_before/after
+   (0.01s)
+
+== DM-6: Sustainability / CO2 / ETS ==
+    [PASS] Sustainability summary returned
+    [PASS] Emissions table returns rows � total=96
+    [PASS] CO2 / carbon content present in summary
+   (0.01s)
+
+== DM-5: Operator interview / STT / Foundry knowledge workflow ==
+    [PASS] Interview session created with recorded consent � IV-00003
+    [PASS] Foundry draft procedure produced � PROC-IV-00003
+    [PASS] STT transcript available
+    [PASS] Transcript exposes confidence/speaker labels
+    [PASS] Draft exists in DRAFT state (cannot self-publish) � draft total=1
+    [PASS] Reviewer approval queue (IN_REVIEW) present � in_review total=1
+    [PASS] Knowledge Engineer approval transitions to APPROVED � APPROVED
+    [PASS] Knowledge retrieval search returns results � total=2
+   (0.03s)
+
+== AUDIT: Append-only audit evidence ==
+    [PASS] Audit decisions accumulate across the demo � total=7
+    [PASS] Energy approval recorded in audit trail � actions=['energy.approve', 'energy.simulate']
+    [PASS] Audit record links actor + correlation + timestamp � actor=demo-knowledge
+   (0.01s)
+
+== CAPACITY: Capacity start / status / pause simulation ==
+    [PASS] Capacity start accepted � SIMULATED
+    [PASS] Capacity operation status retrievable � cap-local-00001
+    [PASS] Capacity pause accepted � SIMULATED
+   (0.02s)
+
+== TABLES: Table search / filter / sort / pagination semantics ==
+    [PASS] Enum filter (quality=GOOD) applied � total=2110
+    [PASS] Text filter (signalCode contains 'hearth') � total=582
+    [PASS] Numeric range filter (value=100..150) � total=280
+    [PASS] Global search q=hearth � total=582
+    [PASS] Sort value:asc ascending � first5=[0.301, 0.319, 0.33, 0.331, 0.339]
+    [PASS] Pagination returns disjoint pages with stable total � total=2110
+    [PASS] Date range filter applied � total=516
+    [PASS] Invalid sort rejected with 400 � {"code":"VALIDATION_ERROR","message":"Invalid or unsortable column in sort 'nope
+    [PASS] size>200 rejected with 400 � {"code":"VALIDATION_ERROR","message":"size must be at most 200.","correlationId"
+    [PASS] Cross-entity /v1/search returns grouped results � groups=5
+   (0.08s)
+
+== AUTHZ: Server-side authorization boundaries ==
+    [PASS] Operator forbidden from energy simulate (403)
+    [PASS] Unauthenticated request rejected (401)
+    [PASS] Non NS-DEMO plant scope rejected (401)
+   (0.01s)
+
+==== 66/66 checks passed; wall-clock moment time 0.26s ====

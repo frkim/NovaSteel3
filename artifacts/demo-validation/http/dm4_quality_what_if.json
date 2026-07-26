@@ -1,0 +1,41 @@
+{
+  "data": {
+    "value": 95.0,
+    "unit": "%",
+    "confidence": {
+      "p10": 92.0,
+      "p50": 95.0,
+      "p90": 97.0
+    },
+    "modelVersion": "quality-risk:1.0.0-demo",
+    "scoredAt": "2026-07-25T05:38:09.396352Z",
+    "drivers": [
+      {
+        "name": "coiling_temperature_correction",
+        "contribution": 0.175
+      },
+      {
+        "name": "force_balance_correction",
+        "contribution": 0.02
+      }
+    ],
+    "sourceRefs": [
+      "batch:COIL-LUX-260725-019"
+    ],
+    "current": {
+      "predictedFirstPassYieldPct": 88.0,
+      "riskScore": 0.3
+    },
+    "proposed": {
+      "predictedFirstPassYieldPct": 95.0,
+      "adjustments": {
+        "coilingTempDeltaC": 20.0,
+        "forceBalanceDeltaPct": 10.0
+      },
+      "operationalWrite": false
+    },
+    "auditRef": "d31850c7-394e-40d0-88b2-92f3bc3c5727"
+  },
+  "asOf": "2026-07-25T05:38:09.396464Z",
+  "correlationId": "5c1aecac-c457-44ab-b88e-094790ca3cba"
+}

@@ -1,0 +1,10 @@
+{
+  "Bff": {
+    "BaseUrl": "http://localhost:8080"
+  },
+  "AzureAd": {
+    "ClientId": "",
+    "Authority": ""
+  }
+}
+

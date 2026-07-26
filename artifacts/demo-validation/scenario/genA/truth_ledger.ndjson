@@ -1,0 +1,1 @@
+{"anomaly_id":"AN-LINING-DEGRADATION-07","asset_id":"LUX-BF-01","component_id":"HEARTH-SECTOR-07","energy_schedule_optimality_gap":-0.017147,"failure_within_21d":1,"lining_state":"degraded","plant_id":"NS-DEMO-LUX-01","quality_drift_active":true,"quality_outcome":"rework","record_ts":"2026-06-11T00:00:00.000Z","rul_days":21.0,"sensor_fault_type":"none"}

@@ -1,0 +1,159 @@
+{
+  "items": [
+    {
+      "auditId": "626d1be4-443e-47b4-bbc6-ae0c5511f410",
+      "domain": "knowledge",
+      "entityId": "PROC-IV-00001",
+      "correlationId": "3ab69b54-3dbd-445c-8760-72ce39d11c9b",
+      "action": "knowledge.procedure.approve",
+      "actor": "demo-knowledge",
+      "inputSnapshotRef": "procedure:PROC-IV-00001",
+      "modelVersion": null,
+      "output": {
+        "status": "APPROVED",
+        "version": 2
+      },
+      "humanAction": {
+        "decision": "APPROVED"
+      },
+      "outcome": null,
+      "recordedAt": "2026-07-25T05:38:09.429555Z",
+      "previousHash": "c68d06b23f3752b04f210018dc9ec6a377f006f8fc73989234e10c7d8e8a7b68",
+      "recordHash": "a0ca7dcebd85d89b0f88256559597f069191cd3c6f516250d5a0c5035802d4cf"
+    },
+    {
+      "auditId": "29d02ced-5147-48c0-9b5c-29a00f3f686a",
+      "domain": "knowledge",
+      "entityId": "IV-00003",
+      "correlationId": "c69a53b7-fe87-43be-90fe-b657e70c598d",
+      "action": "knowledge.interview.create",
+      "actor": "demo-knowledge",
+      "inputSnapshotRef": "consent:knowledge-capture",
+      "modelVersion": null,
+      "output": {
+        "consentState": "GRANTED"
+      },
+      "humanAction": null,
+      "outcome": null,
+      "recordedAt": "2026-07-25T05:38:09.411648Z",
+      "previousHash": "f77d2cd57cee96da6520994e3c0276250e845b40268e470add869557c94ebb01",
+      "recordHash": "c68d06b23f3752b04f210018dc9ec6a377f006f8fc73989234e10c7d8e8a7b68"
+    },
+    {
+      "auditId": "d31850c7-394e-40d0-88b2-92f3bc3c5727",
+      "domain": "quality",
+      "entityId": "COIL-LUX-260725-019",
+      "correlationId": "5c1aecac-c457-44ab-b88e-094790ca3cba",
+      "action": "quality.what_if",
+      "actor": "demo-quality",
+      "inputSnapshotRef": "event:019eb3b8-9900-7ab9-afea-745d2182010b",
+      "modelVersion": "quality-risk:1.0.0-demo",
+      "output": {
+        "value": 95.0,
+        "unit": "%"
+      },
+      "humanAction": null,
+      "outcome": null,
+      "recordedAt": "2026-07-25T05:38:09.396373Z",
+      "previousHash": "d8cb12db1c3f1f717d7cc6bb56215432c7a6f2b599058dffa9fd68d751caf1cb",
+      "recordHash": "f77d2cd57cee96da6520994e3c0276250e845b40268e470add869557c94ebb01"
+    },
+    {
+      "auditId": "3c884b66-dca9-470d-9cb2-87a602ac68ca",
+      "domain": "energy",
+      "entityId": "REC-EB7A0DEDE29F",
+      "correlationId": "cd6bdc76-d988-4b11-ae7c-bc6e6565c45f",
+      "action": "energy.approve",
+      "actor": "demo-energy",
+      "inputSnapshotRef": "recommendation:REC-EB7A0DEDE29F",
+      "modelVersion": "energy-dispatch-deterministic:1.0.0",
+      "output": {
+        "status": "SIMULATED_APPROVED"
+      },
+      "humanAction": {
+        "decision": "SIMULATED_APPROVED",
+        "reason": "Shadow approval for demo; preserves delivery + tonnage"
+      },
+      "outcome": null,
+      "recordedAt": "2026-07-25T05:38:09.382786Z",
+      "previousHash": "d744d95410072f47f8678d5673efa5653860db6633e1bcf7af46077ef52bf32c",
+      "recordHash": "d8cb12db1c3f1f717d7cc6bb56215432c7a6f2b599058dffa9fd68d751caf1cb"
+    },
+    {
+      "auditId": "32dfa3b3-427f-41e3-9201-2d60a96374f8",
+      "domain": "energy",
+      "entityId": "REC-EB7A0DEDE29F",
+      "correlationId": "80edf349-a586-47d0-8ae2-b4525653e201",
+      "action": "energy.simulate",
+      "actor": "demo-energy",
+      "inputSnapshotRef": "simulator:simulator-fixture:demo-full",
+      "modelVersion": "energy-dispatch-deterministic:1.0.0",
+      "output": {
+        "savings": {
+          "costPct": 9.94,
+          "costEur": 3689.98,
+          "peakPct": -5.16,
+          "co2Pct": 8.35,
+          "rawFlexibleCostPct": 29.83,
+          "rawCarbonArbitragePct": -4.98
+        },
+        "hardConstraintViolations": 0
+      },
+      "humanAction": null,
+      "outcome": null,
+      "recordedAt": "2026-07-25T05:38:09.372354Z",
+      "previousHash": "2a446846379e1301c3bf595245956a3df6dd4601d8323a021f0c3d64a34019ee",
+      "recordHash": "d744d95410072f47f8678d5673efa5653860db6633e1bcf7af46077ef52bf32c"
+    },
+    {
+      "auditId": "a85730c8-add7-4423-abb8-a3db47f35139",
+      "domain": "furnace",
+      "entityId": "WO-DEMO-LUX-1042",
+      "correlationId": "43a16239-edd5-46e3-843a-c627e150e614",
+      "action": "workorder.create",
+      "actor": "demo-reliability",
+      "inputSnapshotRef": "asset:LUX-BF-01",
+      "modelVersion": null,
+      "output": {
+        "status": "PLANNED_INSPECTION"
+      },
+      "humanAction": {
+        "decision": "CREATE_SYNTHETIC_WORK_ORDER"
+      },
+      "outcome": null,
+      "recordedAt": "2026-07-25T05:38:09.358269Z",
+      "previousHash": "75a8fa124665282a41c92665488df5a9c935aea8ba51254552fb6976cfe116f2",
+      "recordHash": "2a446846379e1301c3bf595245956a3df6dd4601d8323a021f0c3d64a34019ee"
+    },
+    {
+      "auditId": "5badce33-c95e-46b5-a5d8-a5ae487fdd50",
+      "domain": "furnace",
+      "entityId": "LUX-BF-01",
+      "correlationId": "7b6289d9-8a70-48a1-9396-4151f2a16ac1",
+      "action": "lining.score",
+      "actor": "scoring-worker",
+      "inputSnapshotRef": "simulator:simulator-fixture:demo-full",
+      "modelVersion": "lining-rul-piml:1.3.0-demo",
+      "output": {
+        "value": 21.0,
+        "unit": "d",
+        "confidence": {
+          "p10": 16.8,
+          "p50": 21.0,
+          "p90": 27.5
+        },
+        "riskScore": 0.87
+      },
+      "humanAction": null,
+      "outcome": null,
+      "recordedAt": "2026-07-25T05:38:09.352640Z",
+      "previousHash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "recordHash": "75a8fa124665282a41c92665488df5a9c935aea8ba51254552fb6976cfe116f2"
+    }
+  ],
+  "total": 7,
+  "page": 1,
+  "size": 50,
+  "asOf": "2026-07-25T05:38:09.437932Z",
+  "correlationId": "351274a5-e13d-48fa-b429-f253d420ba5b"
+}

@@ -1,0 +1,33 @@
+{
+  "data": {
+    "batchId": "COIL-LUX-260725-019",
+    "site": "NS-DEMO-LUX-01",
+    "chain": {
+      "rawMaterialLots": [
+        "LOT-FE-0019"
+      ],
+      "heat": "H-LUX-260610-0019",
+      "ladleTreatment": "LADLE-0019",
+      "slab": "SLAB-0019",
+      "reheating": {
+        "assetId": "LUX-RHF-01",
+        "operation": "REHEAT-0019"
+      },
+      "coil": "COIL-LUX-260725-019",
+      "sample": "LAB-260610-0019",
+      "testResult": {
+        "characteristic": "tensile_strength",
+        "value": 814.9,
+        "unit": "MPa",
+        "resultStatus": "FAIL"
+      },
+      "shipment": "SHIP-DEMO-019"
+    },
+    "synthetic": true,
+    "sourceRefs": [
+      "event:019eb3b8-9900-7ab9-afea-745d2182010b"
+    ]
+  },
+  "asOf": "2026-07-25T10:48:16.148521Z",
+  "correlationId": "e26201ea-fb86-4e65-8059-3a59c62c0a64"
+}

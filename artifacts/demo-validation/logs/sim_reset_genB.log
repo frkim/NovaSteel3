@@ -1,0 +1,12 @@
+reset artifacts\demo-validation\scenario\genB: removed 11 item(s)
+  - alarm_event.ndjson
+  - checksums.json
+  - energy_interval.ndjson
+  - heat_batch.ndjson
+  - maintenance_event.ndjson
+  - manifest.json
+  - model_inference.ndjson
+  - operator_knowledge.ndjson
+  - quality_measurement.ndjson
+  - telemetry.ndjson
+  - truth_ledger.ndjson

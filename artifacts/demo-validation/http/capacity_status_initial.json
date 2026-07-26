@@ -1,0 +1,12 @@
+{
+  "data": {
+    "capacityId": "cap-novasteel-demo-sc",
+    "environment": "demo",
+    "state": "Paused",
+    "sku": "F2",
+    "demoModeSimulated": true,
+    "stale": false
+  },
+  "asOf": "2026-07-25T05:38:09.445720Z",
+  "correlationId": "cf546f9d-f66f-4dff-b598-131ebb9b1a3a"
+}

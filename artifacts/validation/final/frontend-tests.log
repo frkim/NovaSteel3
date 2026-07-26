@@ -1,0 +1,29 @@
+
+> novasteel@0.1.0 test:frontend
+> npm --workspace @novasteel/analytics-mfe run test
+
+
+> @novasteel/analytics-mfe@0.0.0 test
+> vitest run
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90mD:/work/20260724 - Novasteel 3/apps/analytics-mfe[39m
+
+ [32m✓[39m src/utils/tableProcessing.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 29[2mms[22m[39m
+ [32m✓[39m src/utils/format.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 41[2mms[22m[39m
+ [32m✓[39m src/api/dataClient.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m src/components/primitives/KpiCard.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 730[2mms[22m[39m
+ [32m✓[39m src/components/primitives/DataTable.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 2274[2mms[22m[39m
+     [33m[2m✓[22m[39m renders every row and honors the default descending sort [33m 624[2mms[22m[39m
+     [33m[2m✓[22m[39m re-sorts when a column header is clicked [33m 555[2mms[22m[39m
+     [33m[2m✓[22m[39m filters rows through the global search box [33m 518[2mms[22m[39m
+     [33m[2m✓[22m[39m filters rows through a per-column header search [33m 572[2mms[22m[39m
+ [32m✓[39m src/components/AnalyticsDashboard.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 1396[2mms[22m[39m
+     [33m[2m✓[22m[39m renders the Command Center with the demo banner and KPI band [33m 885[2mms[22m[39m
+     [33m[2m✓[22m[39m renders the furnace lining forecast screen with the RUL uncertainty band [33m 506[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m6 passed[39m[22m[90m (6)[39m
+[2m      Tests [22m [1m[32m29 passed[39m[22m[90m (29)[39m
+[2m   Start at [22m 07:39:49
+[2m   Duration [22m 11.10s[2m (transform 1.51s, setup 4.84s, import 15.19s, tests 4.48s, environment 16.37s)[22m
+

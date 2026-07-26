@@ -1,0 +1,10 @@
+Generated scenario 'demo-full' (seed=240725) into artifacts\demo-validation\scenario\genA
+  alarm_event: 1 rows
+  energy_interval: 96 rows
+  heat_batch: 8 rows
+  maintenance_event: 2 rows
+  model_inference: 3 rows
+  operator_knowledge: 3 rows
+  quality_measurement: 20 rows
+  telemetry: 2110 rows
+  truth_ledger: 1 rows

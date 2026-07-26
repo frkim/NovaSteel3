@@ -1,0 +1,58 @@
+[
+  {
+    "screen": "01-command-center",
+    "title": "PlantManager | NovaSteel",
+    "fallback": false,
+    "renderError": false,
+    "errors": 0,
+    "screenshot": "D:\\work\\20260724 - Novasteel 3\\artifacts\\azure-deployment\\screenshots\\01-command-center.png"
+  },
+  {
+    "screen": "02-furnace-rul",
+    "title": "FurnaceOperator | NovaSteel",
+    "fallback": false,
+    "renderError": false,
+    "errors": 0,
+    "screenshot": "D:\\work\\20260724 - Novasteel 3\\artifacts\\azure-deployment\\screenshots\\02-furnace-rul.png"
+  },
+  {
+    "screen": "03-energy-optimization",
+    "title": "EnergyManager | NovaSteel",
+    "fallback": false,
+    "renderError": false,
+    "errors": 0,
+    "screenshot": "D:\\work\\20260724 - Novasteel 3\\artifacts\\azure-deployment\\screenshots\\03-energy-optimization.png"
+  },
+  {
+    "screen": "04-quality",
+    "title": "QualityEngineer | NovaSteel",
+    "fallback": false,
+    "renderError": false,
+    "errors": 0,
+    "screenshot": "D:\\work\\20260724 - Novasteel 3\\artifacts\\azure-deployment\\screenshots\\04-quality.png"
+  },
+  {
+    "screen": "05-sustainability",
+    "title": "SustainabilityOfficer | NovaSteel",
+    "fallback": false,
+    "renderError": false,
+    "errors": 0,
+    "screenshot": "D:\\work\\20260724 - Novasteel 3\\artifacts\\azure-deployment\\screenshots\\05-sustainability.png"
+  },
+  {
+    "screen": "06-knowledge",
+    "title": "KnowledgeEngineer | NovaSteel",
+    "fallback": false,
+    "renderError": false,
+    "errors": 0,
+    "screenshot": "D:\\work\\20260724 - Novasteel 3\\artifacts\\azure-deployment\\screenshots\\06-knowledge.png"
+  },
+  {
+    "screen": "07-platform-capacity",
+    "title": "PlatformOps | NovaSteel",
+    "fallback": false,
+    "renderError": false,
+    "errors": 0,
+    "screenshot": "D:\\work\\20260724 - Novasteel 3\\artifacts\\azure-deployment\\screenshots\\07-platform-capacity.png"
+  }
+]

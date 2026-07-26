@@ -1,0 +1,13 @@
+  [IDENTICAL] dm1_dashboard_kpis
+  [IDENTICAL] dm3_lining_forecast
+  [IDENTICAL] dm3_workorder
+  [IDENTICAL] dm2_energy_simulate
+  [IDENTICAL] dm4_quality_what_if
+  [IDENTICAL] dm4_quality_genealogy
+  [IDENTICAL] dm6_sustainability_summary
+  [IDENTICAL] dm6_sustainability_emissions
+  [IDENTICAL] telemetry_list
+  [IDENTICAL] tables_sort_asc
+RESULT: DETERMINISTIC re-run (all domain payloads identical)
+  RUL p50=21.0 p10=16.8 p90=27.5 risk=0.87
+  recId=REC-EB7A0DEDE29F costPct=9.94 viol=0 tonnage=960.0/960.0

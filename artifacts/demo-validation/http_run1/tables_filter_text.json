@@ -1,0 +1,54 @@
+{
+  "items": [
+    {
+      "eventId": "019eb3fa-8400-7d2b-8fd3-41fae32f7135",
+      "eventTs": "2026-06-11T00:00:00.000Z",
+      "site": "NS-DEMO-LUX-01",
+      "assetId": "LUX-BF-01",
+      "sensorId": "LUX-BF-01-HEAR-H07",
+      "signalCode": "hearth_refractory_estimate",
+      "value": 363.0,
+      "unit": "mm",
+      "quality": "GOOD",
+      "uncertainty": 0.3,
+      "scenarioId": "demo-full",
+      "sourceRef": "event:019eb3fa-8400-7d2b-8fd3-41fae32f7135",
+      "synthetic": true
+    },
+    {
+      "eventId": "019eb3fa-8400-7a88-85f2-3a7f76d5e5cc",
+      "eventTs": "2026-06-11T00:00:00.000Z",
+      "site": "NS-DEMO-LUX-01",
+      "assetId": "LUX-BF-01",
+      "sensorId": "LUX-BF-01-HEAR-H08",
+      "signalCode": "hearth_shell_temperature",
+      "value": 119.3,
+      "unit": "Cel",
+      "quality": "GOOD",
+      "uncertainty": 0.22,
+      "scenarioId": "demo-full",
+      "sourceRef": "event:019eb3fa-8400-7a88-85f2-3a7f76d5e5cc",
+      "synthetic": true
+    },
+    {
+      "eventId": "019eb3fa-8400-7a02-8ae9-ae690d8d650e",
+      "eventTs": "2026-06-11T00:00:00.000Z",
+      "site": "NS-DEMO-LUX-01",
+      "assetId": "LUX-BF-01",
+      "sensorId": "LUX-BF-01-HEAR-H07",
+      "signalCode": "hearth_shell_temperature",
+      "value": 152.4,
+      "unit": "Cel",
+      "quality": "GOOD",
+      "uncertainty": 0.22,
+      "scenarioId": "demo-full",
+      "sourceRef": "event:019eb3fa-8400-7a02-8ae9-ae690d8d650e",
+      "synthetic": true
+    }
+  ],
+  "total": 582,
+  "page": 1,
+  "size": 3,
+  "asOf": "2026-07-25T04:54:36.701782Z",
+  "correlationId": "c51aeb44-8089-49f0-a867-f1a3bc4916a1"
+}

@@ -1,0 +1,89 @@
+{
+  "status": "PASS",
+  "generatedAtUtc": "2026-07-25T05:46:42.5158683+00:00",
+  "repositoryRoot": "D:\\work\\20260724 - Novasteel 3",
+  "commit": "unavailable",
+  "suites": [
+    "protected-feeds",
+    "contract",
+    "backend",
+    "frontend",
+    "presentation"
+  ],
+  "strict": false,
+  "restore": false,
+  "checks": [
+    {
+      "name": "verify-protected-feeds",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSeconds": 8.096,
+      "command": "D:\\work\\20260724 - Novasteel 3\\services\\bff-api\\.venv\\Scripts\\python.exe tools/validation/verify_protected_feeds.py --root D:\\work\\20260724 - Novasteel 3 --json D:\\work\\20260724 - Novasteel 3\\artifacts\\validation\\final-targeted\\protected-feeds.json",
+      "log": "D:\\work\\20260724 - Novasteel 3\\artifacts\\validation\\final-targeted\\verify-protected-feeds.log",
+      "reason": ""
+    },
+    {
+      "name": "contract-tests",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSeconds": 3.01,
+      "command": "D:\\work\\20260724 - Novasteel 3\\services\\bff-api\\.venv\\Scripts\\python.exe -m pytest tests/contract services/bff-api/tests/test_contracts.py -q",
+      "log": "D:\\work\\20260724 - Novasteel 3\\artifacts\\validation\\final-targeted\\contract-tests.log",
+      "reason": ""
+    },
+    {
+      "name": "backend-and-integration-tests",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSeconds": 4.782,
+      "command": "D:\\work\\20260724 - Novasteel 3\\services\\bff-api\\.venv\\Scripts\\python.exe -m pytest services/bff-api/tests tests/backend tests/integration tests/e2e -q",
+      "log": "D:\\work\\20260724 - Novasteel 3\\artifacts\\validation\\final-targeted\\backend-and-integration-tests.log",
+      "reason": ""
+    },
+    {
+      "name": "frontend-lint",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSeconds": 1.831,
+      "command": "C:\\Program Files\\nodejs\\npm.cmd run lint:frontend",
+      "log": "D:\\work\\20260724 - Novasteel 3\\artifacts\\validation\\final-targeted\\frontend-lint.log",
+      "reason": ""
+    },
+    {
+      "name": "frontend-tests",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSeconds": 12.612,
+      "command": "C:\\Program Files\\nodejs\\npm.cmd run test:frontend",
+      "log": "D:\\work\\20260724 - Novasteel 3\\artifacts\\validation\\final-targeted\\frontend-tests.log",
+      "reason": ""
+    },
+    {
+      "name": "frontend-build",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSeconds": 4.523,
+      "command": "C:\\Program Files\\nodejs\\npm.cmd run build:analytics",
+      "log": "D:\\work\\20260724 - Novasteel 3\\artifacts\\validation\\final-targeted\\frontend-build.log",
+      "reason": ""
+    },
+    {
+      "name": "npm-vulnerability-audit",
+      "status": "SKIPPED",
+      "exitCode": null,
+      "durationSeconds": 0,
+      "command": "",
+      "log": "",
+      "reason": "A non-public HTTPS NPM_CONFIG_REGISTRY is required to audit dependencies."
+    },
+    {
+      "name": "presentation-package-validator",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSeconds": 0.418,
+      "command": "D:\\work\\20260724 - Novasteel 3\\services\\bff-api\\.venv\\Scripts\\python.exe tools/validation/validate_pptx.py --presentation docs/presentation/NovaSteel-Oral-Defense.pptx --json D:\\work\\20260724 - Novasteel 3\\artifacts\\validation\\final-targeted\\presentation.json",
+      "log": "D:\\work\\20260724 - Novasteel 3\\artifacts\\validation\\final-targeted\\presentation-package-validator.log",
+      "reason": ""
+    }
+  ]
+}

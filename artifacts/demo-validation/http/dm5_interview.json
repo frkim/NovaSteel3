@@ -1,0 +1,10 @@
+{
+  "data": {
+    "sessionId": "IV-00003",
+    "consentState": "GRANTED",
+    "draftProcedureId": "PROC-IV-00003",
+    "auditRef": "29d02ced-5147-48c0-9b5c-29a00f3f686a"
+  },
+  "asOf": "2026-07-25T05:38:09.411721Z",
+  "correlationId": "c69a53b7-fe87-43be-90fe-b657e70c598d"
+}

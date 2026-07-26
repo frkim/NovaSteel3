@@ -1,0 +1,11 @@
+{
+  "data": {
+    "status": "SIMULATED",
+    "state": "Running",
+    "operationId": "cap-local-00001",
+    "capacityId": "cap-novasteel-demo-sc",
+    "auditRef": "74b94af6-8be8-42f1-b976-443cdb8bfd4a"
+  },
+  "asOf": "2026-07-25T05:38:09.450426Z",
+  "correlationId": "7266e40f-0c64-40e1-a351-7a37a35e4882"
+}

@@ -1,0 +1,40 @@
+  slide  1: SLIDE 01
+  slide  2: SLIDE 02
+  slide  3: SLIDE 03
+  slide  4: SLIDE 04
+  slide  5: SLIDE 05
+  slide  6: SLIDE 06
+  slide  7: SLIDE 07
+  slide  8: SLIDE 08
+  slide  9: SLIDE 09
+  slide 10: SLIDE 10
+  slide 11: SLIDE 11
+  slide 12: SLIDE 12
+  slide 13: SLIDE 13
+  slide 14: SLIDE 14
+  slide 15: SLIDE 15
+  slide 16: SLIDE 16
+  slide 17: SLIDE 17
+  slide 18: SLIDE 18
+  slide 19: SLIDE 19
+  slide 20: SLIDE 20
+  slide 21: BACKUP 1
+  slide 22: BACKUP 2
+  slide 23: BACKUP 3
+  slide 24: BACKUP 4
+  slide 25: BACKUP 5
+  slide 26: BACKUP 6
+
+== demo transition alignment ==
+  [PASS] DM-1 command center / persona / Fabric core
+  [PASS] DM-2 energy dispatch optimization
+  [PASS] DM-3 furnace lining RUL 21-day
+  [PASS] DM-4 quality yield / genealogy
+  [PASS] DM-5 operator knowledge / STT
+  [PASS] DM-6 sustainability / CO2 / ETS
+  [PASS] audit / traceability
+  [PASS] synthetic honesty contract
+  [PASS] demo handoff
+  [PASS] targets 14/22/21/8
+
+RESULT: deck pre-loads every demo transition

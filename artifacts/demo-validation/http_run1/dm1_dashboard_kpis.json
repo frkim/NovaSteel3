@@ -1,0 +1,31 @@
+{
+  "data": {
+    "site": "NS-DEMO-LUX-01",
+    "kpis": {
+      "plannedTonnage": 960.0,
+      "energyConsumptionMwh": 1016.38,
+      "energyDispatchSavingsTargetPct": 10.4,
+      "scope2KgCo2e": 165879.67,
+      "qualityPredictedFirstPassYieldPct": 88.0,
+      "liningRulDaysP50": 21.0,
+      "openAlerts": 1
+    },
+    "freshness": {
+      "energy": {
+        "asOf": "2026-06-10T23:45:00.000Z",
+        "stale": false
+      },
+      "furnace": {
+        "asOf": "2026-06-11T00:00:00.000Z",
+        "stale": false
+      },
+      "quality": {
+        "asOf": "2026-06-10T22:48:00.000Z",
+        "stale": false
+      }
+    },
+    "syntheticBanner": "Synthetic demo data — not for operational control"
+  },
+  "asOf": "2026-07-25T04:54:36.543929Z",
+  "correlationId": "3237b419-398a-454c-b6e5-3c34648cda23"
+}

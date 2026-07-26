@@ -1,0 +1,14 @@
+{
+  "data": {
+    "site": "NS-DEMO-LUX-01",
+    "energyConsumptionMwh": 1016.38,
+    "scope1KgCo2e": 1368000.0,
+    "scope2KgCo2e": 165879.67,
+    "etsAllowancePriceEurTonne": 86.0,
+    "modeledDispatchCo2ReductionPct": 8.7,
+    "synthetic": true,
+    "dataClassification": "SYNTHETIC"
+  },
+  "asOf": "2026-07-25T10:48:16.789305Z",
+  "correlationId": "b3410f70-adfa-434e-a1ce-fe1830e9046d"
+}

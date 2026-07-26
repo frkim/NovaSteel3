@@ -1,0 +1,110 @@
+
+> novasteel@0.1.0 test:frontend
+> npm --workspace @novasteel/analytics-mfe run test
+
+
+> @novasteel/analytics-mfe@0.0.0 test
+> vitest run
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90mD:/work/20260724 - Novasteel 3/apps/analytics-mfe[39m
+
+ [32m✓[39m src/utils/tableProcessing.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 29[2mms[22m[39m
+ [32m✓[39m src/utils/format.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 79[2mms[22m[39m
+ [32m✓[39m src/api/dataClient.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m src/components/primitives/KpiCard.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 379[2mms[22m[39m
+stderr | src/components/AnalyticsDashboard.test.tsx > AnalyticsDashboard (UI smoke) > renders the Command Center with the demo banner and KPI band
+In HTML, <button> cannot be a descendant of <button>.
+This will cause a hydration error.
+
+  ...
+    <StateBoundary state={{status:"ready", ...}} skeletonRows={2}>
+      <KpiBand metrics={[...]}>
+        <Box component="section" aria-label="Key perfor..." sx={{display:"grid", ...}}>
+          <Styled(div) as="section" ref={null} className="MuiBox-root" theme={{...}} aria-label="Key perfor..." ...>
+            <Insertion>
+            <section className="MuiBox-roo..." aria-label="Key perfor...">
+              <KpiCard>
+              <KpiCard>
+              <KpiCard metric={{id:"furnace", ...}}>
+                <Card component="article" aria-label="Furnace li..." sx={{height:"100%"}}>
+                  <MuiCard-root className="MuiCard-root" elevation={undefined} ref={null} ownerState={{...}} ...>
+                    <Insertion>
+                    <Paper className="MuiCard-ro..." elevation={undefined} component="article" aria-label="Furnace li...">
+                      <MuiPaper-root as="article" ownerState={{...}} className="MuiPaper-r..." ref={null} ...>
+                        <Insertion>
+                        <article className="MuiPaper-r..." aria-label="Furnace li..." style={{...}}>
+                          <CardActionArea sx={{height:"100%"}} onClick={function onClick}>
+                            <MuiCardActionArea-root internalNativeButton={true} focusVisibleClassName="" ...>
+                              <Insertion>
+                              <ButtonBase internalNativeButton={true} focusVisibleClassName="" onClick={function onClick} ...>
+                                <MuiButtonBase-root as="button" className="MuiButtonB..." ownerState={{...}} ...>
+                                  <Insertion>
+>                                 <button
+>                                   className="MuiButtonBase-root MuiCardActionArea-root css-1w9t26y-MuiButtonBase-roo..."
+>                                   onBlur={function}
+>                                   onClick={function handleClick}
+>                                   onContextMenu={function}
+>                                   onFocus={function}
+>                                   onKeyDown={function handleKeyDown}
+>                                   onKeyUp={function handleKeyUp}
+>                                   onMouseDown={function}
+>                                   onMouseLeave={function}
+>                                   onMouseUp={function}
+>                                   onDragLeave={function}
+>                                   onTouchEnd={function}
+>                                   onTouchMove={function}
+>                                   onTouchStart={function}
+>                                   tabIndex={0}
+>                                   type="button"
+>                                   disabled={false}
+>                                   ref={function}
+>                                 >
+                                    ...
+                                      <MuiIconButton-root id={undefined} className="MuiIconBut..." centerRipple={true} ...>
+                                        <Insertion>
+                                        <ButtonBase id={undefined} className="MuiIconBut..." centerRipple={true} ...>
+                                          <MuiButtonBase-root as="button" className="MuiButtonB..." ...>
+                                            <Insertion>
+>                                           <button
+>                                             className="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall..."
+>                                             onBlur={function}
+>                                             onClick={function handleClick}
+>                                             onContextMenu={function}
+>                                             onFocus={function}
+>                                             onKeyDown={function handleKeyDown}
+>                                             onKeyUp={function handleKeyUp}
+>                                             onMouseDown={function}
+>                                             onMouseLeave={function}
+>                                             onMouseUp={function}
+>                                             onDragLeave={function}
+>                                             onTouchEnd={function}
+>                                             onTouchMove={function}
+>                                             onTouchStart={function}
+>                                             tabIndex={0}
+>                                             type="button"
+>                                             disabled={null}
+>                                             id={undefined}
+>                                             aria-label="Why?"
+>                                             aria-describedby={undefined}
+>                                             ref={function}
+>                                           >
+              ...
+
+<button> cannot contain a nested <button>.
+See this log for the ancestor stack trace.
+
+ [32m✓[39m src/components/primitives/DataTable.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 2071[2mms[22m[39m
+     [33m[2m✓[22m[39m renders every row and honors the default descending sort [33m 621[2mms[22m[39m
+     [33m[2m✓[22m[39m re-sorts when a column header is clicked [33m 380[2mms[22m[39m
+     [33m[2m✓[22m[39m filters rows through the global search box [33m 532[2mms[22m[39m
+     [33m[2m✓[22m[39m filters rows through a per-column header search [33m 533[2mms[22m[39m
+ [32m✓[39m src/components/AnalyticsDashboard.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 1284[2mms[22m[39m
+     [33m[2m✓[22m[39m renders the Command Center with the demo banner and KPI band [33m 808[2mms[22m[39m
+     [33m[2m✓[22m[39m renders the furnace lining forecast screen with the RUL uncertainty band [33m 471[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m6 passed[39m[22m[90m (6)[39m
+[2m      Tests [22m [1m[32m28 passed[39m[22m[90m (28)[39m
+[2m   Start at [22m 07:01:38
+[2m   Duration [22m 10.62s[2m (transform 1.37s, setup 5.06s, import 14.50s, tests 3.85s, environment 19.94s)[22m
+

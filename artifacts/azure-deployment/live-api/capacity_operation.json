@@ -1,0 +1,12 @@
+{
+  "data": {
+    "operationId": "cap-local-00001",
+    "state": "Running",
+    "armStatus": "SimulatedSucceeded",
+    "startedAt": "2026-07-25T10:48:20.358605Z",
+    "reason": "Demo warm-up (simulated)",
+    "simulated": true
+  },
+  "asOf": "2026-07-25T10:48:20.681216Z",
+  "correlationId": "19313304-5902-4fd1-b8b0-796fdadc711a"
+}

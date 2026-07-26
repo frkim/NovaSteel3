@@ -1,0 +1,45 @@
+{
+  "items": [
+    {
+      "procedureId": "PROC-IV-00002",
+      "title": "Approved cooling-circuit inspection procedure",
+      "status": "APPROVED",
+      "version": 2,
+      "sessionId": "IV-00002",
+      "observation": "When one hearth sector warms but cooling flow appears normal, I watch for persistence across taps and slower cooling after a tap.",
+      "recommendedCheck": "I compare the sector with neighboring shell thermocouples and check cooling-water inlet and outlet temperature and recent flow history, not only the current flow. I validate sensor health and recent calibration, and request a cooling-circuit inspection and ultrasound measurement when the signals agree.",
+      "rationale": "A single reading can mislead; corroboration lowers the chance of reacting to an instrument fault.",
+      "safetyBoundary": "A new operator must never bypass alarms or change furnace or cooling controls without engineering approval.",
+      "citations": [
+        "transcript-segment:seg-002",
+        "transcript-segment:seg-003",
+        "transcript-segment:seg-005",
+        "transcript-segment:seg-006",
+        "transcript-segment:seg-008"
+      ]
+    },
+    {
+      "procedureId": "PROC-IV-00001",
+      "title": "Hearth sector over-temperature verification",
+      "status": "APPROVED",
+      "version": 2,
+      "sessionId": "IV-00001",
+      "observation": "When one hearth sector warms but cooling flow appears normal, I watch for persistence across taps and slower cooling after a tap.",
+      "recommendedCheck": "I compare the sector with neighboring shell thermocouples and check cooling-water inlet and outlet temperature and recent flow history, not only the current flow. I validate sensor health and recent calibration, and request a cooling-circuit inspection and ultrasound measurement when the signals agree.",
+      "rationale": "A single reading can mislead; corroboration lowers the chance of reacting to an instrument fault.",
+      "safetyBoundary": "A new operator must never bypass alarms or change furnace or cooling controls without engineering approval.",
+      "citations": [
+        "transcript-segment:seg-002",
+        "transcript-segment:seg-003",
+        "transcript-segment:seg-005",
+        "transcript-segment:seg-006",
+        "transcript-segment:seg-008"
+      ]
+    }
+  ],
+  "total": 2,
+  "page": 1,
+  "size": 50,
+  "asOf": "2026-07-25T10:48:19.059601Z",
+  "correlationId": "95ea7ca5-2f71-46fb-91a4-7902ad7e779b"
+}

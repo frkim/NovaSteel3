@@ -1,0 +1,36 @@
+{
+  "data": {
+    "site": "NS-DEMO-LUX-01",
+    "syntheticBanner": "Synthetic demo data — not for operational control",
+    "freshness": {
+      "energy": {
+        "asOf": "2026-06-10T23:45:00.000Z",
+        "stale": false
+      },
+      "furnace": {
+        "asOf": "2026-06-11T00:00:00.000Z",
+        "stale": false
+      },
+      "quality": {
+        "asOf": "2026-06-10T22:48:00.000Z",
+        "stale": false
+      }
+    },
+    "kpis": {
+      "plannedTonnage": 960.0,
+      "energyConsumptionMwh": 1016.38,
+      "energyDispatchSavingsTargetPct": 10.4,
+      "scope2KgCo2e": 165879.67,
+      "qualityPredictedFirstPassYieldPct": 88.0,
+      "liningRulDaysP50": 21.0,
+      "openAlerts": 1
+    },
+    "scenario": {
+      "id": "demo-full",
+      "seed": 240725,
+      "source": "simulator-fixture:demo-full"
+    }
+  },
+  "asOf": "2026-07-25T05:38:09.305307Z",
+  "correlationId": "9711e021-1dfb-4d59-be3d-b1159829aba4"
+}

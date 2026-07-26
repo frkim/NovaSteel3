@@ -1,0 +1,12 @@
+{
+  "data": {
+    "capacityId": "novasteelv3fabric",
+    "environment": "demo",
+    "state": "Paused",
+    "sku": "F2",
+    "demoModeSimulated": true,
+    "stale": false
+  },
+  "asOf": "2026-07-25T10:48:20.036149Z",
+  "correlationId": "fc72a35a-48cf-452d-9df7-b8034e927b96"
+}

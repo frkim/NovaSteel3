@@ -1,0 +1,54 @@
+{
+  "items": [
+    {
+      "eventId": "019eb3fa-8400-7ff7-8452-4d9b54b59f0a",
+      "eventTs": "2026-06-11T00:00:00.000Z",
+      "site": "NS-DEMO-LUX-01",
+      "assetId": "LUX-BF-01",
+      "sensorId": "LUX-BF-01-COOL-H08",
+      "signalCode": "cooling_water_outlet_temperature",
+      "value": 32.7,
+      "unit": "Cel",
+      "quality": "GOOD",
+      "uncertainty": 0.06,
+      "scenarioId": "demo-full",
+      "sourceRef": "event:019eb3fa-8400-7ff7-8452-4d9b54b59f0a",
+      "synthetic": true
+    },
+    {
+      "eventId": "019eb3fa-8400-7efe-8900-380fcd002fd4",
+      "eventTs": "2026-06-11T00:00:00.000Z",
+      "site": "NS-DEMO-LUX-01",
+      "assetId": "LUX-BF-01",
+      "sensorId": "LUX-BF-01-COOL-H07",
+      "signalCode": "cooling_water_outlet_temperature",
+      "value": 62.8,
+      "unit": "Cel",
+      "quality": "GOOD",
+      "uncertainty": 0.06,
+      "scenarioId": "demo-full",
+      "sourceRef": "event:019eb3fa-8400-7efe-8900-380fcd002fd4",
+      "synthetic": true
+    },
+    {
+      "eventId": "019eb3fa-8400-7ed7-8cbf-67ff2456d454",
+      "eventTs": "2026-06-11T00:00:00.000Z",
+      "site": "NS-DEMO-LUX-01",
+      "assetId": "LUX-HSM-01",
+      "sensorId": "LUX-HSM-01-F1",
+      "signalCode": "strip_speed",
+      "value": 1.001,
+      "unit": "m/s",
+      "quality": "GOOD",
+      "uncertainty": 0.5,
+      "scenarioId": "demo-full",
+      "sourceRef": "event:019eb3fa-8400-7ed7-8cbf-67ff2456d454",
+      "synthetic": true
+    }
+  ],
+  "total": 2110,
+  "page": 1,
+  "size": 3,
+  "asOf": "2026-07-25T04:54:36.693899Z",
+  "correlationId": "f81357ab-e221-4a44-bfde-1196eb9b77f3"
+}

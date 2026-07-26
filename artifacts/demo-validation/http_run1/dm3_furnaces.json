@@ -1,0 +1,25 @@
+{
+  "items": [
+    {
+      "assetId": "LUX-BF-01",
+      "site": "NS-DEMO-LUX-01",
+      "assetType": "BLAST_FURNACE",
+      "componentId": "HEARTH-SECTOR-07",
+      "health": "HIGH_RISK",
+      "synthetic": true
+    },
+    {
+      "assetId": "LUX-RHF-01",
+      "site": "NS-DEMO-LUX-01",
+      "assetType": "REHEAT_FURNACE",
+      "componentId": "RHF-ZONE-03",
+      "health": "WATCH",
+      "synthetic": true
+    }
+  ],
+  "total": 2,
+  "page": 1,
+  "size": 50,
+  "asOf": "2026-07-25T04:54:36.584809Z",
+  "correlationId": "748e3aba-3a08-46e2-bf85-5b1625904e43"
+}

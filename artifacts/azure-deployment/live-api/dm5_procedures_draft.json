@@ -1,0 +1,27 @@
+{
+  "items": [
+    {
+      "procedureId": "PROC-IV-00003",
+      "title": "Synthetic hearth-sector verification draft",
+      "status": "DRAFT",
+      "version": 1,
+      "sessionId": "IV-00003",
+      "observation": "When one hearth sector warms but cooling flow appears normal, I watch for persistence across taps and slower cooling after a tap.",
+      "recommendedCheck": "I compare the sector with neighboring shell thermocouples and check cooling-water inlet and outlet temperature and recent flow history, not only the current flow. I validate sensor health and recent calibration, and request a cooling-circuit inspection and ultrasound measurement when the signals agree.",
+      "rationale": "A single reading can mislead; corroboration lowers the chance of reacting to an instrument fault.",
+      "safetyBoundary": "A new operator must never bypass alarms or change furnace or cooling controls without engineering approval.",
+      "citations": [
+        "transcript-segment:seg-002",
+        "transcript-segment:seg-003",
+        "transcript-segment:seg-005",
+        "transcript-segment:seg-006",
+        "transcript-segment:seg-008"
+      ]
+    }
+  ],
+  "total": 1,
+  "page": 1,
+  "size": 50,
+  "asOf": "2026-07-25T10:48:18.080320Z",
+  "correlationId": "4d1d77b8-6a0c-454f-a48d-c71e66c7e896"
+}

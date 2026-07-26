@@ -1,0 +1,17 @@
+{
+  "data": {
+    "workOrderId": "WO-DEMO-LUX-1042",
+    "site": "NS-DEMO-LUX-01",
+    "assetId": "LUX-BF-01",
+    "title": "Verify hearth sector 07 lining (synthetic)",
+    "reason": "RUL P50 21 days; corroborated neighbours; ultrasound inspection",
+    "status": "PLANNED_INSPECTION",
+    "synthetic": true,
+    "createdBy": "demo-reliability",
+    "sourceRefs": [
+      "alert:HEARTH-SECTOR-07"
+    ]
+  },
+  "asOf": "2026-07-25T04:54:36.595829Z",
+  "correlationId": "a5ff96d9-2cae-490f-b83f-a4e246cd2d29"
+}

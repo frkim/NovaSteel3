@@ -1,0 +1,46 @@
+{
+  "data": {
+    "assetId": "LUX-BF-01",
+    "componentId": "HEARTH-SECTOR-07",
+    "value": 21.0,
+    "unit": "d",
+    "confidence": {
+      "p10": 16.8,
+      "p50": 21.0,
+      "p90": 27.5
+    },
+    "riskScore": 0.87,
+    "riskLevel": "HIGH",
+    "estimatedMinimumLiningMm": 300.0,
+    "modelVersion": "lining-rul-piml:1.3.0-demo",
+    "scoredAt": "2026-06-11T00:00:00.000Z",
+    "drivers": [
+      {
+        "name": "heat_flux_6h_slope",
+        "contribution": 0.29
+      },
+      {
+        "name": "sector_to_ring_temp_delta",
+        "contribution": 0.24
+      },
+      {
+        "name": "cooling_efficiency_residual",
+        "contribution": 0.18
+      }
+    ],
+    "featureSnapshot": {
+      "liningThicknessMm": 363.0,
+      "coolingDeltaC": 37.4,
+      "coolingFlowM3h": 211.5,
+      "heatFluxKwM2": 3073.0,
+      "waterHeatProxyKw": 919.945,
+      "apparentThermalResistance": 0.3352
+    },
+    "sourceRefs": [
+      "simulator:simulator-fixture:demo-full"
+    ],
+    "auditRef": "5badce33-c95e-46b5-a5d8-a5ae487fdd50"
+  },
+  "asOf": "2026-07-25T05:38:09.352798Z",
+  "correlationId": "7b6289d9-8a70-48a1-9396-4151f2a16ac1"
+}

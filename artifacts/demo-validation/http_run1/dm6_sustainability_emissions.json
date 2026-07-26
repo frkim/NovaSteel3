@@ -1,0 +1,49 @@
+{
+  "items": [
+    {
+      "site": "NS-DEMO-LUX-01",
+      "eventTs": "2026-06-10T23:45:00.000Z",
+      "scope2KgCo2e": 1602.0,
+      "consumptionMwh": 10.0,
+      "carbonIntensityKgCo2eMwh": 160.2,
+      "sourceRef": "event:019eb3ec-c860-71b1-a2d6-6fa4f66a1352"
+    },
+    {
+      "site": "NS-DEMO-LUX-01",
+      "eventTs": "2026-06-10T23:30:00.000Z",
+      "scope2KgCo2e": 926.0,
+      "consumptionMwh": 10.0,
+      "carbonIntensityKgCo2eMwh": 92.6,
+      "sourceRef": "event:019eb3df-0cc0-7468-b7f4-78b564e9d445"
+    },
+    {
+      "site": "NS-DEMO-LUX-01",
+      "eventTs": "2026-06-10T23:15:00.000Z",
+      "scope2KgCo2e": 1388.0,
+      "consumptionMwh": 10.0,
+      "carbonIntensityKgCo2eMwh": 138.8,
+      "sourceRef": "event:019eb3d1-5120-7fc1-a31a-572ed85f35fe"
+    },
+    {
+      "site": "NS-DEMO-LUX-01",
+      "eventTs": "2026-06-10T23:00:00.000Z",
+      "scope2KgCo2e": 1073.0,
+      "consumptionMwh": 10.0,
+      "carbonIntensityKgCo2eMwh": 107.3,
+      "sourceRef": "event:019eb3c3-9580-7d79-8446-9927d1749173"
+    },
+    {
+      "site": "NS-DEMO-LUX-01",
+      "eventTs": "2026-06-10T22:45:00.000Z",
+      "scope2KgCo2e": 1222.0,
+      "consumptionMwh": 10.0,
+      "carbonIntensityKgCo2eMwh": 122.2,
+      "sourceRef": "event:019eb3b5-d9e0-7912-9d12-8bc3b34fe91f"
+    }
+  ],
+  "total": 96,
+  "page": 1,
+  "size": 5,
+  "asOf": "2026-07-25T04:54:36.629793Z",
+  "correlationId": "eb184c51-3f44-4a6b-b661-eb752642c301"
+}

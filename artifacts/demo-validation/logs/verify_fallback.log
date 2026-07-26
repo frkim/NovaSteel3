@@ -1,0 +1,14 @@
+  [PASS] Level 1 local deterministic fixture loads � simulator-fixture:demo-full
+  [PASS] Level 1 serves RUL P50 21.0 evidence � 21.0
+  [PASS] Level 1 furnace inventory present
+  [PASS] Level 2 cached snapshot directory loads � simulator-fixture:genA
+  [PASS] Level 2 telemetry rows served � 2110 rows
+  [PASS] Level 3 built-in fallback engages when packs are gone � built-in-fallback
+  [PASS] Level 3 fallback still serves deterministic RUL 21.0 + tonnage 960
+  [PASS] Built-in fallback datasets are non-empty
+  [PASS] Integrity gate rejects a tampered fixture � checksum mismatch raised
+  [PASS] Scoring worker runs fully offline (no network) � p50=21.0
+  [PASS] Optimizer runs fully offline (no network)
+  [PASS] No non-loopback network connection was attempted during the demo path � blocked=[]
+
+==== fallback ladder + no-network: 12/12 checks passed ====

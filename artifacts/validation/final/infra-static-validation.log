@@ -1,0 +1,20 @@
+== Step 1: bicep build (static validation of every module) ==
+  building infra\bicep\main.bicep
+  building infra\bicep\modules\budget.bicep
+  building infra\bicep\modules\containerapps.bicep
+  building infra\bicep\modules\eventhubs.bicep
+  building infra\bicep\modules\fabric-capacity.bicep
+  building infra\bicep\modules\foundry-speech.bicep
+  building infra\bicep\modules\identity.bicep
+  building infra\bicep\modules\keyvault.bicep
+  building infra\bicep\modules\logicapp-capacity-lifecycle.bicep
+  building infra\bicep\modules\monitoring.bicep
+  building infra\bicep\modules\network.bicep
+  building infra\bicep\modules\policy-assignments.bicep
+  building infra\bicep\modules\roles.bicep
+  building infra\bicep\modules\storage.bicep
+  OK: 14 .bicep file(s) build cleanly.
+== Step 2: bicep build-params (dev.bicepparam) ==
+WARNING: A new Bicep release is available: v0.45.15. Upgrade now by running "az bicep upgrade".
+  OK
+Skipping ARM 'what-if'-class validation (-SkipArmValidate). Static validation passed.

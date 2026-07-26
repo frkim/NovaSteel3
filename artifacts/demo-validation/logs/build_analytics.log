@@ -1,0 +1,17 @@
+
+> novasteel@0.1.0 build:analytics
+> npm --workspace @novasteel/analytics-mfe run build
+
+
+> @novasteel/analytics-mfe@0.0.0 build
+> tsc -b && vite build
+
+[36mvite v8.1.5 [32mbuilding client environment for production...[36m[39m
+[2K
+transforming...✓ 1559 modules transformed.
+rendering chunks...
+computing gzip size...
+../portal-shell/wwwroot/analytics-mfe/analytics-mfe.css      2.05 kB │ gzip:   0.87 kB
+../portal-shell/wwwroot/analytics-mfe/analytics-mfe.js   1,685.03 kB │ gzip: 426.06 kB
+
+[32m✓ built in 889ms[39m

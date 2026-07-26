@@ -1,0 +1,9 @@
+contract validator: PASS (2110 records checked)
+physics validator: PASS
+scenario assertion validator: PASS
+checksum validator: PASS
+contracts/events schema validator [telemetry]: PASS (2110 records checked against contracts/events/telemetry.v1.schema.json)
+contracts/events schema validator [energy_interval]: PASS (96 records checked against contracts/events/energy-interval.v1.schema.json)
+contracts/events schema validator [quality_measurement]: PASS (20 records checked against contracts/events/quality-measurement.v1.schema.json)
+contracts/events schema validator [model_inference]: PASS (3 records checked against contracts/events/model-inference.v1.schema.json)
+contracts/events schema validator [alarm_event]: PASS (1 records checked against contracts/events/alarm.v1.schema.json)

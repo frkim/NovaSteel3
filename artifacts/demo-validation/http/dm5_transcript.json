@@ -1,0 +1,75 @@
+{
+  "data": {
+    "status": "COMPLETED",
+    "language": "en",
+    "classification": "Highly Confidential",
+    "segments": [
+      {
+        "segmentId": "seg-001",
+        "speaker": "interviewer",
+        "start": 0.0,
+        "end": 6.5,
+        "text": "What do you check when one hearth sector warms but cooling flow appears normal?",
+        "confidence": 0.98
+      },
+      {
+        "segmentId": "seg-002",
+        "speaker": "operator",
+        "start": 7.0,
+        "end": 18.4,
+        "text": "When one hearth sector warms but cooling flow appears normal, I watch for persistence across taps and slower cooling after a tap.",
+        "confidence": 0.94
+      },
+      {
+        "segmentId": "seg-003",
+        "speaker": "operator",
+        "start": 18.8,
+        "end": 33.2,
+        "text": "I compare the sector with neighboring shell thermocouples and check cooling-water inlet and outlet temperature and recent flow history, not only the current flow.",
+        "confidence": 0.93
+      },
+      {
+        "segmentId": "seg-004",
+        "speaker": "interviewer",
+        "start": 33.6,
+        "end": 39.0,
+        "text": "How do you tell a failing thermocouple from real lining degradation?",
+        "confidence": 0.97
+      },
+      {
+        "segmentId": "seg-005",
+        "speaker": "operator",
+        "start": 39.4,
+        "end": 52.0,
+        "text": "A single reading can mislead; corroboration lowers the chance of reacting to an instrument fault.",
+        "confidence": 0.92
+      },
+      {
+        "segmentId": "seg-006",
+        "speaker": "operator",
+        "start": 52.4,
+        "end": 66.1,
+        "text": "I validate sensor health and recent calibration, and request a cooling-circuit inspection and ultrasound measurement when the signals agree.",
+        "confidence": 0.91
+      },
+      {
+        "segmentId": "seg-007",
+        "speaker": "interviewer",
+        "start": 66.5,
+        "end": 72.0,
+        "text": "What should a new operator never change without engineering approval?",
+        "confidence": 0.97
+      },
+      {
+        "segmentId": "seg-008",
+        "speaker": "operator",
+        "start": 72.4,
+        "end": 86.9,
+        "text": "A new operator must never bypass alarms or change furnace or cooling controls without engineering approval.",
+        "confidence": 0.95
+      }
+    ]
+  },
+  "asOf": "2026-07-25T05:38:09.415769Z",
+  "correlationId": "d28c9173-d1da-4d5e-bea7-58747e6115cf"
+}

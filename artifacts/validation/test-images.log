@@ -1,0 +1,19 @@
+Starting BFF container (novasteelv3/bff:local) ...
+BFF assertions:
+  [PASS] /health/live 200 + status ok
+  [PASS] /health/ready 200 + status ok
+  [PASS] /v1/meta demoMode=true
+  [PASS] /v1/meta environment=demo
+  [PASS] CORS allows configured portal origin
+  [PASS] CORS rejects unlisted origin
+  [PASS] Deterministic demo fixture (demo-full) loaded
+Starting portal container (novasteelv3/portal:local) ...
+Portal assertions:
+  [PASS] / 200 (probe path) serves SPA host
+  [PASS] /healthz 200
+  [PASS] SPA fallback for deep route
+  [PASS] React MFE bundle packaged + served
+  [PASS] Runtime BFF URL injected into appsettings.json
+  [PASS] .wasm served as application/wasm
+
+Smoke tests: 13 passed, 0 failed.

@@ -1,0 +1,23 @@
+{
+  "data": {
+    "procedureId": "PROC-IV-00001",
+    "title": "Hearth sector over-temperature verification",
+    "status": "APPROVED",
+    "version": 2,
+    "sessionId": "IV-00001",
+    "observation": "When one hearth sector warms but cooling flow appears normal, I watch for persistence across taps and slower cooling after a tap.",
+    "recommendedCheck": "I compare the sector with neighboring shell thermocouples and check cooling-water inlet and outlet temperature and recent flow history, not only the current flow. I validate sensor health and recent calibration, and request a cooling-circuit inspection and ultrasound measurement when the signals agree.",
+    "rationale": "A single reading can mislead; corroboration lowers the chance of reacting to an instrument fault.",
+    "safetyBoundary": "A new operator must never bypass alarms or change furnace or cooling controls without engineering approval.",
+    "citations": [
+      "transcript-segment:seg-002",
+      "transcript-segment:seg-003",
+      "transcript-segment:seg-005",
+      "transcript-segment:seg-006",
+      "transcript-segment:seg-008"
+    ],
+    "auditRef": "06725c93-fd0c-43f9-8704-9dba73dbd83a"
+  },
+  "asOf": "2026-07-25T04:54:36.652143Z",
+  "correlationId": "3dd3f2fd-a071-49db-867b-06d7ca9f5535"
+}

@@ -1,0 +1,9 @@
+
+> novasteel@0.1.0 lint:frontend
+> npm --workspace @novasteel/analytics-mfe run lint
+
+
+> @novasteel/analytics-mfe@0.0.0 lint
+> oxlint
+
+src/test/renderWithProviders.tsx:43:10: warning react(only-export-components): Fast refresh only works when a file only exports components. Move your component(s) to a separate file.

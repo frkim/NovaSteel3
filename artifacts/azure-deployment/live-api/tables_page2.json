@@ -1,0 +1,39 @@
+{
+  "items": [
+    {
+      "eventId": "019eb3fa-8400-7ed7-8cbf-67ff2456d454",
+      "eventTs": "2026-06-11T00:00:00.000Z",
+      "site": "NS-DEMO-LUX-01",
+      "assetId": "LUX-HSM-01",
+      "sensorId": "LUX-HSM-01-F1",
+      "signalCode": "strip_speed",
+      "value": 1.001,
+      "unit": "m/s",
+      "quality": "GOOD",
+      "uncertainty": 0.5,
+      "scenarioId": "demo-full",
+      "sourceRef": "event:019eb3fa-8400-7ed7-8cbf-67ff2456d454",
+      "synthetic": true
+    },
+    {
+      "eventId": "019eb3fa-8400-7ec9-b6fa-20c36957ceb1",
+      "eventTs": "2026-06-11T00:00:00.000Z",
+      "site": "NS-DEMO-LUX-01",
+      "assetId": "LUX-HSM-01",
+      "sensorId": "LUX-HSM-01-F7",
+      "signalCode": "stand_motor_current",
+      "value": 3329.251,
+      "unit": "A",
+      "quality": "GOOD",
+      "uncertainty": 0.5,
+      "scenarioId": "demo-full",
+      "sourceRef": "event:019eb3fa-8400-7ec9-b6fa-20c36957ceb1",
+      "synthetic": true
+    }
+  ],
+  "total": 2110,
+  "page": 2,
+  "size": 2,
+  "asOf": "2026-07-25T10:48:23.292677Z",
+  "correlationId": "6ba32f36-7db1-4c65-9415-7e6c3a4697d8"
+}

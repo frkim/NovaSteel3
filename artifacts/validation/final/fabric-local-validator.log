@@ -1,0 +1,1637 @@
+{
+  "status": "PASS",
+  "checkedAt": "2026-07-25T05:44:11.8774629+00:00",
+  "fabricRoot": "D:\\work\\20260724 - Novasteel 3\\fabric",
+  "checkCount": 325,
+  "errorCount": 0,
+  "warningCount": 0,
+  "errors": [],
+  "warnings": [],
+  "checks": [
+    {
+      "name": "json-parse",
+      "status": "PASS",
+      "detail": "27 of 27 JSON files parsed."
+    },
+    {
+      "name": "json-schema:catalog\\fabric-items.json",
+      "status": "PASS",
+      "detail": "Schema: catalog\\fabric-items.schema.json"
+    },
+    {
+      "name": "json-schema:lakehouse\\schema\\medallion-catalog.json",
+      "status": "PASS",
+      "detail": "Schema: lakehouse\\schema\\medallion-catalog.schema.json"
+    },
+    {
+      "name": "json-schema:lakehouse\\schema\\data-quality-rules.json",
+      "status": "PASS",
+      "detail": "Schema: lakehouse\\schema\\data-quality-rules.schema.json"
+    },
+    {
+      "name": "json-schema:capacity\\precondition-evidence.example.json",
+      "status": "PASS",
+      "detail": "Schema: capacity\\precondition-evidence.schema.json"
+    },
+    {
+      "name": "json-schema:deployment-parameters\\dev.example.json",
+      "status": "PASS",
+      "detail": "Schema: deployment-parameters\\environment.schema.json"
+    },
+    {
+      "name": "json-schema:deployment-parameters\\test.example.json",
+      "status": "PASS",
+      "detail": "Schema: deployment-parameters\\environment.schema.json"
+    },
+    {
+      "name": "json-schema:deployment-parameters\\demo.example.json",
+      "status": "PASS",
+      "detail": "Schema: deployment-parameters\\environment.schema.json"
+    },
+    {
+      "name": "json-schema:deployment-parameters\\prod.example.json",
+      "status": "PASS",
+      "detail": "Schema: deployment-parameters\\environment.schema.json"
+    },
+    {
+      "name": "platform-logical-ids",
+      "status": "PASS",
+      "detail": "12 unique logical IDs."
+    },
+    {
+      "name": "catalog-version",
+      "status": "PASS",
+      "detail": "schemaVersion=1"
+    },
+    {
+      "name": "catalog-unique-item-keys",
+      "status": "PASS",
+      "detail": "13 item keys."
+    },
+    {
+      "name": "dependency:kqlOperations:eventhouseOperations",
+      "status": "PASS",
+      "detail": "Dependency must reference a catalog item key."
+    },
+    {
+      "name": "source:kqlOperations",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\items\\kql-ns-operations.KQLDatabase"
+    },
+    {
+      "name": "part:kqlOperations:DatabaseProperties.json",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\items\\kql-ns-operations.KQLDatabase\\DatabaseProperties.json"
+    },
+    {
+      "name": "part:kqlOperations:DatabaseSchema.kql",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\items\\kql-ns-operations.KQLDatabase\\DatabaseSchema.kql"
+    },
+    {
+      "name": "part:kqlOperations:.platform",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\items\\kql-ns-operations.KQLDatabase\\.platform"
+    },
+    {
+      "name": "dependency:notebookInitialize:landingLakehouse",
+      "status": "PASS",
+      "detail": "Dependency must reference a catalog item key."
+    },
+    {
+      "name": "dependency:notebookInitialize:coreLakehouse",
+      "status": "PASS",
+      "detail": "Dependency must reference a catalog item key."
+    },
+    {
+      "name": "source:notebookInitialize",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\notebooks\\ns-initialize-lakehouses.Notebook"
+    },
+    {
+      "name": "part:notebookInitialize:notebook-content.py",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\notebooks\\ns-initialize-lakehouses.Notebook\\notebook-content.py"
+    },
+    {
+      "name": "part:notebookInitialize:.platform",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\notebooks\\ns-initialize-lakehouses.Notebook\\.platform"
+    },
+    {
+      "name": "dependency:notebookBronzeToSilver:notebookInitialize",
+      "status": "PASS",
+      "detail": "Dependency must reference a catalog item key."
+    },
+    {
+      "name": "source:notebookBronzeToSilver",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\notebooks\\ns-bronze-to-silver.Notebook"
+    },
+    {
+      "name": "part:notebookBronzeToSilver:notebook-content.py",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\notebooks\\ns-bronze-to-silver.Notebook\\notebook-content.py"
+    },
+    {
+      "name": "part:notebookBronzeToSilver:.platform",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\notebooks\\ns-bronze-to-silver.Notebook\\.platform"
+    },
+    {
+      "name": "dependency:notebookSilverToGold:notebookBronzeToSilver",
+      "status": "PASS",
+      "detail": "Dependency must reference a catalog item key."
+    },
+    {
+      "name": "source:notebookSilverToGold",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\notebooks\\ns-silver-to-gold.Notebook"
+    },
+    {
+      "name": "part:notebookSilverToGold:notebook-content.py",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\notebooks\\ns-silver-to-gold.Notebook\\notebook-content.py"
+    },
+    {
+      "name": "part:notebookSilverToGold:.platform",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\notebooks\\ns-silver-to-gold.Notebook\\.platform"
+    },
+    {
+      "name": "dependency:notebookDemoScoring:coreLakehouse",
+      "status": "PASS",
+      "detail": "Dependency must reference a catalog item key."
+    },
+    {
+      "name": "source:notebookDemoScoring",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\notebooks\\ns-deterministic-demo-scoring.Notebook"
+    },
+    {
+      "name": "part:notebookDemoScoring:notebook-content.py",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\notebooks\\ns-deterministic-demo-scoring.Notebook\\notebook-content.py"
+    },
+    {
+      "name": "part:notebookDemoScoring:.platform",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\notebooks\\ns-deterministic-demo-scoring.Notebook\\.platform"
+    },
+    {
+      "name": "dependency:notebookDataQuality:notebookSilverToGold",
+      "status": "PASS",
+      "detail": "Dependency must reference a catalog item key."
+    },
+    {
+      "name": "source:notebookDataQuality",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\notebooks\\ns-validate-data-quality.Notebook"
+    },
+    {
+      "name": "part:notebookDataQuality:notebook-content.py",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\notebooks\\ns-validate-data-quality.Notebook\\notebook-content.py"
+    },
+    {
+      "name": "part:notebookDataQuality:.platform",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\notebooks\\ns-validate-data-quality.Notebook\\.platform"
+    },
+    {
+      "name": "dependency:pipelineMedallion:notebookInitialize",
+      "status": "PASS",
+      "detail": "Dependency must reference a catalog item key."
+    },
+    {
+      "name": "dependency:pipelineMedallion:notebookBronzeToSilver",
+      "status": "PASS",
+      "detail": "Dependency must reference a catalog item key."
+    },
+    {
+      "name": "dependency:pipelineMedallion:notebookSilverToGold",
+      "status": "PASS",
+      "detail": "Dependency must reference a catalog item key."
+    },
+    {
+      "name": "dependency:pipelineMedallion:notebookDataQuality",
+      "status": "PASS",
+      "detail": "Dependency must reference a catalog item key."
+    },
+    {
+      "name": "source:pipelineMedallion",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\pipelines\\pl-ns-medallion.DataPipeline"
+    },
+    {
+      "name": "part:pipelineMedallion:pipeline-content.json",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\pipelines\\pl-ns-medallion.DataPipeline\\pipeline-content.json"
+    },
+    {
+      "name": "part:pipelineMedallion:.platform",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\pipelines\\pl-ns-medallion.DataPipeline\\.platform"
+    },
+    {
+      "name": "dependency:pipelineDemoScoring:notebookDemoScoring",
+      "status": "PASS",
+      "detail": "Dependency must reference a catalog item key."
+    },
+    {
+      "name": "dependency:pipelineDemoScoring:notebookDataQuality",
+      "status": "PASS",
+      "detail": "Dependency must reference a catalog item key."
+    },
+    {
+      "name": "source:pipelineDemoScoring",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\pipelines\\pl-ns-demo-scoring.DataPipeline"
+    },
+    {
+      "name": "part:pipelineDemoScoring:pipeline-content.json",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\pipelines\\pl-ns-demo-scoring.DataPipeline\\pipeline-content.json"
+    },
+    {
+      "name": "part:pipelineDemoScoring:.platform",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\pipelines\\pl-ns-demo-scoring.DataPipeline\\.platform"
+    },
+    {
+      "name": "dependency:eventstreamTelemetry:kqlOperations",
+      "status": "PASS",
+      "detail": "Dependency must reference a catalog item key."
+    },
+    {
+      "name": "dependency:eventstreamTelemetry:landingLakehouse",
+      "status": "PASS",
+      "detail": "Dependency must reference a catalog item key."
+    },
+    {
+      "name": "source:eventstreamTelemetry",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\items\\es-ns-telemetry-v1.Eventstream"
+    },
+    {
+      "name": "part:eventstreamTelemetry:eventstream.json",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\items\\es-ns-telemetry-v1.Eventstream\\eventstream.json"
+    },
+    {
+      "name": "part:eventstreamTelemetry:eventstreamProperties.json",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\items\\es-ns-telemetry-v1.Eventstream\\eventstreamProperties.json"
+    },
+    {
+      "name": "part:eventstreamTelemetry:.platform",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\items\\es-ns-telemetry-v1.Eventstream\\.platform"
+    },
+    {
+      "name": "dependency:semanticOperations:coreLakehouse",
+      "status": "PASS",
+      "detail": "Dependency must reference a catalog item key."
+    },
+    {
+      "name": "source:semanticOperations",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\semantic-model\\sm-ns-operations.SemanticModel"
+    },
+    {
+      "name": "part:semanticOperations:definition.pbism",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\semantic-model\\sm-ns-operations.SemanticModel\\definition.pbism"
+    },
+    {
+      "name": "part:semanticOperations:definition/database.tmdl",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\semantic-model\\sm-ns-operations.SemanticModel\\definition\\database.tmdl"
+    },
+    {
+      "name": "part:semanticOperations:definition/model.tmdl",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\semantic-model\\sm-ns-operations.SemanticModel\\definition\\model.tmdl"
+    },
+    {
+      "name": "part:semanticOperations:definition/relationships.tmdl",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\semantic-model\\sm-ns-operations.SemanticModel\\definition\\relationships.tmdl"
+    },
+    {
+      "name": "part:semanticOperations:definition/tables/dim_calendar.tmdl",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\semantic-model\\sm-ns-operations.SemanticModel\\definition\\tables\\dim_calendar.tmdl"
+    },
+    {
+      "name": "part:semanticOperations:definition/tables/dim_plant.tmdl",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\semantic-model\\sm-ns-operations.SemanticModel\\definition\\tables\\dim_plant.tmdl"
+    },
+    {
+      "name": "part:semanticOperations:definition/tables/dim_kpi_target.tmdl",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\semantic-model\\sm-ns-operations.SemanticModel\\definition\\tables\\dim_kpi_target.tmdl"
+    },
+    {
+      "name": "part:semanticOperations:definition/tables/fact_energy_daily.tmdl",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\semantic-model\\sm-ns-operations.SemanticModel\\definition\\tables\\fact_energy_daily.tmdl"
+    },
+    {
+      "name": "part:semanticOperations:definition/tables/fact_emissions_daily.tmdl",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\semantic-model\\sm-ns-operations.SemanticModel\\definition\\tables\\fact_emissions_daily.tmdl"
+    },
+    {
+      "name": "part:semanticOperations:definition/tables/fact_production_shift.tmdl",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\semantic-model\\sm-ns-operations.SemanticModel\\definition\\tables\\fact_production_shift.tmdl"
+    },
+    {
+      "name": "part:semanticOperations:definition/tables/fact_quality_yield.tmdl",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\semantic-model\\sm-ns-operations.SemanticModel\\definition\\tables\\fact_quality_yield.tmdl"
+    },
+    {
+      "name": "part:semanticOperations:definition/tables/fact_furnace_rul.tmdl",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\semantic-model\\sm-ns-operations.SemanticModel\\definition\\tables\\fact_furnace_rul.tmdl"
+    },
+    {
+      "name": "part:semanticOperations:definition/tables/fact_dispatch_recommendation.tmdl",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\semantic-model\\sm-ns-operations.SemanticModel\\definition\\tables\\fact_dispatch_recommendation.tmdl"
+    },
+    {
+      "name": "part:semanticOperations:definition/tables/fact_ai_decision_audit.tmdl",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\semantic-model\\sm-ns-operations.SemanticModel\\definition\\tables\\fact_ai_decision_audit.tmdl"
+    },
+    {
+      "name": "part:semanticOperations:definition/tables/fact_model_evaluation.tmdl",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\semantic-model\\sm-ns-operations.SemanticModel\\definition\\tables\\fact_model_evaluation.tmdl"
+    },
+    {
+      "name": "part:semanticOperations:definition/tables/fact_customer_claim.tmdl",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\semantic-model\\sm-ns-operations.SemanticModel\\definition\\tables\\fact_customer_claim.tmdl"
+    },
+    {
+      "name": "part:semanticOperations:definition/tables/fact_knowledge_procedure.tmdl",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\semantic-model\\sm-ns-operations.SemanticModel\\definition\\tables\\fact_knowledge_procedure.tmdl"
+    },
+    {
+      "name": "part:semanticOperations:definition/tables/fact_knowledge_usage.tmdl",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\semantic-model\\sm-ns-operations.SemanticModel\\definition\\tables\\fact_knowledge_usage.tmdl"
+    },
+    {
+      "name": "part:semanticOperations:definition/tables/fact_platform_usage.tmdl",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\semantic-model\\sm-ns-operations.SemanticModel\\definition\\tables\\fact_platform_usage.tmdl"
+    },
+    {
+      "name": "binding-gate:semanticOperations",
+      "status": "PASS",
+      "detail": "bindingGate=semanticModelBindingValidated"
+    },
+    {
+      "name": "manual-asset:rtiDashboard",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\rti\\dashboard-spec.json"
+    },
+    {
+      "name": "manual-evidence:rtiDashboard",
+      "status": "PASS",
+      "detail": "3 evidence requirements."
+    },
+    {
+      "name": "manual-asset:activator",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\rti\\activator-rules.template.json"
+    },
+    {
+      "name": "manual-evidence:activator",
+      "status": "PASS",
+      "detail": "3 evidence requirements."
+    },
+    {
+      "name": "manual-asset:powerBiReports",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\powerbi\\report-catalog.json"
+    },
+    {
+      "name": "manual-evidence:powerBiReports",
+      "status": "PASS",
+      "detail": "3 evidence requirements."
+    },
+    {
+      "name": "manual-asset:oneLakeSecurity",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\catalog\\security-role-matrix.json"
+    },
+    {
+      "name": "manual-evidence:oneLakeSecurity",
+      "status": "PASS",
+      "detail": "3 evidence requirements."
+    },
+    {
+      "name": "definition-token-contract",
+      "status": "PASS",
+      "detail": "All definition tokens are catalogued."
+    },
+    {
+      "name": "kql-table:telemetry_hot",
+      "status": "PASS",
+      "detail": "Required hot table create-merge command."
+    },
+    {
+      "name": "kql-table:alarm_hot",
+      "status": "PASS",
+      "detail": "Required hot table create-merge command."
+    },
+    {
+      "name": "kql-table:gateway_health_hot",
+      "status": "PASS",
+      "detail": "Required hot table create-merge command."
+    },
+    {
+      "name": "kql-table:model_inference_hot",
+      "status": "PASS",
+      "detail": "Required hot table create-merge command."
+    },
+    {
+      "name": "kql-table:ingest_quarantine_hot",
+      "status": "PASS",
+      "detail": "Required hot table create-merge command."
+    },
+    {
+      "name": "kql-function:fn_latest_telemetry",
+      "status": "PASS",
+      "detail": "Required reusable KQL function."
+    },
+    {
+      "name": "kql-function:fn_active_alarms",
+      "status": "PASS",
+      "detail": "Required reusable KQL function."
+    },
+    {
+      "name": "kql-function:fn_gateway_status",
+      "status": "PASS",
+      "detail": "Required reusable KQL function."
+    },
+    {
+      "name": "kql-function:fn_latest_model_scores",
+      "status": "PASS",
+      "detail": "Required reusable KQL function."
+    },
+    {
+      "name": "kql-function:fn_data_freshness",
+      "status": "PASS",
+      "detail": "Required reusable KQL function."
+    },
+    {
+      "name": "kql-function:fn_quarantine_rate",
+      "status": "PASS",
+      "detail": "Required reusable KQL function."
+    },
+    {
+      "name": "kql-view:mv_telemetry_latest_by_signal",
+      "status": "PASS",
+      "detail": "Required KQL materialized view."
+    },
+    {
+      "name": "kql-view:mv_telemetry_1m",
+      "status": "PASS",
+      "detail": "Required KQL materialized view."
+    },
+    {
+      "name": "kql-view:mv_alarm_current",
+      "status": "PASS",
+      "detail": "Required KQL materialized view."
+    },
+    {
+      "name": "kql-view:mv_gateway_latest",
+      "status": "PASS",
+      "detail": "Required KQL materialized view."
+    },
+    {
+      "name": "kql-view:mv_model_latest",
+      "status": "PASS",
+      "detail": "Required KQL materialized view."
+    },
+    {
+      "name": "kql-view:mv_quarantine_15m",
+      "status": "PASS",
+      "detail": "Required KQL materialized view."
+    },
+    {
+      "name": "kql-no-destructive-management",
+      "status": "PASS",
+      "detail": "0 destructive commands."
+    },
+    {
+      "name": "eventstream-custom-endpoint",
+      "status": "PASS",
+      "detail": "1 Custom Endpoint source."
+    },
+    {
+      "name": "eventstream-destination:landing-bronze-envelope",
+      "status": "PASS",
+      "detail": "Required dual-path destination."
+    },
+    {
+      "name": "eventstream-destination:kql-telemetry-hot",
+      "status": "PASS",
+      "detail": "Required dual-path destination."
+    },
+    {
+      "name": "eventstream-destination:kql-alarm-hot",
+      "status": "PASS",
+      "detail": "Required dual-path destination."
+    },
+    {
+      "name": "eventstream-destination:kql-gateway-health-hot",
+      "status": "PASS",
+      "detail": "Required dual-path destination."
+    },
+    {
+      "name": "eventstream-destination:kql-model-inference-hot",
+      "status": "PASS",
+      "detail": "Required dual-path destination."
+    },
+    {
+      "name": "eventstream-destination:kql-ingest-quarantine-hot",
+      "status": "PASS",
+      "detail": "Required dual-path destination."
+    },
+    {
+      "name": "eventstream-no-credential",
+      "status": "PASS",
+      "detail": "Eventstream definition contains identifiers only."
+    },
+    {
+      "name": "medallion-zones",
+      "status": "PASS",
+      "detail": "bronze, silver, gold, operations"
+    },
+    {
+      "name": "lakehouse-table:bronze_event_envelope",
+      "status": "PASS",
+      "detail": "Required architecture table contract."
+    },
+    {
+      "name": "lakehouse-table:bronze_batch_mes",
+      "status": "PASS",
+      "detail": "Required architecture table contract."
+    },
+    {
+      "name": "lakehouse-table:bronze_batch_cmms",
+      "status": "PASS",
+      "detail": "Required architecture table contract."
+    },
+    {
+      "name": "lakehouse-table:bronze_batch_market",
+      "status": "PASS",
+      "detail": "Required architecture table contract."
+    },
+    {
+      "name": "lakehouse-table:quarantine_event",
+      "status": "PASS",
+      "detail": "Required architecture table contract."
+    },
+    {
+      "name": "lakehouse-table:quarantine_batch",
+      "status": "PASS",
+      "detail": "Required architecture table contract."
+    },
+    {
+      "name": "lakehouse-table:fact_telemetry",
+      "status": "PASS",
+      "detail": "Required architecture table contract."
+    },
+    {
+      "name": "lakehouse-table:fact_energy_interval",
+      "status": "PASS",
+      "detail": "Required architecture table contract."
+    },
+    {
+      "name": "lakehouse-table:fact_quality_measurement",
+      "status": "PASS",
+      "detail": "Required architecture table contract."
+    },
+    {
+      "name": "lakehouse-table:fact_maintenance_event",
+      "status": "PASS",
+      "detail": "Required architecture table contract."
+    },
+    {
+      "name": "lakehouse-table:fact_model_inference",
+      "status": "PASS",
+      "detail": "Required architecture table contract."
+    },
+    {
+      "name": "lakehouse-table:fact_ai_decision",
+      "status": "PASS",
+      "detail": "Required architecture table contract."
+    },
+    {
+      "name": "lakehouse-table:dim_plant",
+      "status": "PASS",
+      "detail": "Required architecture table contract."
+    },
+    {
+      "name": "lakehouse-table:dim_asset",
+      "status": "PASS",
+      "detail": "Required architecture table contract."
+    },
+    {
+      "name": "lakehouse-table:dim_sensor",
+      "status": "PASS",
+      "detail": "Required architecture table contract."
+    },
+    {
+      "name": "lakehouse-table:dim_grade",
+      "status": "PASS",
+      "detail": "Required architecture table contract."
+    },
+    {
+      "name": "lakehouse-table:dim_calendar",
+      "status": "PASS",
+      "detail": "Required architecture table contract."
+    },
+    {
+      "name": "lakehouse-table:fact_energy_daily",
+      "status": "PASS",
+      "detail": "Required architecture table contract."
+    },
+    {
+      "name": "lakehouse-table:fact_emissions_daily",
+      "status": "PASS",
+      "detail": "Required architecture table contract."
+    },
+    {
+      "name": "lakehouse-table:fact_production_shift",
+      "status": "PASS",
+      "detail": "Required architecture table contract."
+    },
+    {
+      "name": "lakehouse-table:fact_quality_yield",
+      "status": "PASS",
+      "detail": "Required architecture table contract."
+    },
+    {
+      "name": "lakehouse-table:fact_furnace_rul",
+      "status": "PASS",
+      "detail": "Required architecture table contract."
+    },
+    {
+      "name": "lakehouse-table:fact_dispatch_recommendation",
+      "status": "PASS",
+      "detail": "Required architecture table contract."
+    },
+    {
+      "name": "lakehouse-table:fact_knowledge_procedure",
+      "status": "PASS",
+      "detail": "Required architecture table contract."
+    },
+    {
+      "name": "lakehouse-table:fact_ai_decision_audit",
+      "status": "PASS",
+      "detail": "Required architecture table contract."
+    },
+    {
+      "name": "lakehouse-keys:bronze_event_envelope",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:bronze_event_envelope",
+      "status": "PASS",
+      "detail": "Partitions: event_date, plant_id"
+    },
+    {
+      "name": "lakehouse-keys:bronze_batch_mes",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:bronze_batch_mes",
+      "status": "PASS",
+      "detail": "Partitions: event_date, plant_id"
+    },
+    {
+      "name": "lakehouse-keys:bronze_batch_cmms",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:bronze_batch_cmms",
+      "status": "PASS",
+      "detail": "Partitions: event_date, plant_id"
+    },
+    {
+      "name": "lakehouse-keys:bronze_batch_market",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:bronze_batch_market",
+      "status": "PASS",
+      "detail": "Partitions: event_date, market_zone"
+    },
+    {
+      "name": "lakehouse-keys:quarantine_event",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:quarantine_event",
+      "status": "PASS",
+      "detail": "Partitions: quarantine_date, plant_id"
+    },
+    {
+      "name": "lakehouse-keys:quarantine_batch",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:quarantine_batch",
+      "status": "PASS",
+      "detail": "Partitions: quarantine_date, source_system"
+    },
+    {
+      "name": "lakehouse-keys:dim_plant",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:dim_plant",
+      "status": "PASS",
+      "detail": "Partitions: "
+    },
+    {
+      "name": "lakehouse-keys:dim_asset",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:dim_asset",
+      "status": "PASS",
+      "detail": "Partitions: plant_id"
+    },
+    {
+      "name": "lakehouse-keys:dim_sensor",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:dim_sensor",
+      "status": "PASS",
+      "detail": "Partitions: plant_id"
+    },
+    {
+      "name": "lakehouse-keys:dim_grade",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:dim_grade",
+      "status": "PASS",
+      "detail": "Partitions: "
+    },
+    {
+      "name": "lakehouse-keys:dim_calendar",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:dim_calendar",
+      "status": "PASS",
+      "detail": "Partitions: "
+    },
+    {
+      "name": "lakehouse-keys:fact_telemetry",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:fact_telemetry",
+      "status": "PASS",
+      "detail": "Partitions: event_date, plant_id"
+    },
+    {
+      "name": "lakehouse-keys:fact_energy_interval",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:fact_energy_interval",
+      "status": "PASS",
+      "detail": "Partitions: event_date, plant_id"
+    },
+    {
+      "name": "lakehouse-keys:fact_quality_measurement",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:fact_quality_measurement",
+      "status": "PASS",
+      "detail": "Partitions: event_date, plant_id"
+    },
+    {
+      "name": "lakehouse-keys:fact_maintenance_event",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:fact_maintenance_event",
+      "status": "PASS",
+      "detail": "Partitions: event_date, plant_id"
+    },
+    {
+      "name": "lakehouse-keys:fact_alarm_event",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:fact_alarm_event",
+      "status": "PASS",
+      "detail": "Partitions: event_date, plant_id"
+    },
+    {
+      "name": "lakehouse-keys:fact_model_inference",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:fact_model_inference",
+      "status": "PASS",
+      "detail": "Partitions: event_date, plant_id"
+    },
+    {
+      "name": "lakehouse-keys:fact_ai_decision",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:fact_ai_decision",
+      "status": "PASS",
+      "detail": "Partitions: event_date, domain"
+    },
+    {
+      "name": "lakehouse-keys:fact_energy_daily",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:fact_energy_daily",
+      "status": "PASS",
+      "detail": "Partitions: date_key, plant_id"
+    },
+    {
+      "name": "lakehouse-keys:fact_emissions_daily",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:fact_emissions_daily",
+      "status": "PASS",
+      "detail": "Partitions: date_key, plant_id"
+    },
+    {
+      "name": "lakehouse-keys:fact_production_shift",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:fact_production_shift",
+      "status": "PASS",
+      "detail": "Partitions: shift_date, plant_id"
+    },
+    {
+      "name": "lakehouse-keys:fact_quality_yield",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:fact_quality_yield",
+      "status": "PASS",
+      "detail": "Partitions: date_key, plant_id"
+    },
+    {
+      "name": "lakehouse-keys:fact_furnace_rul",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:fact_furnace_rul",
+      "status": "PASS",
+      "detail": "Partitions: scored_date, plant_id"
+    },
+    {
+      "name": "lakehouse-keys:fact_dispatch_recommendation",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:fact_dispatch_recommendation",
+      "status": "PASS",
+      "detail": "Partitions: recommendation_date, plant_id"
+    },
+    {
+      "name": "lakehouse-keys:fact_knowledge_procedure",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:fact_knowledge_procedure",
+      "status": "PASS",
+      "detail": "Partitions: published_date"
+    },
+    {
+      "name": "lakehouse-keys:fact_ai_decision_audit",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:fact_ai_decision_audit",
+      "status": "PASS",
+      "detail": "Partitions: recorded_date, domain"
+    },
+    {
+      "name": "lakehouse-keys:dim_kpi_target",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:dim_kpi_target",
+      "status": "PASS",
+      "detail": "Partitions: "
+    },
+    {
+      "name": "lakehouse-keys:fact_model_evaluation",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:fact_model_evaluation",
+      "status": "PASS",
+      "detail": "Partitions: evaluation_date, domain"
+    },
+    {
+      "name": "lakehouse-keys:fact_customer_claim",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:fact_customer_claim",
+      "status": "PASS",
+      "detail": "Partitions: claim_date, plant_id"
+    },
+    {
+      "name": "lakehouse-keys:fact_knowledge_usage",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:fact_knowledge_usage",
+      "status": "PASS",
+      "detail": "Partitions: query_date"
+    },
+    {
+      "name": "lakehouse-keys:fact_platform_usage",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:fact_platform_usage",
+      "status": "PASS",
+      "detail": "Partitions: week_start"
+    },
+    {
+      "name": "lakehouse-keys:dq_run_result",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:dq_run_result",
+      "status": "PASS",
+      "detail": "Partitions: run_date"
+    },
+    {
+      "name": "lakehouse-keys:pipeline_run_reconciliation",
+      "status": "PASS",
+      "detail": "Primary key columns exist."
+    },
+    {
+      "name": "lakehouse-no-sensor-partition:pipeline_run_reconciliation",
+      "status": "PASS",
+      "detail": "Partitions: run_date"
+    },
+    {
+      "name": "ddl:bronze_event_envelope",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:bronze_batch_mes",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:bronze_batch_cmms",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:bronze_batch_market",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:quarantine_event",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:quarantine_batch",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:dim_plant",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:dim_asset",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:dim_sensor",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:dim_grade",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:dim_calendar",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:fact_telemetry",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:fact_energy_interval",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:fact_quality_measurement",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:fact_maintenance_event",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:fact_alarm_event",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:fact_model_inference",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:fact_ai_decision",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:fact_energy_daily",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:fact_emissions_daily",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:fact_production_shift",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:fact_quality_yield",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:fact_furnace_rul",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:fact_dispatch_recommendation",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:fact_knowledge_procedure",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:fact_ai_decision_audit",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:dim_kpi_target",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:fact_model_evaluation",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:fact_customer_claim",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:fact_knowledge_usage",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:fact_platform_usage",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:dq_run_result",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "ddl:pipeline_run_reconciliation",
+      "status": "PASS",
+      "detail": "Spark SQL CREATE TABLE contract."
+    },
+    {
+      "name": "dq-quarantine-reasons",
+      "status": "PASS",
+      "detail": "SCHEMA_INVALID, UNKNOWN_ASSET, LATE_BEYOND_POLICY, DUPLICATE_CONFLICT, INVALID_UNIT"
+    },
+    {
+      "name": "dq-reconciliation-zero",
+      "status": "PASS",
+      "detail": "requiredUnexplainedRows=0"
+    },
+    {
+      "name": "dq-reason:DQ-ENV-001",
+      "status": "PASS",
+      "detail": "SCHEMA_INVALID"
+    },
+    {
+      "name": "dq-reason:DQ-ENV-002",
+      "status": "PASS",
+      "detail": "SCHEMA_INVALID"
+    },
+    {
+      "name": "dq-reason:DQ-ENV-003",
+      "status": "PASS",
+      "detail": "SCHEMA_INVALID"
+    },
+    {
+      "name": "dq-reason:DQ-ENV-004",
+      "status": "PASS",
+      "detail": "SCHEMA_INVALID"
+    },
+    {
+      "name": "dq-reason:DQ-DUP-001",
+      "status": "PASS",
+      "detail": "DUPLICATE_CONFLICT"
+    },
+    {
+      "name": "dq-reason:DQ-REF-001",
+      "status": "PASS",
+      "detail": "UNKNOWN_ASSET"
+    },
+    {
+      "name": "dq-reason:DQ-UNIT-001",
+      "status": "PASS",
+      "detail": "INVALID_UNIT"
+    },
+    {
+      "name": "dq-reason:DQ-NUM-001",
+      "status": "PASS",
+      "detail": "SCHEMA_INVALID"
+    },
+    {
+      "name": "dq-reason:DQ-ENUM-001",
+      "status": "PASS",
+      "detail": "SCHEMA_INVALID"
+    },
+    {
+      "name": "dq-reason:DQ-LATE-001",
+      "status": "PASS",
+      "detail": "LATE_BEYOND_POLICY"
+    },
+    {
+      "name": "notebook-count",
+      "status": "PASS",
+      "detail": "5 notebook source files."
+    },
+    {
+      "name": "notebook-marker:ns-bronze-to-silver.Notebook",
+      "status": "PASS",
+      "detail": "FabricGitSource marker."
+    },
+    {
+      "name": "notebook-no-package-install:ns-bronze-to-silver.Notebook",
+      "status": "PASS",
+      "detail": "No runtime package installation."
+    },
+    {
+      "name": "python-ast:ns-bronze-to-silver.Notebook",
+      "status": "PASS",
+      "detail": "Python AST parse."
+    },
+    {
+      "name": "notebook-marker:ns-deterministic-demo-scoring.Notebook",
+      "status": "PASS",
+      "detail": "FabricGitSource marker."
+    },
+    {
+      "name": "notebook-no-package-install:ns-deterministic-demo-scoring.Notebook",
+      "status": "PASS",
+      "detail": "No runtime package installation."
+    },
+    {
+      "name": "python-ast:ns-deterministic-demo-scoring.Notebook",
+      "status": "PASS",
+      "detail": "Python AST parse."
+    },
+    {
+      "name": "notebook-marker:ns-initialize-lakehouses.Notebook",
+      "status": "PASS",
+      "detail": "FabricGitSource marker."
+    },
+    {
+      "name": "notebook-no-package-install:ns-initialize-lakehouses.Notebook",
+      "status": "PASS",
+      "detail": "No runtime package installation."
+    },
+    {
+      "name": "python-ast:ns-initialize-lakehouses.Notebook",
+      "status": "PASS",
+      "detail": "Python AST parse."
+    },
+    {
+      "name": "notebook-marker:ns-silver-to-gold.Notebook",
+      "status": "PASS",
+      "detail": "FabricGitSource marker."
+    },
+    {
+      "name": "notebook-no-package-install:ns-silver-to-gold.Notebook",
+      "status": "PASS",
+      "detail": "No runtime package installation."
+    },
+    {
+      "name": "python-ast:ns-silver-to-gold.Notebook",
+      "status": "PASS",
+      "detail": "Python AST parse."
+    },
+    {
+      "name": "notebook-marker:ns-validate-data-quality.Notebook",
+      "status": "PASS",
+      "detail": "FabricGitSource marker."
+    },
+    {
+      "name": "notebook-no-package-install:ns-validate-data-quality.Notebook",
+      "status": "PASS",
+      "detail": "No runtime package installation."
+    },
+    {
+      "name": "python-ast:ns-validate-data-quality.Notebook",
+      "status": "PASS",
+      "detail": "Python AST parse."
+    },
+    {
+      "name": "demo-score-cue:240726",
+      "status": "PASS",
+      "detail": "Deterministic documented cue."
+    },
+    {
+      "name": "demo-score-cue:21.0",
+      "status": "PASS",
+      "detail": "Deterministic documented cue."
+    },
+    {
+      "name": "demo-score-cue:16.8",
+      "status": "PASS",
+      "detail": "Deterministic documented cue."
+    },
+    {
+      "name": "demo-score-cue:27.5",
+      "status": "PASS",
+      "detail": "Deterministic documented cue."
+    },
+    {
+      "name": "demo-score-cue:0.87",
+      "status": "PASS",
+      "detail": "Deterministic documented cue."
+    },
+    {
+      "name": "demo-score-cue:HEARTH-SECTOR-07",
+      "status": "PASS",
+      "detail": "Deterministic documented cue."
+    },
+    {
+      "name": "demo-score-prod-deny",
+      "status": "PASS",
+      "detail": "Synthetic scorer production hard deny."
+    },
+    {
+      "name": "pipeline-activities:pl-ns-demo-scoring.DataPipeline",
+      "status": "PASS",
+      "detail": "2 activities."
+    },
+    {
+      "name": "pipeline-dependency:Validate_Demo_Cues",
+      "status": "PASS",
+      "detail": "Deterministic_Demo_Scoring"
+    },
+    {
+      "name": "pipeline-activities:pl-ns-medallion.DataPipeline",
+      "status": "PASS",
+      "detail": "4 activities."
+    },
+    {
+      "name": "pipeline-dependency:Bronze_to_Silver",
+      "status": "PASS",
+      "detail": "Initialize_Lakehouses"
+    },
+    {
+      "name": "pipeline-dependency:Silver_to_Gold",
+      "status": "PASS",
+      "detail": "Bronze_to_Silver"
+    },
+    {
+      "name": "pipeline-dependency:Data_Quality_Gate",
+      "status": "PASS",
+      "detail": "Silver_to_Gold"
+    },
+    {
+      "name": "semantic-kpi:KPI-ENE-01",
+      "status": "PASS",
+      "detail": "Documented KPI measure mapping."
+    },
+    {
+      "name": "semantic-kpi:KPI-ENE-02",
+      "status": "PASS",
+      "detail": "Documented KPI measure mapping."
+    },
+    {
+      "name": "semantic-kpi:KPI-ENE-03",
+      "status": "PASS",
+      "detail": "Documented KPI measure mapping."
+    },
+    {
+      "name": "semantic-kpi:KPI-CO2-01",
+      "status": "PASS",
+      "detail": "Documented KPI measure mapping."
+    },
+    {
+      "name": "semantic-kpi:KPI-CO2-02",
+      "status": "PASS",
+      "detail": "Documented KPI measure mapping."
+    },
+    {
+      "name": "semantic-kpi:KPI-FUR-01",
+      "status": "PASS",
+      "detail": "Documented KPI measure mapping."
+    },
+    {
+      "name": "semantic-kpi:KPI-FUR-02",
+      "status": "PASS",
+      "detail": "Documented KPI measure mapping."
+    },
+    {
+      "name": "semantic-kpi:KPI-FUR-03",
+      "status": "PASS",
+      "detail": "Documented KPI measure mapping."
+    },
+    {
+      "name": "semantic-kpi:KPI-QUA-01",
+      "status": "PASS",
+      "detail": "Documented KPI measure mapping."
+    },
+    {
+      "name": "semantic-kpi:KPI-QUA-02",
+      "status": "PASS",
+      "detail": "Documented KPI measure mapping."
+    },
+    {
+      "name": "semantic-kpi:KPI-KNW-01",
+      "status": "PASS",
+      "detail": "Documented KPI measure mapping."
+    },
+    {
+      "name": "semantic-kpi:KPI-KNW-02",
+      "status": "PASS",
+      "detail": "Documented KPI measure mapping."
+    },
+    {
+      "name": "semantic-kpi:KPI-TRUST-01",
+      "status": "PASS",
+      "detail": "Documented KPI measure mapping."
+    },
+    {
+      "name": "semantic-kpi:KPI-ADO-01",
+      "status": "PASS",
+      "detail": "Documented KPI measure mapping."
+    },
+    {
+      "name": "semantic-kpi:KPI-GOV-01",
+      "status": "PASS",
+      "detail": "Documented KPI measure mapping."
+    },
+    {
+      "name": "dax:KPI-ENE-01 SEC GJ per t",
+      "status": "PASS",
+      "detail": "Required DAX measure definition."
+    },
+    {
+      "name": "dax:KPI-CO2-01 Specific CO2 t per t",
+      "status": "PASS",
+      "detail": "Required DAX measure definition."
+    },
+    {
+      "name": "dax:KPI-FUR-01 Lining Lead Time Days",
+      "status": "PASS",
+      "detail": "Required DAX measure definition."
+    },
+    {
+      "name": "dax:KPI-QUA-01 High-Grade Yield Rate",
+      "status": "PASS",
+      "detail": "Required DAX measure definition."
+    },
+    {
+      "name": "dax:KPI-GOV-01 Audit Completeness",
+      "status": "PASS",
+      "detail": "Required DAX measure definition."
+    },
+    {
+      "name": "dax:OEE",
+      "status": "PASS",
+      "detail": "Required DAX measure definition."
+    },
+    {
+      "name": "environment-file:dev.example.json",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\deployment-parameters\\dev.example.json"
+    },
+    {
+      "name": "environment-no-secrets:dev.example.json",
+      "status": "PASS",
+      "detail": "No secret-bearing parameter keys."
+    },
+    {
+      "name": "environment-file:test.example.json",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\deployment-parameters\\test.example.json"
+    },
+    {
+      "name": "environment-no-secrets:test.example.json",
+      "status": "PASS",
+      "detail": "No secret-bearing parameter keys."
+    },
+    {
+      "name": "environment-file:demo.example.json",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\deployment-parameters\\demo.example.json"
+    },
+    {
+      "name": "environment-no-secrets:demo.example.json",
+      "status": "PASS",
+      "detail": "No secret-bearing parameter keys."
+    },
+    {
+      "name": "environment-file:prod.example.json",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\deployment-parameters\\prod.example.json"
+    },
+    {
+      "name": "environment-no-secrets:prod.example.json",
+      "status": "PASS",
+      "detail": "No secret-bearing parameter keys."
+    },
+    {
+      "name": "environment-file:environment.template.json",
+      "status": "PASS",
+      "detail": "D:\\work\\20260724 - Novasteel 3\\fabric\\deployment-parameters\\environment.template.json"
+    },
+    {
+      "name": "environment-no-secrets:environment.template.json",
+      "status": "PASS",
+      "detail": "No secret-bearing parameter keys."
+    },
+    {
+      "name": "demo-parameter-boundary",
+      "status": "PASS",
+      "detail": "Demo is synthetic-only and all workspace names use NS-DEMO-."
+    },
+    {
+      "name": "prod-lifecycle-hard-deny",
+      "status": "PASS",
+      "detail": "automationEnabled=False"
+    },
+    {
+      "name": "powershell-parse:Deploy-FabricAssets.ps1",
+      "status": "PASS",
+      "detail": "PowerShell parser clean."
+    },
+    {
+      "name": "powershell-parse:Deploy-FabricDefinitionsWithCli.ps1",
+      "status": "PASS",
+      "detail": "PowerShell parser clean."
+    },
+    {
+      "name": "powershell-parse:FabricDeployment.psm1",
+      "status": "PASS",
+      "detail": "PowerShell parser clean."
+    },
+    {
+      "name": "powershell-parse:Invoke-FabricCapacityLifecycle.ps1",
+      "status": "PASS",
+      "detail": "PowerShell parser clean."
+    },
+    {
+      "name": "powershell-parse:Test-FabricAssetsLocal.ps1",
+      "status": "PASS",
+      "detail": "PowerShell parser clean."
+    },
+    {
+      "name": "powershell-parse:Test-FabricDeployment.ps1",
+      "status": "PASS",
+      "detail": "PowerShell parser clean."
+    },
+    {
+      "name": "bicep-boundary",
+      "status": "PASS",
+      "detail": "README explicitly limits Bicep to the capacity/Azure control plane."
+    },
+    {
+      "name": "capacity-contract:2023-11-01",
+      "status": "PASS",
+      "detail": "Required lifecycle safeguard."
+    },
+    {
+      "name": "capacity-contract:environment -eq 'prod'",
+      "status": "PASS",
+      "detail": "Required lifecycle safeguard."
+    },
+    {
+      "name": "capacity-contract:SKIPPED_BUSY",
+      "status": "PASS",
+      "detail": "Required lifecycle safeguard."
+    },
+    {
+      "name": "capacity-contract:relayDrainedOrCheckpointed",
+      "status": "PASS",
+      "detail": "Required lifecycle safeguard."
+    },
+    {
+      "name": "capacity-contract:Azure-AsyncOperation",
+      "status": "PASS",
+      "detail": "Required lifecycle safeguard."
+    },
+    {
+      "name": "capacity-contract:Retry-After",
+      "status": "PASS",
+      "detail": "Required lifecycle safeguard."
+    }
+  ]
+}

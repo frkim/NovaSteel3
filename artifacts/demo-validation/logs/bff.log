@@ -1,0 +1,59 @@
+INFO:     Started server process [53812]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8080 (Press CTRL+C to quit)
+INFO:     127.0.0.1:24052 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24053 - "GET /v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24053 - "GET /v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24053 - "GET /v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24053 - "GET /v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24053 - "GET /v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24053 - "GET /v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24053 - "GET /v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24053 - "GET /v1/command-center/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24053 - "GET /v1/dashboard/kpis HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24053 - "GET /v1/telemetry?size=5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24053 - "GET /v1/furnaces/LUX-BF-01/telemetry?size=5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24053 - "GET /v1/realtime/alerts%3Apoll HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24053 - "GET /v1/realtime/alerts HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "GET /v1/furnaces HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "GET /v1/furnaces/LUX-BF-01/lining-forecast HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "POST /v1/workorders HTTP/1.1" 201 Created
+INFO:     127.0.0.1:24054 - "GET /v1/workorders/WO-DEMO-LUX-1042 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "GET /v1/energy/intervals?size=5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "POST /v1/energy/schedules%3Asimulate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "GET /v1/energy/recommendations HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "POST /v1/energy/recommendations/REC-EB7A0DEDE29F%3Aapprove HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "GET /v1/quality/batches?size=50 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "GET /v1/quality/batches/COIL-LUX-260725-019/genealogy HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "POST /v1/quality/what-if HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "GET /v1/sustainability/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "GET /v1/sustainability/emissions?size=5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "POST /v1/knowledge/interviews HTTP/1.1" 201 Created
+INFO:     127.0.0.1:24054 - "GET /v1/knowledge/interviews/IV-00003/transcript HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "GET /v1/knowledge/procedures?status=DRAFT HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "GET /v1/knowledge/procedures?status=IN_REVIEW HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "POST /v1/knowledge/procedures/PROC-IV-00001%3Aapprove HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "GET /v1/knowledge/search?q=cooling HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "GET /v1/audit/decisions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "GET /v1/audit/decisions?domain=energy HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "GET /v1/platform/capacity HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "POST /v1/platform/capacity/start-requests HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "GET /v1/platform/capacity/operations/cap-local-00001 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "POST /v1/platform/capacity/pause-requests HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "GET /v1/telemetry?quality=GOOD&size=3 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "GET /v1/telemetry?signalCode=hearth&size=3 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "GET /v1/telemetry?value=100..150&size=5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "GET /v1/telemetry?q=hearth&size=3 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "GET /v1/telemetry?sort=value:asc&size=10 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "GET /v1/telemetry?page=1&size=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "GET /v1/telemetry?page=2&size=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "GET /v1/telemetry?from=2026-06-10T00:00:00Z&to=2026-06-10T06:00:00Z&size=5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "GET /v1/telemetry?sort=nope:asc HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:24054 - "GET /v1/telemetry?size=500 HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:24054 - "GET /v1/search?q=LUX HTTP/1.1" 200 OK
+INFO:     127.0.0.1:24054 - "POST /v1/energy/schedules%3Asimulate HTTP/1.1" 403 Forbidden
+INFO:     127.0.0.1:24054 - "GET /v1/me HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:24054 - "GET /v1/me HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:38515 - "GET /v1/quality/batches/COIL-LUX-260725-017/genealogy HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38516 - "POST /v1/quality/what-if HTTP/1.1" 200 OK
