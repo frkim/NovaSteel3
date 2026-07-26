@@ -1,0 +1,1146 @@
+openapi: 3.1.1
+info:
+  title: NovaSteel BFF API
+  version: 1.0.0
+  description: |
+    Versioned contract for the NovaSteel browser-facing BFF. All domain routes
+    are mediated by the BFF; no browser route reaches Fabric, Foundry, ARM, or
+    OT systems directly.
+servers:
+  - url: https://{host}
+    variables:
+      host:
+        default: api.example.invalid
+security:
+  - EntraBearer: []
+tags:
+  - name: Health
+  - name: Bootstrap
+  - name: CommandCenter
+  - name: Realtime
+  - name: Furnace
+  - name: Energy
+  - name: Quality
+  - name: Knowledge
+  - name: Audit
+  - name: Platform
+  - name: WorkOrders
+  - name: Telemetry
+  - name: Sustainability
+paths:
+  /health/live:
+    get:
+      tags: [Health]
+      operationId: getLiveness
+      security: []
+      responses:
+        '200':
+          description: Process is alive.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+  /health/ready:
+    get:
+      tags: [Health]
+      operationId: getReadiness
+      security: []
+      responses:
+        '200':
+          description: Process is configured to serve traffic.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+        '503':
+          $ref: '#/components/responses/UpstreamUnavailable'
+  /v1/meta:
+    get:
+      tags: [Bootstrap]
+      operationId: getApiMetadata
+      security: []
+      responses:
+        '200':
+          description: Non-sensitive API capability metadata.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetaEnvelope'
+  /v1/me:
+    get:
+      tags: [Bootstrap]
+      operationId: getCurrentUser
+      responses:
+        '200':
+          description: Authenticated user and UI capability projection.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/command-center/summary:
+    get:
+      tags: [CommandCenter]
+      operationId: getCommandCenterSummary
+      parameters:
+        - $ref: '#/components/parameters/Site'
+      responses:
+        '200':
+          description: Plant-scoped command center summary.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/realtime/alerts:
+    get:
+      tags: [Realtime]
+      operationId: streamAlerts
+      responses:
+        '200':
+          description: Server-Sent Events alert stream. Heartbeats occur every 15 seconds.
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  '/v1/realtime/alerts:poll':
+    get:
+      tags: [Realtime]
+      operationId: pollAlerts
+      parameters:
+        - name: since
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Poll fallback for alert events.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertPollEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/furnaces/{assetId}/lining-forecast:
+    get:
+      tags: [Furnace]
+      operationId: getLiningForecast
+      parameters:
+        - $ref: '#/components/parameters/AssetId'
+      responses:
+        '200':
+          description: Lining forecast with confidence and explanation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LiningForecastEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  '/v1/energy/schedules:simulate':
+    post:
+      tags: [Energy]
+      operationId: simulateEnergySchedule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnergySimulationRequest'
+      responses:
+        '200':
+          description: Feasible proposal only; never an operational schedule write.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  '/v1/energy/recommendations/{recommendationId}:approve':
+    post:
+      tags: [Energy]
+      operationId: approveEnergyRecommendation
+      parameters:
+        - $ref: '#/components/parameters/RecommendationId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprovalRequest'
+      responses:
+        '200':
+          description: Phase 0/1 simulated or shadow approval.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  '/v1/energy/recommendations/{recommendationId}:reject':
+    post:
+      tags: [Energy]
+      operationId: rejectEnergyRecommendation
+      parameters:
+        - $ref: '#/components/parameters/RecommendationId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RejectionRequest'
+      responses:
+        '200':
+          description: Recorded rejection.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/quality/batches:
+    get:
+      tags: [Quality]
+      operationId: listQualityBatches
+      parameters:
+        - $ref: '#/components/parameters/Site'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Query'
+      responses:
+        '200':
+          description: Paginated quality batches.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/quality/batches/{batchId}/genealogy:
+    get:
+      tags: [Quality]
+      operationId: getBatchGenealogy
+      parameters:
+        - $ref: '#/components/parameters/BatchId'
+      responses:
+        '200':
+          description: Full batch genealogy chain.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  '/v1/quality/what-if':
+    post:
+      tags: [Quality]
+      operationId: simulateQualityWhatIf
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QualityWhatIfRequest'
+      responses:
+        '200':
+          description: Simulation result; it never writes a recipe or setpoint.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/knowledge/interviews:
+    post:
+      tags: [Knowledge]
+      operationId: createKnowledgeInterview
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KnowledgeInterviewRequest'
+      responses:
+        '201':
+          description: Consent-bound knowledge interview session.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/knowledge/interviews/{sessionId}/transcript:
+    get:
+      tags: [Knowledge]
+      operationId: getKnowledgeTranscript
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: Approved transcript result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEnvelope'
+        '202':
+          description: Transcription is still processing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/knowledge/procedures:
+    get:
+      tags: [Knowledge]
+      operationId: listKnowledgeProcedures
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Query'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [DRAFT, IN_REVIEW, APPROVED, REJECTED]
+      responses:
+        '200':
+          description: Paginated procedure collection.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  '/v1/knowledge/procedures/{procedureId}:approve':
+    post:
+      tags: [Knowledge]
+      operationId: approveKnowledgeProcedure
+      parameters:
+        - $ref: '#/components/parameters/ProcedureId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpectedVersionRequest'
+      responses:
+        '200':
+          description: Published immutable procedure version.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/knowledge/search:
+    get:
+      tags: [Knowledge]
+      operationId: searchApprovedKnowledge
+      parameters:
+        - $ref: '#/components/parameters/Query'
+      responses:
+        '200':
+          description: Search results restricted to approved procedures.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/audit/decisions:
+    get:
+      tags: [Audit]
+      operationId: listAuditDecisions
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Query'
+        - name: domain
+          in: query
+          schema:
+            type: string
+            enum: [energy, quality, furnace, knowledge, capacity]
+        - name: entityId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Append-only audit evidence.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/platform/capacity:
+    get:
+      tags: [Platform]
+      operationId: getCapacity
+      responses:
+        '200':
+          description: Cached, authoritative non-production capacity state.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapacityEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/platform/capacity/start-requests:
+    post:
+      tags: [Platform]
+      operationId: requestCapacityStart
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CapacityRequest'
+      responses:
+        '200':
+          description: Simulated demo transition.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEnvelope'
+        '202':
+          description: ARM transition accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/platform/capacity/pause-requests:
+    post:
+      tags: [Platform]
+      operationId: requestCapacityPause
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CapacityRequest'
+      responses:
+        '200':
+          description: Simulated demo transition.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEnvelope'
+        '202':
+          description: ARM transition accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/platform/capacity/operations/{operationId}:
+    get:
+      tags: [Platform]
+      operationId: getCapacityOperation
+      parameters:
+        - $ref: '#/components/parameters/OperationId'
+      responses:
+        '200':
+          description: Capacity transition status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/workorders:
+    post:
+      tags: [WorkOrders]
+      operationId: createSyntheticWorkOrder
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkOrderRequest'
+      responses:
+        '201':
+          description: Synthetic work-order workflow record.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/workorders/{workOrderId}:
+    get:
+      tags: [WorkOrders]
+      operationId: getWorkOrder
+      parameters:
+        - $ref: '#/components/parameters/WorkOrderId'
+      responses:
+        '200':
+          description: Work-order workflow record.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/search:
+    get:
+      tags: [Bootstrap]
+      operationId: searchAll
+      parameters:
+        - $ref: '#/components/parameters/Query'
+        - name: types
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: Grouped global search results.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/dashboard/kpis:
+    get:
+      tags: [CommandCenter]
+      operationId: getDashboardKpis
+      parameters:
+        - $ref: '#/components/parameters/Site'
+      responses:
+        '200':
+          description: Persona-scoped dashboard KPI projection with freshness.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/telemetry:
+    get:
+      tags: [Telemetry]
+      operationId: listTelemetry
+      description: TBL-STD telemetry list. Supports standard page, size, sort, q, site, from/to and declared per-column filters.
+      parameters:
+        - $ref: '#/components/parameters/Site'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Query'
+      responses:
+        '200':
+          description: Paginated telemetry observations.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/furnaces:
+    get:
+      tags: [Furnace]
+      operationId: listFurnaces
+      parameters:
+        - $ref: '#/components/parameters/Site'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Query'
+      responses:
+        '200':
+          description: Plant-scoped furnace units.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/furnaces/{assetId}/telemetry:
+    get:
+      tags: [Furnace, Telemetry]
+      operationId: listFurnaceTelemetry
+      parameters:
+        - $ref: '#/components/parameters/AssetId'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Query'
+      responses:
+        '200':
+          description: TBL-STD telemetry projection for one authorized furnace asset.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/energy/intervals:
+    get:
+      tags: [Energy]
+      operationId: listEnergyIntervals
+      parameters:
+        - $ref: '#/components/parameters/Site'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Query'
+      responses:
+        '200':
+          description: TBL-STD market, demand, and carbon interval list.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/energy/recommendations:
+    get:
+      tags: [Energy]
+      operationId: listEnergyRecommendations
+      parameters:
+        - $ref: '#/components/parameters/Site'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Query'
+      responses:
+        '200':
+          description: Pending and terminal advisory-only energy recommendations.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/sustainability/summary:
+    get:
+      tags: [Sustainability]
+      operationId: getSustainabilitySummary
+      parameters:
+        - $ref: '#/components/parameters/Site'
+      responses:
+        '200':
+          description: Plant-scoped synthetic emissions and ETS summary.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/sustainability/emissions:
+    get:
+      tags: [Sustainability]
+      operationId: listSustainabilityEmissions
+      parameters:
+        - $ref: '#/components/parameters/Site'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Query'
+      responses:
+        '200':
+          description: TBL-STD scope-two emissions interval list.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+components:
+  securitySchemes:
+    EntraBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Entra-issued user access token for the BFF audience.
+  parameters:
+    AssetId:
+      name: assetId
+      in: path
+      required: true
+      schema:
+        type: string
+    BatchId:
+      name: batchId
+      in: path
+      required: true
+      schema:
+        type: string
+    RecommendationId:
+      name: recommendationId
+      in: path
+      required: true
+      schema:
+        type: string
+    ProcedureId:
+      name: procedureId
+      in: path
+      required: true
+      schema:
+        type: string
+    SessionId:
+      name: sessionId
+      in: path
+      required: true
+      schema:
+        type: string
+    OperationId:
+      name: operationId
+      in: path
+      required: true
+      schema:
+        type: string
+    WorkOrderId:
+      name: workOrderId
+      in: path
+      required: true
+      schema:
+        type: string
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Site:
+      name: site
+      in: query
+      schema:
+        type: string
+        default: all
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    Size:
+      name: size
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 50
+    Sort:
+      name: sort
+      in: query
+      schema:
+        type: array
+        items:
+          type: string
+          pattern: '^[A-Za-z][A-Za-z0-9_]*:(asc|desc)$'
+      style: form
+      explode: true
+    Query:
+      name: q
+      in: query
+      schema:
+        type: string
+        minLength: 1
+  responses:
+    ErrorResponse:
+      description: Standard error envelope.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    UpstreamUnavailable:
+      description: A required dependency is unavailable.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+  schemas:
+    HealthStatus:
+      type: object
+      additionalProperties: false
+      required: [status, service, correlationId]
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded]
+        service:
+          type: string
+        correlationId:
+          type: string
+    MetaEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data, asOf, correlationId]
+      properties:
+        data:
+          type: object
+          additionalProperties: false
+          required: [apiVersion, service, environment, demoMode, authMode, dataNamespace, bridgeContractVersion]
+          properties:
+            apiVersion:
+              type: string
+              const: v1
+            service:
+              type: string
+            environment:
+              type: string
+            demoMode:
+              type: boolean
+            authMode:
+              type: string
+              enum: [demo, entra, entra-pending]
+            dataNamespace:
+              type: string
+            bridgeContractVersion:
+              type: string
+        asOf:
+          type: string
+          format: date-time
+        correlationId:
+          type: string
+    MeEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/DataEnvelope'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/UserContext'
+    UserContext:
+      type: object
+      additionalProperties: false
+      required: [userId, displayName, roles, plantScope, personas, locale, permittedActions]
+      properties:
+        userId:
+          type: string
+        displayName:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+        plantScope:
+          type: array
+          items:
+            type: string
+        personas:
+          type: array
+          items:
+            type: string
+        locale:
+          type: string
+        permittedActions:
+          type: array
+          items:
+            type: string
+    DataEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data, asOf, correlationId]
+      properties:
+        data:
+          type: object
+          additionalProperties: true
+        asOf:
+          type: string
+          format: date-time
+        correlationId:
+          type: string
+    ListEnvelope:
+      type: object
+      additionalProperties: false
+      required: [items, total, page, size, asOf, correlationId]
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        total:
+          type: integer
+          minimum: 0
+        page:
+          type: integer
+          minimum: 1
+        size:
+          type: integer
+          minimum: 1
+          maximum: 200
+        asOf:
+          type: string
+          format: date-time
+        correlationId:
+          type: string
+    ErrorEnvelope:
+      type: object
+      additionalProperties: false
+      required: [code, message, correlationId, retryable]
+      properties:
+        code:
+          type: string
+          enum:
+            - INVALID_TOKEN
+            - FORBIDDEN_ROLE
+            - FORBIDDEN_SCOPE
+            - NOT_FOUND
+            - VALIDATION_ERROR
+            - IDEMPOTENCY_KEY_REQUIRED
+            - IDEMPOTENCY_CONFLICT
+            - STALE_APPROVAL
+            - DUPLICATE_APPROVAL
+            - RATE_LIMITED
+            - UPSTREAM_UNAVAILABLE
+            - CAPACITY_STATE_CONFLICT
+            - POLICY_DENIED
+            - INTERNAL_ERROR
+        message:
+          type: string
+        correlationId:
+          type: string
+        retryable:
+          type: boolean
+    AiValue:
+      type: object
+      additionalProperties: true
+      required: [value, unit, confidence, modelVersion, scoredAt, drivers, sourceRefs]
+      properties:
+        value:
+          type: number
+        unit:
+          type: string
+        confidence:
+          type: object
+          required: [p10, p50, p90]
+          properties:
+            p10:
+              type: number
+            p50:
+              type: number
+            p90:
+              type: number
+        modelVersion:
+          type: string
+        scoredAt:
+          type: string
+          format: date-time
+        drivers:
+          type: array
+          items:
+            type: object
+            required: [name, contribution]
+            properties:
+              name:
+                type: string
+              contribution:
+                type: number
+        sourceRefs:
+          type: array
+          items:
+            type: string
+    LiningForecastEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/DataEnvelope'
+        - type: object
+          properties:
+            data:
+              allOf:
+                - $ref: '#/components/schemas/AiValue'
+                - type: object
+                  required: [assetId, riskLevel, auditRef]
+                  properties:
+                    assetId:
+                      type: string
+                    componentId:
+                      type: string
+                    riskLevel:
+                      type: string
+                      enum: [LOW, MEDIUM, HIGH]
+                    riskScore:
+                      type: number
+                      minimum: 0
+                      maximum: 1
+                    estimatedMinimumLiningMm:
+                      type: number
+                    auditRef:
+                      type: string
+    AlertPollEnvelope:
+      type: object
+      additionalProperties: false
+      required: [events, asOf, stale, correlationId]
+      properties:
+        events:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        asOf:
+          type: string
+          format: date-time
+        stale:
+          type: boolean
+        correlationId:
+          type: string
+    EnergySimulationRequest:
+      type: object
+      additionalProperties: false
+      required: [site, horizonHours, scenario, constraints]
+      properties:
+        site:
+          type: string
+        horizonHours:
+          type: integer
+          minimum: 1
+          maximum: 168
+        scenario:
+          type: string
+        constraints:
+          type: object
+          additionalProperties: true
+    ApprovalRequest:
+      type: object
+      additionalProperties: false
+      required: [reason, approvalContext, expectedVersion]
+      properties:
+        reason:
+          type: string
+          minLength: 1
+        approvalContext:
+          type: object
+          additionalProperties: true
+        expectedVersion:
+          type: integer
+          minimum: 1
+    RejectionRequest:
+      type: object
+      additionalProperties: false
+      required: [reasonCode, expectedVersion]
+      properties:
+        reasonCode:
+          type: string
+          enum: [PRODUCTION_CONFLICT, RISK_TOO_HIGH, DATA_QUALITY_CONCERN, OTHER]
+        reasonNote:
+          type: string
+        expectedVersion:
+          type: integer
+          minimum: 1
+      allOf:
+        - if:
+            properties:
+              reasonCode:
+                const: OTHER
+          required: [reasonCode]
+          then:
+            required: [reasonNote]
+    QualityWhatIfRequest:
+      type: object
+      additionalProperties: false
+      required: [batchId, adjustments]
+      properties:
+        batchId:
+          type: string
+        adjustments:
+          type: object
+          additionalProperties:
+            type: number
+    KnowledgeInterviewRequest:
+      type: object
+      additionalProperties: false
+      required: [operatorRef, language, consent]
+      properties:
+        operatorRef:
+          type: string
+        language:
+          type: string
+        consent:
+          type: object
+          additionalProperties: false
+          required: [granted, scope, retentionDays]
+          properties:
+            granted:
+              type: boolean
+              const: true
+            scope:
+              type: string
+              const: knowledge-capture
+            retentionDays:
+              type: integer
+              minimum: 1
+    ExpectedVersionRequest:
+      type: object
+      additionalProperties: false
+      required: [expectedVersion]
+      properties:
+        expectedVersion:
+          type: integer
+          minimum: 1
+    CapacityEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/DataEnvelope'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Capacity'
+    Capacity:
+      type: object
+      additionalProperties: false
+      required: [capacityId, environment, state, sku, demoModeSimulated, stale]
+      properties:
+        capacityId:
+          type: string
+        environment:
+          type: string
+          enum: [dev, test, demo]
+        state:
+          type: string
+          enum: [Paused, ResumeRequested, Resuming, ReadinessCheck, Running, DrainRequested, Draining, SuspendRequested, Failed]
+        sku:
+          type: string
+        demoModeSimulated:
+          type: boolean
+        stale:
+          type: boolean
+    CapacityRequest:
+      type: object
+      additionalProperties: false
+      required: [capacityId, reason]
+      properties:
+        capacityId:
+          type: string
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+    WorkOrderRequest:
+      type: object
+      additionalProperties: false
+      required: [assetId, title, reason]
+      properties:
+        assetId:
+          type: string
+        title:
+          type: string
+        reason:
+          type: string

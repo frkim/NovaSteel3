@@ -1,0 +1,317 @@
+{
+  "$schema": "./novasteelv3.items-manifest.schema.json",
+  "schemaVersion": 1,
+  "supportedItems": [
+    {
+      "key": "eventhouseOperations",
+      "type": "Eventhouse",
+      "displayName": "evh-novasteelv3-operations",
+      "description": "Isolated novasteelv3 hot operational Eventhouse.",
+      "restCollection": "/eventhouses",
+      "sourceDirectory": "items/evh-ns-operations.Eventhouse",
+      "definitionFormat": null,
+      "definitionParts": [],
+      "createWithoutDefinition": true,
+      "cliDeployable": false,
+      "bindingGate": null,
+      "deploymentOption": "deployEventhouseAndKql",
+      "dependencies": [],
+      "manualGates": [
+        "Confirm the isolated novasteelv3 workspace is assigned to the running F2 capacity before this item is created.",
+        "Validate retention/cache cost and cold-start behavior for the demo capacity."
+      ]
+    },
+    {
+      "key": "landingLakehouse",
+      "type": "Lakehouse",
+      "displayName": "lh_novasteelv3_landing",
+      "description": "Isolated novasteelv3 immutable bronze envelopes and quarantine landing.",
+      "restCollection": "/lakehouses",
+      "sourceDirectory": "items/lh-ns-landing.Lakehouse",
+      "definitionFormat": null,
+      "definitionParts": [],
+      "createWithoutDefinition": true,
+      "cliDeployable": false,
+      "bindingGate": null,
+      "deploymentOption": "deployLakehouses",
+      "dependencies": [],
+      "manualGates": [
+        "Apply and verify current OneLake security roles and sensitivity label in the target tenant.",
+        "Verify that no shortcut crosses into the existing NovaSteel workspaces or lakehouses."
+      ]
+    },
+    {
+      "key": "coreLakehouse",
+      "type": "Lakehouse",
+      "displayName": "lh_novasteelv3_core",
+      "description": "Isolated novasteelv3 typed silver facts, SCD dimensions, and gold KPI tables.",
+      "restCollection": "/lakehouses",
+      "sourceDirectory": "items/lh-ns-core.Lakehouse",
+      "definitionFormat": null,
+      "definitionParts": [],
+      "createWithoutDefinition": true,
+      "cliDeployable": false,
+      "bindingGate": null,
+      "deploymentOption": "deployLakehouses",
+      "dependencies": [],
+      "manualGates": [
+        "Apply and verify current OneLake security roles and sensitivity label in the target tenant.",
+        "Confirm the workspace/notebook identity can read landing and write core only."
+      ]
+    },
+    {
+      "key": "kqlOperations",
+      "type": "KQLDatabase",
+      "displayName": "kql-novasteelv3-operations",
+      "description": "Isolated novasteelv3 hot telemetry, alarms, gateway health, inference, and quarantine.",
+      "restCollection": "/kqlDatabases",
+      "sourceDirectory": "items/kql-ns-operations.KQLDatabase",
+      "definitionFormat": null,
+      "definitionParts": ["DatabaseProperties.json", "DatabaseSchema.kql", ".platform"],
+      "createWithoutDefinition": false,
+      "cliDeployable": true,
+      "bindingGate": null,
+      "deploymentOption": "deployEventhouseAndKql",
+      "dependencies": ["eventhouseOperations"],
+      "manualGates": [
+        "Measure retention/cache cost and adjust the novasteelv3 retention values before enabling long-lived demos.",
+        "Confirm KQL query/ingestion endpoints and item identity support before any non-demo use."
+      ]
+    },
+    {
+      "key": "notebookInitialize",
+      "type": "Notebook",
+      "displayName": "v3-initialize-lakehouses",
+      "description": "Create Delta medallion tables and reference targets idempotently for novasteelv3.",
+      "restCollection": "/notebooks",
+      "sourceDirectory": "notebooks/ns-initialize-lakehouses.Notebook",
+      "definitionFormat": "fabricGitSource",
+      "definitionParts": ["notebook-content.py", ".platform"],
+      "createWithoutDefinition": false,
+      "cliDeployable": true,
+      "bindingGate": null,
+      "deploymentOption": "deployNotebooks",
+      "dependencies": ["landingLakehouse", "coreLakehouse"],
+      "manualGates": [
+        "Attach or authorize the novasteelv3 landing/core Lakehouses for the notebook execution identity."
+      ]
+    },
+    {
+      "key": "notebookBronzeToSilver",
+      "type": "Notebook",
+      "displayName": "v3-bronze-to-silver",
+      "description": "Validate, deduplicate, normalize, SCD-resolve, and quarantine bronze events for novasteelv3.",
+      "restCollection": "/notebooks",
+      "sourceDirectory": "notebooks/ns-bronze-to-silver.Notebook",
+      "definitionFormat": "fabricGitSource",
+      "definitionParts": ["notebook-content.py", ".platform"],
+      "createWithoutDefinition": false,
+      "cliDeployable": true,
+      "bindingGate": null,
+      "deploymentOption": "deployNotebooks",
+      "dependencies": ["notebookInitialize"],
+      "manualGates": [
+        "Validate event-time SCD joins, unit registry, watermark, and replay behavior with a fixed demo batch."
+      ]
+    },
+    {
+      "key": "notebookSilverToGold",
+      "type": "Notebook",
+      "displayName": "v3-silver-to-gold",
+      "description": "Build governed daily/shift KPI facts and decision/audit projections for novasteelv3.",
+      "restCollection": "/notebooks",
+      "sourceDirectory": "notebooks/ns-silver-to-gold.Notebook",
+      "definitionFormat": "fabricGitSource",
+      "definitionParts": ["notebook-content.py", ".platform"],
+      "createWithoutDefinition": false,
+      "cliDeployable": true,
+      "bindingGate": null,
+      "deploymentOption": "deployNotebooks",
+      "dependencies": ["notebookBronzeToSilver"],
+      "manualGates": [
+        "Business owners must sign off KPI definitions before any non-demo reporting."
+      ]
+    },
+    {
+      "key": "notebookDemoScoring",
+      "type": "Notebook",
+      "displayName": "v3-deterministic-demo-scoring",
+      "description": "Synthetic-only deterministic RUL and quality demo scoring for novasteelv3.",
+      "restCollection": "/notebooks",
+      "sourceDirectory": "notebooks/ns-deterministic-demo-scoring.Notebook",
+      "definitionFormat": "fabricGitSource",
+      "definitionParts": ["notebook-content.py", ".platform"],
+      "createWithoutDefinition": false,
+      "cliDeployable": true,
+      "bindingGate": null,
+      "deploymentOption": "deployNotebooks",
+      "dependencies": ["coreLakehouse"],
+      "manualGates": [
+        "Run only against SYNTHETIC data; this rule-based scorer is not a promoted production model.",
+        "A production model requires MLflow evaluation, model card, drift gates, and RAI approval."
+      ]
+    },
+    {
+      "key": "notebookDataQuality",
+      "type": "Notebook",
+      "displayName": "v3-validate-data-quality",
+      "description": "Reconciliation, contract, physical, and scenario quality gate for novasteelv3.",
+      "restCollection": "/notebooks",
+      "sourceDirectory": "notebooks/ns-validate-data-quality.Notebook",
+      "definitionFormat": "fabricGitSource",
+      "definitionParts": ["notebook-content.py", ".platform"],
+      "createWithoutDefinition": false,
+      "cliDeployable": true,
+      "bindingGate": null,
+      "deploymentOption": "deployNotebooks",
+      "dependencies": ["notebookSilverToGold"],
+      "manualGates": [
+        "A run is demo-ready only when contract, physics, and scenario assertions pass."
+      ]
+    },
+    {
+      "key": "pipelineMedallion",
+      "type": "DataPipeline",
+      "displayName": "pl-novasteelv3-medallion",
+      "description": "Initialize and run bronze-to-silver-to-gold with a quality gate for novasteelv3.",
+      "restCollection": "/dataPipelines",
+      "sourceDirectory": "pipelines/pl-ns-medallion.DataPipeline",
+      "definitionFormat": null,
+      "definitionParts": ["pipeline-content.json", ".platform"],
+      "createWithoutDefinition": false,
+      "cliDeployable": true,
+      "bindingGate": null,
+      "deploymentOption": "deployPipelines",
+      "dependencies": [
+        "notebookInitialize",
+        "notebookBronzeToSilver",
+        "notebookSilverToGold",
+        "notebookDataQuality"
+      ],
+      "manualGates": [
+        "Bind the current notebook job identity and test a fixed-batch row reconciliation.",
+        "Configure schedules only after the novasteelv3 capacity pause window is excluded."
+      ]
+    },
+    {
+      "key": "pipelineDemoScoring",
+      "type": "DataPipeline",
+      "displayName": "pl-novasteelv3-demo-scoring",
+      "description": "Run deterministic synthetic scoring then refresh gold quality checks for novasteelv3.",
+      "restCollection": "/dataPipelines",
+      "sourceDirectory": "pipelines/pl-ns-demo-scoring.DataPipeline",
+      "definitionFormat": null,
+      "definitionParts": ["pipeline-content.json", ".platform"],
+      "createWithoutDefinition": false,
+      "cliDeployable": true,
+      "bindingGate": null,
+      "deploymentOption": "deployPipelines",
+      "dependencies": ["notebookDemoScoring", "notebookDataQuality"],
+      "manualGates": [
+        "Keep this pipeline disabled outside the synthetic novasteelv3 demo workspace."
+      ]
+    },
+    {
+      "key": "semanticOperations",
+      "type": "SemanticModel",
+      "displayName": "sm-novasteelv3-operations",
+      "description": "Direct Lake novasteelv3 KPI model over governed gold Delta tables.",
+      "restCollection": "/semanticModels",
+      "sourceDirectory": "semantic-model/sm-ns-operations.SemanticModel",
+      "definitionFormat": "TMDL",
+      "definitionParts": [
+        "definition.pbism",
+        "definition/database.tmdl",
+        "definition/model.tmdl",
+        "definition/relationships.tmdl",
+        "definition/tables/dim_calendar.tmdl",
+        "definition/tables/dim_plant.tmdl",
+        "definition/tables/dim_kpi_target.tmdl",
+        "definition/tables/fact_energy_daily.tmdl",
+        "definition/tables/fact_emissions_daily.tmdl",
+        "definition/tables/fact_production_shift.tmdl",
+        "definition/tables/fact_quality_yield.tmdl",
+        "definition/tables/fact_furnace_rul.tmdl",
+        "definition/tables/fact_dispatch_recommendation.tmdl",
+        "definition/tables/fact_ai_decision_audit.tmdl",
+        "definition/tables/fact_model_evaluation.tmdl",
+        "definition/tables/fact_customer_claim.tmdl",
+        "definition/tables/fact_knowledge_procedure.tmdl",
+        "definition/tables/fact_knowledge_usage.tmdl",
+        "definition/tables/fact_platform_usage.tmdl"
+      ],
+      "createWithoutDefinition": false,
+      "cliDeployable": true,
+      "bindingGate": "semanticModelBindingValidated",
+      "deploymentOption": "deploySemanticModel",
+      "dependencies": ["coreLakehouse"],
+      "manualGates": [
+        "Validate the Direct Lake source binding against the novasteelv3 core Lakehouse SQL endpoint.",
+        "Validate RLS/persona plant scope using test identities; UI hiding is not authorization.",
+        "Confirm every report consumer has Pro/PPU/trial below F64.",
+        "Apply sensitivity label and test refresh/query before setting semanticModelBindingValidated=true."
+      ]
+    }
+  ],
+  "excludedItems": [
+    {
+      "key": "eventstreamTelemetry",
+      "type": "Eventstream",
+      "reason": "The Custom Endpoint connection details are runtime-generated per tenant, and the managed-identity publisher path must be proven manually before automation is allowed to touch it in the isolated novasteelv3 workspace. Deliberately out of scope for this preparation."
+    }
+  ],
+  "manualAssets": [
+    {
+      "key": "rtiDashboard",
+      "assetType": "KQLDashboard",
+      "sourcePath": "fabric/rti/dashboard-spec.json",
+      "reason": "Queries and visual metadata are portable, but datasource IDs, dashboard layout/export format, and permissions must be validated from a tenant-exported KQL dashboard definition against the novasteelv3 kql-novasteelv3-operations database before API deployment.",
+      "completionEvidence": [
+        "All queries in fabric/rti/dashboard-queries.kql run against kql-novasteelv3-operations.",
+        "Freshness, gateway state, active alarms, model score, and quarantine visuals render in the novasteelv3 workspace only.",
+        "A tenant-exported definition is checked in before enabling automated import."
+      ]
+    },
+    {
+      "key": "activator",
+      "assetType": "Reflex",
+      "sourcePath": "fabric/rti/activator-rules.template.json",
+      "reason": "Rule actions require tenant-bound Teams/email/Power Automate connections, DLP/licensing review, and owner routing scoped to the novasteelv3 demo.",
+      "completionEvidence": [
+        "Rules notify or enrich only; no safety, OT, schedule commit, or capacity action exists.",
+        "A human owner confirms notification targets and escalation policy for the novasteelv3 demo."
+      ]
+    },
+    {
+      "key": "powerBiReports",
+      "assetType": "Report",
+      "sourcePath": "fabric/powerbi/report-catalog.json",
+      "reason": "PBIR/report layouts depend on the tenant-bound sm-novasteelv3-operations semantic model, RLS, labels, and internal user-owned-data embedding configuration.",
+      "completionEvidence": [
+        "Report pages bind only to sm-novasteelv3-operations, never to the existing NovaSteel semantic model.",
+        "RLS and export permissions pass persona tests.",
+        "A tenant-exported PBIR definition is checked in before REST/CLI import."
+      ]
+    },
+    {
+      "key": "oneLakeSecurity",
+      "assetType": "OneLakeSecurityRole",
+      "sourcePath": "fabric/catalog/security-role-matrix.json",
+      "reason": "Role APIs and item/security capabilities must be verified in the target tenant for the novasteelv3 workspace specifically; broad workspace roles are not a substitute for OneLake data security.",
+      "completionEvidence": [
+        "Persona and service identities pass least-privilege read/write tests scoped to novasteelv3 only.",
+        "Monthly role export is retained as release evidence."
+      ]
+    },
+    {
+      "key": "tenantApiPermission",
+      "assetType": "TenantSetting",
+      "sourcePath": "fabric/README.md",
+      "reason": "A Fabric admin must permit the deployment identity to create workspaces and use Fabric APIs, and the identity must be a capacity contributor/admin on the novasteelv3-fabric capacity before any script in .azure/fabric can run outside -DryRun/-ValidateOnly.",
+      "completionEvidence": [
+        "Tenant setting confirmed enabled for the deployment identity.",
+        "Identity confirmed as capacity contributor/admin on the exact novasteelv3 capacity resource ID."
+      ]
+    }
+  ]
+}

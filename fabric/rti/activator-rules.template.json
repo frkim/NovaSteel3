@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "deploymentStatus": "MANUAL_CONNECTION_AND_DLP_GATE",
+  "displayName": "act-ns-operational-notifications",
+  "source": {
+    "database": "kql-ns-operations",
+    "functions": [
+      "fn_active_alarms",
+      "fn_gateway_status",
+      "fn_latest_model_scores",
+      "fn_quarantine_rate"
+    ]
+  },
+  "rules": [
+    {
+      "id": "ACT-FUR-001",
+      "name": "Sustained high lining risk",
+      "condition": "risk_score >= 0.80 and remaining_useful_life_days_p50 <= 21 for 5 minutes",
+      "key": "plant_id|asset_id|component_id|model_id",
+      "recovery": "risk_score < 0.70 for 10 minutes",
+      "suppressionMinutes": 60,
+      "actions": [
+        {
+          "type": "TeamsOrEmailNotification",
+          "connectionIdParameter": "<tenant-notification-connection-id>",
+          "payloadFields": [
+            "asset_id",
+            "component_id",
+            "feature_snapshot_ts",
+            "risk_score",
+            "remaining_useful_life_days_p10",
+            "remaining_useful_life_days_p50",
+            "remaining_useful_life_days_p90",
+            "correlation_id",
+            "investigation_link"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ACT-GW-001",
+      "name": "Missing gateway heartbeat",
+      "condition": "freshness_seconds > 60 or connection_state in (OFFLINE, DEGRADED)",
+      "key": "plant_id|gateway_id",
+      "recovery": "freshness_seconds <= 30 and connection_state == ONLINE",
+      "suppressionMinutes": 15,
+      "actions": [
+        {
+          "type": "TeamsOrEmailNotification",
+          "connectionIdParameter": "<tenant-notification-connection-id>",
+          "payloadFields": [
+            "plant_id",
+            "gateway_id",
+            "connection_state",
+            "queue_depth",
+            "oldest_buffered_event",
+            "event_time_lag_ms",
+            "correlation_id"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ACT-DQ-001",
+      "name": "Quarantine rate above two percent",
+      "condition": "quarantine_rate > 0.02 over 15 minutes",
+      "key": "plant_id",
+      "recovery": "quarantine_rate <= 0.01 over 30 minutes",
+      "suppressionMinutes": 30,
+      "actions": [
+        {
+          "type": "PowerAutomateOrTicket",
+          "connectionIdParameter": "<tenant-workflow-connection-id>",
+          "payloadFields": [
+            "plant_id",
+            "quarantine_rate",
+            "dominant_reason",
+            "window_start",
+            "window_end",
+            "correlation_id"
+          ]
+        }
+      ]
+    }
+  ],
+  "forbiddenActions": [
+    "PLC or safety-system write",
+    "production setpoint or recipe change",
+    "schedule commit",
+    "CMMS production write without a separately approved human gate",
+    "Fabric capacity pause/resume"
+  ],
+  "manualGates": [
+    "Validate Activator action availability, rate limits, DLP, licensing, and owner routing in the tenant.",
+    "Tune against historical replay and verify state transitions/deduplication prevent alert storms.",
+    "Use Power Automate as the documented workflow target; do not claim a native Logic Apps Activator action.",
+    "A Logic App integration, if required, uses an approved secured intermediary/HTTP trigger with independent identity and retry policy."
+  ]
+}

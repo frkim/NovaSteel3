@@ -1,0 +1,32 @@
+# .NET
+**/bin/
+**/obj/
+
+# Python
+**/__pycache__/
+**/*.py[cod]
+**/.venv/
+.pytest_cache/
+
+# Node.js
+**/node_modules/
+**/dist/
+apps/portal-shell/wwwroot/analytics-mfe/*
+!apps/portal-shell/wwwroot/analytics-mfe/.gitkeep
+
+# Local configuration and editor state
+*.user
+*.suo
+.vs/
+.idea/
+.vscode/
+*.local.json
+
+# Simulator scratch/test output (never committed)
+/output/
+tests/simulator/.tmp/*
+!tests/simulator/.tmp/README.md
+
+# Local CI validation output
+/artifacts/
+/.validation-venv/

@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://novasteel.example/schemas/capacity-lifecycle-result.schema.json",
+  "title": "NovaSteel capacity lifecycle result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "correlationId",
+    "actor",
+    "policyVersion",
+    "environment",
+    "capacityResourceId",
+    "action",
+    "startedAt",
+    "completedAt",
+    "result",
+    "startState",
+    "endState",
+    "armOperationId"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "correlationId": { "type": "string" },
+    "actor": { "type": "string" },
+    "policyVersion": { "type": "string" },
+    "environment": { "enum": ["dev", "test", "demo"] },
+    "capacityResourceId": { "type": "string" },
+    "action": { "enum": ["Status", "Resume", "Suspend"] },
+    "startedAt": { "type": "string", "format": "date-time" },
+    "completedAt": { "type": "string", "format": "date-time" },
+    "durationSeconds": { "type": "number", "minimum": 0 },
+    "result": {
+      "enum": [
+        "SUCCEEDED",
+        "FAILED",
+        "SKIPPED_BUSY",
+        "POLICY_DENIED",
+        "STATUS_ONLY"
+      ]
+    },
+    "startState": { "type": ["string", "null"] },
+    "endState": { "type": ["string", "null"] },
+    "armOperationId": { "type": ["string", "null"] },
+    "preconditionEvidence": { "type": ["object", "null"] },
+    "error": { "type": ["string", "null"] }
+  }
+}

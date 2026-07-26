@@ -1,0 +1,80 @@
+{
+  "contractVersion": 1,
+  "zone": "bronze",
+  "classificationRule": "Preserve the original payload and source metadata without semantic mutation.",
+  "tables": [
+    {
+      "name": "bronze_event_envelope",
+      "grain": "One accepted canonical event envelope.",
+      "primaryKey": [
+        "event_id"
+      ],
+      "idempotencyKey": [
+        "event_id"
+      ],
+      "appendOnly": true,
+      "columns": [
+        { "name": "event_id", "type": "string", "nullable": false },
+        { "name": "event_ts", "type": "timestamp", "nullable": false },
+        { "name": "ingest_ts", "type": "timestamp", "nullable": false },
+        { "name": "source_id", "type": "string", "nullable": false },
+        { "name": "asset_id", "type": "string", "nullable": false },
+        { "name": "plant_id", "type": "string", "nullable": false },
+        { "name": "sequence", "type": "long", "nullable": false },
+        { "name": "correlation_id", "type": "string", "nullable": false },
+        { "name": "schema_name", "type": "string", "nullable": false },
+        { "name": "schema_version", "type": "integer", "nullable": false },
+        { "name": "data_classification", "type": "string", "nullable": false },
+        { "name": "privacy_label", "type": "string", "nullable": false },
+        { "name": "scenario_id", "type": "string", "nullable": true },
+        { "name": "seed", "type": "long", "nullable": true },
+        { "name": "payload_json", "type": "string", "nullable": false }
+      ]
+    },
+    {
+      "name": "bronze_batch_mes",
+      "grain": "One immutable synthetic or approved MES batch source row.",
+      "primaryKey": [
+        "source_system",
+        "source_record_id",
+        "ingest_ts"
+      ],
+      "idempotencyKey": [
+        "source_system",
+        "source_record_id",
+        "source_version"
+      ],
+      "appendOnly": true
+    },
+    {
+      "name": "bronze_batch_cmms",
+      "grain": "One immutable synthetic or approved CMMS batch source row.",
+      "primaryKey": [
+        "source_system",
+        "source_record_id",
+        "ingest_ts"
+      ],
+      "idempotencyKey": [
+        "source_system",
+        "source_record_id",
+        "source_version"
+      ],
+      "appendOnly": true
+    },
+    {
+      "name": "bronze_batch_market",
+      "grain": "One immutable licensed market-data source row.",
+      "primaryKey": [
+        "source_system",
+        "source_record_id",
+        "ingest_ts"
+      ],
+      "idempotencyKey": [
+        "source_system",
+        "source_record_id",
+        "source_version"
+      ],
+      "appendOnly": true
+    }
+  ]
+}

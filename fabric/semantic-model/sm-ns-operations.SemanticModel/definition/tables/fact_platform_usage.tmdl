@@ -1,0 +1,32 @@
+table fact_platform_usage
+	column week_start
+		dataType: dateTime
+		formatString: yyyy-MM-dd
+		summarizeBy: none
+		sourceColumn: week_start
+
+	column persona_group
+		dataType: string
+		summarizeBy: none
+		sourceColumn: persona_group
+
+	column user_subject
+		dataType: string
+		summarizeBy: none
+		sourceColumn: user_subject
+
+	column active_flag
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: active_flag
+
+	column target_user_flag
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: target_user_flag
+
+	partition fact_platform_usage = entity
+		mode: directLake
+		source
+			entityName: fact_platform_usage
+			schemaName: dbo

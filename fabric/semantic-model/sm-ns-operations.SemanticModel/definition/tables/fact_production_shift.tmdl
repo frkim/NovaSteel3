@@ -1,0 +1,57 @@
+table fact_production_shift
+	column shift_date
+		dataType: dateTime
+		formatString: yyyy-MM-dd
+		summarizeBy: none
+		sourceColumn: shift_date
+
+	column plant_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: plant_id
+
+	column line_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: line_id
+
+	column planned_minutes
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: planned_minutes
+
+	column runtime_minutes
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: runtime_minutes
+
+	column ideal_rate_tph
+		dataType: double
+		summarizeBy: average
+		sourceColumn: ideal_rate_tph
+
+	column total_tons
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: total_tons
+
+	column good_tons
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: good_tons
+
+	column on_time_orders
+		dataType: int64
+		summarizeBy: sum
+		sourceColumn: on_time_orders
+
+	column total_orders
+		dataType: int64
+		summarizeBy: sum
+		sourceColumn: total_orders
+
+	partition fact_production_shift = entity
+		mode: directLake
+		source
+			entityName: fact_production_shift
+			schemaName: dbo

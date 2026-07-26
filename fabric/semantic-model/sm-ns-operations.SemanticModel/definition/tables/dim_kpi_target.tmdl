@@ -1,0 +1,167 @@
+table dim_kpi_target
+	measure 'Total Energy GJ' = SUM('fact_energy_daily'[energy_gj])
+		formatString: #,0.00
+		displayFolder: Energy
+
+	measure 'Crude Steel Tons' = SUM('fact_energy_daily'[crude_steel_tons])
+		formatString: #,0.00
+		displayFolder: Production
+
+	measure 'KPI-ENE-01 SEC GJ per t' = DIVIDE([Total Energy GJ], [Crude Steel Tons])
+		formatString: 0.00
+		displayFolder: Energy
+
+	measure 'KPI-ENE-01 Baseline GJ per t' = CALCULATE(MAX('dim_kpi_target'[baseline_value]), KEEPFILTERS('dim_kpi_target'[kpi_id] = "KPI-ENE-01"))
+		formatString: 0.00
+		displayFolder: Energy
+
+	measure 'KPI-ENE-01 Reduction vs Baseline' = DIVIDE([KPI-ENE-01 Baseline GJ per t] - [KPI-ENE-01 SEC GJ per t], [KPI-ENE-01 Baseline GJ per t])
+		formatString: 0.0%
+		displayFolder: Energy
+
+	measure 'KPI-ENE-02 Energy Cost Avoidance EUR' = SUMX(FILTER('fact_dispatch_recommendation', 'fact_dispatch_recommendation'[status] IN {"ACCEPTED", "MODIFIED"}), COALESCE('fact_dispatch_recommendation'[realized_cost_avoidance_eur], 'fact_dispatch_recommendation'[expected_cost_avoidance_eur]))
+		formatString: €#,0
+		displayFolder: Energy
+
+	measure 'KPI-ENE-03 Dispatch Acceptance Rate' = DIVIDE(CALCULATE(COUNTROWS('fact_dispatch_recommendation'), 'fact_dispatch_recommendation'[status] IN {"ACCEPTED", "MODIFIED"}), COUNTROWS('fact_dispatch_recommendation'))
+		formatString: 0.0%
+		displayFolder: Energy
+
+	measure 'Total CO2e t' = SUM('fact_emissions_daily'[total_co2e_t])
+		formatString: #,0.00
+		displayFolder: Sustainability
+
+	measure 'KPI-CO2-01 Specific CO2 t per t' = DIVIDE([Total CO2e t], SUM('fact_emissions_daily'[crude_steel_tons]))
+		formatString: 0.000
+		displayFolder: Sustainability
+
+	measure 'KPI-CO2-02 ETS Exposure EUR' = SUM('fact_emissions_daily'[ets_exposure_eur])
+		formatString: €#,0
+		displayFolder: Sustainability
+
+	measure 'KPI-FUR-01 Lining Lead Time Days' = AVERAGEX(FILTER('fact_furnace_rul', NOT ISBLANK('fact_furnace_rul'[alert_issued_at]) && NOT ISBLANK('fact_furnace_rul'[actual_reline_or_failure_at])), DATEDIFF('fact_furnace_rul'[alert_issued_at], 'fact_furnace_rul'[actual_reline_or_failure_at], DAY))
+		formatString: 0.0
+		displayFolder: Furnace
+
+	measure 'KPI-FUR-02 Unplanned Outages Rolling 12M' = CALCULATE(COUNTROWS('fact_furnace_rul'), 'fact_furnace_rul'[unplanned_outage_flag] = TRUE(), DATESINPERIOD('dim_calendar'[date_key], MAX('dim_calendar'[date_key]), -12, MONTH))
+		formatString: #,0
+		displayFolder: Furnace
+
+	measure 'KPI-FUR-03 RUL Precision' = DIVIDE(SUM('fact_model_evaluation'[true_positive]), SUM('fact_model_evaluation'[true_positive]) + SUM('fact_model_evaluation'[false_positive]))
+		formatString: 0.0%
+		displayFolder: Furnace
+
+	measure 'KPI-FUR-03 RUL Recall' = DIVIDE(SUM('fact_model_evaluation'[true_positive]), SUM('fact_model_evaluation'[true_positive]) + SUM('fact_model_evaluation'[false_negative]))
+		formatString: 0.0%
+		displayFolder: Furnace
+
+	measure 'KPI-QUA-01 High-Grade Yield Rate' = DIVIDE(CALCULATE(SUM('fact_quality_yield'[first_pass_good_tons]), 'fact_quality_yield'[high_grade_flag] = TRUE()), CALCULATE(SUM('fact_quality_yield'[attempted_tons]), 'fact_quality_yield'[high_grade_flag] = TRUE()))
+		formatString: 0.0%
+		displayFolder: Quality
+
+	measure 'KPI-QUA-02 Claims per Ton Shipped' = DIVIDE(SUM('fact_customer_claim'[non_conformance_count]), SUM('fact_customer_claim'[tons_shipped]))
+		formatString: 0.000000
+		displayFolder: Quality
+
+	measure 'KPI-KNW-01 Procedure Coverage' = DIVIDE(CALCULATE(DISTINCTCOUNT('fact_knowledge_procedure'[topic_id]), 'fact_knowledge_procedure'[approved_flag] = TRUE()), DISTINCTCOUNT('fact_knowledge_procedure'[topic_id]))
+		formatString: 0.0%
+		displayFolder: Knowledge
+
+	measure 'KPI-KNW-02 Median Retrieval Seconds' = DIVIDE(MEDIAN('fact_knowledge_usage'[retrieval_ms]), 1000.0)
+		formatString: 0.0
+		displayFolder: Knowledge
+
+	measure 'KPI-TRUST-01 Portfolio Acceptance Rate' = DIVIDE(CALCULATE(COUNTROWS('fact_ai_decision_audit'), 'fact_ai_decision_audit'[recommendation_status] IN {"ACCEPTED", "MODIFIED"}), COUNTROWS('fact_ai_decision_audit'))
+		formatString: 0.0%
+		displayFolder: Trust and Governance
+
+	measure 'KPI-ADO-01 Weekly Active User Rate' = DIVIDE(CALCULATE(DISTINCTCOUNT('fact_platform_usage'[user_subject]), 'fact_platform_usage'[active_flag] = TRUE()), CALCULATE(DISTINCTCOUNT('fact_platform_usage'[user_subject]), 'fact_platform_usage'[target_user_flag] = TRUE()))
+		formatString: 0.0%
+		displayFolder: Adoption
+
+	measure 'KPI-GOV-01 Audit Completeness' = DIVIDE(CALCULATE(COUNTROWS('fact_ai_decision_audit'), 'fact_ai_decision_audit'[complete_audit_flag] = TRUE()), COUNTROWS('fact_ai_decision_audit'))
+		formatString: 0.0%
+		displayFolder: Trust and Governance
+
+	measure 'Throughput t per h' = DIVIDE(SUM('fact_production_shift'[total_tons]), DIVIDE(SUM('fact_production_shift'[runtime_minutes]), 60.0))
+		formatString: #,0.0
+		displayFolder: Operations
+
+	measure Availability = DIVIDE(SUM('fact_production_shift'[runtime_minutes]), SUM('fact_production_shift'[planned_minutes]))
+		formatString: 0.0%
+		displayFolder: Operations
+
+	measure Performance = DIVIDE(SUM('fact_production_shift'[total_tons]), SUMX('fact_production_shift', 'fact_production_shift'[ideal_rate_tph] * DIVIDE('fact_production_shift'[runtime_minutes], 60.0)))
+		formatString: 0.0%
+		displayFolder: Operations
+
+	measure 'Quality Rate' = DIVIDE(SUM('fact_production_shift'[good_tons]), SUM('fact_production_shift'[total_tons]))
+		formatString: 0.0%
+		displayFolder: Operations
+
+	measure OEE = [Availability] * [Performance] * [Quality Rate]
+		formatString: 0.0%
+		displayFolder: Operations
+
+	measure 'Energy EUR per t' = DIVIDE(SUM('fact_energy_daily'[energy_cost_eur]), SUM('fact_energy_daily'[crude_steel_tons]))
+		formatString: €#,0.00
+		displayFolder: Operations
+
+	measure 'On-Time Rate' = DIVIDE(SUM('fact_production_shift'[on_time_orders]), SUM('fact_production_shift'[total_orders]))
+		formatString: 0.0%
+		displayFolder: Operations
+
+	measure 'Latest RUL P50 Days' = MAXX(TOPN(1, 'fact_furnace_rul', 'fact_furnace_rul'[scored_at], DESC), 'fact_furnace_rul'[rul_days_p50])
+		formatString: 0.0
+		displayFolder: Furnace
+
+	measure 'Latest Lining Risk' = MAXX(TOPN(1, 'fact_furnace_rul', 'fact_furnace_rul'[scored_at], DESC), 'fact_furnace_rul'[risk_score])
+		formatString: 0.0%
+		displayFolder: Furnace
+
+	measure 'Projected Savings EUR' = SUM('fact_dispatch_recommendation'[expected_cost_avoidance_eur])
+		formatString: €#,0
+		displayFolder: Energy
+
+	measure 'Shiftable MW' = SUM('fact_dispatch_recommendation'[shiftable_mw])
+		formatString: #,0.0
+		displayFolder: Energy
+
+	measure 'First-Pass Yield' = DIVIDE(SUM('fact_quality_yield'[first_pass_good_tons]), SUM('fact_quality_yield'[attempted_tons]))
+		formatString: 0.0%
+		displayFolder: Quality
+
+	measure 'Defect PPM' = DIVIDE(SUM('fact_quality_yield'[defect_count]) * 1000000.0, SUM('fact_quality_yield'[produced_units]))
+		formatString: #,0
+		displayFolder: Quality
+
+	column kpi_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: kpi_id
+
+	column environment
+		dataType: string
+		summarizeBy: none
+		sourceColumn: environment
+
+	column baseline_value
+		dataType: double
+		summarizeBy: none
+		sourceColumn: baseline_value
+
+	column target_value
+		dataType: double
+		summarizeBy: none
+		sourceColumn: target_value
+
+	column unit
+		dataType: string
+		summarizeBy: none
+		sourceColumn: unit
+
+	partition dim_kpi_target = entity
+		mode: directLake
+		source
+			entityName: dim_kpi_target
+			schemaName: dbo

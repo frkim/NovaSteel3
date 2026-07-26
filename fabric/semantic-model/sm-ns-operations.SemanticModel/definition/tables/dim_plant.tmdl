@@ -1,0 +1,27 @@
+table dim_plant
+	column plant_id
+		dataType: string
+		isKey
+		summarizeBy: none
+		sourceColumn: plant_id
+
+	column plant_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: plant_name
+
+	column country_code
+		dataType: string
+		summarizeBy: none
+		sourceColumn: country_code
+
+	column time_zone
+		dataType: string
+		summarizeBy: none
+		sourceColumn: time_zone
+
+	partition dim_plant = entity
+		mode: directLake
+		source
+			entityName: dim_plant
+			schemaName: dbo

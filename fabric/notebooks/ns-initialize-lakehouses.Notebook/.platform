@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Notebook",
+    "displayName": "ns-initialize-lakehouses",
+    "description": "Create Delta medallion tables and reference KPI targets idempotently."
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "61000000-0000-4610-8610-000000000001"
+  }
+}

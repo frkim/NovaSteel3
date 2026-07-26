@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "DataPipeline",
+    "displayName": "pl-ns-demo-scoring",
+    "description": "Run deterministic synthetic scoring then validate the demo cues."
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "72000000-0000-4720-8720-000000000002"
+  }
+}

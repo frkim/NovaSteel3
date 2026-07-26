@@ -1,0 +1,13 @@
+{
+  "name": "novasteel-oral-defense-deck",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Editable PptxGenJS source for the NovaSteel oral-defense deck.",
+  "scripts": {
+    "assets": "python generate_assets.py",
+    "build": "node build-deck.js"
+  },
+  "devDependencies": {
+    "pptxgenjs": "^3.12.0"
+  }
+}

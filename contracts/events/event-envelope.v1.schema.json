@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://novasteel.example/contracts/events/event-envelope.v1.schema.json",
+  "title": "NovaSteel canonical event envelope v1",
+  "description": "Shared transport envelope for OT and simulator events. Consumers must tolerate additive fields within schema version 1.",
+  "type": "object",
+  "required": [
+    "event_id",
+    "event_ts",
+    "ingest_ts",
+    "source_id",
+    "asset_id",
+    "plant_id",
+    "sequence",
+    "correlation_id",
+    "schema_name",
+    "schema_version",
+    "data_classification",
+    "privacy_label",
+    "payload"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+      "description": "UUIDv7 event identifier used as the idempotency key."
+    },
+    "event_ts": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC event time at the source."
+    },
+    "ingest_ts": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC time at which the relay accepted the event."
+    },
+    "source_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "asset_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "plant_id": {
+      "type": "string",
+      "pattern": "^NS-(DEMO-)?[A-Z0-9-]+$"
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Monotonic sequence within source_id."
+    },
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "schema_name": {
+      "type": "string",
+      "pattern": "^novasteel\\.[a-z0-9.-]+\\.v[1-9][0-9]*$"
+    },
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "data_classification": {
+      "type": "string",
+      "enum": [
+        "SYNTHETIC",
+        "CONFIDENTIAL"
+      ]
+    },
+    "privacy_label": {
+      "type": "string",
+      "enum": [
+        "DEMO-NONPERSONAL",
+        "CONFIDENTIAL-OPERATIONAL"
+      ]
+    },
+    "scenario_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Required for synthetic events."
+    },
+    "seed": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Required for synthetic events."
+    },
+    "generator_version": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Required for synthetic events."
+    },
+    "payload": {
+      "type": "object"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "data_classification": {
+            "const": "SYNTHETIC"
+          }
+        },
+        "required": [
+          "data_classification"
+        ]
+      },
+      "then": {
+        "required": [
+          "scenario_id",
+          "seed",
+          "generator_version"
+        ],
+        "properties": {
+          "privacy_label": {
+            "const": "DEMO-NONPERSONAL"
+          },
+          "plant_id": {
+            "pattern": "^NS-DEMO-[A-Z0-9-]+$"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,734 @@
+{
+  "$schema": "./medallion-catalog.schema.json",
+  "schemaVersion": 1,
+  "contractVersion": "1.0.0",
+  "zones": [
+    {
+      "name": "bronze",
+      "lakehouse": "landingLakehouse",
+      "tables": [
+        {
+          "name": "bronze_event_envelope",
+          "grain": "One immutable arrival of a versioned event envelope.",
+          "primaryKey": ["event_id", "payload_hash", "landed_at"],
+          "idempotencyKey": ["event_id"],
+          "partitionBy": ["event_date", "plant_id"],
+          "columns": [
+            { "name": "event_id", "type": "string", "nullable": false, "description": "UUIDv7 event identifier." },
+            { "name": "event_ts", "type": "timestamp", "nullable": false, "description": "Original UTC event time." },
+            { "name": "ingest_ts", "type": "timestamp", "nullable": false, "description": "Gateway/relay UTC ingest time." },
+            { "name": "sequence", "type": "long", "nullable": false, "description": "Monotonic sequence per source partition." },
+            { "name": "source_id", "type": "string", "nullable": false, "description": "Source/gateway identifier." },
+            { "name": "plant_id", "type": "string", "nullable": false, "description": "Natural plant key." },
+            { "name": "asset_id", "type": "string", "nullable": true, "description": "Natural asset key." },
+            { "name": "schema_name", "type": "string", "nullable": false, "description": "Versioned event schema name." },
+            { "name": "schema_version", "type": "integer", "nullable": false, "description": "Major schema version." },
+            { "name": "correlation_id", "type": "string", "nullable": false, "description": "End-to-end correlation ID." },
+            { "name": "data_classification", "type": "string", "nullable": false, "description": "SYNTHETIC or governed production class." },
+            { "name": "privacy_label", "type": "string", "nullable": true, "description": "Privacy label such as DEMO-NONPERSONAL." },
+            { "name": "scenario_id", "type": "string", "nullable": true, "description": "Synthetic scenario lineage." },
+            { "name": "seed", "type": "long", "nullable": true, "description": "Deterministic synthetic root seed." },
+            { "name": "generator_version", "type": "string", "nullable": true, "description": "Synthetic generator version." },
+            { "name": "clock_mode", "type": "string", "nullable": true, "description": "realtime, accelerated, paused, or replay." },
+            { "name": "payload_json", "type": "string", "nullable": false, "description": "Original payload serialized without semantic repair." },
+            { "name": "payload_hash", "type": "string", "nullable": false, "description": "SHA-256 of canonical payload bytes." },
+            { "name": "run_id", "type": "string", "nullable": true, "description": "Synthetic/pipeline run identifier." },
+            { "name": "event_date", "type": "date", "nullable": false, "description": "UTC date derived from event_ts." },
+            { "name": "landed_at", "type": "timestamp", "nullable": false, "description": "OneLake arrival timestamp." }
+          ]
+        },
+        {
+          "name": "bronze_batch_mes",
+          "grain": "One immutable MES source record in an extract batch.",
+          "primaryKey": ["batch_id", "source_record_id", "payload_hash"],
+          "idempotencyKey": ["source_system", "source_record_id", "source_updated_at"],
+          "partitionBy": ["event_date", "plant_id"],
+          "columns": [
+            { "name": "batch_id", "type": "string", "nullable": false, "description": "Pipeline batch identifier." },
+            { "name": "source_system", "type": "string", "nullable": false, "description": "MES source identifier." },
+            { "name": "source_record_id", "type": "string", "nullable": false, "description": "Stable source key." },
+            { "name": "source_updated_at", "type": "timestamp", "nullable": false, "description": "Source change timestamp." },
+            { "name": "event_date", "type": "date", "nullable": false, "description": "Business event date." },
+            { "name": "plant_id", "type": "string", "nullable": false, "description": "Natural plant key." },
+            { "name": "dataset", "type": "string", "nullable": false, "description": "heat_batch, production_shift, or genealogy." },
+            { "name": "payload_json", "type": "string", "nullable": false, "description": "Source row JSON." },
+            { "name": "payload_hash", "type": "string", "nullable": false, "description": "Content hash." },
+            { "name": "data_classification", "type": "string", "nullable": false, "description": "Governance classification." },
+            { "name": "landed_at", "type": "timestamp", "nullable": false, "description": "Landing timestamp." }
+          ]
+        },
+        {
+          "name": "bronze_batch_cmms",
+          "grain": "One immutable CMMS work-order/action source record.",
+          "primaryKey": ["batch_id", "source_record_id", "payload_hash"],
+          "idempotencyKey": ["source_system", "source_record_id", "source_updated_at"],
+          "partitionBy": ["event_date", "plant_id"],
+          "columns": [
+            { "name": "batch_id", "type": "string", "nullable": false, "description": "Pipeline batch identifier." },
+            { "name": "source_system", "type": "string", "nullable": false, "description": "CMMS source identifier." },
+            { "name": "source_record_id", "type": "string", "nullable": false, "description": "Stable source key." },
+            { "name": "source_updated_at", "type": "timestamp", "nullable": false, "description": "Source change timestamp." },
+            { "name": "event_date", "type": "date", "nullable": false, "description": "Business event date." },
+            { "name": "plant_id", "type": "string", "nullable": false, "description": "Natural plant key." },
+            { "name": "payload_json", "type": "string", "nullable": false, "description": "Source row JSON." },
+            { "name": "payload_hash", "type": "string", "nullable": false, "description": "Content hash." },
+            { "name": "data_classification", "type": "string", "nullable": false, "description": "Governance classification." },
+            { "name": "landed_at", "type": "timestamp", "nullable": false, "description": "Landing timestamp." }
+          ]
+        },
+        {
+          "name": "bronze_batch_market",
+          "grain": "One immutable market/carbon/tariff interval source record.",
+          "primaryKey": ["batch_id", "source_record_id", "payload_hash"],
+          "idempotencyKey": ["source_system", "source_record_id", "source_updated_at"],
+          "partitionBy": ["event_date", "market_zone"],
+          "columns": [
+            { "name": "batch_id", "type": "string", "nullable": false, "description": "Pipeline batch identifier." },
+            { "name": "source_system", "type": "string", "nullable": false, "description": "Licensed market/grid source." },
+            { "name": "source_record_id", "type": "string", "nullable": false, "description": "Stable source key." },
+            { "name": "source_updated_at", "type": "timestamp", "nullable": false, "description": "Source change timestamp." },
+            { "name": "event_date", "type": "date", "nullable": false, "description": "Market interval UTC date." },
+            { "name": "market_zone", "type": "string", "nullable": false, "description": "Country/bidding-zone key." },
+            { "name": "payload_json", "type": "string", "nullable": false, "description": "Source row JSON." },
+            { "name": "payload_hash", "type": "string", "nullable": false, "description": "Content hash." },
+            { "name": "data_classification", "type": "string", "nullable": false, "description": "Governance classification." },
+            { "name": "landed_at", "type": "timestamp", "nullable": false, "description": "Landing timestamp." }
+          ]
+        },
+        {
+          "name": "quarantine_event",
+          "grain": "One failed event/rule reason; an event may have multiple reason rows.",
+          "primaryKey": ["quarantine_id"],
+          "idempotencyKey": ["event_id", "quarantine_reason", "payload_hash"],
+          "partitionBy": ["quarantine_date", "plant_id"],
+          "columns": [
+            { "name": "quarantine_id", "type": "string", "nullable": false, "description": "Deterministic hash key." },
+            { "name": "event_id", "type": "string", "nullable": true, "description": "Original event ID if parseable." },
+            { "name": "event_ts", "type": "timestamp", "nullable": true, "description": "Original event time if parseable." },
+            { "name": "plant_id", "type": "string", "nullable": true, "description": "Original plant key." },
+            { "name": "asset_id", "type": "string", "nullable": true, "description": "Original asset key." },
+            { "name": "quarantine_reason", "type": "string", "nullable": false, "description": "Closed reason enum." },
+            { "name": "rule_id", "type": "string", "nullable": false, "description": "Data-quality rule identifier." },
+            { "name": "detail", "type": "string", "nullable": false, "description": "Non-sensitive diagnostic." },
+            { "name": "payload_json", "type": "string", "nullable": false, "description": "Original envelope/payload." },
+            { "name": "payload_hash", "type": "string", "nullable": false, "description": "Original content hash." },
+            { "name": "correlation_id", "type": "string", "nullable": true, "description": "End-to-end correlation ID." },
+            { "name": "quarantined_at", "type": "timestamp", "nullable": false, "description": "Rule evaluation time." },
+            { "name": "quarantine_date", "type": "date", "nullable": false, "description": "UTC partition date." }
+          ]
+        },
+        {
+          "name": "quarantine_batch",
+          "grain": "One rejected batch source record and rule reason.",
+          "primaryKey": ["quarantine_id"],
+          "idempotencyKey": ["batch_id", "source_record_id", "quarantine_reason", "payload_hash"],
+          "partitionBy": ["quarantine_date", "source_system"],
+          "columns": [
+            { "name": "quarantine_id", "type": "string", "nullable": false, "description": "Deterministic hash key." },
+            { "name": "batch_id", "type": "string", "nullable": false, "description": "Pipeline batch ID." },
+            { "name": "source_system", "type": "string", "nullable": false, "description": "Source system." },
+            { "name": "source_record_id", "type": "string", "nullable": true, "description": "Source key if parseable." },
+            { "name": "quarantine_reason", "type": "string", "nullable": false, "description": "Closed reason enum." },
+            { "name": "rule_id", "type": "string", "nullable": false, "description": "Data-quality rule identifier." },
+            { "name": "detail", "type": "string", "nullable": false, "description": "Non-sensitive diagnostic." },
+            { "name": "payload_json", "type": "string", "nullable": false, "description": "Original source row." },
+            { "name": "payload_hash", "type": "string", "nullable": false, "description": "Original content hash." },
+            { "name": "quarantined_at", "type": "timestamp", "nullable": false, "description": "Rule evaluation time." },
+            { "name": "quarantine_date", "type": "date", "nullable": false, "description": "UTC partition date." }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "silver",
+      "lakehouse": "coreLakehouse",
+      "tables": [
+        {
+          "name": "dim_plant",
+          "grain": "One SCD2 version of a plant.",
+          "primaryKey": ["plant_key"],
+          "idempotencyKey": ["plant_id", "valid_from"],
+          "partitionBy": [],
+          "columns": [
+            { "name": "plant_key", "type": "long", "nullable": false, "description": "Surrogate key." },
+            { "name": "plant_id", "type": "string", "nullable": false, "description": "Natural key." },
+            { "name": "plant_name", "type": "string", "nullable": false, "description": "Governed display name." },
+            { "name": "country_code", "type": "string", "nullable": false, "description": "ISO country code." },
+            { "name": "time_zone", "type": "string", "nullable": false, "description": "IANA site time zone." },
+            { "name": "route", "type": "string", "nullable": true, "description": "Primary steel route." },
+            { "name": "valid_from", "type": "timestamp", "nullable": false, "description": "Inclusive valid time." },
+            { "name": "valid_to", "type": "timestamp", "nullable": true, "description": "Exclusive valid time." },
+            { "name": "is_current", "type": "boolean", "nullable": false, "description": "Current-row flag." },
+            { "name": "version", "type": "integer", "nullable": false, "description": "Natural-key version." },
+            { "name": "change_reason", "type": "string", "nullable": true, "description": "Auditable change reason." }
+          ]
+        },
+        {
+          "name": "dim_asset",
+          "grain": "One SCD2 version of an asset/component hierarchy node.",
+          "primaryKey": ["asset_key"],
+          "idempotencyKey": ["asset_id", "valid_from"],
+          "partitionBy": ["plant_id"],
+          "columns": [
+            { "name": "asset_key", "type": "long", "nullable": false, "description": "Surrogate key." },
+            { "name": "asset_id", "type": "string", "nullable": false, "description": "Natural asset key." },
+            { "name": "plant_id", "type": "string", "nullable": false, "description": "Natural plant key." },
+            { "name": "parent_asset_id", "type": "string", "nullable": true, "description": "Hierarchy parent." },
+            { "name": "area", "type": "string", "nullable": true, "description": "Plant area." },
+            { "name": "line_id", "type": "string", "nullable": true, "description": "Line natural key." },
+            { "name": "asset_type", "type": "string", "nullable": false, "description": "Controlled asset type." },
+            { "name": "criticality", "type": "string", "nullable": true, "description": "Controlled criticality." },
+            { "name": "commissioned_state", "type": "string", "nullable": true, "description": "Lifecycle state." },
+            { "name": "valid_from", "type": "timestamp", "nullable": false, "description": "Inclusive valid time." },
+            { "name": "valid_to", "type": "timestamp", "nullable": true, "description": "Exclusive valid time." },
+            { "name": "is_current", "type": "boolean", "nullable": false, "description": "Current-row flag." },
+            { "name": "version", "type": "integer", "nullable": false, "description": "Natural-key version." },
+            { "name": "change_reason", "type": "string", "nullable": true, "description": "Auditable change reason." }
+          ]
+        },
+        {
+          "name": "dim_sensor",
+          "grain": "One SCD2 version of a physical/logical sensor.",
+          "primaryKey": ["sensor_key"],
+          "idempotencyKey": ["sensor_id", "valid_from"],
+          "partitionBy": ["plant_id"],
+          "columns": [
+            { "name": "sensor_key", "type": "long", "nullable": false, "description": "Surrogate key." },
+            { "name": "sensor_id", "type": "string", "nullable": false, "description": "Stable sensor ID." },
+            { "name": "plant_id", "type": "string", "nullable": false, "description": "Natural plant key." },
+            { "name": "asset_id", "type": "string", "nullable": false, "description": "Natural asset key." },
+            { "name": "signal_code", "type": "string", "nullable": false, "description": "Canonical signal code." },
+            { "name": "canonical_unit", "type": "string", "nullable": false, "description": "UCUM unit." },
+            { "name": "hard_min", "type": "double", "nullable": true, "description": "Physical lower bound." },
+            { "name": "hard_max", "type": "double", "nullable": true, "description": "Physical upper bound." },
+            { "name": "sample_period_ms", "type": "long", "nullable": true, "description": "Nominal sample period." },
+            { "name": "calibration_version", "type": "string", "nullable": true, "description": "Calibration lineage." },
+            { "name": "valid_from", "type": "timestamp", "nullable": false, "description": "Inclusive valid time." },
+            { "name": "valid_to", "type": "timestamp", "nullable": true, "description": "Exclusive valid time." },
+            { "name": "is_current", "type": "boolean", "nullable": false, "description": "Current-row flag." },
+            { "name": "version", "type": "integer", "nullable": false, "description": "Natural-key version." },
+            { "name": "change_reason", "type": "string", "nullable": true, "description": "Auditable change reason." }
+          ]
+        },
+        {
+          "name": "dim_grade",
+          "grain": "One SCD2 version of a synthetic/approved grade specification.",
+          "primaryKey": ["grade_key"],
+          "idempotencyKey": ["grade_code", "valid_from"],
+          "partitionBy": [],
+          "columns": [
+            { "name": "grade_key", "type": "long", "nullable": false, "description": "Surrogate key." },
+            { "name": "grade_code", "type": "string", "nullable": false, "description": "Natural grade key." },
+            { "name": "grade_family", "type": "string", "nullable": true, "description": "Reporting family." },
+            { "name": "high_grade_flag", "type": "boolean", "nullable": false, "description": "Automotive/high-grade scope." },
+            { "name": "target_json", "type": "string", "nullable": false, "description": "Versioned specification targets." },
+            { "name": "valid_from", "type": "timestamp", "nullable": false, "description": "Inclusive valid time." },
+            { "name": "valid_to", "type": "timestamp", "nullable": true, "description": "Exclusive valid time." },
+            { "name": "is_current", "type": "boolean", "nullable": false, "description": "Current-row flag." },
+            { "name": "version", "type": "integer", "nullable": false, "description": "Natural-key version." },
+            { "name": "change_reason", "type": "string", "nullable": true, "description": "Auditable change reason." }
+          ]
+        },
+        {
+          "name": "dim_calendar",
+          "grain": "One UTC date and site-local shift context.",
+          "primaryKey": ["date_key", "plant_id"],
+          "idempotencyKey": ["date_key", "plant_id"],
+          "partitionBy": [],
+          "columns": [
+            { "name": "date_key", "type": "date", "nullable": false, "description": "UTC calendar date." },
+            { "name": "plant_id", "type": "string", "nullable": false, "description": "Plant context." },
+            { "name": "local_date", "type": "date", "nullable": false, "description": "Site-local date." },
+            { "name": "year", "type": "integer", "nullable": false, "description": "Calendar year." },
+            { "name": "month", "type": "integer", "nullable": false, "description": "Calendar month." },
+            { "name": "iso_week", "type": "integer", "nullable": false, "description": "ISO week." },
+            { "name": "day_of_week", "type": "integer", "nullable": false, "description": "ISO day 1-7." },
+            { "name": "is_holiday", "type": "boolean", "nullable": false, "description": "Plant-local holiday flag." }
+          ]
+        },
+        {
+          "name": "fact_telemetry",
+          "grain": "One accepted canonical sensor observation.",
+          "primaryKey": ["event_id"],
+          "idempotencyKey": ["event_id"],
+          "partitionBy": ["event_date", "plant_id"],
+          "columns": [
+            { "name": "event_id", "type": "string", "nullable": false, "description": "Event idempotency key." },
+            { "name": "event_ts", "type": "timestamp", "nullable": false, "description": "UTC event time." },
+            { "name": "ingest_ts", "type": "timestamp", "nullable": false, "description": "UTC ingest time." },
+            { "name": "event_date", "type": "date", "nullable": false, "description": "UTC event date." },
+            { "name": "plant_key", "type": "long", "nullable": false, "description": "Event-time plant surrogate." },
+            { "name": "asset_key", "type": "long", "nullable": false, "description": "Event-time asset surrogate." },
+            { "name": "sensor_key", "type": "long", "nullable": false, "description": "Event-time sensor surrogate." },
+            { "name": "plant_id", "type": "string", "nullable": false, "description": "Natural plant key retained for partition/filter." },
+            { "name": "asset_id", "type": "string", "nullable": false, "description": "Natural asset key." },
+            { "name": "sensor_id", "type": "string", "nullable": false, "description": "Natural sensor key." },
+            { "name": "signal_code", "type": "string", "nullable": false, "description": "Canonical signal code." },
+            { "name": "value", "type": "double", "nullable": false, "description": "Canonical value." },
+            { "name": "unit", "type": "string", "nullable": false, "description": "Canonical UCUM unit." },
+            { "name": "source_quality", "type": "string", "nullable": false, "description": "GOOD/UNCERTAIN/BAD/STALE/SUBSTITUTED." },
+            { "name": "uncertainty", "type": "double", "nullable": true, "description": "Measurement uncertainty." },
+            { "name": "late_flag", "type": "boolean", "nullable": false, "description": "Accepted-but-late within policy." },
+            { "name": "scenario_id", "type": "string", "nullable": true, "description": "Synthetic scenario." },
+            { "name": "seed", "type": "long", "nullable": true, "description": "Synthetic seed." },
+            { "name": "correlation_id", "type": "string", "nullable": false, "description": "End-to-end correlation." },
+            { "name": "data_classification", "type": "string", "nullable": false, "description": "Governance classification." }
+          ]
+        },
+        {
+          "name": "fact_energy_interval",
+          "grain": "One meter/market interval.",
+          "primaryKey": ["meter_id", "interval_start"],
+          "idempotencyKey": ["meter_id", "interval_start", "source_version"],
+          "partitionBy": ["event_date", "plant_id"],
+          "columns": [
+            { "name": "meter_id", "type": "string", "nullable": false, "description": "Natural meter key." },
+            { "name": "plant_id", "type": "string", "nullable": false, "description": "Natural plant key." },
+            { "name": "interval_start", "type": "timestamp", "nullable": false, "description": "Inclusive UTC start." },
+            { "name": "interval_end", "type": "timestamp", "nullable": false, "description": "Exclusive UTC end." },
+            { "name": "event_date", "type": "date", "nullable": false, "description": "UTC date." },
+            { "name": "energy_type", "type": "string", "nullable": false, "description": "electricity, gas, oxygen, steam." },
+            { "name": "energy_mwh", "type": "double", "nullable": true, "description": "Canonical energy." },
+            { "name": "energy_gj", "type": "double", "nullable": false, "description": "Canonical GJ." },
+            { "name": "spot_price_eur_per_mwh", "type": "double", "nullable": true, "description": "Licensed/synthetic price." },
+            { "name": "grid_carbon_kg_per_mwh", "type": "double", "nullable": true, "description": "Grid carbon intensity." },
+            { "name": "cost_eur", "type": "double", "nullable": true, "description": "Interval energy cost." },
+            { "name": "co2e_t", "type": "double", "nullable": true, "description": "Interval CO2e tonnes." },
+            { "name": "source_version", "type": "string", "nullable": false, "description": "Source revision." },
+            { "name": "data_classification", "type": "string", "nullable": false, "description": "Governance classification." }
+          ]
+        },
+        {
+          "name": "fact_quality_measurement",
+          "grain": "One sample characteristic measurement.",
+          "primaryKey": ["sample_id", "characteristic_code"],
+          "idempotencyKey": ["sample_id", "characteristic_code", "measurement_method"],
+          "partitionBy": ["event_date", "plant_id"],
+          "columns": [
+            { "name": "sample_id", "type": "string", "nullable": false, "description": "Sample key." },
+            { "name": "characteristic_code", "type": "string", "nullable": false, "description": "Measured characteristic." },
+            { "name": "event_ts", "type": "timestamp", "nullable": false, "description": "Measurement time." },
+            { "name": "event_date", "type": "date", "nullable": false, "description": "UTC event date." },
+            { "name": "plant_id", "type": "string", "nullable": false, "description": "Plant natural key." },
+            { "name": "asset_id", "type": "string", "nullable": true, "description": "Producing asset." },
+            { "name": "material_id", "type": "string", "nullable": false, "description": "Coil/slab/bar key." },
+            { "name": "heat_id", "type": "string", "nullable": true, "description": "Heat genealogy key." },
+            { "name": "grade_key", "type": "long", "nullable": false, "description": "Event-time grade surrogate." },
+            { "name": "grade_code", "type": "string", "nullable": false, "description": "Grade natural key." },
+            { "name": "value", "type": "double", "nullable": false, "description": "Measured value." },
+            { "name": "unit", "type": "string", "nullable": false, "description": "Canonical unit." },
+            { "name": "lower_spec_limit", "type": "double", "nullable": true, "description": "Lower spec limit." },
+            { "name": "upper_spec_limit", "type": "double", "nullable": true, "description": "Upper spec limit." },
+            { "name": "measurement_method", "type": "string", "nullable": false, "description": "Method lineage." },
+            { "name": "result_status", "type": "string", "nullable": false, "description": "PASS/FAIL/REWORK/DOWNGRADE." },
+            { "name": "first_pass_flag", "type": "boolean", "nullable": false, "description": "First-pass outcome." },
+            { "name": "tons", "type": "double", "nullable": true, "description": "Associated material tonnes." }
+          ]
+        },
+        {
+          "name": "fact_maintenance_event",
+          "grain": "One maintenance lifecycle action/event.",
+          "primaryKey": ["work_order_id", "event_ts", "action_code"],
+          "idempotencyKey": ["work_order_id", "event_ts", "action_code"],
+          "partitionBy": ["event_date", "plant_id"],
+          "columns": [
+            { "name": "work_order_id", "type": "string", "nullable": false, "description": "Work-order key." },
+            { "name": "event_ts", "type": "timestamp", "nullable": false, "description": "Lifecycle event time." },
+            { "name": "event_date", "type": "date", "nullable": false, "description": "UTC date." },
+            { "name": "plant_id", "type": "string", "nullable": false, "description": "Plant natural key." },
+            { "name": "asset_id", "type": "string", "nullable": false, "description": "Asset natural key." },
+            { "name": "component_id", "type": "string", "nullable": true, "description": "Component natural key." },
+            { "name": "event_type", "type": "string", "nullable": false, "description": "detected/acknowledged/planned/started/completed." },
+            { "name": "failure_mode", "type": "string", "nullable": true, "description": "Controlled failure mode." },
+            { "name": "action_code", "type": "string", "nullable": false, "description": "Controlled action." },
+            { "name": "planned_flag", "type": "boolean", "nullable": false, "description": "Planned vs unplanned." },
+            { "name": "downtime_hours", "type": "double", "nullable": true, "description": "Associated downtime." },
+            { "name": "linked_inference_id", "type": "string", "nullable": true, "description": "Prediction lineage." }
+          ]
+        },
+        {
+          "name": "fact_alarm_event",
+          "grain": "One alarm lifecycle transition.",
+          "primaryKey": ["alarm_id", "transition_id"],
+          "idempotencyKey": ["alarm_id", "transition_id"],
+          "partitionBy": ["event_date", "plant_id"],
+          "columns": [
+            { "name": "alarm_id", "type": "string", "nullable": false, "description": "Alarm natural key." },
+            { "name": "transition_id", "type": "string", "nullable": false, "description": "Transition key." },
+            { "name": "event_ts", "type": "timestamp", "nullable": false, "description": "Transition time." },
+            { "name": "event_date", "type": "date", "nullable": false, "description": "UTC date." },
+            { "name": "plant_id", "type": "string", "nullable": false, "description": "Plant natural key." },
+            { "name": "asset_id", "type": "string", "nullable": false, "description": "Asset natural key." },
+            { "name": "severity", "type": "string", "nullable": false, "description": "CRITICAL/HIGH/WARNING/INFO." },
+            { "name": "state", "type": "string", "nullable": false, "description": "OPEN through CLOSED." },
+            { "name": "alarm_type", "type": "string", "nullable": false, "description": "Controlled alarm type." },
+            { "name": "confidence", "type": "double", "nullable": true, "description": "AI confidence when derived." },
+            { "name": "correlation_id", "type": "string", "nullable": false, "description": "End-to-end correlation." }
+          ]
+        },
+        {
+          "name": "fact_model_inference",
+          "grain": "One model inference for an asset/material feature snapshot.",
+          "primaryKey": ["inference_id"],
+          "idempotencyKey": ["inference_id"],
+          "partitionBy": ["event_date", "plant_id"],
+          "columns": [
+            { "name": "inference_id", "type": "string", "nullable": false, "description": "Inference key." },
+            { "name": "event_date", "type": "date", "nullable": false, "description": "Feature snapshot UTC date." },
+            { "name": "feature_snapshot_ts", "type": "timestamp", "nullable": false, "description": "Feature as-of time." },
+            { "name": "scored_at", "type": "timestamp", "nullable": false, "description": "Scoring time." },
+            { "name": "plant_id", "type": "string", "nullable": false, "description": "Plant natural key." },
+            { "name": "entity_id", "type": "string", "nullable": false, "description": "Asset/material entity." },
+            { "name": "component_id", "type": "string", "nullable": true, "description": "Component key." },
+            { "name": "model_id", "type": "string", "nullable": false, "description": "Registered model identifier." },
+            { "name": "model_version", "type": "string", "nullable": false, "description": "Model/config version." },
+            { "name": "prediction_type", "type": "string", "nullable": false, "description": "rul or quality-risk." },
+            { "name": "prediction_value", "type": "double", "nullable": false, "description": "Primary prediction." },
+            { "name": "unit", "type": "string", "nullable": false, "description": "Prediction unit." },
+            { "name": "p10", "type": "double", "nullable": true, "description": "Lower uncertainty quantile." },
+            { "name": "p50", "type": "double", "nullable": true, "description": "Median prediction." },
+            { "name": "p90", "type": "double", "nullable": true, "description": "Upper uncertainty quantile." },
+            { "name": "risk_score", "type": "double", "nullable": true, "description": "Calibrated risk 0-1." },
+            { "name": "confidence", "type": "double", "nullable": true, "description": "Calibrated confidence 0-1." },
+            { "name": "top_factors_json", "type": "string", "nullable": false, "description": "Explainability factors." },
+            { "name": "feature_snapshot_ref", "type": "string", "nullable": false, "description": "Versioned source reference." },
+            { "name": "scenario_id", "type": "string", "nullable": true, "description": "Synthetic scenario." },
+            { "name": "seed", "type": "long", "nullable": true, "description": "Synthetic seed." }
+          ]
+        },
+        {
+          "name": "fact_ai_decision",
+          "grain": "One append-only recommendation, human decision, or outcome event.",
+          "primaryKey": ["audit_event_id"],
+          "idempotencyKey": ["audit_event_id"],
+          "partitionBy": ["event_date", "domain"],
+          "columns": [
+            { "name": "audit_event_id", "type": "string", "nullable": false, "description": "Append event key." },
+            { "name": "audit_id", "type": "string", "nullable": false, "description": "Decision lineage root." },
+            { "name": "event_ts", "type": "timestamp", "nullable": false, "description": "Append time." },
+            { "name": "event_date", "type": "date", "nullable": false, "description": "UTC date." },
+            { "name": "domain", "type": "string", "nullable": false, "description": "energy/quality/furnace/knowledge/capacity." },
+            { "name": "entity_id", "type": "string", "nullable": false, "description": "Decision entity." },
+            { "name": "event_type", "type": "string", "nullable": false, "description": "RECOMMENDATION/HUMAN_DECISION/OUTCOME." },
+            { "name": "recommendation_status", "type": "string", "nullable": true, "description": "ISSUED/ACCEPTED/MODIFIED/REJECTED." },
+            { "name": "input_snapshot_ref", "type": "string", "nullable": false, "description": "Versioned input reference." },
+            { "name": "model_version", "type": "string", "nullable": true, "description": "Model/agent configuration." },
+            { "name": "output_json", "type": "string", "nullable": true, "description": "Structured output." },
+            { "name": "confidence", "type": "double", "nullable": true, "description": "Calibrated confidence." },
+            { "name": "actor_id", "type": "string", "nullable": true, "description": "Pseudonymous actor identifier." },
+            { "name": "reason_code", "type": "string", "nullable": true, "description": "Human decision reason." },
+            { "name": "correlation_id", "type": "string", "nullable": false, "description": "End-to-end correlation." },
+            { "name": "complete_audit_flag", "type": "boolean", "nullable": false, "description": "Required lineage completeness." }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "gold",
+      "lakehouse": "coreLakehouse",
+      "tables": [
+        {
+          "name": "fact_energy_daily",
+          "grain": "One plant and UTC date.",
+          "primaryKey": ["date_key", "plant_id"],
+          "idempotencyKey": ["date_key", "plant_id", "calculation_version"],
+          "partitionBy": ["date_key", "plant_id"],
+          "columns": [
+            { "name": "date_key", "type": "date", "nullable": false, "description": "UTC date." },
+            { "name": "plant_id", "type": "string", "nullable": false, "description": "Plant natural key." },
+            { "name": "energy_gj", "type": "double", "nullable": false, "description": "Total energy GJ." },
+            { "name": "electricity_mwh", "type": "double", "nullable": true, "description": "Electricity MWh." },
+            { "name": "energy_cost_eur", "type": "double", "nullable": true, "description": "As-run energy cost." },
+            { "name": "baseline_energy_gj", "type": "double", "nullable": true, "description": "Comparable baseline energy." },
+            { "name": "baseline_cost_eur", "type": "double", "nullable": true, "description": "Baseline schedule cost." },
+            { "name": "crude_steel_tons", "type": "double", "nullable": false, "description": "Produced crude-steel tonnes." },
+            { "name": "calculation_version", "type": "string", "nullable": false, "description": "KPI calculation version." }
+          ]
+        },
+        {
+          "name": "fact_emissions_daily",
+          "grain": "One plant and UTC date.",
+          "primaryKey": ["date_key", "plant_id"],
+          "idempotencyKey": ["date_key", "plant_id", "calculation_version"],
+          "partitionBy": ["date_key", "plant_id"],
+          "columns": [
+            { "name": "date_key", "type": "date", "nullable": false, "description": "UTC date." },
+            { "name": "plant_id", "type": "string", "nullable": false, "description": "Plant natural key." },
+            { "name": "scope1_co2e_t", "type": "double", "nullable": false, "description": "Scope 1 tonnes." },
+            { "name": "scope2_co2e_t", "type": "double", "nullable": false, "description": "Scope 2 tonnes." },
+            { "name": "total_co2e_t", "type": "double", "nullable": false, "description": "Total CO2e tonnes." },
+            { "name": "baseline_co2e_t", "type": "double", "nullable": true, "description": "Comparable baseline." },
+            { "name": "crude_steel_tons", "type": "double", "nullable": false, "description": "Produced crude-steel tonnes." },
+            { "name": "free_allocation_t", "type": "double", "nullable": true, "description": "ETS free-allocation threshold." },
+            { "name": "ets_allowance_price_eur_per_t", "type": "double", "nullable": true, "description": "Allowance price." },
+            { "name": "ets_exposure_eur", "type": "double", "nullable": true, "description": "Forecast excess emissions times price." },
+            { "name": "calculation_version", "type": "string", "nullable": false, "description": "KPI calculation version." }
+          ]
+        },
+        {
+          "name": "fact_production_shift",
+          "grain": "One plant/line/shift.",
+          "primaryKey": ["shift_id", "line_id"],
+          "idempotencyKey": ["shift_id", "line_id", "calculation_version"],
+          "partitionBy": ["shift_date", "plant_id"],
+          "columns": [
+            { "name": "shift_id", "type": "string", "nullable": false, "description": "Shift key." },
+            { "name": "shift_date", "type": "date", "nullable": false, "description": "Site-local shift date." },
+            { "name": "plant_id", "type": "string", "nullable": false, "description": "Plant natural key." },
+            { "name": "line_id", "type": "string", "nullable": false, "description": "Line natural key." },
+            { "name": "planned_minutes", "type": "double", "nullable": false, "description": "Planned production minutes." },
+            { "name": "runtime_minutes", "type": "double", "nullable": false, "description": "Actual runtime minutes." },
+            { "name": "ideal_rate_tph", "type": "double", "nullable": false, "description": "Rated throughput." },
+            { "name": "total_tons", "type": "double", "nullable": false, "description": "Total output." },
+            { "name": "good_tons", "type": "double", "nullable": false, "description": "Good output." },
+            { "name": "crude_steel_tons", "type": "double", "nullable": false, "description": "Crude-steel output." },
+            { "name": "on_time_orders", "type": "long", "nullable": false, "description": "On-time order count." },
+            { "name": "total_orders", "type": "long", "nullable": false, "description": "Total order count." },
+            { "name": "calculation_version", "type": "string", "nullable": false, "description": "KPI calculation version." }
+          ]
+        },
+        {
+          "name": "fact_quality_yield",
+          "grain": "One plant/grade/date.",
+          "primaryKey": ["date_key", "plant_id", "grade_code"],
+          "idempotencyKey": ["date_key", "plant_id", "grade_code", "calculation_version"],
+          "partitionBy": ["date_key", "plant_id"],
+          "columns": [
+            { "name": "date_key", "type": "date", "nullable": false, "description": "UTC date." },
+            { "name": "plant_id", "type": "string", "nullable": false, "description": "Plant natural key." },
+            { "name": "grade_code", "type": "string", "nullable": false, "description": "Grade natural key." },
+            { "name": "high_grade_flag", "type": "boolean", "nullable": false, "description": "Automotive/high-grade scope." },
+            { "name": "attempted_tons", "type": "double", "nullable": false, "description": "Attempted tonnes." },
+            { "name": "first_pass_good_tons", "type": "double", "nullable": false, "description": "First-pass spec tonnes." },
+            { "name": "rework_tons", "type": "double", "nullable": false, "description": "Rework tonnes." },
+            { "name": "downgrade_tons", "type": "double", "nullable": false, "description": "Downgrade tonnes." },
+            { "name": "scrap_tons", "type": "double", "nullable": false, "description": "Scrap tonnes." },
+            { "name": "defect_count", "type": "long", "nullable": false, "description": "Defect count." },
+            { "name": "produced_units", "type": "long", "nullable": false, "description": "Produced units for ppm." },
+            { "name": "open_ncr_count", "type": "long", "nullable": false, "description": "Open non-conformance count." },
+            { "name": "calculation_version", "type": "string", "nullable": false, "description": "KPI calculation version." }
+          ]
+        },
+        {
+          "name": "fact_furnace_rul",
+          "grain": "One furnace/component scoring snapshot.",
+          "primaryKey": ["inference_id"],
+          "idempotencyKey": ["inference_id"],
+          "partitionBy": ["scored_date", "plant_id"],
+          "columns": [
+            { "name": "inference_id", "type": "string", "nullable": false, "description": "Inference key." },
+            { "name": "scored_date", "type": "date", "nullable": false, "description": "UTC scoring date." },
+            { "name": "scored_at", "type": "timestamp", "nullable": false, "description": "UTC scoring time." },
+            { "name": "plant_id", "type": "string", "nullable": false, "description": "Plant natural key." },
+            { "name": "asset_id", "type": "string", "nullable": false, "description": "Furnace asset." },
+            { "name": "component_id", "type": "string", "nullable": false, "description": "Lining component/sector." },
+            { "name": "rul_days_p10", "type": "double", "nullable": false, "description": "Lower RUL quantile." },
+            { "name": "rul_days_p50", "type": "double", "nullable": false, "description": "Median RUL." },
+            { "name": "rul_days_p90", "type": "double", "nullable": false, "description": "Upper RUL quantile." },
+            { "name": "risk_score", "type": "double", "nullable": false, "description": "Risk 0-1." },
+            { "name": "confidence", "type": "double", "nullable": false, "description": "Model confidence." },
+            { "name": "predicted_failure_date", "type": "date", "nullable": false, "description": "P50 failure date." },
+            { "name": "alert_issued_at", "type": "timestamp", "nullable": true, "description": "Threshold alert time." },
+            { "name": "actual_reline_or_failure_at", "type": "timestamp", "nullable": true, "description": "Observed outcome time." },
+            { "name": "unplanned_outage_flag", "type": "boolean", "nullable": false, "description": "Observed unplanned outage." },
+            { "name": "model_version", "type": "string", "nullable": false, "description": "Model/config version." },
+            { "name": "top_factors_json", "type": "string", "nullable": false, "description": "Explainability factors." },
+            { "name": "scenario_id", "type": "string", "nullable": true, "description": "Synthetic scenario." },
+            { "name": "seed", "type": "long", "nullable": true, "description": "Synthetic seed." }
+          ]
+        },
+        {
+          "name": "fact_dispatch_recommendation",
+          "grain": "One energy dispatch recommendation.",
+          "primaryKey": ["recommendation_id"],
+          "idempotencyKey": ["recommendation_id"],
+          "partitionBy": ["recommendation_date", "plant_id"],
+          "columns": [
+            { "name": "recommendation_id", "type": "string", "nullable": false, "description": "Recommendation key." },
+            { "name": "recommendation_date", "type": "date", "nullable": false, "description": "UTC issue date." },
+            { "name": "issued_at", "type": "timestamp", "nullable": false, "description": "Issue time." },
+            { "name": "plant_id", "type": "string", "nullable": false, "description": "Plant natural key." },
+            { "name": "status", "type": "string", "nullable": false, "description": "ISSUED/ACCEPTED/MODIFIED/REJECTED." },
+            { "name": "baseline_cost_eur", "type": "double", "nullable": false, "description": "Baseline schedule cost." },
+            { "name": "optimized_cost_eur", "type": "double", "nullable": false, "description": "Proposed optimized cost." },
+            { "name": "as_run_cost_eur", "type": "double", "nullable": true, "description": "Observed accepted-schedule cost." },
+            { "name": "expected_cost_avoidance_eur", "type": "double", "nullable": false, "description": "Baseline minus optimized." },
+            { "name": "realized_cost_avoidance_eur", "type": "double", "nullable": true, "description": "Baseline minus as-run for accepted recommendation." },
+            { "name": "expected_co2_avoided_t", "type": "double", "nullable": true, "description": "Expected CO2 delta." },
+            { "name": "shiftable_mw", "type": "double", "nullable": true, "description": "Eligible shiftable load." },
+            { "name": "hard_constraint_violations", "type": "long", "nullable": false, "description": "Must remain zero for feasible recommendation." },
+            { "name": "model_version", "type": "string", "nullable": false, "description": "Optimizer/config version." },
+            { "name": "correlation_id", "type": "string", "nullable": false, "description": "End-to-end correlation." }
+          ]
+        },
+        {
+          "name": "fact_knowledge_procedure",
+          "grain": "One immutable procedure version.",
+          "primaryKey": ["procedure_id", "version"],
+          "idempotencyKey": ["procedure_id", "version"],
+          "partitionBy": ["published_date"],
+          "columns": [
+            { "name": "procedure_id", "type": "string", "nullable": false, "description": "Procedure natural key." },
+            { "name": "version", "type": "integer", "nullable": false, "description": "Immutable version." },
+            { "name": "topic_id", "type": "string", "nullable": false, "description": "Critical-knowledge topic." },
+            { "name": "equipment_id", "type": "string", "nullable": true, "description": "Equipment scope." },
+            { "name": "review_status", "type": "string", "nullable": false, "description": "DRAFT/APPROVED/REJECTED." },
+            { "name": "approved_flag", "type": "boolean", "nullable": false, "description": "General retrieval eligibility." },
+            { "name": "published_date", "type": "date", "nullable": true, "description": "Approved publication date." },
+            { "name": "source_citation_count", "type": "long", "nullable": false, "description": "Approved source count." },
+            { "name": "content_hash", "type": "string", "nullable": false, "description": "Tamper-evident content hash." }
+          ]
+        },
+        {
+          "name": "fact_ai_decision_audit",
+          "grain": "One decision lineage root with latest linked human/outcome state for reporting.",
+          "primaryKey": ["audit_id"],
+          "idempotencyKey": ["audit_id", "projection_version"],
+          "partitionBy": ["recorded_date", "domain"],
+          "columns": [
+            { "name": "audit_id", "type": "string", "nullable": false, "description": "Decision lineage root." },
+            { "name": "recorded_date", "type": "date", "nullable": false, "description": "Issue UTC date." },
+            { "name": "recorded_at", "type": "timestamp", "nullable": false, "description": "Recommendation issue time." },
+            { "name": "domain", "type": "string", "nullable": false, "description": "Decision domain." },
+            { "name": "entity_id", "type": "string", "nullable": false, "description": "Decision entity." },
+            { "name": "recommendation_status", "type": "string", "nullable": false, "description": "Latest human state." },
+            { "name": "input_snapshot_ref", "type": "string", "nullable": false, "description": "Versioned inputs." },
+            { "name": "model_version", "type": "string", "nullable": true, "description": "Model/agent config." },
+            { "name": "confidence", "type": "double", "nullable": true, "description": "Calibrated confidence." },
+            { "name": "human_decision_at", "type": "timestamp", "nullable": true, "description": "Human decision time." },
+            { "name": "outcome_recorded_at", "type": "timestamp", "nullable": true, "description": "Outcome append time." },
+            { "name": "complete_audit_flag", "type": "boolean", "nullable": false, "description": "All mandatory fields present." },
+            { "name": "correlation_id", "type": "string", "nullable": false, "description": "End-to-end correlation." },
+            { "name": "projection_version", "type": "string", "nullable": false, "description": "Projection version." }
+          ]
+        },
+        {
+          "name": "dim_kpi_target",
+          "grain": "One KPI/environment/effective-period target.",
+          "primaryKey": ["kpi_id", "environment", "valid_from"],
+          "idempotencyKey": ["kpi_id", "environment", "valid_from"],
+          "partitionBy": [],
+          "columns": [
+            { "name": "kpi_id", "type": "string", "nullable": false, "description": "Stable requirements KPI ID." },
+            { "name": "environment", "type": "string", "nullable": false, "description": "dev/test/demo/prod." },
+            { "name": "baseline_value", "type": "double", "nullable": true, "description": "Approved/synthetic baseline." },
+            { "name": "target_value", "type": "double", "nullable": true, "description": "Target value." },
+            { "name": "unit", "type": "string", "nullable": false, "description": "KPI unit." },
+            { "name": "target_direction", "type": "string", "nullable": false, "description": "increase/decrease/minimum/maximum." },
+            { "name": "valid_from", "type": "date", "nullable": false, "description": "Inclusive validity." },
+            { "name": "valid_to", "type": "date", "nullable": true, "description": "Exclusive validity." },
+            { "name": "source", "type": "string", "nullable": false, "description": "Requirement/business approval reference." }
+          ]
+        },
+        {
+          "name": "fact_model_evaluation",
+          "grain": "One model/domain/evaluation window.",
+          "primaryKey": ["evaluation_id"],
+          "idempotencyKey": ["evaluation_id"],
+          "partitionBy": ["evaluation_date", "domain"],
+          "columns": [
+            { "name": "evaluation_id", "type": "string", "nullable": false, "description": "Evaluation key." },
+            { "name": "evaluation_date", "type": "date", "nullable": false, "description": "Evaluation date." },
+            { "name": "domain", "type": "string", "nullable": false, "description": "furnace or quality." },
+            { "name": "model_id", "type": "string", "nullable": false, "description": "Model ID." },
+            { "name": "model_version", "type": "string", "nullable": false, "description": "Model version." },
+            { "name": "true_positive", "type": "long", "nullable": false, "description": "Confusion-matrix TP." },
+            { "name": "false_positive", "type": "long", "nullable": false, "description": "Confusion-matrix FP." },
+            { "name": "false_negative", "type": "long", "nullable": false, "description": "Confusion-matrix FN." },
+            { "name": "true_negative", "type": "long", "nullable": false, "description": "Confusion-matrix TN." },
+            { "name": "drift_score", "type": "double", "nullable": true, "description": "Approved drift metric." },
+            { "name": "passed_gate", "type": "boolean", "nullable": false, "description": "Evaluation gate result." }
+          ]
+        },
+        {
+          "name": "fact_customer_claim",
+          "grain": "One customer non-conformance claim.",
+          "primaryKey": ["claim_id"],
+          "idempotencyKey": ["claim_id"],
+          "partitionBy": ["claim_date", "plant_id"],
+          "columns": [
+            { "name": "claim_id", "type": "string", "nullable": false, "description": "Claim key." },
+            { "name": "claim_date", "type": "date", "nullable": false, "description": "Claim date." },
+            { "name": "plant_id", "type": "string", "nullable": false, "description": "Plant natural key." },
+            { "name": "material_id", "type": "string", "nullable": true, "description": "Shipped material." },
+            { "name": "non_conformance_count", "type": "long", "nullable": false, "description": "Claim count." },
+            { "name": "tons_shipped", "type": "double", "nullable": false, "description": "Comparable shipped tonnes." },
+            { "name": "predicted_risk_flag", "type": "boolean", "nullable": true, "description": "Prediction linkage." }
+          ]
+        },
+        {
+          "name": "fact_knowledge_usage",
+          "grain": "One approved knowledge search/query.",
+          "primaryKey": ["query_id"],
+          "idempotencyKey": ["query_id"],
+          "partitionBy": ["query_date"],
+          "columns": [
+            { "name": "query_id", "type": "string", "nullable": false, "description": "Query key." },
+            { "name": "query_date", "type": "date", "nullable": false, "description": "UTC query date." },
+            { "name": "topic_id", "type": "string", "nullable": true, "description": "Matched topic." },
+            { "name": "retrieval_ms", "type": "long", "nullable": false, "description": "Time to cited answer." },
+            { "name": "cited_answer_flag", "type": "boolean", "nullable": false, "description": "Grounded answer result." }
+          ]
+        },
+        {
+          "name": "fact_platform_usage",
+          "grain": "One user/persona/week activity summary.",
+          "primaryKey": ["week_start", "persona_group", "user_subject"],
+          "idempotencyKey": ["week_start", "persona_group", "user_subject"],
+          "partitionBy": ["week_start"],
+          "columns": [
+            { "name": "week_start", "type": "date", "nullable": false, "description": "ISO week start." },
+            { "name": "persona_group", "type": "string", "nullable": false, "description": "Authorized persona group." },
+            { "name": "user_subject", "type": "string", "nullable": false, "description": "Pseudonymous subject ID." },
+            { "name": "active_flag", "type": "boolean", "nullable": false, "description": "Weekly active flag." },
+            { "name": "target_user_flag", "type": "boolean", "nullable": false, "description": "Licensed/target population flag." }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "operations",
+      "lakehouse": "coreLakehouse",
+      "tables": [
+        {
+          "name": "dq_run_result",
+          "grain": "One rule result per pipeline run/table/rule.",
+          "primaryKey": ["run_id", "table_name", "rule_id"],
+          "idempotencyKey": ["run_id", "table_name", "rule_id"],
+          "partitionBy": ["run_date"],
+          "columns": [
+            { "name": "run_id", "type": "string", "nullable": false, "description": "Pipeline/scenario run ID." },
+            { "name": "run_date", "type": "date", "nullable": false, "description": "UTC run date." },
+            { "name": "table_name", "type": "string", "nullable": false, "description": "Evaluated table." },
+            { "name": "rule_id", "type": "string", "nullable": false, "description": "Stable DQ rule ID." },
+            { "name": "status", "type": "string", "nullable": false, "description": "PASS/WARN/FAIL." },
+            { "name": "evaluated_rows", "type": "long", "nullable": false, "description": "Rows evaluated." },
+            { "name": "failed_rows", "type": "long", "nullable": false, "description": "Rows failing." },
+            { "name": "metric_value", "type": "double", "nullable": true, "description": "Rule metric." },
+            { "name": "threshold", "type": "double", "nullable": true, "description": "Rule threshold." },
+            { "name": "recorded_at", "type": "timestamp", "nullable": false, "description": "UTC result time." }
+          ]
+        },
+        {
+          "name": "pipeline_run_reconciliation",
+          "grain": "One source/target reconciliation per pipeline run and dataset.",
+          "primaryKey": ["run_id", "dataset"],
+          "idempotencyKey": ["run_id", "dataset"],
+          "partitionBy": ["run_date"],
+          "columns": [
+            { "name": "run_id", "type": "string", "nullable": false, "description": "Pipeline run ID." },
+            { "name": "run_date", "type": "date", "nullable": false, "description": "UTC run date." },
+            { "name": "dataset", "type": "string", "nullable": false, "description": "Dataset name." },
+            { "name": "bronze_rows", "type": "long", "nullable": false, "description": "Input rows." },
+            { "name": "silver_rows", "type": "long", "nullable": false, "description": "Accepted unique rows." },
+            { "name": "quarantine_rows", "type": "long", "nullable": false, "description": "Rejected reason rows." },
+            { "name": "duplicate_rows", "type": "long", "nullable": false, "description": "Idempotent exact duplicates." },
+            { "name": "unexplained_rows", "type": "long", "nullable": false, "description": "Must equal zero." },
+            { "name": "status", "type": "string", "nullable": false, "description": "PASS/FAIL." },
+            { "name": "recorded_at", "type": "timestamp", "nullable": false, "description": "UTC result time." }
+          ]
+        }
+      ]
+    }
+  ]
+}

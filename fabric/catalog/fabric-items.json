@@ -1,0 +1,379 @@
+{
+  "$schema": "./fabric-items.schema.json",
+  "schemaVersion": 1,
+  "workspaces": [
+    {
+      "key": "rtiIngress",
+      "purpose": "Isolated Eventstream publisher blast radius, Eventhouse/KQL, landing Lakehouse, and RTI assets.",
+      "parameterPath": "workspaces.rtiIngress"
+    },
+    {
+      "key": "dataCore",
+      "purpose": "Curated core Lakehouse, notebooks, and Data Pipelines; no ingress publisher access.",
+      "parameterPath": "workspaces.dataCore"
+    },
+    {
+      "key": "ml",
+      "purpose": "Fabric Data Science, experiments, evaluations, and approved model artifacts.",
+      "parameterPath": "workspaces.ml"
+    },
+    {
+      "key": "analytics",
+      "purpose": "Direct Lake semantic model and Power BI/board reporting.",
+      "parameterPath": "workspaces.analytics"
+    }
+  ],
+  "items": [
+    {
+      "key": "eventhouseOperations",
+      "type": "Eventhouse",
+      "displayName": "evh-ns-operations",
+      "description": "NovaSteel hot operational Eventhouse.",
+      "workspaceKey": "rtiIngress",
+      "automationTier": "automaticAfterTenantGate",
+      "deploymentOption": "deployRti",
+      "restCollection": "/eventhouses",
+      "sourceDirectory": "items/evh-ns-operations.Eventhouse",
+      "definitionFormat": null,
+      "definitionParts": [],
+      "createWithoutDefinition": true,
+      "cliDeployable": false,
+      "bindingGate": null,
+      "dependencies": [],
+      "manualGates": [
+        "Confirm the workspace is assigned to a running supported Fabric capacity.",
+        "Validate retention/cache cost and cold-start behavior in the target tenant."
+      ]
+    },
+    {
+      "key": "landingLakehouse",
+      "type": "Lakehouse",
+      "displayName": "lh-ns-landing",
+      "description": "Immutable bronze envelopes and quarantine landing.",
+      "workspaceKey": "rtiIngress",
+      "automationTier": "automaticAfterTenantGate",
+      "deploymentOption": "deployLakehouses",
+      "restCollection": "/lakehouses",
+      "sourceDirectory": "items/lh-ns-landing.Lakehouse",
+      "definitionFormat": null,
+      "definitionParts": [],
+      "createWithoutDefinition": true,
+      "cliDeployable": false,
+      "bindingGate": null,
+      "dependencies": [],
+      "manualGates": [
+        "Apply and verify current OneLake security roles and sensitivity label.",
+        "Verify that no shortcut crosses the demo/non-demo boundary."
+      ]
+    },
+    {
+      "key": "coreLakehouse",
+      "type": "Lakehouse",
+      "displayName": "lh-ns-core",
+      "description": "Typed silver facts, SCD dimensions, and gold KPI tables.",
+      "workspaceKey": "dataCore",
+      "automationTier": "automaticAfterTenantGate",
+      "deploymentOption": "deployLakehouses",
+      "restCollection": "/lakehouses",
+      "sourceDirectory": "items/lh-ns-core.Lakehouse",
+      "definitionFormat": null,
+      "definitionParts": [],
+      "createWithoutDefinition": true,
+      "cliDeployable": false,
+      "bindingGate": null,
+      "dependencies": [],
+      "manualGates": [
+        "Apply and verify current OneLake security roles and sensitivity label.",
+        "Confirm the workspace identity/notebook identity can read landing and write core only."
+      ]
+    },
+    {
+      "key": "kqlOperations",
+      "type": "KQLDatabase",
+      "displayName": "kql-ns-operations",
+      "description": "Hot telemetry, alarms, gateway health, inference, and quarantine.",
+      "workspaceKey": "rtiIngress",
+      "automationTier": "automaticAfterTenantGate",
+      "deploymentOption": "deployRti",
+      "restCollection": "/kqlDatabases",
+      "sourceDirectory": "items/kql-ns-operations.KQLDatabase",
+      "definitionFormat": null,
+      "definitionParts": [
+        "DatabaseProperties.json",
+        "DatabaseSchema.kql",
+        ".platform"
+      ],
+      "createWithoutDefinition": false,
+      "cliDeployable": true,
+      "bindingGate": null,
+      "dependencies": ["eventhouseOperations"],
+      "manualGates": [
+        "Measure retention/cache cost and adjust environment retention values.",
+        "Confirm KQL query/ingestion endpoints and item identity support before production."
+      ]
+    },
+    {
+      "key": "notebookInitialize",
+      "type": "Notebook",
+      "displayName": "ns-initialize-lakehouses",
+      "description": "Create Delta medallion tables and reference targets idempotently.",
+      "workspaceKey": "dataCore",
+      "automationTier": "automaticAfterTenantGate",
+      "deploymentOption": "deployNotebooks",
+      "restCollection": "/notebooks",
+      "sourceDirectory": "notebooks/ns-initialize-lakehouses.Notebook",
+      "definitionFormat": "fabricGitSource",
+      "definitionParts": ["notebook-content.py", ".platform"],
+      "createWithoutDefinition": false,
+      "cliDeployable": true,
+      "bindingGate": null,
+      "dependencies": ["landingLakehouse", "coreLakehouse"],
+      "manualGates": [
+        "Attach or authorize the landing/core Lakehouses for the notebook execution identity."
+      ]
+    },
+    {
+      "key": "notebookBronzeToSilver",
+      "type": "Notebook",
+      "displayName": "ns-bronze-to-silver",
+      "description": "Validate, deduplicate, normalize, SCD-resolve, and quarantine bronze events.",
+      "workspaceKey": "dataCore",
+      "automationTier": "automaticAfterTenantGate",
+      "deploymentOption": "deployNotebooks",
+      "restCollection": "/notebooks",
+      "sourceDirectory": "notebooks/ns-bronze-to-silver.Notebook",
+      "definitionFormat": "fabricGitSource",
+      "definitionParts": ["notebook-content.py", ".platform"],
+      "createWithoutDefinition": false,
+      "cliDeployable": true,
+      "bindingGate": null,
+      "dependencies": ["notebookInitialize"],
+      "manualGates": [
+        "Validate event-time SCD joins, unit registry, watermark, and replay behavior with a fixed batch."
+      ]
+    },
+    {
+      "key": "notebookSilverToGold",
+      "type": "Notebook",
+      "displayName": "ns-silver-to-gold",
+      "description": "Build governed daily/shift KPI facts and decision/audit projections.",
+      "workspaceKey": "dataCore",
+      "automationTier": "automaticAfterTenantGate",
+      "deploymentOption": "deployNotebooks",
+      "restCollection": "/notebooks",
+      "sourceDirectory": "notebooks/ns-silver-to-gold.Notebook",
+      "definitionFormat": "fabricGitSource",
+      "definitionParts": ["notebook-content.py", ".platform"],
+      "createWithoutDefinition": false,
+      "cliDeployable": true,
+      "bindingGate": null,
+      "dependencies": ["notebookBronzeToSilver"],
+      "manualGates": [
+        "Business owners must sign off KPI definitions before production reporting."
+      ]
+    },
+    {
+      "key": "notebookDemoScoring",
+      "type": "Notebook",
+      "displayName": "ns-deterministic-demo-scoring",
+      "description": "Synthetic-only deterministic RUL and quality demo scoring.",
+      "workspaceKey": "ml",
+      "automationTier": "automaticAfterTenantGate",
+      "deploymentOption": "deployNotebooks",
+      "restCollection": "/notebooks",
+      "sourceDirectory": "notebooks/ns-deterministic-demo-scoring.Notebook",
+      "definitionFormat": "fabricGitSource",
+      "definitionParts": ["notebook-content.py", ".platform"],
+      "createWithoutDefinition": false,
+      "cliDeployable": true,
+      "bindingGate": null,
+      "dependencies": ["coreLakehouse"],
+      "manualGates": [
+        "Run only against SYNTHETIC data; this rule-based scorer is not a promoted production model.",
+        "A production model requires MLflow evaluation, model card, drift gates, and RAI approval."
+      ]
+    },
+    {
+      "key": "notebookDataQuality",
+      "type": "Notebook",
+      "displayName": "ns-validate-data-quality",
+      "description": "Reconciliation, contract, physical, and scenario quality gate.",
+      "workspaceKey": "dataCore",
+      "automationTier": "automaticAfterTenantGate",
+      "deploymentOption": "deployNotebooks",
+      "restCollection": "/notebooks",
+      "sourceDirectory": "notebooks/ns-validate-data-quality.Notebook",
+      "definitionFormat": "fabricGitSource",
+      "definitionParts": ["notebook-content.py", ".platform"],
+      "createWithoutDefinition": false,
+      "cliDeployable": true,
+      "bindingGate": null,
+      "dependencies": ["notebookSilverToGold"],
+      "manualGates": [
+        "A run is demo-ready only when contract, physics, and scenario assertions pass."
+      ]
+    },
+    {
+      "key": "pipelineMedallion",
+      "type": "DataPipeline",
+      "displayName": "pl-ns-medallion",
+      "description": "Initialize and run bronze-to-silver-to-gold with a quality gate.",
+      "workspaceKey": "dataCore",
+      "automationTier": "automaticAfterTenantGate",
+      "deploymentOption": "deployPipelines",
+      "restCollection": "/dataPipelines",
+      "sourceDirectory": "pipelines/pl-ns-medallion.DataPipeline",
+      "definitionFormat": null,
+      "definitionParts": ["pipeline-content.json", ".platform"],
+      "createWithoutDefinition": false,
+      "cliDeployable": true,
+      "bindingGate": null,
+      "dependencies": [
+        "notebookInitialize",
+        "notebookBronzeToSilver",
+        "notebookSilverToGold",
+        "notebookDataQuality"
+      ],
+      "manualGates": [
+        "Bind the current notebook job identity and test a fixed-batch row reconciliation.",
+        "Configure schedules only after capacity pause windows are excluded."
+      ]
+    },
+    {
+      "key": "pipelineDemoScoring",
+      "type": "DataPipeline",
+      "displayName": "pl-ns-demo-scoring",
+      "description": "Run deterministic synthetic scoring then refresh gold quality checks.",
+      "workspaceKey": "ml",
+      "automationTier": "automaticAfterTenantGate",
+      "deploymentOption": "deployPipelines",
+      "restCollection": "/dataPipelines",
+      "sourceDirectory": "pipelines/pl-ns-demo-scoring.DataPipeline",
+      "definitionFormat": null,
+      "definitionParts": ["pipeline-content.json", ".platform"],
+      "createWithoutDefinition": false,
+      "cliDeployable": true,
+      "bindingGate": null,
+      "dependencies": ["notebookDemoScoring", "notebookDataQuality"],
+      "manualGates": [
+        "Keep this pipeline disabled outside synthetic dev/test/demo workspaces."
+      ]
+    },
+    {
+      "key": "eventstreamTelemetry",
+      "type": "Eventstream",
+      "displayName": "es-ns-telemetry-v1",
+      "description": "Managed-identity Custom Endpoint with hot KQL and immutable bronze routes.",
+      "workspaceKey": "rtiIngress",
+      "automationTier": "automaticAfterTenantGate",
+      "deploymentOption": "deployRti",
+      "restCollection": "/eventstreams",
+      "sourceDirectory": "items/es-ns-telemetry-v1.Eventstream",
+      "definitionFormat": "eventstream",
+      "definitionParts": [
+        "eventstream.json",
+        "eventstreamProperties.json",
+        ".platform"
+      ],
+      "createWithoutDefinition": false,
+      "cliDeployable": true,
+      "bindingGate": null,
+      "dependencies": ["kqlOperations", "landingLakehouse"],
+      "manualGates": [
+        "Retrieve the generated Custom Endpoint details and prove Entra managed-identity publishing.",
+        "Use Fabric CLI/portal to grant the publisher identity Contributor only on RTI-Ingress.",
+        "Test duplicate, late, invalid-unit, unknown-asset, and malformed-message behavior.",
+        "Do not enable ingestion while the capacity is paused."
+      ]
+    },
+    {
+      "key": "semanticOperations",
+      "type": "SemanticModel",
+      "displayName": "sm-ns-operations",
+      "description": "Direct Lake NovaSteel KPI model over governed gold Delta tables.",
+      "workspaceKey": "analytics",
+      "automationTier": "automaticAfterBindingGate",
+      "deploymentOption": "deploySemanticModel",
+      "restCollection": "/semanticModels",
+      "sourceDirectory": "semantic-model/sm-ns-operations.SemanticModel",
+      "definitionFormat": "TMDL",
+      "definitionParts": [
+        "definition.pbism",
+        "definition/database.tmdl",
+        "definition/model.tmdl",
+        "definition/relationships.tmdl",
+        "definition/tables/dim_calendar.tmdl",
+        "definition/tables/dim_plant.tmdl",
+        "definition/tables/dim_kpi_target.tmdl",
+        "definition/tables/fact_energy_daily.tmdl",
+        "definition/tables/fact_emissions_daily.tmdl",
+        "definition/tables/fact_production_shift.tmdl",
+        "definition/tables/fact_quality_yield.tmdl",
+        "definition/tables/fact_furnace_rul.tmdl",
+        "definition/tables/fact_dispatch_recommendation.tmdl",
+        "definition/tables/fact_ai_decision_audit.tmdl",
+        "definition/tables/fact_model_evaluation.tmdl",
+        "definition/tables/fact_customer_claim.tmdl",
+        "definition/tables/fact_knowledge_procedure.tmdl",
+        "definition/tables/fact_knowledge_usage.tmdl",
+        "definition/tables/fact_platform_usage.tmdl"
+      ],
+      "createWithoutDefinition": false,
+      "cliDeployable": true,
+      "bindingGate": "semanticModelBindingValidated",
+      "dependencies": ["coreLakehouse"],
+      "manualGates": [
+        "Validate the Direct Lake source binding against the core Lakehouse SQL endpoint.",
+        "Validate RLS/persona plant scope using test identities; UI hiding is not authorization.",
+        "Confirm every report consumer has Pro/PPU/trial below F64.",
+        "Apply sensitivity label and test refresh/query before setting semanticModelBindingValidated=true."
+      ]
+    }
+  ],
+  "manualAssets": [
+    {
+      "key": "rtiDashboard",
+      "assetType": "KQLDashboard",
+      "sourcePath": "rti/dashboard-spec.json",
+      "reason": "Queries and visual metadata are portable, but datasource IDs, dashboard layout/export format, and permissions must be validated from a tenant-exported KQL dashboard definition before API deployment.",
+      "completionEvidence": [
+        "All queries in rti/dashboard-queries.kql run against kql-ns-operations.",
+        "Freshness, gateway state, active alarms, model score, and quarantine visuals render.",
+        "A tenant-exported definition is checked in before enabling automated import."
+      ]
+    },
+    {
+      "key": "activator",
+      "assetType": "Reflex",
+      "sourcePath": "rti/activator-rules.template.json",
+      "reason": "Rule actions require tenant-bound Teams/email/Power Automate connections, DLP/licensing review, and owner routing.",
+      "completionEvidence": [
+        "Rules notify or enrich only; no safety, OT, schedule commit, or capacity action exists.",
+        "State transition, deduplication, recovery, and alert-storm suppression are tested.",
+        "A human owner confirms notification targets and escalation policy."
+      ]
+    },
+    {
+      "key": "powerBiReports",
+      "assetType": "Report",
+      "sourcePath": "powerbi/report-catalog.json",
+      "reason": "PBIR/report layouts depend on the tenant-bound semantic model, RLS, labels, and internal user-owned-data embedding configuration.",
+      "completionEvidence": [
+        "Executive, sustainability, and persona report pages bind only to sm-ns-operations.",
+        "RLS and export permissions pass persona tests.",
+        "A tenant-exported PBIR definition is checked in before REST/CLI import."
+      ]
+    },
+    {
+      "key": "oneLakeSecurity",
+      "assetType": "OneLakeSecurityRole",
+      "sourcePath": "catalog/security-role-matrix.json",
+      "reason": "Role APIs and item/security capabilities must be verified in the target tenant; broad workspace roles are not a substitute for OneLake data security.",
+      "completionEvidence": [
+        "Publisher identity has no DataCore, ML, Analytics, or production access.",
+        "Persona and service identities pass least-privilege read/write tests.",
+        "Monthly role export is retained as release evidence."
+      ]
+    }
+  ]
+}

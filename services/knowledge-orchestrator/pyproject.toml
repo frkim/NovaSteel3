@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "novasteel-knowledge-orchestrator"
+version = "0.1.0"
+description = "Consent-aware STT + Foundry Agent Service knowledge-capture orchestration for NovaSteel"
+requires-python = ">=3.11"
+# Runtime has NO mandatory third-party dependency: the core service and its local
+# demo/adapters use only the Python standard library so tests run offline.
+dependencies = []
+
+[project.optional-dependencies]
+# Resolve ONLY from the approved feed (see pip.conf). Never from public PyPI.
+serve = ["fastapi", "uvicorn"]
+azure = ["azure-identity", "azure-ai-projects", "requests"]
+test = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["../../tests/knowledge"]

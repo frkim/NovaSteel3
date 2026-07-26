@@ -1,0 +1,55 @@
+{
+  "properties": {
+    "displayName": "NovaSteel: restrict Fabric capacity SKU to the approved demo/measurement set",
+    "description": "Prevents an unreviewed jump to a larger, costlier Fabric F SKU. Deployment-topology.md §6: 'F4 only on measured contention; production SKU after pilot load test'. F2 is the cost-conscious starting SKU; F4 is the only pre-approved measurement fallback without a separate change/cost-owner sign-off.",
+    "policyType": "Custom",
+    "mode": "Indexed",
+    "metadata": {
+      "category": "NovaSteel Guardrails",
+      "source": "docs/architecture/deployment-topology.md §6, docs/research/fabric-platform.md"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Deny or Audit."
+        },
+        "allowedValues": [
+          "Deny",
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "allowedSkus": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed Fabric capacity SKU names",
+          "description": "Default only permits the pre-approved cost-conscious set; a production SKU decision requires updating this parameter as part of a reviewed change."
+        },
+        "defaultValue": [
+          "F2",
+          "F4"
+        ]
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Fabric/capacities"
+          },
+          {
+            "field": "Microsoft.Fabric/capacities/sku.name",
+            "notIn": "[parameters('allowedSkus')]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  }
+}

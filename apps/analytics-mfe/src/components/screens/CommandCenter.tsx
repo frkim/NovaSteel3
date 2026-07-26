@@ -1,0 +1,271 @@
+import { useMemo } from 'react'
+import { Box, Button, Card, CardContent, Stack, Typography } from '@mui/material'
+import { useAnalytics } from '../../context/analytics'
+import { useResource } from '../../hooks/useResource'
+import { usePolling } from '../../hooks/usePolling'
+import { useTokens } from '../../hooks/useTokens'
+import type { AlertRow } from '../../api/domain'
+import { StateBoundary } from '../primitives/StateBoundary'
+import { SeverityPill } from '../primitives/SeverityPill'
+import { DataTable, type DataTableColumn } from '../primitives/DataTable'
+import { DonutChart } from '../charts/DonutChart'
+import { ChartContainer } from '../charts/ChartContainer'
+import { KpiBand, PanelCard, SectionStack, TwoColumn } from './common'
+import { formatDateTime, formatInteger, formatNumber } from '../../utils/format'
+import type { KpiCardModel } from '../primitives/KpiCard'
+
+const SEVERITY_RANK: Record<string, number> = { CRITICAL: 0, WARNING: 1, INFO: 2 }
+
+export function CommandCenter() {
+  const { client, emit, locale, site } = useAnalytics()
+  const tokens = useTokens()
+
+  const summaryState = useResource(() => client.getCommandSummary('all'), [client])
+  const alertsState = useResource(() => client.getAlerts(), [client])
+  usePolling(alertsState.reload, 8000)
+
+  const alerts = useMemo(() => alertsState.data ?? [], [alertsState.data])
+  const openCritical = useMemo(
+    () => alerts.filter((alert) => alert.severity === 'CRITICAL' && alert.status !== 'CLOSED'),
+    [alerts],
+  )
+
+  const metrics = useMemo<KpiCardModel[]>(() => {
+    const kpis = summaryState.data?.kpis
+    const asOf = summaryState.asOf
+    const source = summaryState.source
+    return [
+      {
+        id: 'energy',
+        label: 'Energy consumption',
+        value: formatNumber(kpis?.energyConsumptionMwh, locale),
+        unit: 'MWh',
+        trend: 'down',
+        goodDirection: 'down',
+        deltaLabel: `−${formatNumber(kpis?.energyDispatchSavingsTargetPct, locale)}% target`,
+        target: 'target −14% energy/t',
+        asOf,
+        source,
+        onClick: () => emit('nav.intent', { route: `/${site}/energy-optimization/spot-price-schedule` }),
+      },
+      {
+        id: 'co2',
+        label: 'CO₂ (Scope 2)',
+        value: formatNumber((kpis?.scope2KgCo2e ?? 0) / 1000, locale),
+        unit: 't/day',
+        trend: 'down',
+        goodDirection: 'down',
+        deltaLabel: '−22% target',
+        target: 'target −22% CO₂',
+        asOf,
+        source,
+        onClick: () => emit('nav.intent', { route: `/${site}/sustainability-compliance/emissions-ledger` }),
+      },
+      {
+        id: 'furnace',
+        label: 'Furnace lining RUL',
+        value: formatNumber(kpis?.liningRulDaysP50, locale),
+        unit: 'days (P50)',
+        trend: 'down',
+        goodDirection: 'up',
+        deltaLabel: 'HEARTH-07',
+        target: '21-day advance warning',
+        asOf,
+        source,
+        why: {
+          modelVersion: 'lining-rul-piml/1.3.0-demo',
+          scoredAt: asOf,
+          drivers: [
+            { name: 'heat_flux_6h_slope', contribution: 0.29 },
+            { name: 'sector_to_ring_temp_delta', contribution: 0.24 },
+            { name: 'cooling_efficiency_residual', contribution: 0.18 },
+          ],
+          confidenceText: 'P50 21.0 days · P10 16.8 · P90 27.5 (risk 0.87).',
+        },
+        onClick: () => emit('nav.intent', { route: `/${site}/furnace-health/lining-forecast` }),
+      },
+      {
+        id: 'yield',
+        label: 'High-grade yield (pred.)',
+        value: formatNumber(kpis?.qualityPredictedFirstPassYieldPct, locale),
+        unit: '%',
+        trend: 'up',
+        goodDirection: 'up',
+        deltaLabel: '+8% target',
+        target: 'target +8% yield',
+        asOf,
+        source,
+        onClick: () => emit('nav.intent', { route: `/${site}/quality/batches` }),
+      },
+      {
+        id: 'alerts',
+        label: 'Open alerts',
+        value: formatInteger(kpis?.openAlerts ?? alerts.length, locale),
+        unit: '',
+        deltaLabel: `${openCritical.length} critical`,
+        trend: openCritical.length > 0 ? 'up' : 'flat',
+        goodDirection: 'down',
+        target: 'triage in Command Center',
+        asOf: alertsState.asOf,
+        source: alertsState.source,
+      },
+    ]
+  }, [summaryState.data, summaryState.asOf, summaryState.source, alertsState.asOf, alertsState.source, alerts.length, openCritical.length, locale, emit, site])
+
+  const severityMix = useMemo(() => {
+    const counts: Record<string, number> = { CRITICAL: 0, WARNING: 0, INFO: 0 }
+    for (const alert of alerts) {
+      counts[alert.severity] = (counts[alert.severity] ?? 0) + 1
+    }
+    return [
+      { label: 'Critical', value: counts.CRITICAL, color: tokens.status.critical },
+      { label: 'Warning', value: counts.WARNING, color: tokens.status.warning },
+      { label: 'Info', value: counts.INFO, color: tokens.status.info },
+    ]
+  }, [alerts, tokens])
+
+  const actions = useMemo(
+    () => [
+      {
+        id: 'load-shift',
+        title: 'Approve simulated load-shift 17:00–20:00',
+        detail: 'Modeled saving ≈ €4.2k · shifts flexible reheat away from the 280 €/MWh peak.',
+        route: `/${site}/energy-optimization/load-shift-simulator`,
+      },
+      {
+        id: 'inspect',
+        title: 'Schedule BF2 hearth inspection (risk 0.87)',
+        detail: 'Predicted RUL P50 21 days · create synthetic work order and verify sensors.',
+        route: `/${site}/furnace-health/lining-forecast`,
+      },
+      {
+        id: 'quality',
+        title: 'Review NS-AUTO-DP780 drift on COIL-017',
+        detail: 'Coiling temperature drift detected before first off-spec lab result.',
+        route: `/${site}/quality/batches`,
+      },
+    ],
+    [site],
+  )
+
+  const alertColumns: DataTableColumn<AlertRow>[] = [
+    {
+      key: 'severity',
+      label: 'Severity',
+      type: 'enum',
+      width: 120,
+      render: (row) => <SeverityPill severity={row.severity} />,
+      value: (row) => SEVERITY_RANK[row.severity] ?? 3,
+    },
+    { key: 'createdAt', label: 'Time', type: 'date', render: (row) => formatDateTime(row.createdAt, locale) },
+    { key: 'assetId', label: 'Site/Unit', type: 'text' },
+    { key: 'componentId', label: 'Component', type: 'text' },
+    { key: 'message', label: 'Message', type: 'text' },
+    {
+      key: 'confidence',
+      label: 'Conf.',
+      type: 'number',
+      align: 'right',
+      render: (row) => (row.confidence ? `${Math.round(row.confidence * 100)}%` : '—'),
+    },
+    { key: 'status', label: 'Status', type: 'enum' },
+  ]
+
+  return (
+    <SectionStack>
+      <StateBoundary state={summaryState} skeletonRows={2}>
+        {() => <KpiBand metrics={metrics} />}
+      </StateBoundary>
+
+      <TwoColumn
+        main={
+          <PanelCard title="Active alerts">
+            <Box role="log" aria-live="polite" aria-relevant="additions">
+              <span className="ns-visually-hidden" role="status">
+                {openCritical.length} critical alerts open
+              </span>
+              <StateBoundary
+                state={alertsState}
+                isEmpty={(rows) => rows.length === 0}
+                emptyMessage="No active alerts."
+              >
+                {(rows) => (
+                  <DataTable
+                    caption="Active alerts and incidents"
+                    rows={rows}
+                    columns={alertColumns}
+                    getRowId={(row) => row.alertId}
+                    defaultSort={[
+                      { key: 'severity', direction: 'asc' },
+                      { key: 'createdAt', direction: 'desc' },
+                    ]}
+                    exportFileName="novasteel-alerts"
+                    onRefresh={alertsState.reload}
+                    onRowClick={(row) => emit('telemetry', { event: 'alert.open', alertId: row.alertId })}
+                  />
+                )}
+              </StateBoundary>
+            </Box>
+          </PanelCard>
+        }
+        side={
+          <Stack spacing={2}>
+            <PanelCard title="Next-best actions">
+              <Stack spacing={1.5}>
+                {actions.map((action, index) => (
+                  <Card key={action.id} variant="outlined">
+                    <CardContent sx={{ py: 1.5 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                        {index + 1}. {action.title}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                        {action.detail}
+                      </Typography>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        onClick={() => emit('nav.intent', { route: action.route })}
+                      >
+                        Open
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </Stack>
+            </PanelCard>
+            <ChartContainer
+              title="Alert severity mix"
+              summary={`${severityMix.map((slice) => `${slice.label} ${slice.value}`).join(', ')}.`}
+              height={180}
+            >
+              <DonutChart
+                slices={severityMix}
+                centerValue={String(alerts.length)}
+                centerLabel="alerts"
+                height={180}
+              />
+            </ChartContainer>
+          </Stack>
+        }
+      />
+
+      <PanelCard title="Site status">
+        <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
+          {['LU', 'DE', 'BE', 'ES'].map((code, index) => (
+            <Card key={code} variant="outlined">
+              <CardContent>
+                <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Typography variant="h5">{code}</Typography>
+                  <SeverityPill severity={index === 0 ? 'WARNING' : 'INFO'} label={index === 0 ? 'Attention' : 'Healthy'} />
+                </Stack>
+                <Typography variant="caption" color="text.secondary">
+                  {index === 0 ? 'Moselle Integrated Works' : 'Synthetic roll-up'}
+                </Typography>
+              </CardContent>
+            </Card>
+          ))}
+        </Box>
+      </PanelCard>
+    </SectionStack>
+  )
+}

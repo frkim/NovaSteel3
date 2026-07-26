@@ -1,0 +1,106 @@
+{
+  "properties": {
+    "description": "Idempotent medallion orchestration. No activity writes to OT or a production control system.",
+    "activities": [
+      {
+        "name": "Initialize_Lakehouses",
+        "type": "TridentNotebook",
+        "dependsOn": [],
+        "policy": {
+          "timeout": "0.02:00:00",
+          "retry": 1,
+          "retryIntervalInSeconds": 60,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "typeProperties": {
+          "notebookId": "{{item.notebookInitialize.id}}",
+          "workspaceId": "{{workspace.dataCore.id}}",
+          "parameters": {
+            "ENVIRONMENT": { "value": "{{environment}}", "type": "string" },
+            "LANDING_TABLES_URI": { "value": "{{onelake.landingTablesUri}}", "type": "string" },
+            "CORE_TABLES_URI": { "value": "{{onelake.coreTablesUri}}", "type": "string" }
+          }
+        }
+      },
+      {
+        "name": "Bronze_to_Silver",
+        "type": "TridentNotebook",
+        "dependsOn": [
+          {
+            "activity": "Initialize_Lakehouses",
+            "dependencyConditions": ["Succeeded"]
+          }
+        ],
+        "policy": {
+          "timeout": "0.02:00:00",
+          "retry": 1,
+          "retryIntervalInSeconds": 60,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "typeProperties": {
+          "notebookId": "{{item.notebookBronzeToSilver.id}}",
+          "workspaceId": "{{workspace.dataCore.id}}",
+          "parameters": {
+            "ENVIRONMENT": { "value": "{{environment}}", "type": "string" },
+            "LANDING_TABLES_URI": { "value": "{{onelake.landingTablesUri}}", "type": "string" },
+            "CORE_TABLES_URI": { "value": "{{onelake.coreTablesUri}}", "type": "string" },
+            "LATE_WATERMARK_HOURS": { "value": 24, "type": "int" }
+          }
+        }
+      },
+      {
+        "name": "Silver_to_Gold",
+        "type": "TridentNotebook",
+        "dependsOn": [
+          {
+            "activity": "Bronze_to_Silver",
+            "dependencyConditions": ["Succeeded"]
+          }
+        ],
+        "policy": {
+          "timeout": "0.02:00:00",
+          "retry": 1,
+          "retryIntervalInSeconds": 60,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "typeProperties": {
+          "notebookId": "{{item.notebookSilverToGold.id}}",
+          "workspaceId": "{{workspace.dataCore.id}}",
+          "parameters": {
+            "ENVIRONMENT": { "value": "{{environment}}", "type": "string" },
+            "CORE_TABLES_URI": { "value": "{{onelake.coreTablesUri}}", "type": "string" }
+          }
+        }
+      },
+      {
+        "name": "Data_Quality_Gate",
+        "type": "TridentNotebook",
+        "dependsOn": [
+          {
+            "activity": "Silver_to_Gold",
+            "dependencyConditions": ["Succeeded"]
+          }
+        ],
+        "policy": {
+          "timeout": "0.01:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 60,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "typeProperties": {
+          "notebookId": "{{item.notebookDataQuality.id}}",
+          "workspaceId": "{{workspace.dataCore.id}}",
+          "parameters": {
+            "ENVIRONMENT": { "value": "{{environment}}", "type": "string" },
+            "LANDING_TABLES_URI": { "value": "{{onelake.landingTablesUri}}", "type": "string" },
+            "CORE_TABLES_URI": { "value": "{{onelake.coreTablesUri}}", "type": "string" }
+          }
+        }
+      }
+    ]
+  }
+}

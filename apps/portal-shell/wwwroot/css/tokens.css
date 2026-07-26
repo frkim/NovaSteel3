@@ -1,0 +1,39 @@
+:root {
+  --ns-font-base: "Segoe UI Variable", "Segoe UI", system-ui, "Noto Sans", sans-serif;
+  --ns-font-mono: "Cascadia Code", Consolas, monospace;
+  --ns-space-xs: 4px;
+  --ns-space-s: 8px;
+  --ns-space-m: 16px;
+  --ns-space-l: 24px;
+  --ns-space-xl: 32px;
+  --ns-radius-s: 4px;
+  --ns-radius-m: 8px;
+  --ns-radius-l: 12px;
+  --ns-color-canvas: #F5F6F8;
+  --ns-color-surface: #FFFFFF;
+  --ns-color-surface-alt: #EEF1F4;
+  --ns-color-text-primary: #1A1D1F;
+  --ns-color-text-secondary: #5A6470;
+  --ns-color-brand-primary: #0B5FFF;
+  --ns-color-brand-accent: #00A3A1;
+  --ns-color-critical: #C42B1C;
+  --ns-color-warning: #B26A00;
+  --ns-color-success: #0F7B0F;
+  --ns-color-stale: #8A6D3B;
+  --ns-color-focus: #0B5FFF;
+}
+
+:root[data-theme="dark"] {
+  --ns-color-canvas: #141719;
+  --ns-color-surface: #1E2224;
+  --ns-color-surface-alt: #262B2E;
+  --ns-color-text-primary: #F2F4F5;
+  --ns-color-text-secondary: #AEB6BF;
+  --ns-color-brand-primary: #4C8DFF;
+  --ns-color-brand-accent: #3FD0CE;
+  --ns-color-critical: #FF6B5E;
+  --ns-color-warning: #FFB84D;
+  --ns-color-success: #5BD75B;
+  --ns-color-stale: #D6B77A;
+  --ns-color-focus: #8FB6FF;
+}

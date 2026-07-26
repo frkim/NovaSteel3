@@ -1,0 +1,49 @@
+table fact_energy_daily
+	column date_key
+		dataType: dateTime
+		formatString: yyyy-MM-dd
+		summarizeBy: none
+		sourceColumn: date_key
+
+	column plant_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: plant_id
+
+	column energy_gj
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: energy_gj
+
+	column electricity_mwh
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: electricity_mwh
+
+	column energy_cost_eur
+		dataType: double
+		formatString: €#,0.00
+		summarizeBy: sum
+		sourceColumn: energy_cost_eur
+
+	column baseline_energy_gj
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: baseline_energy_gj
+
+	column baseline_cost_eur
+		dataType: double
+		formatString: €#,0.00
+		summarizeBy: sum
+		sourceColumn: baseline_cost_eur
+
+	column crude_steel_tons
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: crude_steel_tons
+
+	partition fact_energy_daily = entity
+		mode: directLake
+		source
+			entityName: fact_energy_daily
+			schemaName: dbo

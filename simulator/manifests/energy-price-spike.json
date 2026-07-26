@@ -1,0 +1,47 @@
+{
+  "scenario_id": "energy-price-spike",
+  "schema_version": 1,
+  "description": "Evening day-ahead scarcity interval (17:00-20:00) raising spot price to 280 EUR/MWh; the schedule optimizer shifts eligible reheat batches out of the spike (docs section 8.2, 10.3 seed 240727).",
+  "root_seed": 240727,
+  "plant_id": "NS-DEMO-LUX-01",
+  "primary_asset_id": "LUX-UTIL-01",
+  "start_time": "2026-06-10T00:00:00Z",
+  "window_hours": 24,
+  "sample_interval_seconds": 900,
+  "fast_window_hours": 24,
+  "fast_sample_interval_seconds": 900,
+  "hearth_sectors": ["07"],
+  "campaign": {
+    "min_safe_thickness_mm": 300.0,
+    "thickness_at_eval_mm": {"default": 700.0},
+    "degradation_rate_mm_per_day": {"default": 0.02}
+  },
+  "energy": {
+    "price_profile": "evening-scarcity",
+    "spike_start_hour": 17.0,
+    "spike_end_hour": 20.0,
+    "spike_price_eur_mwh": 280.0,
+    "num_batches": 8,
+    "base_load_mw": 40.0,
+    "urgent_batch_index": 3
+  },
+  "quality": {
+    "drift_active": false
+  },
+  "anomalies": [
+    {
+      "anomaly_id": "AN-ENERGY-PRICE-SPIKE",
+      "type": "price_spike",
+      "layer": "business",
+      "target": "NS-DEMO-LUX-01",
+      "start_hours": 17.0,
+      "end_hours": 20.0,
+      "params": {"spike_price_eur_mwh": 280.0}
+    }
+  ],
+  "expected_assertions": {
+    "optimized_cost_lower_than_baseline": true,
+    "tonnage_equal": true,
+    "max_hard_constraint_violations": 0
+  }
+}

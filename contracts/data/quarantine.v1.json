@@ -1,0 +1,27 @@
+{
+  "contractVersion": 1,
+  "zone": "quarantine",
+  "tables": [
+    {
+      "name": "quarantine_event",
+      "grain": "One rejected event envelope retained for investigation.",
+      "primaryKey": ["quarantine_id"],
+      "idempotencyKey": ["original_event_id", "quarantine_reason"],
+      "appendOnly": true,
+      "allowedReasons": [
+        "SCHEMA_INVALID",
+        "UNKNOWN_ASSET",
+        "LATE_BEYOND_POLICY",
+        "DUPLICATE_CONFLICT",
+        "INVALID_UNIT"
+      ]
+    },
+    {
+      "name": "quarantine_batch",
+      "grain": "One rejected batch source row retained for investigation.",
+      "primaryKey": ["quarantine_id"],
+      "idempotencyKey": ["source_system", "source_record_id", "quarantine_reason"],
+      "appendOnly": true
+    }
+  ]
+}

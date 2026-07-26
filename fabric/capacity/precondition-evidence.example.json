@@ -1,0 +1,23 @@
+{
+  "$schema": "./precondition-evidence.schema.json",
+  "schemaVersion": 1,
+  "correlationId": "demo-lifecycle-20260725-0100",
+  "checkedAt": "2026-07-25T00:59:30Z",
+  "environment": "demo",
+  "capacityResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-ns-demo-fabric/providers/Microsoft.Fabric/capacities/cap-novasteel-demo-sc",
+  "simulatorStopped": true,
+  "relayDrainedOrCheckpointed": true,
+  "protectedRehearsalActive": false,
+  "criticalFabricJobActive": false,
+  "approvedConsumerActive": false,
+  "budgetBlock": false,
+  "replayCheckpoint": "checkpoint://demo/run-20260725-a/82711",
+  "evidence": {
+    "simulator": "BFF reports STOPPED",
+    "relay": "Event Hubs backlog is zero; replay checkpoint recorded",
+    "rehearsalWindow": "No protected calendar window active",
+    "fabricJobs": "No critical pipeline, notebook, or semantic refresh",
+    "consumers": "No approved consumer operation active",
+    "budget": "No policy block"
+  }
+}

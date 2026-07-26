@@ -1,0 +1,123 @@
+@inject CapacityState Capacity
+@inject ShellState Shell
+@implements IDisposable
+
+@if (Capacity.PanelOpen)
+{
+    <div class="capacity-scrim" @onclick="Capacity.ClosePanel"></div>
+    <aside class="capacity-panel" role="dialog" aria-modal="true" aria-label="Fabric capacity control">
+        <header class="capacity-panel-header">
+            <div>
+                <h2>Fabric capacity</h2>
+                <span class="capacity-state capacity-state-@Capacity.Status.State.ToLowerInvariant()">
+                    <span aria-hidden="true">@StateGlyph(Capacity.Status.State)</span> @Capacity.Status.State
+                </span>
+            </div>
+            <button class="icon-button" type="button" @onclick="Capacity.ClosePanel" aria-label="Close capacity panel">✕</button>
+        </header>
+
+        @if (Capacity.Status.DemoModeSimulated)
+        {
+            <p class="capacity-simulated" role="status"><strong>Simulated</strong> — transitions are timed to look realistic; no ARM operation fires.</p>
+        }
+
+        <dl class="capacity-facts">
+            <div><dt>Capacity</dt><dd>@Capacity.Status.CapacityId</dd></div>
+            <div><dt>SKU</dt><dd>@Capacity.Status.Sku</dd></div>
+            <div><dt>Environment</dt><dd>@Capacity.Status.Environment</dd></div>
+            <div><dt>Region</dt><dd>Sweden Central</dd></div>
+            <div><dt>Source</dt><dd>@(Capacity.Source == "bff" ? "Live BFF" : "Simulated")</dd></div>
+        </dl>
+        <p class="capacity-policy">Policy: 01:00 Europe/Luxembourg lifecycle check · non-production only.</p>
+
+        <label class="capacity-reason">
+            <span>Reason</span>
+            <input @bind="_reason" disabled="@(!Capacity.CanManage)" aria-label="Capacity request reason" />
+        </label>
+
+        <div class="capacity-actions">
+            <button class="capacity-primary" type="button"
+                    disabled="@StartDisabled()"
+                    @onclick="RequestStart">
+                Request start
+            </button>
+            <button class="capacity-secondary" type="button"
+                    disabled="@PauseDisabled()"
+                    @onclick="RequestPause">
+                Request pause
+            </button>
+        </div>
+
+        @if (!Capacity.CanManage)
+        {
+            <p class="capacity-note">Read-only: only <code>Platform.Capacity.Manage</code> may request start or pause.</p>
+        }
+        else if (Capacity.MutationsLocked)
+        {
+            <p class="capacity-note">A lifecycle operation is in progress (@Capacity.Status.State); mutations are disabled until it settles.</p>
+        }
+
+        @if (Capacity.LastMessage is not null)
+        {
+            <p class="capacity-message" role="status">@Capacity.LastMessage</p>
+        }
+
+        <h3>Recent transitions</h3>
+        @if (Capacity.Transitions.Count == 0)
+        {
+            <p class="capacity-note">No transitions recorded in this session yet.</p>
+        }
+        else
+        {
+            <table class="capacity-transitions">
+                <thead>
+                    <tr><th scope="col">Time</th><th scope="col">From → To</th><th scope="col">Reason / correlation</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var transition in Capacity.Transitions)
+                    {
+                        <tr>
+                            <td>@transition.Time</td>
+                            <td>@transition.FromState → @transition.ToState</td>
+                            <td>@transition.Reason / @transition.CorrelationId</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </aside>
+}
+
+@code {
+    private string _reason = "rehearsal readiness";
+
+    protected override void OnInitialized()
+    {
+        Capacity.Changed += OnChanged;
+    }
+
+    private void OnChanged() => _ = InvokeAsync(StateHasChanged);
+
+    private bool StartDisabled() =>
+        !Capacity.CanManage || Capacity.Busy || Capacity.MutationsLocked || Capacity.Status.State != "Paused";
+
+    private bool PauseDisabled() =>
+        !Capacity.CanManage || Capacity.Busy || Capacity.MutationsLocked || Capacity.Status.State != "Running";
+
+    private Task RequestStart() => Capacity.RequestAsync("start", _reason, Shell.Locale);
+
+    private Task RequestPause() => Capacity.RequestAsync("pause", _reason, Shell.Locale);
+
+    private static string StateGlyph(string state) => state switch
+    {
+        "Running" => "▲",
+        "Paused" => "◼",
+        "Failed" => "⛔",
+        _ => "…"
+    };
+
+    public void Dispose()
+    {
+        Capacity.Changed -= OnChanged;
+    }
+}

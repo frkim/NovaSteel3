@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Lakehouse",
+    "displayName": "lh-ns-core",
+    "description": "Typed silver facts, SCD dimensions, and gold KPI tables."
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "44444444-4444-4444-8444-444444444444"
+  }
+}

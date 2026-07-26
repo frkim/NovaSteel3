@@ -1,0 +1,27 @@
+table fact_knowledge_usage
+	column query_date
+		dataType: dateTime
+		formatString: yyyy-MM-dd
+		summarizeBy: none
+		sourceColumn: query_date
+
+	column topic_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: topic_id
+
+	column retrieval_ms
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: retrieval_ms
+
+	column cited_answer_flag
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: cited_answer_flag
+
+	partition fact_knowledge_usage = entity
+		mode: directLake
+		source
+			entityName: fact_knowledge_usage
+			schemaName: dbo

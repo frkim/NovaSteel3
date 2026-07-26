@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://novasteel.example/schemas/fabric-novasteelv3-environment.schema.json",
+  "title": "NovaSteel v3 isolated Fabric binding parameters",
+  "description": "Parameter contract for the isolated novasteelv3 demo Fabric workspace/item binding consumed by .azure/fabric scripts only. This schema is additive: it does not replace or alter environment.schema.json, which continues to govern the four-workspace dev/test/demo/prod estate in fabric/deployment-parameters and fabric/scripts.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "project",
+    "environment",
+    "region",
+    "dataClassification",
+    "syntheticOnly",
+    "tenantId",
+    "subscriptionId",
+    "capacity",
+    "authentication",
+    "isolation",
+    "workspace",
+    "items",
+    "onelake",
+    "retention",
+    "bindings",
+    "deploymentOptions"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "project": { "const": "novasteelv3" },
+    "environment": { "const": "novasteelv3-demo" },
+    "region": { "const": "Sweden Central" },
+    "dataClassification": { "const": "SYNTHETIC" },
+    "syntheticOnly": { "const": true },
+    "tenantId": { "type": "string" },
+    "subscriptionId": { "type": "string" },
+    "capacity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "resourceGroupName",
+        "fabricCapacityId",
+        "armResourceId",
+        "sku"
+      ],
+      "properties": {
+        "name": { "type": "string" },
+        "resourceGroupName": { "type": "string" },
+        "fabricCapacityId": { "type": "string" },
+        "armResourceId": { "type": "string" },
+        "sku": { "enum": ["F2", "F4"] }
+      }
+    },
+    "authentication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "managedIdentityClientId"],
+      "properties": {
+        "mode": { "enum": ["AzureCli", "ManagedIdentity"] },
+        "managedIdentityClientId": { "type": "string" }
+      }
+    },
+    "isolation": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Guard-rail metadata enforced by .azure/fabric scripts before any create/update call, so the isolated novasteelv3 workspace can never resolve to an existing NovaSteel workspace/item.",
+      "required": [
+        "workspaceNamePattern",
+        "reservedNamePrefixes",
+        "neverModifyExistingWorkspaces"
+      ],
+      "properties": {
+        "workspaceNamePattern": { "type": "string" },
+        "reservedNamePrefixes": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "neverModifyExistingWorkspaces": { "const": true }
+      }
+    },
+    "workspace": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Exactly one synthetic-only workspace, unlike the four-workspace dev/test/demo/prod estate.",
+      "required": ["displayName", "id"],
+      "properties": {
+        "displayName": { "type": "string", "pattern": "^NovaSteelV3(-[A-Za-z0-9]+)?$" },
+        "id": { "type": "string" }
+      }
+    },
+    "items": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "eventhouseOperations",
+        "kqlOperations",
+        "landingLakehouse",
+        "coreLakehouse",
+        "notebookInitialize",
+        "notebookBronzeToSilver",
+        "notebookSilverToGold",
+        "notebookDemoScoring",
+        "notebookDataQuality",
+        "pipelineMedallion",
+        "pipelineDemoScoring",
+        "semanticOperations"
+      ],
+      "properties": {
+        "eventhouseOperations": { "$ref": "#/$defs/namedResource" },
+        "kqlOperations": { "$ref": "#/$defs/namedResource" },
+        "landingLakehouse": { "$ref": "#/$defs/namedResource" },
+        "coreLakehouse": { "$ref": "#/$defs/namedResource" },
+        "notebookInitialize": { "$ref": "#/$defs/namedResource" },
+        "notebookBronzeToSilver": { "$ref": "#/$defs/namedResource" },
+        "notebookSilverToGold": { "$ref": "#/$defs/namedResource" },
+        "notebookDemoScoring": { "$ref": "#/$defs/namedResource" },
+        "notebookDataQuality": { "$ref": "#/$defs/namedResource" },
+        "pipelineMedallion": { "$ref": "#/$defs/namedResource" },
+        "pipelineDemoScoring": { "$ref": "#/$defs/namedResource" },
+        "semanticOperations": { "$ref": "#/$defs/namedResource" }
+      }
+    },
+    "onelake": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["landingTablesUri", "coreTablesUri"],
+      "properties": {
+        "landingTablesUri": { "type": "string" },
+        "coreTablesUri": { "type": "string" }
+      }
+    },
+    "retention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "telemetryHot",
+        "alarmHot",
+        "gatewayHealthHot",
+        "modelInferenceHot",
+        "quarantineHot"
+      ],
+      "properties": {
+        "telemetryHot": { "type": "string", "pattern": "^[1-9][0-9]*d$" },
+        "alarmHot": { "type": "string", "pattern": "^[1-9][0-9]*d$" },
+        "gatewayHealthHot": { "type": "string", "pattern": "^[1-9][0-9]*d$" },
+        "modelInferenceHot": { "type": "string", "pattern": "^[1-9][0-9]*d$" },
+        "quarantineHot": { "type": "string", "pattern": "^[1-9][0-9]*d$" }
+      }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sensitivityLabelId",
+        "kqlQueryServiceUri",
+        "kqlIngestionServiceUri",
+        "coreSqlEndpoint"
+      ],
+      "properties": {
+        "sensitivityLabelId": { "type": "string" },
+        "kqlQueryServiceUri": { "type": "string" },
+        "kqlIngestionServiceUri": { "type": "string" },
+        "coreSqlEndpoint": { "type": "string" }
+      }
+    },
+    "deploymentOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "createOrBindWorkspace",
+        "assignCapacity",
+        "deployEventhouseAndKql",
+        "deployLakehouses",
+        "deployNotebooks",
+        "deployPipelines",
+        "deploySemanticModel",
+        "semanticModelBindingValidated"
+      ],
+      "properties": {
+        "createOrBindWorkspace": { "type": "boolean" },
+        "assignCapacity": { "type": "boolean" },
+        "deployEventhouseAndKql": { "type": "boolean" },
+        "deployLakehouses": { "type": "boolean" },
+        "deployNotebooks": { "type": "boolean" },
+        "deployPipelines": { "type": "boolean" },
+        "deploySemanticModel": { "type": "boolean" },
+        "semanticModelBindingValidated": { "type": "boolean" }
+      }
+    }
+  },
+  "$defs": {
+    "namedResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["displayName", "id"],
+      "properties": {
+        "displayName": { "type": "string" },
+        "id": { "type": "string" }
+      }
+    }
+  }
+}

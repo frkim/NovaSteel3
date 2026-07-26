@@ -1,0 +1,92 @@
+{
+  "scenario_id": "demo-full",
+  "schema_version": 1,
+  "description": "Full demo narrative combining hearth sector 07 lining degradation (21-day warning), an evening energy scarcity spike with schedule optimization, gradual coiling-temperature quality drift, a maintenance work order, an operator-knowledge capture session, and a gateway outage/recovery cycle -- everything the demo runbook walks through in one manifest (docs section 6.2, demo-runbook.md).",
+  "root_seed": 240725,
+  "plant_id": "NS-DEMO-LUX-01",
+  "primary_asset_id": "LUX-BF-01",
+  "start_time": "2026-06-10T00:00:00Z",
+  "window_hours": 48,
+  "sample_interval_seconds": 900,
+  "fast_window_hours": 24,
+  "fast_sample_interval_seconds": 900,
+  "hearth_sectors": ["06", "07", "08"],
+  "campaign": {
+    "min_safe_thickness_mm": 300.0,
+    "thickness_at_eval_mm": {"default": 700.0, "07": 363.0},
+    "degradation_rate_mm_per_day": {"default": 0.02, "07": 3.0}
+  },
+  "energy": {
+    "price_profile": "evening-scarcity",
+    "spike_start_hour": 17.0,
+    "spike_end_hour": 20.0,
+    "spike_price_eur_mwh": 280.0,
+    "num_batches": 8,
+    "base_load_mw": 40.0,
+    "urgent_batch_index": 3
+  },
+  "quality": {
+    "drift_active": true,
+    "latent_hours": 12.0,
+    "full_drift_hours": 36.0,
+    "warning_lead_hours": 2.0,
+    "fast_latent_hours": 6.0,
+    "fast_full_drift_hours": 20.0
+  },
+  "edge": {
+    "degraded_start_hours": 30.0,
+    "degraded_end_hours": 30.5,
+    "offline_end_hours": 33.5,
+    "recovering_end_hours": 34.0
+  },
+  "anomalies": [
+    {
+      "anomaly_id": "AN-LINING-DEGRADATION-07",
+      "type": "lining_degradation",
+      "layer": "process",
+      "target": "07",
+      "start_hours": 0,
+      "end_hours": 999999,
+      "params": {"target_delta_c": 22.0}
+    },
+    {
+      "anomaly_id": "AN-ENERGY-PRICE-SPIKE",
+      "type": "price_spike",
+      "layer": "business",
+      "target": "NS-DEMO-LUX-01",
+      "start_hours": 17.0,
+      "end_hours": 20.0,
+      "params": {"spike_price_eur_mwh": 280.0}
+    },
+    {
+      "anomaly_id": "AN-QUALITY-DRIFT-HSM",
+      "type": "quality_drift",
+      "layer": "process",
+      "target": "LUX-HSM-01",
+      "start_hours": 0,
+      "end_hours": 999999,
+      "params": {"latent_hours": 12.0, "full_drift_hours": 36.0}
+    },
+    {
+      "anomaly_id": "AN-GATEWAY-OUTAGE",
+      "type": "gateway_outage",
+      "layer": "edge",
+      "target": "edge-LUX-01",
+      "start_hours": 30.0,
+      "end_hours": 34.0,
+      "params": {}
+    }
+  ],
+  "expected_assertions": {
+    "component_id": "HEARTH-SECTOR-07",
+    "rul_p50_days_min": 19.0,
+    "rul_p50_days_max": 23.0,
+    "risk_score_min": 0.80,
+    "optimized_cost_lower_than_baseline": true,
+    "tonnage_equal": true,
+    "max_hard_constraint_violations": 0,
+    "warning_before_first_off_spec": true,
+    "predicted_yield_before_max": 0.90,
+    "predicted_yield_after_min": 0.93
+  }
+}

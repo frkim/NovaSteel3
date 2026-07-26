@@ -1,0 +1,78 @@
+{
+  "$schema": "./novasteelv3.schema.json",
+  "schemaVersion": 1,
+  "project": "novasteelv3",
+  "environment": "novasteelv3-demo",
+  "region": "Sweden Central",
+  "dataClassification": "SYNTHETIC",
+  "syntheticOnly": true,
+  "tenantId": "00000000-0000-0000-0000-000000000000",
+  "subscriptionId": "00000000-0000-0000-0000-000000000000",
+  "capacity": {
+    "name": "novasteelv3-fabric",
+    "resourceGroupName": "rg-novasteelv3-demo-sc",
+    "fabricCapacityId": "00000000-0000-0000-0000-000000000000",
+    "armResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-novasteelv3-demo-sc/providers/Microsoft.Fabric/capacities/novasteelv3-fabric",
+    "sku": "F2"
+  },
+  "authentication": {
+    "mode": "AzureCli",
+    "managedIdentityClientId": ""
+  },
+  "isolation": {
+    "workspaceNamePattern": "^NovaSteelV3(-[A-Za-z0-9]+)?$",
+    "reservedNamePrefixes": [
+      "NS-DEMO-",
+      "NS-dev-",
+      "NS-test-",
+      "NS-prod-",
+      "NovaSteel-"
+    ],
+    "neverModifyExistingWorkspaces": true
+  },
+  "workspace": {
+    "displayName": "NovaSteelV3-Demo",
+    "id": ""
+  },
+  "items": {
+    "eventhouseOperations": { "displayName": "evh-novasteelv3-operations", "id": "" },
+    "kqlOperations": { "displayName": "kql-novasteelv3-operations", "id": "" },
+    "landingLakehouse": { "displayName": "lh_novasteelv3_landing", "id": "" },
+    "coreLakehouse": { "displayName": "lh_novasteelv3_core", "id": "" },
+    "notebookInitialize": { "displayName": "v3-initialize-lakehouses", "id": "" },
+    "notebookBronzeToSilver": { "displayName": "v3-bronze-to-silver", "id": "" },
+    "notebookSilverToGold": { "displayName": "v3-silver-to-gold", "id": "" },
+    "notebookDemoScoring": { "displayName": "v3-deterministic-demo-scoring", "id": "" },
+    "notebookDataQuality": { "displayName": "v3-validate-data-quality", "id": "" },
+    "pipelineMedallion": { "displayName": "pl-novasteelv3-medallion", "id": "" },
+    "pipelineDemoScoring": { "displayName": "pl-novasteelv3-demo-scoring", "id": "" },
+    "semanticOperations": { "displayName": "sm-novasteelv3-operations", "id": "" }
+  },
+  "onelake": {
+    "landingTablesUri": "abfss://<novasteelv3-workspace-guid>@onelake.dfs.fabric.microsoft.com/<lh_novasteelv3_landing-guid>/Tables",
+    "coreTablesUri": "abfss://<novasteelv3-workspace-guid>@onelake.dfs.fabric.microsoft.com/<lh_novasteelv3_core-guid>/Tables"
+  },
+  "retention": {
+    "telemetryHot": "90.00:00:00",
+    "alarmHot": "365.00:00:00",
+    "gatewayHealthHot": "30.00:00:00",
+    "modelInferenceHot": "90.00:00:00",
+    "quarantineHot": "30.00:00:00"
+  },
+  "bindings": {
+    "sensitivityLabelId": "",
+    "kqlQueryServiceUri": "",
+    "kqlIngestionServiceUri": "",
+    "coreSqlEndpoint": ""
+  },
+  "deploymentOptions": {
+    "createOrBindWorkspace": true,
+    "assignCapacity": true,
+    "deployEventhouseAndKql": true,
+    "deployLakehouses": true,
+    "deployNotebooks": true,
+    "deployPipelines": true,
+    "deploySemanticModel": false,
+    "semanticModelBindingValidated": false
+  }
+}

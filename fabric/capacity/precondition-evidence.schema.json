@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://novasteel.example/schemas/capacity-precondition-evidence.schema.json",
+  "title": "NovaSteel capacity suspend precondition evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "correlationId",
+    "checkedAt",
+    "environment",
+    "capacityResourceId",
+    "simulatorStopped",
+    "relayDrainedOrCheckpointed",
+    "protectedRehearsalActive",
+    "criticalFabricJobActive",
+    "approvedConsumerActive",
+    "budgetBlock",
+    "evidence"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "correlationId": { "type": "string", "minLength": 8 },
+    "checkedAt": { "type": "string", "format": "date-time" },
+    "environment": { "enum": ["dev", "test", "demo"] },
+    "capacityResourceId": {
+      "type": "string",
+      "pattern": "^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft\\.Fabric/capacities/[^/]+$"
+    },
+    "simulatorStopped": { "type": "boolean" },
+    "relayDrainedOrCheckpointed": { "type": "boolean" },
+    "protectedRehearsalActive": { "type": "boolean" },
+    "criticalFabricJobActive": { "type": "boolean" },
+    "approvedConsumerActive": { "type": "boolean" },
+    "budgetBlock": { "type": "boolean" },
+    "replayCheckpoint": { "type": ["string", "null"] },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "simulator",
+        "relay",
+        "rehearsalWindow",
+        "fabricJobs",
+        "consumers",
+        "budget"
+      ],
+      "properties": {
+        "simulator": { "type": "string" },
+        "relay": { "type": "string" },
+        "rehearsalWindow": { "type": "string" },
+        "fabricJobs": { "type": "string" },
+        "consumers": { "type": "string" },
+        "budget": { "type": "string" }
+      }
+    }
+  }
+}

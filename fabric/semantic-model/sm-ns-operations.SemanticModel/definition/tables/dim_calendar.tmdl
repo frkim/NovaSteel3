@@ -1,0 +1,28 @@
+table dim_calendar
+	column date_key
+		dataType: dateTime
+		formatString: yyyy-MM-dd
+		isKey
+		summarizeBy: none
+		sourceColumn: date_key
+
+	column year
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: year
+
+	column month
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: month
+
+	column iso_week
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: iso_week
+
+	partition dim_calendar = entity
+		mode: directLake
+		source
+			entityName: dim_calendar
+			schemaName: dbo

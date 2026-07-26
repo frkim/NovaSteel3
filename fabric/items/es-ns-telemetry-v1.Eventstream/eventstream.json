@@ -1,0 +1,215 @@
+{
+  "sources": [
+    {
+      "name": "novasteel-custom-endpoint",
+      "type": "CustomEndpoint",
+      "properties": {}
+    }
+  ],
+  "destinations": [
+    {
+      "name": "landing-bronze-envelope",
+      "type": "Lakehouse",
+      "properties": {
+        "workspaceId": "{{workspace.rtiIngress.id}}",
+        "itemId": "{{item.landingLakehouse.id}}",
+        "schema": "",
+        "deltaTable": "bronze_event_envelope",
+        "minimumRows": 1000,
+        "maximumDurationInSeconds": 30,
+        "inputSerialization": {
+          "type": "Json",
+          "properties": {
+            "encoding": "UTF8"
+          }
+        }
+      },
+      "inputNodes": [
+        { "name": "novasteel-raw" }
+      ]
+    },
+    {
+      "name": "kql-telemetry-hot",
+      "type": "Eventhouse",
+      "properties": {
+        "dataIngestionMode": "ProcessedIngestion",
+        "workspaceId": "{{workspace.rtiIngress.id}}",
+        "itemId": "{{item.kqlOperations.id}}",
+        "databaseName": "kql-ns-operations",
+        "tableName": "telemetry_hot",
+        "inputSerialization": {
+          "type": "Json",
+          "properties": { "encoding": "UTF8" }
+        }
+      },
+      "inputNodes": [
+        { "name": "telemetry-stream" }
+      ]
+    },
+    {
+      "name": "kql-alarm-hot",
+      "type": "Eventhouse",
+      "properties": {
+        "dataIngestionMode": "ProcessedIngestion",
+        "workspaceId": "{{workspace.rtiIngress.id}}",
+        "itemId": "{{item.kqlOperations.id}}",
+        "databaseName": "kql-ns-operations",
+        "tableName": "alarm_hot",
+        "inputSerialization": {
+          "type": "Json",
+          "properties": { "encoding": "UTF8" }
+        }
+      },
+      "inputNodes": [
+        { "name": "alarm-stream" }
+      ]
+    },
+    {
+      "name": "kql-gateway-health-hot",
+      "type": "Eventhouse",
+      "properties": {
+        "dataIngestionMode": "ProcessedIngestion",
+        "workspaceId": "{{workspace.rtiIngress.id}}",
+        "itemId": "{{item.kqlOperations.id}}",
+        "databaseName": "kql-ns-operations",
+        "tableName": "gateway_health_hot",
+        "inputSerialization": {
+          "type": "Json",
+          "properties": { "encoding": "UTF8" }
+        }
+      },
+      "inputNodes": [
+        { "name": "gateway-health-stream" }
+      ]
+    },
+    {
+      "name": "kql-model-inference-hot",
+      "type": "Eventhouse",
+      "properties": {
+        "dataIngestionMode": "ProcessedIngestion",
+        "workspaceId": "{{workspace.rtiIngress.id}}",
+        "itemId": "{{item.kqlOperations.id}}",
+        "databaseName": "kql-ns-operations",
+        "tableName": "model_inference_hot",
+        "inputSerialization": {
+          "type": "Json",
+          "properties": { "encoding": "UTF8" }
+        }
+      },
+      "inputNodes": [
+        { "name": "model-inference-stream" }
+      ]
+    },
+    {
+      "name": "kql-ingest-quarantine-hot",
+      "type": "Eventhouse",
+      "properties": {
+        "dataIngestionMode": "ProcessedIngestion",
+        "workspaceId": "{{workspace.rtiIngress.id}}",
+        "itemId": "{{item.kqlOperations.id}}",
+        "databaseName": "kql-ns-operations",
+        "tableName": "ingest_quarantine_hot",
+        "inputSerialization": {
+          "type": "Json",
+          "properties": { "encoding": "UTF8" }
+        }
+      },
+      "inputNodes": [
+        { "name": "quarantine-stream" }
+      ]
+    }
+  ],
+  "operators": [
+    {
+      "name": "route-hot-schemas",
+      "type": "SQL",
+      "inputNodes": [
+        { "name": "novasteel-raw" }
+      ],
+      "properties": {
+        "query": "--Init Query\nSELECT * INTO [telemetry-stream] FROM [novasteel-raw] WHERE schema_name = 'novasteel.telemetry.v1';\nSELECT * INTO [alarm-stream] FROM [novasteel-raw] WHERE schema_name = 'novasteel.alarm.v1';\nSELECT * INTO [gateway-health-stream] FROM [novasteel-raw] WHERE schema_name = 'novasteel.gateway-health.v1';\nSELECT * INTO [model-inference-stream] FROM [novasteel-raw] WHERE schema_name = 'novasteel.model-inference.v1';\nSELECT * INTO [quarantine-stream] FROM [novasteel-raw] WHERE schema_name = 'novasteel.quarantine.v1';",
+        "advancedSettings": {
+          "eventsOutOfOrderPolicy": "Adjust",
+          "eventsOutOfOrderMaxDelayInSeconds": 5,
+          "eventsLateArrivalMaxDelayInSeconds": 300
+        }
+      }
+    }
+  ],
+  "streams": [
+    {
+      "name": "novasteel-raw",
+      "type": "DefaultStream",
+      "properties": {},
+      "inputNodes": [
+        { "name": "novasteel-custom-endpoint" }
+      ]
+    },
+    {
+      "name": "telemetry-stream",
+      "type": "DerivedStream",
+      "properties": {
+        "inputSerialization": {
+          "type": "Json",
+          "properties": { "encoding": "UTF8" }
+        }
+      },
+      "inputNodes": [
+        { "name": "route-hot-schemas" }
+      ]
+    },
+    {
+      "name": "alarm-stream",
+      "type": "DerivedStream",
+      "properties": {
+        "inputSerialization": {
+          "type": "Json",
+          "properties": { "encoding": "UTF8" }
+        }
+      },
+      "inputNodes": [
+        { "name": "route-hot-schemas" }
+      ]
+    },
+    {
+      "name": "gateway-health-stream",
+      "type": "DerivedStream",
+      "properties": {
+        "inputSerialization": {
+          "type": "Json",
+          "properties": { "encoding": "UTF8" }
+        }
+      },
+      "inputNodes": [
+        { "name": "route-hot-schemas" }
+      ]
+    },
+    {
+      "name": "model-inference-stream",
+      "type": "DerivedStream",
+      "properties": {
+        "inputSerialization": {
+          "type": "Json",
+          "properties": { "encoding": "UTF8" }
+        }
+      },
+      "inputNodes": [
+        { "name": "route-hot-schemas" }
+      ]
+    },
+    {
+      "name": "quarantine-stream",
+      "type": "DerivedStream",
+      "properties": {
+        "inputSerialization": {
+          "type": "Json",
+          "properties": { "encoding": "UTF8" }
+        }
+      },
+      "inputNodes": [
+        { "name": "route-hot-schemas" }
+      ]
+    }
+  ],
+  "compatibilityLevel": "1.1"
+}

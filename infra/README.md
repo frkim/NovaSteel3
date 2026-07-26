@@ -1,0 +1,189 @@
+# NovaSteel Azure infrastructure (`infra/`)
+
+Modular Bicep IaC for the NovaSteel platform's Azure control-plane resources, implementing
+`docs/architecture/deployment-topology.md`, `docs/architecture/solution-architecture.md` §11–13,
+`docs/security/security-governance-and-threat-model.md`, `docs/research/azure-ai-regions.md`, and
+`docs/research/fabric-platform.md`. This folder and `tests/infra` are the only paths this
+workstream owns — it does not modify `apps/`, `services/`, `simulator/`, `fabric/`, or any
+presentation asset.
+
+## Scope discipline
+
+- **Only `Microsoft.Fabric/capacities` is declared.** Fabric workspaces, Eventstreams,
+  Eventhouse/KQL, Lakehouses, pipelines, notebooks, the Direct Lake semantic model, and Power BI
+  reports are Fabric SaaS-plane items with no supported ARM type — they belong to `fabric/` and
+  the Fabric REST API/portal/Git integration (`docs/implementation/implementation-guide.md` §9.2),
+  never to this folder. `infra/policy/definitions/deny-unsupported-fabric-items.json` enforces
+  this as a policy guardrail.
+- **No Foundry Agent Service project/agent is provisioned.** Only the base Cognitive
+  Services/Foundry and Speech resource accounts are created
+  (`infra/bicep/modules/foundry-speech.bicep`). Enabling Agent Service is a manual, quota-gated
+  step — see "Deployment blockers" below.
+- **Container Apps/Jobs are placeholders.** They use a public sample image
+  (`mcr.microsoft.com/k8se/quickstart`) until `services/*` publishes real images through
+  `cd-services.yml`.
+
+## Repository layout
+
+```text
+infra/
+├── bicep/
+│   ├── main.bicep                        # Subscription-scoped orchestrator, one env per run
+│   ├── parameters/
+│   │   ├── dev.bicepparam
+│   │   ├── test.bicepparam
+│   │   ├── demo.bicepparam
+│   │   └── prod.bicepparam
+│   └── modules/
+│       ├── roles.bicep                   # Custom "Fabric Capacity Operator" RBAC role
+│       ├── network.bicep                 # Hub+spoke VNet, subnets, NSGs, private DNS zones
+│       ├── identity.bicep                # Per-service managed identities + GitHub OIDC federation
+│       ├── keyvault.bicep                # RBAC-only, private-endpoint-only Key Vault (reusable)
+│       ├── storage.bicep                 # Audio/fallback-artifact storage account (reusable)
+│       ├── eventhubs.bicep               # Per-plant Event Hubs + scoped data-plane RBAC
+│       ├── fabric-capacity.bicep         # Microsoft.Fabric/capacities (the only Fabric ARM type)
+│       ├── containerapps.bicep           # Container Apps environment + placeholder apps/jobs
+│       ├── foundry-speech.bicep          # Foundry/Speech resource accounts (no Agent Service)
+│       ├── monitoring.bicep              # Log Analytics + App Insights + Sentinel onboarding
+│       ├── logicapp-capacity-lifecycle.bicep  # 01:00 Europe/Luxembourg pause workflow (non-prod)
+│       ├── policy-assignments.bicep      # Custom + built-in policy assignments (subscription)
+│       └── budget.bicep                  # Per-environment cost budget/alerts
+├── policy/
+│   ├── README.md
+│   └── definitions/*.json                # Custom Azure Policy rule definitions
+├── scripts/
+│   ├── validate.ps1                      # bicep build + build-params + az deployment sub validate
+│   ├── what-if.ps1                       # az deployment sub what-if (PR diff)
+│   ├── deploy.ps1                        # az deployment sub create (OIDC only, no secrets)
+│   ├── setup-github-oidc-managed-identity.ps1  # RBAC grant for the Bicep-created CI identity
+│   └── setup-github-oidc-app-registration.ps1  # TENANT-ADMIN-GATED alternative (manual/dry-run by default)
+└── README.md                             # This file
+```
+
+## Region model
+
+`main.bicep`'s `location` parameter defaults to `swedencentral` and only otherwise accepts
+`westeurope` — the two-value `@allowed()` list is the mechanism satisfying "Sweden Central
+default, explicit West Europe contingency" (`deployment-topology.md` §1, §2.2). West Europe is
+never silently enabled as a replica; switching to it is a deliberate, reviewed parameter change,
+and cross-region replication of `HighlyConfidential` audio/transcript data additionally requires
+DPO approval regardless of this parameter (`deployment-topology.md` §2.3).
+
+## Resource groups (per environment)
+
+| Resource group | Contents |
+|---|---|
+| `rg-ns-<env>-hub` | Hub+spoke VNet, subnets, NSGs, private DNS zones, optional Azure Firewall |
+| `rg-ns-<env>-integration` | Event Hubs, OT-gateway Key Vault |
+| `rg-ns-<env>-apps` | Managed identities, platform Key Vault, fallback-pack storage, Container Apps environment/apps/jobs |
+| `rg-ns-<env>-ai` | Foundry/Speech accounts, audio/transcript storage |
+| `rg-ns-<env>-fabric` | Fabric capacity, capacity-lifecycle Logic App (non-prod) |
+| `rg-ns-<env>-monitoring` | Log Analytics, Application Insights, Sentinel onboarding |
+
+## Usage
+
+```powershell
+# 1. Static + ARM validation (safe, read-only)
+./infra/scripts/validate.ps1 -Environment dev
+
+# 2. What-if diff (attach to PR per implementation-guide.md §10)
+./infra/scripts/what-if.ps1 -Environment dev -OutFile whatif-dev.txt
+
+# 3. Deploy (requires az login or CI OIDC context; confirms before applying)
+./infra/scripts/deploy.ps1 -Environment dev
+```
+
+All three scripts use whatever Azure CLI/OIDC session is already active — a developer's
+`az login`, or the `azure/login@v2` GitHub Action using Workload Identity Federation
+(`security-governance-and-threat-model.md` §3.2). **None of them accept or require a client
+secret**; `deploy.ps1` actively refuses to run if `AZURE_CLIENT_SECRET`/`AZURE_CREDENTIALS` is set,
+to fail closed against an accidental non-OIDC credential path.
+
+### Suggested `cd-infra.yml` shape (documentation only — this repository's `.github/workflows`
+is owned by a separate workstream and is not created by this folder)
+
+```yaml
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    environment: ${{ inputs.environment }}   # dev | test | demo | prod — GitHub Environment gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - run: pwsh ./infra/scripts/validate.ps1 -Environment ${{ inputs.environment }}
+      - run: pwsh ./infra/scripts/what-if.ps1 -Environment ${{ inputs.environment }}
+      - run: pwsh ./infra/scripts/deploy.ps1 -Environment ${{ inputs.environment }} -Force
+```
+
+## GitHub OIDC (Workload Identity Federation)
+
+Two paths are provided; **prefer the first**:
+
+1. **`identity.bicep` (default, no tenant-admin gate)** — creates a user-assigned managed
+   identity (`mi-ns-cicd-<env>`) plus a `federatedIdentityCredentials` child resource trusting
+   `repo:<githubOrg>/<githubRepo>:environment:<env>`. Both are plain ARM resources; creating them
+   requires only Contributor on the resource group, not any Entra tenant-admin/Graph permission.
+   After the first (human-run) deployment, run
+   `infra/scripts/setup-github-oidc-managed-identity.ps1 -Environment <env>` once to grant that
+   identity Contributor on its own environment's 6 resource groups (this RBAC-grant step itself
+   requires Owner/User Access Administrator — a privileged but subscription-scoped, not
+   tenant-scoped, permission).
+2. **`infra/scripts/setup-github-oidc-app-registration.ps1` (tenant-admin-gated alternative)** —
+   only if policy specifically requires an Entra App Registration instead of a managed identity.
+   Requires the Application Administrator/Cloud Application Administrator Entra role. Runs as a
+   dry run by default and only executes Graph calls when invoked with `-Confirm:$true`; never run
+   by any automated pipeline.
+
+## Cost tags
+
+Every resource group receives `environment`, `owner`, `costCenter`, `dataClassification`, and
+`recoveryTier` tags; `expiry` is additionally required for `dev`/`test`/`demo` (mandatory per
+`deployment-topology.md` §3.1) and is enforced both by convention (see the `.bicepparam` files)
+and by the `require-tag-expiry` policy assignment when `deployGuardrails=true`. A monthly
+`Microsoft.Consumption/budgets` resource (`budget.bicep`) with 50%/80%/100% email alerts covers
+each environment's 6 resource groups. **No currency figure in this template is a real price** —
+`deployment-topology.md` §6 is explicit that exact regional pricing must be pulled live from the
+Azure/Fabric pricing calculator at deployment time, never copied from a document.
+
+## Outputs consumed downstream
+
+`main.bicep` outputs (resource group names, Fabric capacity ID/name, Event Hubs namespace/hub
+names, Key Vault URIs, Log Analytics/App Insights IDs, Foundry/Speech endpoints, the GitHub OIDC
+client ID, and the Container Apps environment ID) are intended to populate
+`fabric/deployment-parameters/<env>.json` (owned by the Fabric workstream) and application
+configuration — never a secret value, only resource identifiers/endpoints, consistent with
+`implementation-guide.md` §9.3's "no secrets, only identifiers" rule.
+
+## Deployment blockers / manual gates (must be cleared before go-live, not assumed)
+
+| Gate | Why it cannot be automated here | Where to act |
+|---|---|---|
+| **Fabric tenant capacity quota/region proof** | `Microsoft.Fabric/capacities` ARM creation can still fail on tenant-level quota/feature availability even though Sweden Central/West Europe are listed regions. | Re-verify in the target tenant immediately before deployment (`docs/research/fabric-platform.md`). |
+| **Fabric SaaS-item provisioning** (workspaces, Eventstream, Eventhouse/KQL, Lakehouse, pipelines, notebooks, semantic model, Power BI) | Not ARM resources; Bicep cannot create them by design. | Fabric REST API / portal / Git integration, owned by the `fabric/` workstream, after this template's capacity resource exists. |
+| **Microsoft Foundry Agent Service project/agent** | Regional/tool/model/quota availability is not guaranteed and must not be assumed (`docs/research/azure-ai-regions.md`). This template provisions only the base Foundry/Speech resource accounts. | Execute the deployment validation checklist in `azure-ai-regions.md`, then set `foundryAgentServiceManuallyValidated=true` as a record of that manual step (this flag does not itself create an Agent Service project). |
+| **GitHub repository/environment configuration** | `githubOrg`/`githubRepo` parameters default to empty; the federated credential is only created once both are supplied. | Set the real org/repo in the target environment's `.bicepparam` before deploying, or use `setup-github-oidc-app-registration.ps1` for the alternative path. |
+| **Subscription-wide policy guardrails** | `deployGuardrails` defaults to `false` in dev/test/demo parameter files to avoid racy concurrent subscription-scoped writes if multiple environments deploy in parallel. | Deploy exactly one environment (the shipped `prod.bicepparam` sets `deployGuardrails=true`) as the designated governance run, or adjust which environment owns it per your rollout order. |
+| **Production onboarding** | Real EU operational/personal data must not flow until DPO/legal, OT, security/RAI, capacity/DR, and source/market-license gates are signed (`deployment-topology.md` §9, `solution-architecture.md` §13 step 8). | Manual governance sign-off; this template does not and cannot certify legal/DPO approval. |
+| **Fabric capacity SKU for production** | F2/F4 are the only pre-approved SKUs; a production SKU is a measured, pilot-load-tested decision (`deployment-topology.md` §6). | Re-run the measurement described in `docs/research/fabric-platform.md`, then update `fabricSkuName` (and `infra/policy/definitions/restrict-fabric-capacity-sku.json`'s allow-list) as a reviewed change. |
+| **West Europe recovery copy** | Any cross-region replication of `HighlyConfidential` data needs DPO approval, retention/encryption controls, and a tested restore runbook — not just a parameter flip. | DPO/legal review per `deployment-topology.md` §2.3, before setting `location=westeurope` for any resource carrying that data class. |
+| **First deployment identity** | The very first `main.bicep` run for a new environment must use a human/admin (or already-privileged pipeline) identity, since `mi-ns-cicd-<env>` does not exist yet to bootstrap itself. | Run `deploy.ps1` once as a privileged human/admin, then hand off via `setup-github-oidc-managed-identity.ps1`. |
+
+## Validation performed
+
+- `az bicep build` on every `.bicep` file (zero errors/warnings) — see `infra/scripts/validate.ps1`
+  step 1, reproduced in `tests/infra`.
+- `az bicep build-params` on every `.bicepparam` file — step 2.
+- `tests/infra` (pytest) additionally asserts naming-convention compliance, tag/parameter
+  completeness, and that every custom policy JSON file is well-formed and wired into
+  `policy-assignments.bicep`.
+- `az deployment sub validate` / `what-if` require a live Azure/OIDC session and are therefore
+  exercised by the CI pipeline (`cd-infra.yml`), not by this offline task — see "Deployment
+  blockers" above for what must additionally be confirmed in the target tenant.

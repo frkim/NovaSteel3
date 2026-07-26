@@ -1,0 +1,84 @@
+{
+  "properties": {
+    "displayName": "NovaSteel: deny public network access on data-plane PaaS resources",
+    "description": "Enforces security-governance-and-threat-model.md §4.1 ('Public network access is disabled on Azure resources except where a documented exception exists') for Key Vault, Storage, Event Hubs namespaces, and Cognitive Services (Foundry/Speech) accounts.",
+    "policyType": "Custom",
+    "mode": "Indexed",
+    "metadata": {
+      "category": "NovaSteel Guardrails",
+      "source": "docs/security/security-governance-and-threat-model.md §4.1, §5"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Deny or Audit."
+        },
+        "allowedValues": [
+          "Deny",
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Deny"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "anyOf": [
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.KeyVault/vaults"
+              },
+              {
+                "field": "Microsoft.KeyVault/vaults/publicNetworkAccess",
+                "notEquals": "Disabled"
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Storage/storageAccounts"
+              },
+              {
+                "field": "Microsoft.Storage/storageAccounts/publicNetworkAccess",
+                "notEquals": "Disabled"
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.EventHub/namespaces"
+              },
+              {
+                "field": "Microsoft.EventHub/namespaces/publicNetworkAccess",
+                "notEquals": "Disabled"
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.CognitiveServices/accounts"
+              },
+              {
+                "field": "Microsoft.CognitiveServices/accounts/publicNetworkAccess",
+                "notEquals": "Disabled"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  }
+}

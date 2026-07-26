@@ -1,0 +1,23 @@
+{
+  "description": "Seed corpus of APPROVED procedures for grounding/retrieval evaluation. Only approved procedures are ever retrievable (api-contracts §10.2).",
+  "procedures": [
+    {
+      "procedure_id": "PROC-APPROVED-0001",
+      "title": "Hearth sector over-temperature verification",
+      "status": "APPROVED",
+      "observation": "A hearth sector reads high while cooling flow appears nominal.",
+      "recommended_check": "Compare with neighboring shell thermocouples and review cooling-water inlet/outlet temperature and recent flow history.",
+      "rationale": "Corroborating independent signals distinguishes a real thermal event from a single faulty sensor.",
+      "safety_boundary": "Do not bypass alarms or change furnace/cooling setpoints from this guidance; escalate to engineering."
+    },
+    {
+      "procedure_id": "PROC-APPROVED-0002",
+      "title": "Thermocouple health validation",
+      "status": "APPROVED",
+      "observation": "Suspected drift on a shell thermocouple.",
+      "recommended_check": "Validate sensor health and recent calibration; request ultrasound measurement when signals agree.",
+      "rationale": "Calibration and cross-checks prevent acting on instrument faults.",
+      "safety_boundary": "Only engineering may authorize control changes."
+    }
+  ]
+}

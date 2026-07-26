@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://novasteel.example/contracts/events/quarantine.v1.schema.json",
+  "title": "NovaSteel quarantined event v1",
+  "type": "object",
+  "required": [
+    "quarantine_id",
+    "quarantined_at",
+    "quarantine_reason",
+    "original_event"
+  ],
+  "properties": {
+    "quarantine_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "quarantined_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "quarantine_reason": {
+      "type": "string",
+      "enum": [
+        "SCHEMA_INVALID",
+        "UNKNOWN_ASSET",
+        "LATE_BEYOND_POLICY",
+        "DUPLICATE_CONFLICT",
+        "INVALID_UNIT"
+      ]
+    },
+    "original_event": {
+      "type": "object"
+    },
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    }
+  }
+}

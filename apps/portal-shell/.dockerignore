@@ -1,0 +1,10 @@
+# Build context = apps/portal-shell (BuildKit honours this main-context ignore).
+# Exclude build outputs and the committed MFE bundle; the image rebuilds the
+# analytics microfrontend from source and overlays it during publish.
+bin/
+obj/
+wwwroot/analytics-mfe/
+**/*.user
+Dockerfile
+.dockerignore
+README.md

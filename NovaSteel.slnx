@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/apps/" />
+  <Folder Name="/apps/portal-shell/">
+    <Project Path="apps/portal-shell/PortalShell.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://novasteel.example/contracts/events/telemetry.v1.schema.json",
+  "title": "NovaSteel telemetry event v1",
+  "allOf": [
+    {
+      "$ref": "event-envelope.v1.schema.json"
+    },
+    {
+      "properties": {
+        "schema_name": {
+          "const": "novasteel.telemetry.v1"
+        },
+        "payload": {
+          "type": "object",
+          "description": "Sensor observation fields follow the synthetic-data specification. Additive fields are allowed within v1.",
+          "required": [
+            "type",
+            "sensor_id",
+            "signal_code",
+            "value",
+            "unit",
+            "quality",
+            "uncertainty",
+            "sample_period_ms"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "telemetry.furnace.thermal",
+                "telemetry.rolling.mill"
+              ]
+            },
+            "sensor_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "signal_code": {
+              "type": "string",
+              "minLength": 1
+            },
+            "value": {
+              "type": "number"
+            },
+            "unit": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Canonical UCUM unit where available."
+            },
+            "quality": {
+              "type": "string",
+              "enum": [
+                "GOOD",
+                "UNCERTAIN",
+                "BAD",
+                "STALE",
+                "SUBSTITUTED"
+              ]
+            },
+            "uncertainty": {
+              "type": "number",
+              "minimum": 0
+            },
+            "sample_period_ms": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "signal": {
+              "type": "string",
+              "minLength": 1,
+              "deprecated": true,
+              "description": "Legacy alias for signal_code; new producers emit signal_code."
+            },
+            "quality_flag": {
+              "type": "string",
+              "enum": [
+                "GOOD",
+                "UNCERTAIN",
+                "BAD",
+                "STALE",
+                "SUBSTITUTED",
+                "SUSPECT"
+              ],
+              "deprecated": true,
+              "description": "Legacy alias for quality; new producers emit quality."
+            },
+            "measurement_method": {
+              "type": "string"
+            },
+            "calibration_version": {
+              "type": "string"
+            },
+            "source_quality_detail": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

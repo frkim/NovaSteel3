@@ -1,0 +1,39 @@
+relationship 81000000-0000-4810-8810-000000000001
+	fromColumn: fact_energy_daily.date_key
+	toColumn: dim_calendar.date_key
+
+relationship 81000000-0000-4810-8810-000000000002
+	fromColumn: fact_emissions_daily.date_key
+	toColumn: dim_calendar.date_key
+
+relationship 81000000-0000-4810-8810-000000000003
+	fromColumn: fact_quality_yield.date_key
+	toColumn: dim_calendar.date_key
+
+relationship 81000000-0000-4810-8810-000000000004
+	fromColumn: fact_furnace_rul.scored_date
+	toColumn: dim_calendar.date_key
+
+relationship 81000000-0000-4810-8810-000000000005
+	fromColumn: fact_energy_daily.plant_id
+	toColumn: dim_plant.plant_id
+
+relationship 81000000-0000-4810-8810-000000000006
+	fromColumn: fact_emissions_daily.plant_id
+	toColumn: dim_plant.plant_id
+
+relationship 81000000-0000-4810-8810-000000000007
+	fromColumn: fact_production_shift.plant_id
+	toColumn: dim_plant.plant_id
+
+relationship 81000000-0000-4810-8810-000000000008
+	fromColumn: fact_quality_yield.plant_id
+	toColumn: dim_plant.plant_id
+
+relationship 81000000-0000-4810-8810-000000000009
+	fromColumn: fact_furnace_rul.plant_id
+	toColumn: dim_plant.plant_id
+
+relationship 81000000-0000-4810-8810-000000000010
+	fromColumn: fact_dispatch_recommendation.plant_id
+	toColumn: dim_plant.plant_id

@@ -1,0 +1,44 @@
+{
+  "properties": {
+    "displayName": "NovaSteel: only Microsoft.Fabric/capacities may be declared under Microsoft.Fabric",
+    "description": "Guardrail operationalizing implementation-guide.md §9.2 and the azure-infrastructure task instruction 'do not provision unsupported Fabric SaaS items': Fabric workspaces, Eventstreams, Eventhouses, Lakehouses, pipelines, notebooks, semantic models, and Power BI reports are Fabric SaaS-plane items with no supported Microsoft.Fabric ARM resource type as of this policy's authoring date. This policy denies any Microsoft.Fabric/* resource type OTHER than Microsoft.Fabric/capacities, so that if a future preview ARM type appears under the Microsoft.Fabric namespace it cannot be silently deployed without a deliberate policy update and re-review.",
+    "policyType": "Custom",
+    "mode": "Indexed",
+    "metadata": {
+      "category": "NovaSteel Guardrails",
+      "source": "docs/architecture/deployment-topology.md, docs/implementation/implementation-guide.md §9.2"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Deny or Audit."
+        },
+        "allowedValues": [
+          "Deny",
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Deny"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "like": "Microsoft.Fabric/*"
+          },
+          {
+            "field": "type",
+            "notEquals": "Microsoft.Fabric/capacities"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  }
+}

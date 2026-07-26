@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://novasteel.example/schemas/data-quality-rules.schema.json",
+  "title": "NovaSteel data quality rules",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "quarantineReasons", "rules", "reconciliation"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "quarantineReasons": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "SCHEMA_INVALID",
+          "UNKNOWN_ASSET",
+          "LATE_BEYOND_POLICY",
+          "DUPLICATE_CONFLICT",
+          "INVALID_UNIT"
+        ]
+      }
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "zone",
+          "dataset",
+          "severity",
+          "condition",
+          "action",
+          "quarantineReason",
+          "description"
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "zone": { "enum": ["bronze", "silver", "gold", "operations"] },
+          "dataset": { "type": "string" },
+          "severity": { "enum": ["error", "warning", "metric"] },
+          "condition": { "type": "string" },
+          "action": { "enum": ["quarantine", "fail-run", "warn", "measure"] },
+          "quarantineReason": {
+            "type": ["string", "null"],
+            "enum": [
+              null,
+              "SCHEMA_INVALID",
+              "UNKNOWN_ASSET",
+              "LATE_BEYOND_POLICY",
+              "DUPLICATE_CONFLICT",
+              "INVALID_UNIT"
+            ]
+          },
+          "description": { "type": "string" }
+        }
+      }
+    },
+    "reconciliation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["formula", "requiredUnexplainedRows", "failureSeverity"],
+      "properties": {
+        "formula": { "type": "string" },
+        "requiredUnexplainedRows": { "const": 0 },
+        "failureSeverity": { "const": "error" }
+      }
+    }
+  }
+}

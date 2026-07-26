@@ -1,0 +1,42 @@
+{
+  "alarm_event.ndjson": {
+    "bytes": 891,
+    "sha256": "e7cef0fd4158aa9571c24878d9832b26cfadcb3d9ca33d4b550bc04f147905da"
+  },
+  "energy_interval.ndjson": {
+    "bytes": 79032,
+    "sha256": "67da487707c9228e48c787f6f951cc60a378e1d6493aeca22bd18c22f82933be"
+  },
+  "heat_batch.ndjson": {
+    "bytes": 5325,
+    "sha256": "68b9961fc5b95132a4af283070f0e2125ebc3a2608e8f6641197b61086d2444c"
+  },
+  "maintenance_event.ndjson": {
+    "bytes": 1150,
+    "sha256": "3bbfb1e96f06d76f0b24a1e03d44bb103b81509f661d7493ff92e00cb0bdf193"
+  },
+  "manifest.json": {
+    "bytes": 1951,
+    "sha256": "20375b2dfdd39228f27141dc0e19e8fe4b05e48445c5158f65fce094031c0f7d"
+  },
+  "model_inference.ndjson": {
+    "bytes": 3358,
+    "sha256": "cb3b0bd8c350b3cc656972a964481f8b9b5241d0cde02c6ff1057152c1ef6a6a"
+  },
+  "operator_knowledge.ndjson": {
+    "bytes": 2835,
+    "sha256": "f81505c4677227eed397565b21e2d9f19f7be5b202830f33ff57be193f9d7a06"
+  },
+  "quality_measurement.ndjson": {
+    "bytes": 17899,
+    "sha256": "19811e175f669e7bc057ddcd17d9c388c676790f192d69d23b7131940397f5a5"
+  },
+  "telemetry.ndjson": {
+    "bytes": 1489862,
+    "sha256": "491ee02ea5d8188c347d4c13e8e16054e55e6b0ee33b15340cb5446ac8e85bc8"
+  },
+  "truth_ledger.ndjson": {
+    "bytes": 356,
+    "sha256": "969f442bd411ff012a47c78e7ea372ec86a734bbaf41922be75b798e064d4511"
+  }
+}

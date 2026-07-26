@@ -1,0 +1,27 @@
+table fact_customer_claim
+	column claim_date
+		dataType: dateTime
+		formatString: yyyy-MM-dd
+		summarizeBy: none
+		sourceColumn: claim_date
+
+	column plant_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: plant_id
+
+	column non_conformance_count
+		dataType: int64
+		summarizeBy: sum
+		sourceColumn: non_conformance_count
+
+	column tons_shipped
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: tons_shipped
+
+	partition fact_customer_claim = entity
+		mode: directLake
+		source
+			entityName: fact_customer_claim
+			schemaName: dbo

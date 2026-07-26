@@ -1,0 +1,12 @@
+{
+  "quarantine_id": "018f2f6e-6b2a-7c31-9b1a-2f7e6a9c1d51",
+  "quarantined_at": "2026-07-25T08:04:00Z",
+  "quarantine_reason": "INVALID_UNIT",
+  "correlation_id": "01J9Z8Q3K5F8E2X6R7T4V0M1N2",
+  "original_event": {
+    "event_id": "018f2f6e-6b2a-7c31-9b1a-2f7e6a9c1d52",
+    "payload": {
+      "unit": "unknown"
+    }
+  }
+}

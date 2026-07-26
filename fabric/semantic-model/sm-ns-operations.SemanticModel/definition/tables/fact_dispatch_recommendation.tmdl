@@ -1,0 +1,50 @@
+table fact_dispatch_recommendation
+	column recommendation_id
+		dataType: string
+		isKey
+		summarizeBy: none
+		sourceColumn: recommendation_id
+
+	column recommendation_date
+		dataType: dateTime
+		formatString: yyyy-MM-dd
+		summarizeBy: none
+		sourceColumn: recommendation_date
+
+	column plant_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: plant_id
+
+	column status
+		dataType: string
+		summarizeBy: none
+		sourceColumn: status
+
+	column expected_cost_avoidance_eur
+		dataType: double
+		formatString: €#,0.00
+		summarizeBy: sum
+		sourceColumn: expected_cost_avoidance_eur
+
+	column realized_cost_avoidance_eur
+		dataType: double
+		formatString: €#,0.00
+		summarizeBy: sum
+		sourceColumn: realized_cost_avoidance_eur
+
+	column shiftable_mw
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: shiftable_mw
+
+	column hard_constraint_violations
+		dataType: int64
+		summarizeBy: sum
+		sourceColumn: hard_constraint_violations
+
+	partition fact_dispatch_recommendation = entity
+		mode: directLake
+		source
+			entityName: fact_dispatch_recommendation
+			schemaName: dbo

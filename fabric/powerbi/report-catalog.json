@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "deploymentStatus": "TENANT_PBIR_EXPORT_REQUIRED",
+  "semanticModel": "sm-ns-operations",
+  "embedding": {
+    "mode": "EmbedForYourOrganization",
+    "authorizationOwner": "Entra user plus semantic-model RLS",
+    "forbiddenMode": "AppOwnsDataAsInternalAuthorizationBypass"
+  },
+  "reports": [
+    {
+      "displayName": "rpt-ns-executive",
+      "audience": ["Executive", "Plant Manager"],
+      "pages": [
+        {
+          "name": "Portfolio Overview",
+          "kpis": [
+            "KPI-ENE-01 SEC GJ per t",
+            "KPI-ENE-01 Reduction vs Baseline",
+            "KPI-CO2-01 Specific CO2 t per t",
+            "KPI-CO2-01 Reduction vs Baseline",
+            "KPI-QUA-01 High-Grade Yield Rate",
+            "Latest RUL P50 Days",
+            "KPI-ENE-02 Energy Cost Avoidance EUR"
+          ],
+          "visuals": [
+            "Target-vs-actual bullet by KPI",
+            "Grouped site comparison",
+            "Site scorecard with energy, CO2, yield, RUL, and alerts"
+          ]
+        },
+        {
+          "name": "Trust and Adoption",
+          "kpis": [
+            "KPI-TRUST-01 Portfolio Acceptance Rate",
+            "KPI-ADO-01 Weekly Active User Rate",
+            "KPI-GOV-01 Audit Completeness"
+          ],
+          "visuals": [
+            "Acceptance trend by domain",
+            "Adoption by persona",
+            "Audit completeness exceptions"
+          ]
+        }
+      ]
+    },
+    {
+      "displayName": "rpt-ns-sustainability",
+      "audience": ["Sustainability Officer", "Compliance Auditor", "Executive"],
+      "pages": [
+        {
+          "name": "Emissions Ledger",
+          "kpis": [
+            "Total CO2e t",
+            "KPI-CO2-01 Specific CO2 t per t",
+            "KPI-CO2-02 ETS Exposure EUR",
+            "ETS Allowances Remaining t"
+          ],
+          "visuals": [
+            "CO2 trend vs target",
+            "Scope 1/2 stacked contribution",
+            "Immutable emissions ledger export"
+          ]
+        },
+        {
+          "name": "ETS Exposure",
+          "kpis": ["KPI-CO2-02 ETS Exposure EUR"],
+          "visuals": [
+            "Allowance used vs allocation bullet",
+            "Period-end exposure projection"
+          ]
+        }
+      ]
+    },
+    {
+      "displayName": "rpt-ns-operations",
+      "audience": ["Plant Manager", "Energy Manager", "Quality Engineer", "Maintenance Engineer"],
+      "pages": [
+        {
+          "name": "Operations",
+          "kpis": [
+            "Throughput t per h",
+            "OEE",
+            "Energy EUR per t",
+            "On-Time Rate"
+          ],
+          "visuals": [
+            "Shift and site trend",
+            "Production target variance",
+            "Drillthrough plant to line to asset"
+          ]
+        },
+        {
+          "name": "Energy and Quality",
+          "kpis": [
+            "Projected Savings EUR",
+            "Shiftable MW",
+            "First-Pass Yield",
+            "Defect PPM"
+          ],
+          "visuals": [
+            "Cost and CO2 before/after",
+            "Yield trend",
+            "Defect Pareto"
+          ]
+        }
+      ]
+    }
+  ],
+  "manualGates": [
+    "Validate all visuals against the fixed synthetic cue sheet.",
+    "Validate RLS and export permissions with persona test identities.",
+    "Verify WCAG-compatible labels, keyboard navigation, contrast, and table alternatives.",
+    "Export reviewed PBIR source before automated report deployment."
+  ]
+}

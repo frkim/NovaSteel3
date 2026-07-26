@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "source": "docs/specs/solution-requirements.md#13-kpi-catalog-definitions--formulas",
+  "model": "sm-ns-operations",
+  "measures": [
+    {
+      "kpiId": "KPI-ENE-01",
+      "name": "Specific Energy Consumption",
+      "daxMeasure": "KPI-ENE-01 SEC GJ per t",
+      "formula": "Total energy consumed (GJ) / total crude steel produced (t)",
+      "target": "-14% vs baseline (19.5 to approximately 16.8 GJ/t)",
+      "frequency": "Daily and rolling 30-day"
+    },
+    {
+      "kpiId": "KPI-ENE-02",
+      "name": "Energy Cost Avoidance",
+      "daxMeasure": "KPI-ENE-02 Energy Cost Avoidance EUR",
+      "formula": "Sum of baseline-schedule cost minus as-run cost over accepted recommendations",
+      "target": "Track and report",
+      "frequency": "Daily ledger and monthly report"
+    },
+    {
+      "kpiId": "KPI-ENE-03",
+      "name": "Dispatch Recommendation Acceptance Rate",
+      "daxMeasure": "KPI-ENE-03 Dispatch Acceptance Rate",
+      "formula": "Accepted recommendations / recommendations issued",
+      "target": "At least 70% illustrative adoption target",
+      "frequency": "Weekly"
+    },
+    {
+      "kpiId": "KPI-CO2-01",
+      "name": "Specific CO2 Emissions",
+      "daxMeasure": "KPI-CO2-01 Specific CO2 t per t",
+      "formula": "Total CO2e emitted (t) / total crude steel produced (t)",
+      "target": "-22% vs baseline (2.10 to approximately 1.64 t/t)",
+      "frequency": "Daily and rolling 30-day"
+    },
+    {
+      "kpiId": "KPI-CO2-02",
+      "name": "ETS Allowance Cost Exposure",
+      "daxMeasure": "KPI-CO2-02 ETS Exposure EUR",
+      "formula": "Forecast emissions above free allocation (t) * ETS allowance price (EUR/t)",
+      "target": "Minimize and report trend",
+      "frequency": "Monthly"
+    },
+    {
+      "kpiId": "KPI-FUR-01",
+      "name": "Lining Failure Lead Time",
+      "daxMeasure": "KPI-FUR-01 Lining Lead Time Days",
+      "formula": "Actual reline/failure timestamp minus alert issue timestamp in days",
+      "target": "At least 21 days",
+      "frequency": "Per event"
+    },
+    {
+      "kpiId": "KPI-FUR-02",
+      "name": "Unplanned Outage Avoidance",
+      "daxMeasure": "KPI-FUR-02 Unplanned Outages Rolling 12M",
+      "formula": "Count of unplanned furnace outages over rolling 12 months",
+      "target": "Downward trend; zero catastrophic unplanned events",
+      "frequency": "Monthly"
+    },
+    {
+      "kpiId": "KPI-FUR-03",
+      "name": "RUL Prediction Precision and Recall",
+      "daxMeasure": "KPI-FUR-03 RUL Precision",
+      "secondaryDaxMeasure": "KPI-FUR-03 RUL Recall",
+      "formula": "Standard precision and recall for alerts vs failures within the evaluation window",
+      "target": "Precision at least 0.8 and recall at least 0.9 (illustrative)",
+      "frequency": "Quarterly"
+    },
+    {
+      "kpiId": "KPI-QUA-01",
+      "name": "High-Grade Yield Rate",
+      "daxMeasure": "KPI-QUA-01 High-Grade Yield Rate",
+      "formula": "First-pass automotive-grade tonnes meeting spec / automotive-grade tonnes attempted",
+      "target": "+8% relative vs baseline (approximately 90% to 97%)",
+      "frequency": "Daily and rolling 30-day"
+    },
+    {
+      "kpiId": "KPI-QUA-02",
+      "name": "Customer Claims or Reject Rate",
+      "daxMeasure": "KPI-QUA-02 Claims per Ton Shipped",
+      "formula": "Customer-reported non-conformances / tonnes shipped",
+      "target": "Downward trend",
+      "frequency": "Monthly"
+    },
+    {
+      "kpiId": "KPI-KNW-01",
+      "name": "Procedure Library Coverage",
+      "daxMeasure": "KPI-KNW-01 Procedure Coverage",
+      "formula": "Critical topics with an approved procedure / identified critical topics",
+      "target": "Upward trend toward 100%",
+      "frequency": "Monthly"
+    },
+    {
+      "kpiId": "KPI-KNW-02",
+      "name": "Knowledge Retrieval Time",
+      "daxMeasure": "KPI-KNW-02 Median Retrieval Seconds",
+      "formula": "Median time from query to cited relevant answer",
+      "target": "Less than 10 seconds in the demo",
+      "frequency": "Continuous"
+    },
+    {
+      "kpiId": "KPI-TRUST-01",
+      "name": "AI Recommendation Acceptance Rate",
+      "daxMeasure": "KPI-TRUST-01 Portfolio Acceptance Rate",
+      "formula": "Accepted recommendations across all domains / recommendations issued",
+      "target": "Upward trend",
+      "frequency": "Monthly"
+    },
+    {
+      "kpiId": "KPI-ADO-01",
+      "name": "Platform Adoption",
+      "daxMeasure": "KPI-ADO-01 Weekly Active User Rate",
+      "formula": "Weekly active target users / licensed or target users",
+      "target": "At least 80% by end of pilot",
+      "frequency": "Weekly"
+    },
+    {
+      "kpiId": "KPI-GOV-01",
+      "name": "Audit Completeness",
+      "daxMeasure": "KPI-GOV-01 Audit Completeness",
+      "formula": "Recommendations with a complete audit record / recommendations issued",
+      "target": "100%",
+      "frequency": "Continuous"
+    }
+  ],
+  "supportingMeasures": [
+    "Throughput t per h",
+    "Availability",
+    "Performance",
+    "Quality Rate",
+    "OEE",
+    "Active Alerts",
+    "Energy EUR per t",
+    "On-Time Rate",
+    "Latest RUL P50 Days",
+    "Latest Lining Risk",
+    "Projected Savings EUR",
+    "Shiftable MW",
+    "First-Pass Yield",
+    "Defect PPM",
+    "CO2 t per day",
+    "ETS Allowances Remaining t"
+  ]
+}

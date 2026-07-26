@@ -1,0 +1,210 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://novasteel.example/schemas/fabric-environment.schema.json",
+  "title": "NovaSteel Fabric environment parameters",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "environment",
+    "region",
+    "dataClassification",
+    "syntheticOnly",
+    "tenantId",
+    "subscriptionId",
+    "capacity",
+    "authentication",
+    "workspaces",
+    "items",
+    "onelake",
+    "retention",
+    "bindings",
+    "deploymentOptions",
+    "lifecycle"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "environment": { "enum": ["dev", "test", "demo", "prod"] },
+    "region": { "const": "Sweden Central" },
+    "dataClassification": { "type": "string" },
+    "syntheticOnly": { "type": "boolean" },
+    "tenantId": { "type": "string" },
+    "subscriptionId": { "type": "string" },
+    "capacity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "resourceGroupName",
+        "fabricCapacityId",
+        "armResourceId",
+        "sku"
+      ],
+      "properties": {
+        "name": { "type": "string" },
+        "resourceGroupName": { "type": "string" },
+        "fabricCapacityId": { "type": "string" },
+        "armResourceId": { "type": "string" },
+        "sku": { "enum": ["F2", "F4", "F64", "OTHER_MEASURED"] }
+      }
+    },
+    "authentication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "managedIdentityClientId"],
+      "properties": {
+        "mode": { "enum": ["AzureCli", "ManagedIdentity"] },
+        "managedIdentityClientId": { "type": "string" }
+      }
+    },
+    "workspaces": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rtiIngress", "dataCore", "ml", "analytics"],
+      "properties": {
+        "rtiIngress": { "$ref": "#/$defs/namedResource" },
+        "dataCore": { "$ref": "#/$defs/namedResource" },
+        "ml": { "$ref": "#/$defs/namedResource" },
+        "analytics": { "$ref": "#/$defs/namedResource" }
+      }
+    },
+    "items": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "eventhouseOperations",
+        "kqlOperations",
+        "landingLakehouse",
+        "coreLakehouse",
+        "eventstreamTelemetry",
+        "semanticOperations"
+      ],
+      "properties": {
+        "eventhouseOperations": { "$ref": "#/$defs/namedResource" },
+        "kqlOperations": { "$ref": "#/$defs/namedResource" },
+        "landingLakehouse": { "$ref": "#/$defs/namedResource" },
+        "coreLakehouse": { "$ref": "#/$defs/namedResource" },
+        "eventstreamTelemetry": { "$ref": "#/$defs/namedResource" },
+        "semanticOperations": { "$ref": "#/$defs/namedResource" }
+      }
+    },
+    "onelake": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["landingTablesUri", "coreTablesUri"],
+      "properties": {
+        "landingTablesUri": { "type": "string" },
+        "coreTablesUri": { "type": "string" }
+      }
+    },
+    "retention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "telemetryHot",
+        "alarmHot",
+        "gatewayHealthHot",
+        "modelInferenceHot",
+        "quarantineHot"
+      ],
+      "properties": {
+        "telemetryHot": { "type": "string", "pattern": "^[1-9][0-9]*d$" },
+        "alarmHot": { "type": "string", "pattern": "^[1-9][0-9]*d$" },
+        "gatewayHealthHot": { "type": "string", "pattern": "^[1-9][0-9]*d$" },
+        "modelInferenceHot": { "type": "string", "pattern": "^[1-9][0-9]*d$" },
+        "quarantineHot": { "type": "string", "pattern": "^[1-9][0-9]*d$" }
+      }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "eventstreamPublisherObjectId",
+        "dataEngineeringIdentityObjectId",
+        "sensitivityLabelId",
+        "kqlQueryServiceUri",
+        "kqlIngestionServiceUri",
+        "coreSqlEndpoint",
+        "connections"
+      ],
+      "properties": {
+        "eventstreamPublisherObjectId": { "type": "string" },
+        "dataEngineeringIdentityObjectId": { "type": "string" },
+        "sensitivityLabelId": { "type": "string" },
+        "kqlQueryServiceUri": { "type": "string" },
+        "kqlIngestionServiceUri": { "type": "string" },
+        "coreSqlEndpoint": { "type": "string" },
+        "connections": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mes", "lims", "cmms", "market", "powerBi"],
+          "properties": {
+            "mes": { "type": "string" },
+            "lims": { "type": "string" },
+            "cmms": { "type": "string" },
+            "market": { "type": "string" },
+            "powerBi": { "type": "string" }
+          }
+        }
+      }
+    },
+    "deploymentOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "createWorkspaces",
+        "assignCapacity",
+        "deployRti",
+        "deployLakehouses",
+        "deployNotebooks",
+        "deployPipelines",
+        "deploySemanticModel",
+        "semanticModelBindingValidated",
+        "applyIngressPublisherAclWithFabricCli",
+        "runInitializationJobs"
+      ],
+      "properties": {
+        "createWorkspaces": { "type": "boolean" },
+        "assignCapacity": { "type": "boolean" },
+        "deployRti": { "type": "boolean" },
+        "deployLakehouses": { "type": "boolean" },
+        "deployNotebooks": { "type": "boolean" },
+        "deployPipelines": { "type": "boolean" },
+        "deploySemanticModel": { "type": "boolean" },
+        "semanticModelBindingValidated": { "type": "boolean" },
+        "applyIngressPublisherAclWithFabricCli": { "type": "boolean" },
+        "runInitializationJobs": { "type": "boolean" }
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "automationEnabled",
+        "timeZone",
+        "dailyCheckLocalTime",
+        "policyVersion",
+        "preconditionMaxAgeMinutes"
+      ],
+      "properties": {
+        "automationEnabled": { "type": "boolean" },
+        "timeZone": { "const": "Europe/Luxembourg" },
+        "dailyCheckLocalTime": { "const": "01:00" },
+        "policyVersion": { "type": "string" },
+        "preconditionMaxAgeMinutes": { "type": "integer", "minimum": 1, "maximum": 30 }
+      }
+    }
+  },
+  "$defs": {
+    "namedResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["displayName", "id"],
+      "properties": {
+        "displayName": { "type": "string" },
+        "id": { "type": "string" }
+      }
+    }
+  }
+}

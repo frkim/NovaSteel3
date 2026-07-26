@@ -1,0 +1,30 @@
+{
+  "event_id": "018f2f6e-6b2a-7c31-9b1a-2f7e6a9c1d53",
+  "event_ts": "2026-07-25T08:15:00Z",
+  "ingest_ts": "2026-07-25T08:15:00.050Z",
+  "source_id": "LUX-ENERGY-METER-01",
+  "asset_id": "LUX-PLANT-ENERGY",
+  "plant_id": "NS-DEMO-LUX-01",
+  "sequence": 48216,
+  "correlation_id": "01J9Z8Q3K5F8E2X6R7T4V0M1N2",
+  "schema_name": "novasteel.energy-interval.v1",
+  "schema_version": 1,
+  "data_classification": "SYNTHETIC",
+  "privacy_label": "DEMO-NONPERSONAL",
+  "scenario_id": "evening-scarcity",
+  "seed": 240727,
+  "generator_version": "novasteel-sim/1.0.0",
+  "payload": {
+    "type": "energy.interval",
+    "meter_id": "LUX-MTR-ELEC-01",
+    "interval_start": "2026-07-25T08:00:00Z",
+    "interval_end": "2026-07-25T08:15:00Z",
+    "price": 96.4,
+    "price_unit": "EUR/MWh",
+    "demand": 84.7,
+    "demand_unit": "MW",
+    "consumption_mwh": 21.175,
+    "grid_carbon_intensity_kgco2e_per_mwh": 244.0,
+    "scenario": "evening-scarcity"
+  }
+}

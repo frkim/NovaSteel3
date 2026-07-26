@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://novasteel.example/contracts/events/model-inference.v1.schema.json",
+  "title": "NovaSteel model inference event v1",
+  "allOf": [
+    {
+      "$ref": "event-envelope.v1.schema.json"
+    },
+    {
+      "properties": {
+        "schema_name": {
+          "const": "novasteel.model-inference.v1"
+        },
+        "payload": {
+          "type": "object",
+          "description": "Model evidence fields follow the synthetic-data specification. Additive fields are allowed within v1.",
+          "required": [
+            "type",
+            "inference_id",
+            "model_id",
+            "model_version",
+            "feature_snapshot_ts",
+            "component_id",
+            "prediction",
+            "top_factors",
+            "label"
+          ],
+          "properties": {
+            "type": {
+              "const": "model.inference"
+            },
+            "inference_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "model_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "model_version": {
+              "type": "string",
+              "minLength": 1
+            },
+            "feature_snapshot_ts": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "component_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "prediction": {
+              "type": "object",
+              "required": [
+                "remaining_useful_life_days_p50",
+                "remaining_useful_life_days_p10",
+                "remaining_useful_life_days_p90",
+                "estimated_minimum_lining_mm",
+                "risk_score",
+                "severity"
+              ],
+              "properties": {
+                "remaining_useful_life_days_p50": {
+                  "type": "number"
+                },
+                "remaining_useful_life_days_p10": {
+                  "type": "number"
+                },
+                "remaining_useful_life_days_p90": {
+                  "type": "number"
+                },
+                "estimated_minimum_lining_mm": {
+                  "type": "number"
+                },
+                "risk_score": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "LOW",
+                    "MEDIUM",
+                    "HIGH"
+                  ]
+                }
+              }
+            },
+            "top_factors": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "feature",
+                  "contribution"
+                ],
+                "properties": {
+                  "feature": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "contribution": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "label": {
+              "type": "string",
+              "minLength": 1
+            },
+            "value": {
+              "type": "number",
+              "description": "Optional normalized projection for BFF adapters."
+            },
+            "unit": {
+              "type": "string",
+              "description": "Optional normalized projection for BFF adapters."
+            },
+            "scored_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Optional alias for feature_snapshot_ts in normalized projections."
+            },
+            "confidence": {
+              "type": "object",
+              "properties": {
+                "p10": {
+                  "type": "number"
+                },
+                "p50": {
+                  "type": "number"
+                },
+                "p90": {
+                  "type": "number"
+                }
+              }
+            },
+            "source_refs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

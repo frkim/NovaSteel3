@@ -1,0 +1,47 @@
+table fact_model_evaluation
+	column evaluation_date
+		dataType: dateTime
+		formatString: yyyy-MM-dd
+		summarizeBy: none
+		sourceColumn: evaluation_date
+
+	column domain
+		dataType: string
+		summarizeBy: none
+		sourceColumn: domain
+
+	column model_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: model_id
+
+	column model_version
+		dataType: string
+		summarizeBy: none
+		sourceColumn: model_version
+
+	column true_positive
+		dataType: int64
+		summarizeBy: sum
+		sourceColumn: true_positive
+
+	column false_positive
+		dataType: int64
+		summarizeBy: sum
+		sourceColumn: false_positive
+
+	column false_negative
+		dataType: int64
+		summarizeBy: sum
+		sourceColumn: false_negative
+
+	column true_negative
+		dataType: int64
+		summarizeBy: sum
+		sourceColumn: true_negative
+
+	partition fact_model_evaluation = entity
+		mode: directLake
+		source
+			entityName: fact_model_evaluation
+			schemaName: dbo

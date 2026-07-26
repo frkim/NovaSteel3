@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://novasteel.example/schemas/fabric-novasteelv3-items-manifest.schema.json",
+  "title": "NovaSteel v3 isolated Fabric item manifest",
+  "description": "Read-only reference manifest of the item subset that .azure/fabric/Deploy-NovaSteelV3FabricAssets.ps1 is allowed to create/update inside the single isolated novasteelv3 workspace. It reuses the same source-controlled definitions as fabric/catalog/fabric-items.json (fabric/items, fabric/notebooks, fabric/pipelines, fabric/semantic-model) but assigns unique novasteelv3 display names and drops the four-workspace partitioning, because the isolated estate binds every supported item into exactly one workspace. This file does not modify fabric/catalog/fabric-items.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "supportedItems", "excludedItems", "manualAssets"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "supportedItems": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "type",
+          "displayName",
+          "description",
+          "restCollection",
+          "sourceDirectory",
+          "definitionFormat",
+          "definitionParts",
+          "createWithoutDefinition",
+          "cliDeployable",
+          "bindingGate",
+          "deploymentOption",
+          "dependencies",
+          "manualGates"
+        ],
+        "properties": {
+          "key": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9]+$" },
+          "type": { "type": "string" },
+          "displayName": { "type": "string" },
+          "description": { "type": "string", "maxLength": 256 },
+          "restCollection": { "type": "string", "pattern": "^/[A-Za-z]+$" },
+          "sourceDirectory": { "type": "string" },
+          "definitionFormat": { "type": ["string", "null"] },
+          "definitionParts": { "type": "array", "items": { "type": "string" } },
+          "createWithoutDefinition": { "type": "boolean" },
+          "cliDeployable": { "type": "boolean" },
+          "bindingGate": { "type": ["string", "null"] },
+          "deploymentOption": { "type": "string" },
+          "dependencies": { "type": "array", "items": { "type": "string" } },
+          "manualGates": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "excludedItems": {
+      "type": "array",
+      "description": "Items present in the main fabric/ catalog that are intentionally NOT automated for novasteelv3 and remain a manual/portal-only or future gate.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["key", "type", "reason"],
+        "properties": {
+          "key": { "type": "string" },
+          "type": { "type": "string" },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "manualAssets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["key", "assetType", "sourcePath", "reason", "completionEvidence"],
+        "properties": {
+          "key": { "type": "string" },
+          "assetType": { "type": "string" },
+          "sourcePath": { "type": "string" },
+          "reason": { "type": "string" },
+          "completionEvidence": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}

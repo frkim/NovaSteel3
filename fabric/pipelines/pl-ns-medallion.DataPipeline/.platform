@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "DataPipeline",
+    "displayName": "pl-ns-medallion",
+    "description": "Initialize and run bronze-to-silver-to-gold with a quality gate."
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "71000000-0000-4710-8710-000000000001"
+  }
+}

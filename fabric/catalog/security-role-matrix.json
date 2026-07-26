@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "roles": [
+    {
+      "principalKey": "deploymentIdentity",
+      "workspaceKey": "rtiIngress",
+      "workspaceRole": "Admin",
+      "purpose": "Create/update solution items during a controlled deployment.",
+      "standingAccess": false,
+      "manualGate": "Use PIM or an environment-scoped deployment identity and remove/evaluate elevated access after deployment."
+    },
+    {
+      "principalKey": "eventstreamPublisher",
+      "workspaceKey": "rtiIngress",
+      "workspaceRole": "Contributor",
+      "purpose": "Publish to the Custom Endpoint under the documented current role requirement.",
+      "standingAccess": true,
+      "manualGate": "Re-evaluate when Fabric offers a narrower publisher role."
+    },
+    {
+      "principalKey": "eventstreamPublisher",
+      "workspaceKey": "dataCore",
+      "workspaceRole": "None",
+      "purpose": "Explicit deny-by-absence.",
+      "standingAccess": false,
+      "manualGate": "Automated validation must find no assignment."
+    },
+    {
+      "principalKey": "eventstreamPublisher",
+      "workspaceKey": "ml",
+      "workspaceRole": "None",
+      "purpose": "Explicit deny-by-absence.",
+      "standingAccess": false,
+      "manualGate": "Automated validation must find no assignment."
+    },
+    {
+      "principalKey": "eventstreamPublisher",
+      "workspaceKey": "analytics",
+      "workspaceRole": "None",
+      "purpose": "Explicit deny-by-absence.",
+      "standingAccess": false,
+      "manualGate": "Automated validation must find no assignment."
+    },
+    {
+      "principalKey": "dataEngineeringIdentity",
+      "workspaceKey": "rtiIngress",
+      "workspaceRole": "Viewer",
+      "purpose": "Read landing data for governed medallion processing.",
+      "standingAccess": true,
+      "manualGate": "Limit OneLake access to landing/quarantine paths."
+    },
+    {
+      "principalKey": "dataEngineeringIdentity",
+      "workspaceKey": "dataCore",
+      "workspaceRole": "Contributor",
+      "purpose": "Run notebooks/pipelines and append/merge curated tables.",
+      "standingAccess": true,
+      "manualGate": "No workspace administration or role-management permission."
+    },
+    {
+      "principalKey": "analyticsViewers",
+      "workspaceKey": "analytics",
+      "workspaceRole": "Viewer",
+      "purpose": "Internal user-owned-data Power BI consumption.",
+      "standingAccess": true,
+      "manualGate": "Verify RLS, plant scope, export permissions, and Pro/PPU/trial licensing below F64."
+    }
+  ]
+}

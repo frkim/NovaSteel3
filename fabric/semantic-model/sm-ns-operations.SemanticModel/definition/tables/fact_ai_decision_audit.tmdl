@@ -1,0 +1,38 @@
+table fact_ai_decision_audit
+	column audit_id
+		dataType: string
+		isKey
+		summarizeBy: none
+		sourceColumn: audit_id
+
+	column recorded_date
+		dataType: dateTime
+		formatString: yyyy-MM-dd
+		summarizeBy: none
+		sourceColumn: recorded_date
+
+	column domain
+		dataType: string
+		summarizeBy: none
+		sourceColumn: domain
+
+	column recommendation_status
+		dataType: string
+		summarizeBy: none
+		sourceColumn: recommendation_status
+
+	column complete_audit_flag
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: complete_audit_flag
+
+	column confidence
+		dataType: double
+		summarizeBy: none
+		sourceColumn: confidence
+
+	partition fact_ai_decision_audit = entity
+		mode: directLake
+		source
+			entityName: fact_ai_decision_audit
+			schemaName: dbo

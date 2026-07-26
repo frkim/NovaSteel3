@@ -1,0 +1,85 @@
+@page "/"
+@page "/{Site}"
+@page "/{Site}/{Section}"
+@page "/{Site}/{Section}/{SubView}"
+@using System.Text.Json
+@implements IDisposable
+@inject ShellState Shell
+@inject CapacityState Capacity
+@inject NavigationManager Navigation
+
+<PageTitle>@Shell.ActivePersona | NovaSteel</PageTitle>
+
+<AnalyticsBridge Context="@Shell.ToAnalyticsBridgeContext()" OnEvent="HandleAnalyticsEvent" />
+
+@code {
+    [Parameter]
+    public string? Site { get; set; }
+
+    [Parameter]
+    public string? Section { get; set; }
+
+    [Parameter]
+    public string? SubView { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Shell.Changed += OnShellStateChanged;
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (string.IsNullOrWhiteSpace(Site))
+        {
+            Navigation.NavigateTo("/lu/command-center", replace: true);
+            return;
+        }
+
+        Shell.ApplyRoute(Site, Section, SubView);
+    }
+
+    private void OnShellStateChanged() => _ = InvokeAsync(StateHasChanged);
+
+    private async Task HandleAnalyticsEvent(AnalyticsEvent analyticsEvent)
+    {
+        switch (analyticsEvent.Type)
+        {
+            case "nav.intent":
+                var navigation = analyticsEvent.Payload.Deserialize<NavigationIntent>();
+                if (!string.IsNullOrWhiteSpace(navigation?.Route))
+                {
+                    Navigation.NavigateTo(navigation.Route);
+                }
+                break;
+            case "capacity.request":
+                var capacityRequest = analyticsEvent.Payload.Deserialize<CapacityRequest>();
+                if (capacityRequest is not null)
+                {
+                    // The shell owns the control surface: it mediates the BFF call.
+                    await Capacity.RequestAsync(
+                        capacityRequest.Action,
+                        capacityRequest.Reason ?? "requested from analytics",
+                        Shell.Locale);
+                    Shell.PublishToast(
+                        "info",
+                        $"{capacityRequest.Action} request routed through the shell to the BFF.");
+                }
+                break;
+            case "toast":
+                var toast = analyticsEvent.Payload.Deserialize<ToastNotification>();
+                if (toast is not null)
+                {
+                    Shell.PublishToast(toast.Severity, toast.Message);
+                }
+                break;
+            case "telemetry":
+                Shell.PublishToast("info", "Telemetry event accepted by the shell bridge.");
+                break;
+        }
+    }
+
+    public void Dispose()
+    {
+        Shell.Changed -= OnShellStateChanged;
+    }
+}

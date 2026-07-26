@@ -1,0 +1,44 @@
+// Q01 - hot-path freshness. Expected during active demo ingestion: < 5 seconds.
+fn_data_freshness('')
+| order by freshness_seconds desc
+
+// Q02 - current alarms. Bind plant_filter to the selected site when embedded.
+fn_active_alarms('')
+| project event_ts, severity, plant_id, asset_id, alarm_type, title, state,
+          confidence, work_order_id, correlation_id
+| take 200
+
+// Q03 - gateway state and replay pressure.
+fn_gateway_status('')
+| order by connection_state asc, event_time_lag_ms desc
+
+// Q04 - latest furnace/quality model score with uncertainty.
+fn_latest_model_scores('')
+| order by risk_score desc
+
+// Q05 - selected operational signals, one-minute band.
+materialized_view('mv_telemetry_1m')
+| where event_ts > ago(2h)
+| where signal_code in (
+    'hearth_shell_temperature',
+    'cooling_water_flow',
+    'local_heat_flux',
+    'production_rate',
+    'rolling_force',
+    'strip_speed'
+  )
+| order by event_ts asc
+
+// Q06 - quarantine rate and dominant reason (operations alert threshold is 2%/15m).
+fn_quarantine_rate(15m)
+
+// Q07 - quarantine evidence remains queryable and is never silently repaired.
+ingest_quarantine_hot
+| where quarantined_at > ago(24h)
+| summarize records=count() by quarantine_reason, plant_id
+| order by records desc
+
+// Q08 - materialized-view health.
+.show materialized-views
+| where Name startswith 'mv_'
+| project Name, IsHealthy, IsEnabled, LastRun, LastRunResult

@@ -1,0 +1,13 @@
+# NovaSteel synthetic requirements.
+
+# The simulator is implemented entirely with the Python standard library
+# and has no third-party runtime dependencies.
+#
+# If a future change genuinely needs a dependency, add it here pinned with
+# `--require-hashes` and install only through the approved Microsoft-managed
+# feed already configured for this repository in the root `pip.conf`
+# (index-url = https://packagefeedproxy.microsoft.io/pypi/simple), e.g.:
+#
+#   python -m pip install --require-hashes -r simulator/requirements.txt
+#
+# Never add --extra-index-url pointing at public PyPI.

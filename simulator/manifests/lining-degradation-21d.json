@@ -1,0 +1,45 @@
+{
+  "scenario_id": "lining-degradation-21d",
+  "schema_version": 1,
+  "description": "Localized hearth sector 07 refractory wear producing a calibrated 21-day P50 remaining-useful-life warning (docs section 8.1, 10.3 seed 240726).",
+  "root_seed": 240726,
+  "plant_id": "NS-DEMO-LUX-01",
+  "primary_asset_id": "LUX-BF-01",
+  "start_time": "2026-06-10T00:00:00Z",
+  "window_hours": 6,
+  "sample_interval_seconds": 300,
+  "fast_window_hours": 1,
+  "fast_sample_interval_seconds": 300,
+  "hearth_sectors": ["06", "07", "08"],
+  "campaign": {
+    "min_safe_thickness_mm": 300.0,
+    "thickness_at_eval_mm": {"default": 700.0, "07": 363.0},
+    "degradation_rate_mm_per_day": {"default": 0.02, "07": 3.0}
+  },
+  "energy": {
+    "price_profile": "baseline-summer",
+    "num_batches": 6
+  },
+  "quality": {
+    "drift_active": false
+  },
+  "anomalies": [
+    {
+      "anomaly_id": "AN-LINING-DEGRADATION-07",
+      "type": "lining_degradation",
+      "layer": "process",
+      "target": "07",
+      "start_hours": 0,
+      "end_hours": 999999,
+      "params": {"target_delta_c": 22.0}
+    }
+  ],
+  "expected_assertions": {
+    "component_id": "HEARTH-SECTOR-07",
+    "rul_p50_days_min": 19.0,
+    "rul_p50_days_max": 23.0,
+    "risk_score_min": 0.80,
+    "shell_temp_delta_min_c": 12.0,
+    "shell_temp_delta_max_c": 35.0
+  }
+}

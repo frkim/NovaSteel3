@@ -1,0 +1,32 @@
+version: 2
+
+registries:
+  microsoft-protected-pypi:
+    type: python-index
+    url: https://packagefeedproxy.microsoft.io/pypi/simple
+  microsoft-protected-nuget:
+    type: nuget-feed
+    url: https://packagefeedproxy.microsoft.io/nuget/v3/index.json
+
+updates:
+  - package-ecosystem: pip
+    directory: /services/bff-api
+    schedule:
+      interval: weekly
+    registries:
+      - microsoft-protected-pypi
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: nuget
+    directory: /apps/portal-shell
+    schedule:
+      interval: weekly
+    registries:
+      - microsoft-protected-nuget
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5

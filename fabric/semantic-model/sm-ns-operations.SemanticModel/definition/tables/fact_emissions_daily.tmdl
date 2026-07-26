@@ -1,0 +1,43 @@
+table fact_emissions_daily
+	column date_key
+		dataType: dateTime
+		formatString: yyyy-MM-dd
+		summarizeBy: none
+		sourceColumn: date_key
+
+	column plant_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: plant_id
+
+	column total_co2e_t
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: total_co2e_t
+
+	column baseline_co2e_t
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: baseline_co2e_t
+
+	column crude_steel_tons
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: crude_steel_tons
+
+	column free_allocation_t
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: free_allocation_t
+
+	column ets_exposure_eur
+		dataType: double
+		formatString: €#,0.00
+		summarizeBy: sum
+		sourceColumn: ets_exposure_eur
+
+	partition fact_emissions_daily = entity
+		mode: directLake
+		source
+			entityName: fact_emissions_daily
+			schemaName: dbo

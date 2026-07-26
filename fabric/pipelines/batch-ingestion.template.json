@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "deploymentStatus": "MANUAL_BINDING_REQUIRED",
+  "description": "Template for incremental MES/LIMS/CMMS/market copies into immutable bronze tables. It contains no credential.",
+  "sources": [
+    {
+      "name": "MES",
+      "connectionParameter": "bindings.connections.mes",
+      "incrementalColumn": "source_updated_at",
+      "watermarkStore": "pipeline_run_reconciliation",
+      "destinationTable": "bronze_batch_mes",
+      "datasets": ["heat_batch", "production_shift", "genealogy"]
+    },
+    {
+      "name": "LIMS",
+      "connectionParameter": "bindings.connections.lims",
+      "incrementalColumn": "source_updated_at",
+      "watermarkStore": "pipeline_run_reconciliation",
+      "destinationTable": "bronze_batch_mes",
+      "datasets": ["quality_measurement"]
+    },
+    {
+      "name": "CMMS",
+      "connectionParameter": "bindings.connections.cmms",
+      "incrementalColumn": "source_updated_at",
+      "watermarkStore": "pipeline_run_reconciliation",
+      "destinationTable": "bronze_batch_cmms",
+      "datasets": ["maintenance_event", "work_order"]
+    },
+    {
+      "name": "MarketAndCarbon",
+      "connectionParameter": "bindings.connections.market",
+      "incrementalColumn": "source_updated_at",
+      "watermarkStore": "pipeline_run_reconciliation",
+      "destinationTable": "bronze_batch_market",
+      "datasets": ["spot_price", "grid_carbon_intensity", "ets_allowance_price", "tariff"]
+    }
+  ],
+  "copyPolicy": {
+    "validateDataConsistency": true,
+    "skipIncompatibleRows": false,
+    "redirectIncompatibleRowsTo": "quarantine_batch",
+    "retry": 2,
+    "retryIntervalInSeconds": 60,
+    "secureInput": true,
+    "secureOutput": true
+  },
+  "manualGates": [
+    "Create tenant connections and authorize the workspace/job identity.",
+    "Prove source-side incremental semantics and licensed market usage.",
+    "Export the resulting Fabric Copy activity definition and replace this template only after review.",
+    "Exclude the schedule from capacity pause and protected rehearsal windows."
+  ]
+}

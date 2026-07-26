@@ -1,0 +1,74 @@
+table fact_furnace_rul
+	column inference_id
+		dataType: string
+		isKey
+		summarizeBy: none
+		sourceColumn: inference_id
+
+	column scored_date
+		dataType: dateTime
+		formatString: yyyy-MM-dd
+		summarizeBy: none
+		sourceColumn: scored_date
+
+	column scored_at
+		dataType: dateTime
+		formatString: yyyy-MM-dd HH:mm:ss
+		summarizeBy: none
+		sourceColumn: scored_at
+
+	column plant_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: plant_id
+
+	column asset_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: asset_id
+
+	column component_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: component_id
+
+	column rul_days_p10
+		dataType: double
+		summarizeBy: none
+		sourceColumn: rul_days_p10
+
+	column rul_days_p50
+		dataType: double
+		summarizeBy: none
+		sourceColumn: rul_days_p50
+
+	column rul_days_p90
+		dataType: double
+		summarizeBy: none
+		sourceColumn: rul_days_p90
+
+	column risk_score
+		dataType: double
+		summarizeBy: none
+		sourceColumn: risk_score
+
+	column alert_issued_at
+		dataType: dateTime
+		summarizeBy: none
+		sourceColumn: alert_issued_at
+
+	column actual_reline_or_failure_at
+		dataType: dateTime
+		summarizeBy: none
+		sourceColumn: actual_reline_or_failure_at
+
+	column unplanned_outage_flag
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: unplanned_outage_flag
+
+	partition fact_furnace_rul = entity
+		mode: directLake
+		source
+			entityName: fact_furnace_rul
+			schemaName: dbo

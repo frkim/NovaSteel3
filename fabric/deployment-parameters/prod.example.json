@@ -1,0 +1,80 @@
+{
+  "$schema": "./environment.schema.json",
+  "schemaVersion": 1,
+  "environment": "prod",
+  "region": "Sweden Central",
+  "dataClassification": "CONFIDENTIAL_OPERATIONAL",
+  "syntheticOnly": false,
+  "tenantId": "00000000-0000-0000-0000-000000000000",
+  "subscriptionId": "00000000-0000-0000-0000-000000000000",
+  "capacity": {
+    "name": "cap-novasteel-prod-sc",
+    "resourceGroupName": "rg-ns-prod-fabric",
+    "fabricCapacityId": "00000000-0000-0000-0000-000000000000",
+    "armResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-ns-prod-fabric/providers/Microsoft.Fabric/capacities/cap-novasteel-prod-sc",
+    "sku": "OTHER_MEASURED"
+  },
+  "authentication": {
+    "mode": "AzureCli",
+    "managedIdentityClientId": ""
+  },
+  "workspaces": {
+    "rtiIngress": { "displayName": "NS-prod-RTI-Ingress", "id": "" },
+    "dataCore": { "displayName": "NS-prod-DataCore", "id": "" },
+    "ml": { "displayName": "NS-prod-ML", "id": "" },
+    "analytics": { "displayName": "NS-prod-Analytics", "id": "" }
+  },
+  "items": {
+    "eventhouseOperations": { "displayName": "evh-ns-operations", "id": "" },
+    "kqlOperations": { "displayName": "kql-ns-operations", "id": "" },
+    "landingLakehouse": { "displayName": "lh-ns-landing", "id": "" },
+    "coreLakehouse": { "displayName": "lh-ns-core", "id": "" },
+    "eventstreamTelemetry": { "displayName": "es-ns-telemetry-v1", "id": "" },
+    "semanticOperations": { "displayName": "sm-ns-operations", "id": "" }
+  },
+  "onelake": {
+    "landingTablesUri": "abfss://<rti-workspace-guid>@onelake.dfs.fabric.microsoft.com/<landing-lakehouse-guid>/Tables",
+    "coreTablesUri": "abfss://<datacore-workspace-guid>@onelake.dfs.fabric.microsoft.com/<core-lakehouse-guid>/Tables"
+  },
+  "retention": {
+    "telemetryHot": "90d",
+    "alarmHot": "365d",
+    "gatewayHealthHot": "30d",
+    "modelInferenceHot": "90d",
+    "quarantineHot": "30d"
+  },
+  "bindings": {
+    "eventstreamPublisherObjectId": "",
+    "dataEngineeringIdentityObjectId": "",
+    "sensitivityLabelId": "",
+    "kqlQueryServiceUri": "",
+    "kqlIngestionServiceUri": "",
+    "coreSqlEndpoint": "",
+    "connections": {
+      "mes": "",
+      "lims": "",
+      "cmms": "",
+      "market": "",
+      "powerBi": ""
+    }
+  },
+  "deploymentOptions": {
+    "createWorkspaces": true,
+    "assignCapacity": true,
+    "deployRti": true,
+    "deployLakehouses": true,
+    "deployNotebooks": true,
+    "deployPipelines": true,
+    "deploySemanticModel": false,
+    "semanticModelBindingValidated": false,
+    "applyIngressPublisherAclWithFabricCli": false,
+    "runInitializationJobs": false
+  },
+  "lifecycle": {
+    "automationEnabled": false,
+    "timeZone": "Europe/Luxembourg",
+    "dailyCheckLocalTime": "01:00",
+    "policyVersion": "novasteel-capacity-lifecycle/1.0",
+    "preconditionMaxAgeMinutes": 10
+  }
+}

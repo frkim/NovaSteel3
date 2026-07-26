@@ -1,0 +1,238 @@
+{
+  "$schema": "./data-quality-rules.schema.json",
+  "schemaVersion": 1,
+  "quarantineReasons": [
+    "SCHEMA_INVALID",
+    "UNKNOWN_ASSET",
+    "LATE_BEYOND_POLICY",
+    "DUPLICATE_CONFLICT",
+    "INVALID_UNIT"
+  ],
+  "rules": [
+    {
+      "id": "DQ-ENV-001",
+      "zone": "bronze",
+      "dataset": "bronze_event_envelope",
+      "severity": "error",
+      "condition": "required envelope field is null or schema_version is not supported",
+      "action": "quarantine",
+      "quarantineReason": "SCHEMA_INVALID",
+      "description": "event_id, event_ts, ingest_ts, source_id, plant_id, sequence, schema_name, schema_version, correlation_id, classification, and payload are mandatory."
+    },
+    {
+      "id": "DQ-ENV-002",
+      "zone": "bronze",
+      "dataset": "bronze_event_envelope",
+      "severity": "error",
+      "condition": "event_id does not match UUIDv7 format",
+      "action": "quarantine",
+      "quarantineReason": "SCHEMA_INVALID",
+      "description": "The v1 contract requires a globally unique time-ordered UUIDv7 event ID."
+    },
+    {
+      "id": "DQ-ENV-003",
+      "zone": "bronze",
+      "dataset": "bronze_event_envelope",
+      "severity": "error",
+      "condition": "event_ts > ingest_ts + 5 seconds and clock_mode != accelerated",
+      "action": "quarantine",
+      "quarantineReason": "SCHEMA_INVALID",
+      "description": "Future event time is allowed only for the explicitly accelerated synthetic clock."
+    },
+    {
+      "id": "DQ-ENV-004",
+      "zone": "bronze",
+      "dataset": "bronze_event_envelope",
+      "severity": "error",
+      "condition": "environment == demo and (data_classification != SYNTHETIC or privacy_label != DEMO-NONPERSONAL or plant_id does not start NS-DEMO-)",
+      "action": "quarantine",
+      "quarantineReason": "SCHEMA_INVALID",
+      "description": "Demo isolation is a startup and per-row assertion."
+    },
+    {
+      "id": "DQ-DUP-001",
+      "zone": "silver",
+      "dataset": "all event facts",
+      "severity": "error",
+      "condition": "same event_id has more than one distinct payload_hash",
+      "action": "quarantine",
+      "quarantineReason": "DUPLICATE_CONFLICT",
+      "description": "Conflicting duplicates are evidence and cannot be resolved by last-write-wins."
+    },
+    {
+      "id": "DQ-DUP-002",
+      "zone": "silver",
+      "dataset": "all event facts",
+      "severity": "metric",
+      "condition": "same event_id and payload_hash appears more than once",
+      "action": "measure",
+      "quarantineReason": null,
+      "description": "Exact at-least-once duplicates are idempotently removed and counted."
+    },
+    {
+      "id": "DQ-REF-001",
+      "zone": "silver",
+      "dataset": "fact_telemetry",
+      "severity": "error",
+      "condition": "no dim_plant, dim_asset, or dim_sensor SCD2 row is valid at event_ts",
+      "action": "quarantine",
+      "quarantineReason": "UNKNOWN_ASSET",
+      "description": "Facts resolve reference state at event time, not ingest time."
+    },
+    {
+      "id": "DQ-REF-002",
+      "zone": "silver",
+      "dataset": "SCD2 dimensions",
+      "severity": "error",
+      "condition": "validity intervals overlap or active natural key has other than one current row",
+      "action": "fail-run",
+      "quarantineReason": null,
+      "description": "Intervals are half-open [valid_from, valid_to) and cannot overlap."
+    },
+    {
+      "id": "DQ-UNIT-001",
+      "zone": "silver",
+      "dataset": "fact_telemetry",
+      "severity": "error",
+      "condition": "event unit is not the sensor registry canonical unit or an explicitly versioned compatible conversion",
+      "action": "quarantine",
+      "quarantineReason": "INVALID_UNIT",
+      "description": "Bad unit mappings are never silently converted."
+    },
+    {
+      "id": "DQ-NUM-001",
+      "zone": "silver",
+      "dataset": "numeric facts",
+      "severity": "error",
+      "condition": "numeric value is NaN, positive infinity, or negative infinity",
+      "action": "quarantine",
+      "quarantineReason": "SCHEMA_INVALID",
+      "description": "Only finite numeric values enter silver."
+    },
+    {
+      "id": "DQ-ENUM-001",
+      "zone": "silver",
+      "dataset": "fact_telemetry",
+      "severity": "error",
+      "condition": "source_quality not in GOOD, UNCERTAIN, BAD, STALE, SUBSTITUTED",
+      "action": "quarantine",
+      "quarantineReason": "SCHEMA_INVALID",
+      "description": "Enumerations are case-sensitive and versioned."
+    },
+    {
+      "id": "DQ-LATE-001",
+      "zone": "silver",
+      "dataset": "event facts",
+      "severity": "error",
+      "condition": "ingest_ts - event_ts exceeds configured policy watermark",
+      "action": "quarantine",
+      "quarantineReason": "LATE_BEYOND_POLICY",
+      "description": "Late records within the watermark retain late_flag=true; beyond-policy records remain queryable in quarantine."
+    },
+    {
+      "id": "DQ-RANGE-001",
+      "zone": "silver",
+      "dataset": "fact_telemetry",
+      "severity": "warning",
+      "condition": "healthy observation falls outside sensor hard_min/hard_max",
+      "action": "warn",
+      "quarantineReason": null,
+      "description": "At least 99.7% of healthy observations should lie inside configured hard ranges."
+    },
+    {
+      "id": "DQ-PHYS-001",
+      "zone": "silver",
+      "dataset": "furnace thermal features",
+      "severity": "error",
+      "condition": "cooling outlet temperature is below inlet beyond tolerance during heat extraction",
+      "action": "fail-run",
+      "quarantineReason": null,
+      "description": "Cooling-water direction is a physical invariant."
+    },
+    {
+      "id": "DQ-PHYS-002",
+      "zone": "gold",
+      "dataset": "production and energy",
+      "severity": "error",
+      "condition": "furnace heat balance absolute error > 5% or rolling mass balance absolute error > 0.8% or interval energy reconciliation absolute error > 1.5%",
+      "action": "fail-run",
+      "quarantineReason": null,
+      "description": "Published KPI facts must reconcile to the documented physical tolerances."
+    },
+    {
+      "id": "DQ-RUL-001",
+      "zone": "gold",
+      "dataset": "fact_furnace_rul",
+      "severity": "error",
+      "condition": "rul_days_p10 < 0 or not (rul_days_p10 < rul_days_p50 and rul_days_p50 < rul_days_p90)",
+      "action": "fail-run",
+      "quarantineReason": null,
+      "description": "RUL is non-negative and uncertainty quantiles are ordered."
+    },
+    {
+      "id": "DQ-RUL-002",
+      "zone": "gold",
+      "dataset": "fact_furnace_rul",
+      "severity": "error",
+      "condition": "predicted lining thickness increases without a recorded repair/reline event",
+      "action": "fail-run",
+      "quarantineReason": null,
+      "description": "The physics-informed monotonicity constraint is enforced."
+    },
+    {
+      "id": "DQ-OPT-001",
+      "zone": "gold",
+      "dataset": "fact_dispatch_recommendation",
+      "severity": "error",
+      "condition": "hard_constraint_violations != 0",
+      "action": "fail-run",
+      "quarantineReason": null,
+      "description": "No optimizer result may be published as feasible after relaxing a hard production, safety, quality, or contractual constraint."
+    },
+    {
+      "id": "DQ-AUD-001",
+      "zone": "gold",
+      "dataset": "fact_ai_decision_audit",
+      "severity": "error",
+      "condition": "complete_audit_flag != true for an issued recommendation",
+      "action": "fail-run",
+      "quarantineReason": null,
+      "description": "KPI-GOV-01 requires complete inputs/version/output/confidence/human-decision lineage."
+    },
+    {
+      "id": "DQ-DEMO-001",
+      "zone": "gold",
+      "dataset": "fact_furnace_rul",
+      "severity": "error",
+      "condition": "seed == 240726 and component_id == HEARTH-SECTOR-07 and not (rul_days_p50 within configured 21-day tolerance and risk_score >= 0.80)",
+      "action": "fail-run",
+      "quarantineReason": null,
+      "description": "The deterministic lining-warning cue must match the signed manifest."
+    },
+    {
+      "id": "DQ-DEMO-002",
+      "zone": "gold",
+      "dataset": "fact_dispatch_recommendation",
+      "severity": "error",
+      "condition": "seed == 240727 and not (optimized_cost_eur < baseline_cost_eur and hard_constraint_violations == 0)",
+      "action": "fail-run",
+      "quarantineReason": null,
+      "description": "The deterministic energy scenario must reduce cost with equal planned tonnage and no hard violation."
+    },
+    {
+      "id": "DQ-DEMO-003",
+      "zone": "gold",
+      "dataset": "fact_quality_yield",
+      "severity": "error",
+      "condition": "seed == 240728 and quality warning does not precede first off-spec result",
+      "action": "fail-run",
+      "quarantineReason": null,
+      "description": "The deterministic quality warning must precede visible failure and improve predicted first-pass yield."
+    }
+  ],
+  "reconciliation": {
+    "formula": "bronze_rows = silver_rows + exact_duplicate_rows + unique_quarantined_input_rows; quarantine reason rows are separately counted and may exceed unique quarantined inputs",
+    "requiredUnexplainedRows": 0,
+    "failureSeverity": "error"
+  }
+}

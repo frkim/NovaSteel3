@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://novasteel.example/contracts/events/quality-measurement.v1.schema.json",
+  "title": "NovaSteel quality measurement event v1",
+  "allOf": [
+    {
+      "$ref": "event-envelope.v1.schema.json"
+    },
+    {
+      "properties": {
+        "schema_name": {
+          "const": "novasteel.quality-measurement.v1"
+        },
+        "payload": {
+          "type": "object",
+          "description": "Material quality measurement and specification result. Additive fields are allowed within v1.",
+          "required": [
+            "type",
+            "material_id",
+            "heat_id",
+            "grade_code",
+            "sample_id",
+            "characteristic_code",
+            "value",
+            "unit",
+            "lower_spec_limit",
+            "upper_spec_limit",
+            "measurement_method",
+            "result_status"
+          ],
+          "properties": {
+            "type": {
+              "const": "quality.measurement"
+            },
+            "material_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "heat_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "grade_code": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sample_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "characteristic_code": {
+              "type": "string",
+              "minLength": 1
+            },
+            "value": {
+              "type": "number"
+            },
+            "unit": {
+              "type": "string",
+              "minLength": 1
+            },
+            "lower_spec_limit": {
+              "type": "number"
+            },
+            "upper_spec_limit": {
+              "type": "number"
+            },
+            "measurement_method": {
+              "type": "string",
+              "minLength": 1
+            },
+            "result_status": {
+              "type": "string",
+              "enum": [
+                "PASS",
+                "FAIL",
+                "INCONCLUSIVE"
+              ]
+            }
+          }
+        }
+      }
+    }
+  ]
+}

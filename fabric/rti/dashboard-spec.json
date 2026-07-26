@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "deploymentStatus": "TENANT_EXPORT_REQUIRED_FOR_AUTOMATED_IMPORT",
+  "displayName": "rtd-ns-operations",
+  "database": "kql-ns-operations",
+  "queryPack": "../kql/dashboard-queries.kql",
+  "autoRefreshSeconds": 5,
+  "pages": [
+    {
+      "name": "Operations",
+      "visuals": [
+        {
+          "title": "Hot path freshness",
+          "queryId": "Q01",
+          "type": "tiles",
+          "fields": ["stream", "freshness_seconds"],
+          "thresholds": [
+            { "operator": "lessThanOrEqual", "value": 5, "status": "healthy" },
+            { "operator": "greaterThan", "value": 60, "status": "critical" }
+          ]
+        },
+        {
+          "title": "Active alarms",
+          "queryId": "Q02",
+          "type": "table",
+          "fields": [
+            "event_ts",
+            "severity",
+            "plant_id",
+            "asset_id",
+            "alarm_type",
+            "title",
+            "state",
+            "confidence",
+            "work_order_id",
+            "correlation_id"
+          ],
+          "defaultSort": "event_ts desc"
+        },
+        {
+          "title": "Signal bands",
+          "queryId": "Q05",
+          "type": "timeChart",
+          "timeField": "event_ts",
+          "seriesField": "signal_code",
+          "valueFields": ["value_avg", "value_min", "value_max"]
+        }
+      ]
+    },
+    {
+      "name": "Gateway and ingestion",
+      "visuals": [
+        {
+          "title": "Gateway status",
+          "queryId": "Q03",
+          "type": "table",
+          "fields": [
+            "plant_id",
+            "gateway_id",
+            "connection_state",
+            "queue_depth",
+            "oldest_buffered_event",
+            "event_time_lag_ms",
+            "duplicate_count",
+            "publish_retry_count",
+            "freshness_seconds"
+          ]
+        },
+        {
+          "title": "Quarantine rate (15m)",
+          "queryId": "Q06",
+          "type": "gauge",
+          "valueField": "quarantine_rate",
+          "warning": 0.01,
+          "critical": 0.02
+        },
+        {
+          "title": "Quarantine reasons",
+          "queryId": "Q07",
+          "type": "barChart",
+          "categoryField": "quarantine_reason",
+          "valueField": "records"
+        },
+        {
+          "title": "Materialized view health",
+          "queryId": "Q08",
+          "type": "table",
+          "fields": ["Name", "IsHealthy", "IsEnabled", "LastRun", "LastRunResult"]
+        }
+      ]
+    },
+    {
+      "name": "Model awareness",
+      "visuals": [
+        {
+          "title": "Latest RUL and quality risk",
+          "queryId": "Q04",
+          "type": "table",
+          "fields": [
+            "feature_snapshot_ts",
+            "plant_id",
+            "asset_id",
+            "component_id",
+            "model_id",
+            "model_version",
+            "remaining_useful_life_days_p10",
+            "remaining_useful_life_days_p50",
+            "remaining_useful_life_days_p90",
+            "risk_score",
+            "confidence",
+            "correlation_id"
+          ]
+        }
+      ]
+    }
+  ],
+  "manualGates": [
+    "Bind the deployed KQL database item ID and verify every query.",
+    "Use non-color status labels/icons and provide table fallbacks for charts.",
+    "Export the tenant dashboard definition and review it before REST/CLI automation.",
+    "Do not claim a safety or deterministic real-time SLA."
+  ]
+}

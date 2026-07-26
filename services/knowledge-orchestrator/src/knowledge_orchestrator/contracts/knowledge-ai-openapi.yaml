@@ -1,0 +1,162 @@
+openapi: 3.0.3
+info:
+  title: NovaSteel Knowledge-Capture AI Tool & Orchestrator Contract
+  version: 1.0.0
+  description: >-
+    AI-specific contract for the knowledge-orchestrator service. It documents (a) the
+    BFF-facing /v1/knowledge/* routes the orchestrator implements and (b) the
+    restricted Foundry knowledge-capture agent tool surface. This file lives under the
+    service (contracts/) to avoid conflicting with the repo-level contracts/openapi
+    tree. Authoritative sources: api-contracts.md §4.7/§10, solution-architecture.md
+    §4.3, security-governance-and-threat-model.md §12-13.
+servers:
+  - url: https://bff.novasteel.internal
+tags:
+  - name: knowledge
+    description: Consent-aware knowledge capture (BFF-facing)
+  - name: agent-tools
+    description: Restricted Foundry agent tool allow-list (never user-callable)
+paths:
+  /v1/knowledge/interviews:
+    post:
+      tags: [knowledge]
+      summary: Create a consent-bound interview session
+      description: Requires a knowledge workflow role and recorded consent (scope must be knowledge-capture).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInterviewRequest'
+      responses:
+        '201':
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterviewSession'
+  /v1/knowledge/interviews/{sessionId}/transcript:
+    get:
+      tags: [knowledge]
+      summary: Get the Fast Transcription result (polled, Highly Confidential)
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Transcript or PROCESSING status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranscriptResponse'
+  /v1/knowledge/procedures:
+    get:
+      tags: [knowledge]
+      summary: List procedures (DRAFT|IN_REVIEW|APPROVED|REJECTED)
+      parameters:
+        - { name: status, in: query, schema: { type: string, enum: [DRAFT, IN_REVIEW, APPROVED, REJECTED] } }
+        - { name: q, in: query, schema: { type: string } }
+        - { name: page, in: query, schema: { type: integer, default: 1 } }
+        - { name: size, in: query, schema: { type: integer, default: 50 } }
+      responses:
+        '200': { description: Procedure list envelope }
+  /v1/knowledge/search:
+    get:
+      tags: [knowledge]
+      summary: Search APPROVED procedures only (derived retrieval index)
+      parameters:
+        - { name: q, in: query, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Approved-only search results }
+  /v1/knowledge/procedures/{id}:approve:
+    post:
+      tags: [knowledge]
+      summary: Publish a reviewed immutable version (Knowledge.Publisher only)
+      description: >-
+        Requires the Knowledge.Publisher role, an Idempotency-Key header, and an
+        expectedVersion optimistic-concurrency check (409 STALE_APPROVAL on mismatch).
+        This is NOT an agent tool; the agent can never publish.
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApproveRequest'
+      responses:
+        '200': { description: Approved procedure }
+        '403': { description: FORBIDDEN (missing Knowledge.Publisher role) }
+        '409': { description: STALE_APPROVAL (expectedVersion mismatch) }
+components:
+  schemas:
+    CreateInterviewRequest:
+      type: object
+      required: [operatorRef, consent]
+      properties:
+        operatorRef: { type: string, example: OP-DEMO-014 }
+        language: { type: string, example: en }
+        consent:
+          type: object
+          required: [granted, scope, retentionDays]
+          properties:
+            granted: { type: boolean }
+            scope: { type: string, enum: [knowledge-capture] }
+            retentionDays: { type: integer, example: 30 }
+    InterviewSession:
+      type: object
+      properties:
+        sessionId: { type: string }
+        consentState: { type: string, enum: [PENDING, GRANTED, DENIED, WITHDRAWN, EXPIRED] }
+    TranscriptResponse:
+      type: object
+      properties:
+        status: { type: string, enum: [PROCESSING, COMPLETED] }
+        classification: { type: string, example: Highly Confidential }
+        segments:
+          type: array
+          items:
+            type: object
+            properties:
+              segmentId: { type: string }
+              speaker: { type: string }
+              start: { type: number }
+              end: { type: number }
+              text: { type: string }
+              confidence: { type: number }
+    ApproveRequest:
+      type: object
+      required: [actor, roles, expectedVersion]
+      properties:
+        actor: { type: string }
+        roles: { type: array, items: { type: string }, example: [Knowledge.Publisher] }
+        expectedVersion: { type: integer }
+  x-agent-tool-allowlist:
+    knowledge-capture:
+      description: The only tools the Foundry knowledge-capture agent identity may call.
+      tools:
+        - name: search_approved_procedures
+          maps_to: GET /v1/knowledge/search
+          capability: search
+          notes: Restricted to APPROVED procedures only; never queries drafts.
+        - name: write_draft_procedure
+          maps_to: internal draft-write
+          capability: draft-write
+          notes: Writes a DRAFT record only; cannot transition status or publish.
+      forbidden:
+        - approve_procedure
+        - publish_procedure
+        - transition_status
+        - delete_audio
+    energy-dispatch:
+      description: Restricted OpenAPI subset for the energy agent (documented for parity).
+      tools:
+        - { name: read_energy_context, capability: read }
+        - { name: forecast_demand, capability: read }
+        - { name: simulate_schedule, capability: simulate }
+        - { name: propose_recommendation, capability: propose }
+      forbidden:
+        - approve_recommendation
+        - commit_schedule

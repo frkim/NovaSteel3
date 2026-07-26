@@ -1,0 +1,15 @@
+# Build context = services/bff-api (BuildKit honours this main-context ignore).
+# Keep the context minimal: only requirements.txt, src/ and fixtures/ are needed
+# to build the runtime image.
+.venv/
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+tests/
+*.md
+pyproject.toml
+Dockerfile
+.dockerignore

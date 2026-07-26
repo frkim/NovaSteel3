@@ -1,0 +1,295 @@
+// NovaSteel KQL database schema.
+// This definition is rendered by Deploy-FabricAssets.ps1 before submission.
+// It is safe to apply repeatedly: create-merge/create-or-alter/alter only.
+
+// -----------------------------------------------------------------------------
+// Hot tables
+// -----------------------------------------------------------------------------
+
+.create-merge table telemetry_hot (
+    event_id:string,
+    event_ts:datetime,
+    ingest_ts:datetime,
+    source_id:string,
+    plant_id:string,
+    asset_id:string,
+    sequence:long,
+    correlation_id:string,
+    schema_name:string,
+    schema_version:int,
+    data_classification:string,
+    privacy_label:string,
+    scenario_id:string,
+    seed:long,
+    generator_version:string,
+    clock_mode:string,
+    sensor_id:string,
+    signal_code:string,
+    value:real,
+    unit:string,
+    quality:string,
+    uncertainty:real,
+    sample_period_ms:long,
+    payload:dynamic
+)
+
+.alter table telemetry_hot policy retention @'{"SoftDeletePeriod":"{{retention.telemetryHot}}","Recoverability":"Enabled"}'
+
+.alter table telemetry_hot policy caching hot = 7d
+
+.create-merge table alarm_hot (
+    event_id:string,
+    alarm_id:string,
+    transition_id:string,
+    event_ts:datetime,
+    ingest_ts:datetime,
+    source_id:string,
+    plant_id:string,
+    asset_id:string,
+    alarm_type:string,
+    severity:string,
+    title:string,
+    message:string,
+    state:string,
+    threshold:real,
+    observed_value:real,
+    unit:string,
+    confidence:real,
+    actor_type:string,
+    actor_id:string,
+    reason:string,
+    work_order_id:string,
+    correlation_id:string,
+    schema_name:string,
+    schema_version:int,
+    data_classification:string,
+    privacy_label:string,
+    scenario_id:string,
+    seed:long,
+    payload:dynamic
+)
+
+.alter table alarm_hot policy retention @'{"SoftDeletePeriod":"{{retention.alarmHot}}","Recoverability":"Enabled"}'
+
+.alter table alarm_hot policy caching hot = 30d
+
+.create-merge table gateway_health_hot (
+    event_id:string,
+    event_ts:datetime,
+    ingest_ts:datetime,
+    heartbeat_ts:datetime,
+    source_id:string,
+    gateway_id:string,
+    plant_id:string,
+    connection_state:string,
+    partition_id:string,
+    last_sequence:long,
+    queue_depth:long,
+    oldest_buffered_event:datetime,
+    event_time_lag_ms:long,
+    clock_offset_ms:long,
+    duplicate_count:long,
+    publish_retry_count:long,
+    correlation_id:string,
+    schema_name:string,
+    schema_version:int,
+    data_classification:string,
+    privacy_label:string,
+    scenario_id:string,
+    seed:long,
+    payload:dynamic
+)
+
+.alter table gateway_health_hot policy retention @'{"SoftDeletePeriod":"{{retention.gatewayHealthHot}}","Recoverability":"Enabled"}'
+
+.alter table gateway_health_hot policy caching hot = 7d
+
+.create-merge table model_inference_hot (
+    event_id:string,
+    inference_id:string,
+    event_ts:datetime,
+    ingest_ts:datetime,
+    feature_snapshot_ts:datetime,
+    scored_at:datetime,
+    plant_id:string,
+    asset_id:string,
+    component_id:string,
+    model_id:string,
+    model_version:string,
+    prediction_type:string,
+    remaining_useful_life_days_p10:real,
+    remaining_useful_life_days_p50:real,
+    remaining_useful_life_days_p90:real,
+    estimated_minimum_lining_mm:real,
+    risk_score:real,
+    severity:string,
+    quality_risk_score:real,
+    predicted_first_pass_yield:real,
+    confidence:real,
+    top_factors:dynamic,
+    label:string,
+    correlation_id:string,
+    schema_name:string,
+    schema_version:int,
+    data_classification:string,
+    privacy_label:string,
+    scenario_id:string,
+    seed:long,
+    payload:dynamic
+)
+
+.alter table model_inference_hot policy retention @'{"SoftDeletePeriod":"{{retention.modelInferenceHot}}","Recoverability":"Enabled"}'
+
+.alter table model_inference_hot policy caching hot = 30d
+
+.create-merge table ingest_quarantine_hot (
+    quarantine_id:string,
+    quarantined_at:datetime,
+    event_id:string,
+    event_ts:datetime,
+    ingest_ts:datetime,
+    source_id:string,
+    plant_id:string,
+    asset_id:string,
+    schema_name:string,
+    schema_version:int,
+    quarantine_reason:string,
+    quarantine_detail:string,
+    expected_unit:string,
+    observed_unit:string,
+    duplicate_of_event_id:string,
+    original_payload:dynamic,
+    correlation_id:string,
+    data_classification:string,
+    privacy_label:string,
+    scenario_id:string,
+    seed:long
+)
+
+.alter table ingest_quarantine_hot policy retention @'{"SoftDeletePeriod":"{{retention.quarantineHot}}","Recoverability":"Enabled"}'
+
+.alter table ingest_quarantine_hot policy caching hot = 7d
+
+// -----------------------------------------------------------------------------
+// JSON mappings. The managed relay can publish explicit quarantine envelopes;
+// Eventstream remains a lightweight router rather than the authoritative
+// contract validator.
+// -----------------------------------------------------------------------------
+
+.create-or-alter table telemetry_hot ingestion json mapping 'telemetry_v1_json' @'[{"column":"event_id","path":"$.event_id","datatype":"string"},{"column":"event_ts","path":"$.event_ts","datatype":"datetime"},{"column":"ingest_ts","path":"$.ingest_ts","datatype":"datetime"},{"column":"source_id","path":"$.source_id","datatype":"string"},{"column":"plant_id","path":"$.plant_id","datatype":"string"},{"column":"asset_id","path":"$.asset_id","datatype":"string"},{"column":"sequence","path":"$.sequence","datatype":"long"},{"column":"correlation_id","path":"$.correlation_id","datatype":"string"},{"column":"schema_name","path":"$.schema_name","datatype":"string"},{"column":"schema_version","path":"$.schema_version","datatype":"int"},{"column":"data_classification","path":"$.data_classification","datatype":"string"},{"column":"privacy_label","path":"$.privacy_label","datatype":"string"},{"column":"scenario_id","path":"$.scenario_id","datatype":"string"},{"column":"seed","path":"$.seed","datatype":"long"},{"column":"generator_version","path":"$.generator_version","datatype":"string"},{"column":"clock_mode","path":"$.clock_mode","datatype":"string"},{"column":"sensor_id","path":"$.payload.sensor_id","datatype":"string"},{"column":"signal_code","path":"$.payload.signal_code","datatype":"string"},{"column":"value","path":"$.payload.value","datatype":"real"},{"column":"unit","path":"$.payload.unit","datatype":"string"},{"column":"quality","path":"$.payload.quality","datatype":"string"},{"column":"uncertainty","path":"$.payload.uncertainty","datatype":"real"},{"column":"sample_period_ms","path":"$.payload.sample_period_ms","datatype":"long"},{"column":"payload","path":"$.payload","datatype":"dynamic"}]'
+
+.create-or-alter table alarm_hot ingestion json mapping 'alarm_v1_json' @'[{"column":"event_id","path":"$.event_id","datatype":"string"},{"column":"alarm_id","path":"$.payload.alarm_id","datatype":"string"},{"column":"transition_id","path":"$.payload.transition_id","datatype":"string"},{"column":"event_ts","path":"$.event_ts","datatype":"datetime"},{"column":"ingest_ts","path":"$.ingest_ts","datatype":"datetime"},{"column":"source_id","path":"$.source_id","datatype":"string"},{"column":"plant_id","path":"$.plant_id","datatype":"string"},{"column":"asset_id","path":"$.asset_id","datatype":"string"},{"column":"alarm_type","path":"$.payload.alarm_type","datatype":"string"},{"column":"severity","path":"$.payload.severity","datatype":"string"},{"column":"title","path":"$.payload.title","datatype":"string"},{"column":"message","path":"$.payload.message","datatype":"string"},{"column":"state","path":"$.payload.state","datatype":"string"},{"column":"threshold","path":"$.payload.threshold","datatype":"real"},{"column":"observed_value","path":"$.payload.observed_value","datatype":"real"},{"column":"unit","path":"$.payload.unit","datatype":"string"},{"column":"confidence","path":"$.payload.confidence","datatype":"real"},{"column":"actor_type","path":"$.payload.actor_type","datatype":"string"},{"column":"actor_id","path":"$.payload.actor_id","datatype":"string"},{"column":"reason","path":"$.payload.reason","datatype":"string"},{"column":"work_order_id","path":"$.payload.work_order_id","datatype":"string"},{"column":"correlation_id","path":"$.correlation_id","datatype":"string"},{"column":"schema_name","path":"$.schema_name","datatype":"string"},{"column":"schema_version","path":"$.schema_version","datatype":"int"},{"column":"data_classification","path":"$.data_classification","datatype":"string"},{"column":"privacy_label","path":"$.privacy_label","datatype":"string"},{"column":"scenario_id","path":"$.scenario_id","datatype":"string"},{"column":"seed","path":"$.seed","datatype":"long"},{"column":"payload","path":"$.payload","datatype":"dynamic"}]'
+
+.create-or-alter table gateway_health_hot ingestion json mapping 'gateway_health_v1_json' @'[{"column":"event_id","path":"$.event_id","datatype":"string"},{"column":"event_ts","path":"$.event_ts","datatype":"datetime"},{"column":"ingest_ts","path":"$.ingest_ts","datatype":"datetime"},{"column":"heartbeat_ts","path":"$.payload.heartbeat_ts","datatype":"datetime"},{"column":"source_id","path":"$.source_id","datatype":"string"},{"column":"gateway_id","path":"$.payload.gateway_id","datatype":"string"},{"column":"plant_id","path":"$.plant_id","datatype":"string"},{"column":"connection_state","path":"$.payload.connection_state","datatype":"string"},{"column":"partition_id","path":"$.payload.partition_id","datatype":"string"},{"column":"last_sequence","path":"$.payload.last_sequence","datatype":"long"},{"column":"queue_depth","path":"$.payload.queue_depth","datatype":"long"},{"column":"oldest_buffered_event","path":"$.payload.oldest_buffered_event","datatype":"datetime"},{"column":"event_time_lag_ms","path":"$.payload.event_time_lag_ms","datatype":"long"},{"column":"clock_offset_ms","path":"$.payload.clock_offset_ms","datatype":"long"},{"column":"duplicate_count","path":"$.payload.duplicate_count","datatype":"long"},{"column":"publish_retry_count","path":"$.payload.publish_retry_count","datatype":"long"},{"column":"correlation_id","path":"$.correlation_id","datatype":"string"},{"column":"schema_name","path":"$.schema_name","datatype":"string"},{"column":"schema_version","path":"$.schema_version","datatype":"int"},{"column":"data_classification","path":"$.data_classification","datatype":"string"},{"column":"privacy_label","path":"$.privacy_label","datatype":"string"},{"column":"scenario_id","path":"$.scenario_id","datatype":"string"},{"column":"seed","path":"$.seed","datatype":"long"},{"column":"payload","path":"$.payload","datatype":"dynamic"}]'
+
+.create-or-alter table model_inference_hot ingestion json mapping 'model_inference_v1_json' @'[{"column":"event_id","path":"$.event_id","datatype":"string"},{"column":"inference_id","path":"$.inference_id","datatype":"string"},{"column":"event_ts","path":"$.event_ts","datatype":"datetime"},{"column":"ingest_ts","path":"$.ingest_ts","datatype":"datetime"},{"column":"feature_snapshot_ts","path":"$.feature_snapshot_ts","datatype":"datetime"},{"column":"scored_at","path":"$.scored_at","datatype":"datetime"},{"column":"plant_id","path":"$.plant_id","datatype":"string"},{"column":"asset_id","path":"$.asset_id","datatype":"string"},{"column":"component_id","path":"$.component_id","datatype":"string"},{"column":"model_id","path":"$.model_id","datatype":"string"},{"column":"model_version","path":"$.model_version","datatype":"string"},{"column":"prediction_type","path":"$.prediction_type","datatype":"string"},{"column":"remaining_useful_life_days_p10","path":"$.prediction.remaining_useful_life_days_p10","datatype":"real"},{"column":"remaining_useful_life_days_p50","path":"$.prediction.remaining_useful_life_days_p50","datatype":"real"},{"column":"remaining_useful_life_days_p90","path":"$.prediction.remaining_useful_life_days_p90","datatype":"real"},{"column":"estimated_minimum_lining_mm","path":"$.prediction.estimated_minimum_lining_mm","datatype":"real"},{"column":"risk_score","path":"$.prediction.risk_score","datatype":"real"},{"column":"severity","path":"$.prediction.severity","datatype":"string"},{"column":"quality_risk_score","path":"$.prediction.quality_risk_score","datatype":"real"},{"column":"predicted_first_pass_yield","path":"$.prediction.predicted_first_pass_yield","datatype":"real"},{"column":"confidence","path":"$.prediction.confidence","datatype":"real"},{"column":"top_factors","path":"$.top_factors","datatype":"dynamic"},{"column":"label","path":"$.label","datatype":"string"},{"column":"correlation_id","path":"$.correlation_id","datatype":"string"},{"column":"schema_name","path":"$.schema_name","datatype":"string"},{"column":"schema_version","path":"$.schema_version","datatype":"int"},{"column":"data_classification","path":"$.data_classification","datatype":"string"},{"column":"privacy_label","path":"$.privacy_label","datatype":"string"},{"column":"scenario_id","path":"$.scenario_id","datatype":"string"},{"column":"seed","path":"$.seed","datatype":"long"},{"column":"payload","path":"$.payload","datatype":"dynamic"}]'
+
+.create-or-alter table ingest_quarantine_hot ingestion json mapping 'quarantine_v1_json' @'[{"column":"quarantine_id","path":"$.quarantine_id","datatype":"string"},{"column":"quarantined_at","path":"$.quarantined_at","datatype":"datetime"},{"column":"event_id","path":"$.event_id","datatype":"string"},{"column":"event_ts","path":"$.event_ts","datatype":"datetime"},{"column":"ingest_ts","path":"$.ingest_ts","datatype":"datetime"},{"column":"source_id","path":"$.source_id","datatype":"string"},{"column":"plant_id","path":"$.plant_id","datatype":"string"},{"column":"asset_id","path":"$.asset_id","datatype":"string"},{"column":"schema_name","path":"$.schema_name","datatype":"string"},{"column":"schema_version","path":"$.schema_version","datatype":"int"},{"column":"quarantine_reason","path":"$.quarantine_reason","datatype":"string"},{"column":"quarantine_detail","path":"$.quarantine_detail","datatype":"string"},{"column":"expected_unit","path":"$.expected_unit","datatype":"string"},{"column":"observed_unit","path":"$.observed_unit","datatype":"string"},{"column":"duplicate_of_event_id","path":"$.duplicate_of_event_id","datatype":"string"},{"column":"original_payload","path":"$.original_payload","datatype":"dynamic"},{"column":"correlation_id","path":"$.correlation_id","datatype":"string"},{"column":"data_classification","path":"$.data_classification","datatype":"string"},{"column":"privacy_label","path":"$.privacy_label","datatype":"string"},{"column":"scenario_id","path":"$.scenario_id","datatype":"string"},{"column":"seed","path":"$.seed","datatype":"long"}]'
+
+// -----------------------------------------------------------------------------
+// Materialized views
+// -----------------------------------------------------------------------------
+
+.create-or-alter materialized-view with (backfill=false, autoUpdateSchema=true) mv_telemetry_latest_by_signal on table telemetry_hot
+{
+    telemetry_hot
+    | summarize arg_max(event_ts, *) by plant_id, asset_id, sensor_id, signal_code
+}
+
+.create-or-alter materialized-view with (backfill=false) mv_telemetry_1m on table telemetry_hot
+{
+    telemetry_hot
+    | summarize
+        sample_count=count(),
+        value_avg=avg(value),
+        value_min=min(value),
+        value_max=max(value),
+        last_ingest_ts=max(ingest_ts)
+      by bin(event_ts, 1m), plant_id, asset_id, signal_code, unit
+}
+
+.create-or-alter materialized-view with (backfill=false, autoUpdateSchema=true) mv_alarm_current on table alarm_hot
+{
+    alarm_hot
+    | summarize arg_max(event_ts, *) by alarm_id
+}
+
+.create-or-alter materialized-view with (backfill=false, autoUpdateSchema=true) mv_gateway_latest on table gateway_health_hot
+{
+    gateway_health_hot
+    | summarize arg_max(event_ts, *) by plant_id, gateway_id, source_id
+}
+
+.create-or-alter materialized-view with (backfill=false, autoUpdateSchema=true) mv_model_latest on table model_inference_hot
+{
+    model_inference_hot
+    | summarize arg_max(feature_snapshot_ts, *) by plant_id, asset_id, component_id, model_id
+}
+
+.create-or-alter materialized-view with (backfill=false) mv_quarantine_15m on table ingest_quarantine_hot
+{
+    ingest_quarantine_hot
+    | summarize quarantined_count=count()
+      by bin(quarantined_at, 15m), plant_id, quarantine_reason
+}
+
+// -----------------------------------------------------------------------------
+// Dashboard and investigation functions
+// -----------------------------------------------------------------------------
+
+.create-or-alter function with (folder='NovaSteel/RTI', docstring='Latest accepted signal row per sensor and signal.') fn_latest_telemetry(plant_filter:string)
+{
+    materialized_view('mv_telemetry_latest_by_signal')
+    | where isempty(plant_filter) or plant_id == plant_filter
+}
+
+.create-or-alter function with (folder='NovaSteel/RTI', docstring='Current non-closed alarm state.') fn_active_alarms(plant_filter:string)
+{
+    materialized_view('mv_alarm_current')
+    | where isempty(plant_filter) or plant_id == plant_filter
+    | where state !in ('MITIGATED', 'CLOSED')
+    | order by severity asc, event_ts desc
+}
+
+.create-or-alter function with (folder='NovaSteel/RTI', docstring='Latest gateway heartbeat and freshness.') fn_gateway_status(plant_filter:string)
+{
+    materialized_view('mv_gateway_latest')
+    | where isempty(plant_filter) or plant_id == plant_filter
+    | extend freshness_seconds = datetime_diff('second', now(), event_ts)
+    | project plant_id, gateway_id, source_id, connection_state, queue_depth,
+              oldest_buffered_event, event_time_lag_ms, clock_offset_ms,
+              duplicate_count, publish_retry_count, event_ts, freshness_seconds
+}
+
+.create-or-alter function with (folder='NovaSteel/RTI', docstring='Latest model inference per asset/component/model.') fn_latest_model_scores(plant_filter:string)
+{
+    materialized_view('mv_model_latest')
+    | where isempty(plant_filter) or plant_id == plant_filter
+    | project plant_id, asset_id, component_id, model_id, model_version,
+              feature_snapshot_ts, remaining_useful_life_days_p10,
+              remaining_useful_life_days_p50, remaining_useful_life_days_p90,
+              estimated_minimum_lining_mm, risk_score, severity,
+              quality_risk_score, predicted_first_pass_yield, confidence,
+              top_factors, scenario_id, seed, correlation_id
+}
+
+.create-or-alter function with (folder='NovaSteel/RTI', docstring='Hot-path event freshness by stream.') fn_data_freshness(plant_filter:string)
+{
+    union
+      (telemetry_hot | where isempty(plant_filter) or plant_id == plant_filter | summarize last_event=max(event_ts) | extend stream='telemetry_hot'),
+      (alarm_hot | where isempty(plant_filter) or plant_id == plant_filter | summarize last_event=max(event_ts) | extend stream='alarm_hot'),
+      (gateway_health_hot | where isempty(plant_filter) or plant_id == plant_filter | summarize last_event=max(event_ts) | extend stream='gateway_health_hot'),
+      (model_inference_hot | where isempty(plant_filter) or plant_id == plant_filter | summarize last_event=max(feature_snapshot_ts) | extend stream='model_inference_hot')
+    | extend freshness_seconds = iif(isnull(last_event), long(null), datetime_diff('second', now(), last_event))
+    | project stream, last_event, freshness_seconds
+}
+
+.create-or-alter function with (folder='NovaSteel/RTI', docstring='Quarantine volume and rate for a time window.') fn_quarantine_rate(window:timespan)
+{
+    let accepted = toscalar(telemetry_hot | where ingest_ts >= ago(window) | count);
+    let rejected = toscalar(ingest_quarantine_hot | where quarantined_at >= ago(window) | count);
+    print
+      accepted_events=accepted,
+      quarantined_events=rejected,
+      quarantine_rate=iif(accepted + rejected == 0, real(null), todouble(rejected) / todouble(accepted + rejected))
+}

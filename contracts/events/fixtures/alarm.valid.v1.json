@@ -1,0 +1,24 @@
+{
+  "event_id": "018f2f6e-6b2a-7c31-9b1a-2f7e6a9c1d4f",
+  "event_ts": "2026-07-25T08:02:00Z",
+  "ingest_ts": "2026-07-25T08:02:00.100Z",
+  "source_id": "LUX-BF-01-ALM-01",
+  "asset_id": "LUX-BF-01",
+  "plant_id": "NS-DEMO-LUX-01",
+  "sequence": 48214,
+  "correlation_id": "01J9Z8Q3K5F8E2X6R7T4V0M1N2",
+  "schema_name": "novasteel.alarm.v1",
+  "schema_version": 1,
+  "data_classification": "SYNTHETIC",
+  "privacy_label": "DEMO-NONPERSONAL",
+  "scenario_id": "demo-full",
+  "seed": 240725,
+  "generator_version": "novasteel-sim/1.0.0",
+  "payload": {
+    "type": "alarm.event",
+    "severity": "CRITICAL",
+    "message": "Synthetic lining risk threshold reached.",
+    "status": "OPEN",
+    "confidence": 0.82
+  }
+}

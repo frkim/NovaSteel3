@@ -1,0 +1,59 @@
+{
+  "name": "NovaSteel Accessible",
+  "dataColors": [
+    "#0072B2",
+    "#E69F00",
+    "#009E73",
+    "#CC79A7",
+    "#56B4E9",
+    "#D55E00",
+    "#F0E442",
+    "#000000"
+  ],
+  "background": "#F7F9FC",
+  "foreground": "#1B1F24",
+  "tableAccent": "#0072B2",
+  "good": "#007A4D",
+  "neutral": "#5B6470",
+  "bad": "#B3261E",
+  "maximum": "#B3261E",
+  "center": "#E69F00",
+  "minimum": "#007A4D",
+  "visualStyles": {
+    "*": {
+      "*": {
+        "title": [
+          {
+            "show": true,
+            "fontColor": { "solid": { "color": "#1B1F24" } },
+            "background": { "solid": { "color": "#F7F9FC" } },
+            "textSize": 12
+          }
+        ],
+        "visualHeader": [
+          {
+            "show": true,
+            "foreground": { "solid": { "color": "#1B1F24" } }
+          }
+        ]
+      }
+    }
+  },
+  "textClasses": {
+    "callout": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 28,
+      "color": "#1B1F24"
+    },
+    "title": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 14,
+      "color": "#1B1F24"
+    },
+    "label": {
+      "fontFace": "Segoe UI",
+      "fontSize": 10,
+      "color": "#303640"
+    }
+  }
+}

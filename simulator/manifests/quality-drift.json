@@ -1,0 +1,45 @@
+{
+  "scenario_id": "quality-drift",
+  "schema_version": 1,
+  "description": "Gradual coiling-temperature bias and burner imbalance on the hot strip mill; the (simulated) quality model raises a multivariate-drift warning before the first laboratory off-spec result (docs section 8.3, 10.3 seed 240728).",
+  "root_seed": 240728,
+  "plant_id": "NS-DEMO-LUX-01",
+  "primary_asset_id": "LUX-HSM-01",
+  "start_time": "2026-06-10T00:00:00Z",
+  "window_hours": 48,
+  "sample_interval_seconds": 1800,
+  "fast_window_hours": 48,
+  "fast_sample_interval_seconds": 3600,
+  "hearth_sectors": ["07"],
+  "campaign": {
+    "min_safe_thickness_mm": 300.0,
+    "thickness_at_eval_mm": {"default": 700.0},
+    "degradation_rate_mm_per_day": {"default": 0.02}
+  },
+  "energy": {
+    "price_profile": "baseline-summer",
+    "num_batches": 6
+  },
+  "quality": {
+    "drift_active": true,
+    "latent_hours": 12.0,
+    "full_drift_hours": 36.0,
+    "warning_lead_hours": 2.0
+  },
+  "anomalies": [
+    {
+      "anomaly_id": "AN-QUALITY-DRIFT-HSM",
+      "type": "quality_drift",
+      "layer": "process",
+      "target": "LUX-HSM-01",
+      "start_hours": 0,
+      "end_hours": 48,
+      "params": {"latent_hours": 12.0, "full_drift_hours": 36.0}
+    }
+  ],
+  "expected_assertions": {
+    "warning_before_first_off_spec": true,
+    "predicted_yield_before_max": 0.90,
+    "predicted_yield_after_min": 0.93
+  }
+}

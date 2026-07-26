@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://novasteel.example/contracts/events/energy-interval.v1.schema.json",
+  "title": "NovaSteel energy interval event v1",
+  "allOf": [
+    {
+      "$ref": "event-envelope.v1.schema.json"
+    },
+    {
+      "properties": {
+        "schema_name": {
+          "const": "novasteel.energy-interval.v1"
+        },
+        "payload": {
+          "type": "object",
+          "description": "Meter, market, and carbon values for an energy interval. Additive fields are allowed within v1.",
+          "required": [
+            "type",
+            "meter_id",
+            "interval_start",
+            "price",
+            "demand"
+          ],
+          "properties": {
+            "type": {
+              "const": "energy.interval"
+            },
+            "meter_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "interval_start": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "interval_end": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "price": {
+              "type": "number",
+              "description": "Day-ahead electricity spot price in EUR/MWh unless price_unit specifies otherwise."
+            },
+            "price_unit": {
+              "type": "string",
+              "default": "EUR/MWh"
+            },
+            "demand": {
+              "type": "number",
+              "description": "Electricity demand in MW unless demand_unit specifies otherwise."
+            },
+            "demand_unit": {
+              "type": "string",
+              "default": "MW"
+            },
+            "consumption_mwh": {
+              "type": "number",
+              "minimum": 0
+            },
+            "grid_carbon_intensity_kgco2e_per_mwh": {
+              "type": "number",
+              "minimum": 0
+            },
+            "natural_gas_flow_mwhth_per_h": {
+              "type": "number",
+              "minimum": 0
+            },
+            "scenario": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

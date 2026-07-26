@@ -1,0 +1,26 @@
+table fact_knowledge_procedure
+	column procedure_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: procedure_id
+
+	column topic_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: topic_id
+
+	column approved_flag
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: approved_flag
+
+	column review_status
+		dataType: string
+		summarizeBy: none
+		sourceColumn: review_status
+
+	partition fact_knowledge_procedure = entity
+		mode: directLake
+		source
+			entityName: fact_knowledge_procedure
+			schemaName: dbo

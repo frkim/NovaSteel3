@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Notebook",
+    "displayName": "ns-deterministic-demo-scoring",
+    "description": "Synthetic-only deterministic RUL and quality demo scoring."
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "64000000-0000-4640-8640-000000000004"
+  }
+}

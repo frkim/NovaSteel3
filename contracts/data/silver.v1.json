@@ -1,0 +1,88 @@
+{
+  "contractVersion": 1,
+  "zone": "silver",
+  "classificationRule": "Canonical units, event-time dimension lookup, idempotent event handling, retained source quality.",
+  "tables": [
+    {
+      "name": "fact_telemetry",
+      "grain": "One canonical telemetry signal observation at event time.",
+      "primaryKey": ["event_id"],
+      "idempotencyKey": ["event_id"],
+      "columns": [
+        { "name": "event_id", "type": "string", "nullable": false },
+        { "name": "event_ts", "type": "timestamp", "nullable": false },
+        { "name": "plant_key", "type": "long", "nullable": false },
+        { "name": "asset_key", "type": "long", "nullable": false },
+        { "name": "sensor_key", "type": "long", "nullable": true },
+        { "name": "signal", "type": "string", "nullable": false },
+        { "name": "value", "type": "double", "nullable": false },
+        { "name": "canonical_unit", "type": "string", "nullable": false },
+        { "name": "source_quality_flag", "type": "string", "nullable": false }
+      ]
+    },
+    {
+      "name": "fact_energy_interval",
+      "grain": "One plant energy interval.",
+      "primaryKey": ["event_id"],
+      "idempotencyKey": ["event_id"]
+    },
+    {
+      "name": "fact_quality_measurement",
+      "grain": "One quality measurement for a batch and metric.",
+      "primaryKey": ["event_id"],
+      "idempotencyKey": ["event_id"]
+    },
+    {
+      "name": "fact_maintenance_event",
+      "grain": "One maintenance event or synthetic work-order lifecycle transition.",
+      "primaryKey": ["event_id"],
+      "idempotencyKey": ["event_id"]
+    },
+    {
+      "name": "fact_model_inference",
+      "grain": "One model output for an asset, model version, and score time.",
+      "primaryKey": ["event_id"],
+      "idempotencyKey": ["event_id"]
+    },
+    {
+      "name": "fact_ai_decision",
+      "grain": "One append-only decision or outcome event.",
+      "primaryKey": ["audit_id"],
+      "idempotencyKey": ["correlation_id", "decision_sequence"]
+    },
+    {
+      "name": "dim_plant",
+      "grain": "SCD2 version of a plant.",
+      "primaryKey": ["plant_key"],
+      "idempotencyKey": ["plant_id", "valid_from"],
+      "slowlyChangingDimension": 2
+    },
+    {
+      "name": "dim_asset",
+      "grain": "SCD2 version of an asset.",
+      "primaryKey": ["asset_key"],
+      "idempotencyKey": ["asset_id", "valid_from"],
+      "slowlyChangingDimension": 2
+    },
+    {
+      "name": "dim_sensor",
+      "grain": "SCD2 version of a sensor.",
+      "primaryKey": ["sensor_key"],
+      "idempotencyKey": ["sensor_id", "valid_from"],
+      "slowlyChangingDimension": 2
+    },
+    {
+      "name": "dim_grade",
+      "grain": "SCD2 version of a product grade.",
+      "primaryKey": ["grade_key"],
+      "idempotencyKey": ["grade_code", "valid_from"],
+      "slowlyChangingDimension": 2
+    },
+    {
+      "name": "dim_calendar",
+      "grain": "One UTC calendar day.",
+      "primaryKey": ["date_key"],
+      "idempotencyKey": ["calendar_date"]
+    }
+  ]
+}

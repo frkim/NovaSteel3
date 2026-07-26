@@ -1,0 +1,204 @@
+@inherits LayoutComponentBase
+@implements IDisposable
+@inject ShellState Shell
+@inject CapacityState Capacity
+@inject NavigationManager Navigation
+
+<div class="shell">
+    <a class="skip-link" href="#shell-main-content">Skip to content</a>
+    <header class="shell-topbar">
+        <NavLink class="brand" href="@Shell.RouteFor("command-center", null)" aria-label="NovaSteel Command Center">
+            <span class="brand-mark" aria-hidden="true">N</span>
+            <span>NovaSteel</span>
+        </NavLink>
+
+        <label class="topbar-field">
+            <span class="sr-only">Site</span>
+            <select value="@Shell.Site" @onchange="OnSiteChanged" aria-label="Selected site">
+                @foreach (var site in ShellState.Sites)
+                {
+                    <option value="@site">@site.ToUpperInvariant()</option>
+                }
+            </select>
+        </label>
+
+        <label class="topbar-field">
+            <span class="sr-only">Primary persona</span>
+            <select value="@Shell.PrimaryPersona" @onchange="OnPersonaChanged" aria-label="Primary persona">
+                @foreach (var persona in Shell.Auth.CurrentUser.Personas)
+                {
+                    <option value="@persona">@FormatPersona(persona)</option>
+                }
+            </select>
+        </label>
+
+        <form class="topbar-search" role="search" @onsubmit="OnSearchSubmit" @onsubmit:preventDefault="true">
+            <span class="sr-only">Search everything</span>
+            <input type="search" placeholder="Search everything…" @bind="_searchQuery" aria-label="Search everything" />
+        </form>
+
+        <div class="topbar-spacer"></div>
+
+        <button class="capacity-pill capacity-pill-@Capacity.Status.State.ToLowerInvariant()" type="button"
+                @onclick="Capacity.TogglePanel"
+                aria-haspopup="dialog" aria-expanded="@Capacity.PanelOpen"
+                title="Open Fabric capacity control">
+            <span aria-hidden="true">●</span> Fabric: @Capacity.Status.State
+            @if (Capacity.Status.DemoModeSimulated)
+            {
+                <span class="capacity-pill-sim">Simulated</span>
+            }
+        </button>
+
+        <button class="icon-button" type="button" @onclick="OpenAlerts" aria-label="Alerts">
+            🔔<span class="alert-count">@_openAlerts</span>
+        </button>
+
+        <button class="icon-button" type="button" @onclick="Shell.CycleTheme" aria-label="Change theme">
+            Theme: @Shell.ThemeMode
+        </button>
+
+        <label class="topbar-field">
+            <span class="sr-only">Locale</span>
+            <select value="@Shell.Locale" @onchange="OnLocaleChanged" aria-label="Selected locale">
+                @foreach (var locale in ShellState.Locales)
+                {
+                    <option value="@locale">@locale</option>
+                }
+            </select>
+        </label>
+
+        <button class="demo-button" type="button" @onclick="Shell.ToggleDemoMode" aria-pressed="@Shell.DemoMode">
+            @(Shell.DemoMode ? "DEMO" : "CLOUD")
+        </button>
+
+        <details class="account-menu">
+            <summary aria-label="Demo identity">
+                <span class="account-avatar" aria-hidden="true">@Initials(Shell.Auth.CurrentUser.DisplayName)</span>
+            </summary>
+            <div class="account-popover">
+                <p class="account-name">@Shell.Auth.CurrentUser.DisplayName</p>
+                <p class="account-sub">@(Shell.Auth.IsSignedIn ? "Signed in (demo identity)" : "Signed out")</p>
+                <p class="account-label">Roles</p>
+                <ul class="account-list">
+                    @foreach (var role in Shell.Auth.CurrentUser.Roles)
+                    {
+                        <li>@role</li>
+                    }
+                </ul>
+                <button class="account-action" type="button" @onclick="Shell.Auth.ToggleSignIn">
+                    @(Shell.Auth.IsSignedIn ? "Sign out (demo)" : "Sign in (demo)")
+                </button>
+            </div>
+        </details>
+    </header>
+
+    @if (Shell.DemoMode)
+    {
+        <div class="demo-banner" role="status">
+            Synthetic demo data — not for operational control
+        </div>
+    }
+
+    <div class="shell-content">
+        <aside class="shell-nav" aria-label="Persona navigation">
+            <nav>
+                @foreach (var item in Shell.NavigationItems)
+                {
+                    <NavLink class="shell-nav-link"
+                             ActiveClass="active"
+                             href="@Shell.RouteFor(item.Section, item.DefaultSubView)"
+                             Match="NavLinkMatch.Prefix">
+                        <span aria-hidden="true">@item.Symbol</span>
+                        <span>@item.Label</span>
+                    </NavLink>
+                }
+            </nav>
+        </aside>
+
+        <main class="shell-main" id="shell-main-content">
+            <div class="breadcrumbs" aria-label="Breadcrumb">
+                @Shell.Site.ToUpperInvariant() <span aria-hidden="true">›</span> @Shell.ActivePersona
+                @if (!string.IsNullOrWhiteSpace(Shell.SubView))
+                {
+                    <span aria-hidden="true">›</span> @Shell.SubView
+                }
+            </div>
+            @if (Shell.LastToast is not null)
+            {
+                <div class="shell-toast" role="status">@Shell.LastToast.Message</div>
+            }
+            @Body
+        </main>
+    </div>
+
+    <footer class="shell-footer">
+        <span>@(Shell.DemoMode ? "Demo mode" : "Cloud mode") · BFF @Shell.BffBaseUrl</span>
+        <span>WCAG 2.2 AA target · synthetic evidence only</span>
+    </footer>
+</div>
+
+<CapacityPanel />
+
+@code {
+    private string _searchQuery = string.Empty;
+    private readonly int _openAlerts = 3;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Shell.Changed += OnShellStateChanged;
+        Capacity.Changed += OnShellStateChanged;
+        await Capacity.RefreshAsync(Shell.Locale);
+    }
+
+    private void OnShellStateChanged() => _ = InvokeAsync(StateHasChanged);
+
+    private void OnSiteChanged(ChangeEventArgs args)
+    {
+        Shell.SetSite(args.Value?.ToString() ?? Shell.Site);
+        Navigation.NavigateTo(Shell.RouteFor(Shell.Section, Shell.SubView));
+    }
+
+    private void OnPersonaChanged(ChangeEventArgs args)
+    {
+        var persona = args.Value?.ToString() ?? Shell.PrimaryPersona;
+        Shell.SetPrimaryPersona(persona);
+        Navigation.NavigateTo(Shell.RouteForPersona(persona));
+    }
+
+    private void OnLocaleChanged(ChangeEventArgs args)
+    {
+        Shell.SetLocale(args.Value?.ToString() ?? Shell.Locale);
+    }
+
+    private void OnSearchSubmit()
+    {
+        if (!string.IsNullOrWhiteSpace(_searchQuery))
+        {
+            Shell.PublishToast("info", $"Search '{_searchQuery}' — use in-view search for scoped results.");
+            Navigation.NavigateTo(Shell.RouteFor("command-center", null));
+        }
+    }
+
+    private void OpenAlerts()
+    {
+        Navigation.NavigateTo(Shell.RouteFor("command-center", null));
+    }
+
+    private static string FormatPersona(string persona) =>
+        System.Text.RegularExpressions.Regex.Replace(persona, "([a-z])([A-Z])", "$1 $2");
+
+    private static string Initials(string name)
+    {
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return parts.Length >= 2
+            ? $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant()
+            : name.Length > 0 ? name[..1].ToUpperInvariant() : "?";
+    }
+
+    public void Dispose()
+    {
+        Shell.Changed -= OnShellStateChanged;
+        Capacity.Changed -= OnShellStateChanged;
+    }
+}

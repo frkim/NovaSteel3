@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "font": {
+    "familyBase": "Segoe UI Variable, Segoe UI, system-ui, Noto Sans, sans-serif",
+    "familyMono": "Cascadia Code, Consolas, monospace"
+  },
+  "spacing": {
+    "xs": 4,
+    "s": 8,
+    "m": 16,
+    "l": 24,
+    "xl": 32,
+    "2xl": 48
+  },
+  "radius": {
+    "s": 4,
+    "m": 8,
+    "l": 12,
+    "pill": 999
+  },
+  "light": {
+    "canvas": "#F5F6F8",
+    "surface": "#FFFFFF",
+    "surfaceAlt": "#EEF1F4",
+    "textPrimary": "#1A1D1F",
+    "textSecondary": "#5A6470",
+    "brandPrimary": "#0B5FFF",
+    "brandAccent": "#00A3A1",
+    "critical": "#C42B1C",
+    "warning": "#B26A00",
+    "success": "#0F7B0F",
+    "stale": "#8A6D3B",
+    "focusRing": "#0B5FFF"
+  },
+  "dark": {
+    "canvas": "#141719",
+    "surface": "#1E2224",
+    "surfaceAlt": "#262B2E",
+    "textPrimary": "#F2F4F5",
+    "textSecondary": "#AEB6BF",
+    "brandPrimary": "#4C8DFF",
+    "brandAccent": "#3FD0CE",
+    "critical": "#FF6B5E",
+    "warning": "#FFB84D",
+    "success": "#5BD75B",
+    "stale": "#D6B77A",
+    "focusRing": "#8FB6FF"
+  },
+  "chart": {
+    "light": ["#0072B2", "#E69F00", "#009E73", "#CC79A7", "#56B4E9", "#D55E00", "#F0E442", "#000000"],
+    "dark": ["#56B4E9", "#F0E442", "#009E73", "#CC79A7", "#E69F00", "#D55E00", "#8FB6FF", "#F2F4F5"]
+  }
+}

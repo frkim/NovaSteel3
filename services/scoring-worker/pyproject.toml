@@ -1,0 +1,12 @@
+[build-system]
+requires = ["setuptools==83.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "novasteel-scoring-worker"
+version = "0.1.0"
+description = "Physics-informed-style NovaSteel lining and quality scoring"
+requires-python = ">=3.13"
+
+[tool.setuptools.packages.find]
+where = ["src"]
