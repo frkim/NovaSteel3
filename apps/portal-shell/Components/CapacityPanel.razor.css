@@ -118,6 +118,43 @@
     gap: var(--ns-space-s);
 }
 
+.capacity-sku-control {
+    align-items: flex-end;
+    display: flex;
+    gap: var(--ns-space-s);
+    margin: var(--ns-space-s) 0 4px;
+}
+
+.capacity-sku-control label {
+    display: block;
+    flex: 1;
+}
+
+.capacity-sku-control span {
+    color: var(--ns-color-text-secondary);
+    display: block;
+    font-size: 0.8125rem;
+    margin-bottom: 4px;
+}
+
+.capacity-sku-control select {
+    background: var(--ns-color-canvas);
+    border: 1px solid var(--ns-color-surface-alt);
+    border-radius: var(--ns-radius-s);
+    color: var(--ns-color-text-primary);
+    padding: 8px;
+    width: 100%;
+}
+
+.capacity-sku-control select:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.capacity-sku-control button {
+    flex: 0 0 auto;
+}
+
 .capacity-primary,
 .capacity-secondary {
     border: 1px solid var(--ns-color-brand-primary);

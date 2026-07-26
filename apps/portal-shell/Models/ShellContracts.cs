@@ -60,7 +60,8 @@ public sealed record CapacityStatusDto(
     [property: JsonPropertyName("state")] string State,
     [property: JsonPropertyName("sku")] string Sku,
     [property: JsonPropertyName("demoModeSimulated")] bool DemoModeSimulated,
-    [property: JsonPropertyName("stale")] bool Stale);
+    [property: JsonPropertyName("stale")] bool Stale,
+    [property: JsonPropertyName("skuOptions")] IReadOnlyList<string>? SkuOptions = null);
 
 public sealed record CapacityStatusEnvelope(
     [property: JsonPropertyName("data")] CapacityStatusDto Data,
@@ -71,7 +72,9 @@ public sealed record CapacityMutationDto(
     [property: JsonPropertyName("status")] string Status,
     [property: JsonPropertyName("state")] string State,
     [property: JsonPropertyName("operationId")] string? OperationId,
-    [property: JsonPropertyName("capacityId")] string CapacityId);
+    [property: JsonPropertyName("capacityId")] string CapacityId,
+    [property: JsonPropertyName("sku")] string? Sku = null,
+    [property: JsonPropertyName("previousSku")] string? PreviousSku = null);
 
 public sealed record CapacityMutationEnvelope(
     [property: JsonPropertyName("data")] CapacityMutationDto Data,
@@ -81,6 +84,21 @@ public sealed record CapacityMutationEnvelope(
 public sealed record CapacityMutationRequest(
     [property: JsonPropertyName("capacityId")] string CapacityId,
     [property: JsonPropertyName("reason")] string Reason);
+
+public sealed record CapacitySkuRequest(
+    [property: JsonPropertyName("capacityId")] string CapacityId,
+    [property: JsonPropertyName("sku")] string Sku,
+    [property: JsonPropertyName("reason")] string Reason);
+
+/// <summary>Flat BFF error envelope, used to surface a refused SKU change verbatim.</summary>
+public sealed record BffErrorEnvelope(
+    [property: JsonPropertyName("code")] string Code,
+    [property: JsonPropertyName("message")] string Message,
+    [property: JsonPropertyName("correlationId")] string? CorrelationId,
+    [property: JsonPropertyName("retryable")] bool Retryable);
+
+/// <summary>Outcome of a BFF-mediated capacity call: either data or a server-supplied refusal.</summary>
+public sealed record CapacityCallResult(CapacityMutationDto? Data, string? ErrorMessage);
 
 public sealed record CapacityTransitionEntry(
     string Time,

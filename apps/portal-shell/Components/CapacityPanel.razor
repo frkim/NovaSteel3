@@ -35,6 +35,30 @@
             <input @bind="_reason" disabled="@(!Capacity.CanManage)" aria-label="Capacity request reason" />
         </label>
 
+        <div class="capacity-sku-control">
+            <label for="capacity-sku-select">
+                <span>Capacity size (SKU)</span>
+                <select id="capacity-sku-select"
+                        value="@SelectedSku"
+                        @onchange="OnSkuChanged"
+                        disabled="@(!Capacity.CanManage || Capacity.Busy || Capacity.MutationsLocked)">
+                    @foreach (var option in Capacity.SkuOptions)
+                    {
+                        <option value="@option">@SkuOptionLabel(option)</option>
+                    }
+                </select>
+            </label>
+            <button class="capacity-secondary" type="button"
+                    disabled="@ApplySkuDisabled()"
+                    @onclick="ApplySku">
+                Apply SKU
+            </button>
+        </div>
+        <p class="capacity-note">
+            Fabric capacity units scale linearly, so F4 costs about twice F2 per hour and F8 about four times.
+            Resizing keeps the current lifecycle state and is allow-list checked, role-gated and audited by the BFF.
+        </p>
+
         <div class="capacity-actions">
             <button class="capacity-primary" type="button"
                     disabled="@StartDisabled()"
@@ -90,6 +114,9 @@
 
 @code {
     private string _reason = "rehearsal readiness";
+    private string? _sku;
+
+    private string SelectedSku => _sku ?? Capacity.Status.Sku;
 
     protected override void OnInitialized()
     {
@@ -97,6 +124,25 @@
     }
 
     private void OnChanged() => _ = InvokeAsync(StateHasChanged);
+
+    private void OnSkuChanged(ChangeEventArgs args) => _sku = args.Value?.ToString();
+
+    private string SkuOptionLabel(string option) =>
+        string.Equals(option, Capacity.Status.Sku, StringComparison.OrdinalIgnoreCase)
+            ? $"{option} (current)"
+            : option;
+
+    private bool ApplySkuDisabled() =>
+        !Capacity.CanManage
+        || Capacity.Busy
+        || Capacity.MutationsLocked
+        || string.Equals(SelectedSku, Capacity.Status.Sku, StringComparison.OrdinalIgnoreCase);
+
+    private async Task ApplySku()
+    {
+        await Capacity.RequestSkuAsync(SelectedSku, _reason, Shell.Locale);
+        _sku = null;
+    }
 
     private bool StartDisabled() =>
         !Capacity.CanManage || Capacity.Busy || Capacity.MutationsLocked || Capacity.Status.State != "Paused";

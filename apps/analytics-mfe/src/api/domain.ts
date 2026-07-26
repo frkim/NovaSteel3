@@ -242,6 +242,7 @@ export interface CapacityStatus {
   environment: string
   state: CapacityState | string
   sku: string
+  skuOptions?: string[]
   demoModeSimulated: boolean
   stale: boolean
 }

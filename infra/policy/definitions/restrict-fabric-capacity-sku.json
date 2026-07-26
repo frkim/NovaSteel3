@@ -1,7 +1,7 @@
 {
   "properties": {
     "displayName": "NovaSteel: restrict Fabric capacity SKU to the approved demo/measurement set",
-    "description": "Prevents an unreviewed jump to a larger, costlier Fabric F SKU. Deployment-topology.md §6: 'F4 only on measured contention; production SKU after pilot load test'. F2 is the cost-conscious starting SKU; F4 is the only pre-approved measurement fallback without a separate change/cost-owner sign-off.",
+    "description": "Prevents an unreviewed jump to a larger, costlier Fabric F SKU. Deployment-topology.md §6: F2 is the cost-conscious starting SKU, F4 is the measured-contention fallback, and F8 is the pre-approved demo-day burst tier requestable from the portal capacity dialog with a recorded reason. Anything above F8 requires a separate change/cost-owner sign-off and an update to this parameter.",
     "policyType": "Custom",
     "mode": "Indexed",
     "metadata": {
@@ -26,11 +26,12 @@
         "type": "Array",
         "metadata": {
           "displayName": "Allowed Fabric capacity SKU names",
-          "description": "Default only permits the pre-approved cost-conscious set; a production SKU decision requires updating this parameter as part of a reviewed change."
+          "description": "Default permits only the pre-approved cost-conscious set (F2 baseline, F4 measured fallback, F8 demo-day burst). A production SKU decision requires updating this parameter as part of a reviewed change."
         },
         "defaultValue": [
           "F2",
-          "F4"
+          "F4",
+          "F8"
         ]
       }
     },

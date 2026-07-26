@@ -60,7 +60,8 @@ def test_fabric_sku_guardrail_matches_deployment_topology_default_allow_list() -
     definitions_dir = BICEP_DIR.parent / "policy" / "definitions"
     data = load_json(definitions_dir / "restrict-fabric-capacity-sku.json")
     allowed = data["properties"]["parameters"]["allowedSkus"]["defaultValue"]
-    assert set(allowed) == {"F2", "F4"}, (
+    assert set(allowed) == {"F2", "F4", "F8"}, (
         "the Fabric capacity SKU guardrail's default allow-list should match "
-        "deployment-topology.md §6 (F2 initial, F4 measurement fallback only)"
+        "deployment-topology.md §6 (F2 initial, F4 measured fallback, F8 demo-day burst) "
+        "and must stay in step with the SKUs the portal capacity dialog offers"
     )

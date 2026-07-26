@@ -43,10 +43,11 @@ param expiryDate string = ''
 @description('Default data classification tag for resources that do not set a more specific value.')
 param dataClassification string = 'Confidential'
 
-@description('Fabric capacity SKU. F2 is the cost-conscious default; F4 is the only pre-approved measurement fallback (deployment-topology.md §6).')
+@description('Fabric capacity SKU. F2 is the cost-conscious default, F4 the measured-contention fallback, and F8 the pre-approved demo-day burst tier requestable from the portal capacity dialog (deployment-topology.md §6).')
 @allowed([
   'F2'
   'F4'
+  'F8'
 ])
 param fabricSkuName string = 'F2'
 

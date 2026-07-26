@@ -229,3 +229,89 @@ def test_sse_replay_frames_use_event_ids(client: TestClient, admin_headers: dict
     frame = asyncio.run(first_frame())
     assert frame.startswith("id: ")
     assert "event: alert.created" in frame
+
+
+_SKU_ENDPOINT = "/v1/platform/capacity/sku-requests"
+_ALLOWED_CAPACITY = "cap-novasteel-demo-sc"
+
+
+def test_capacity_sku_change_happy_path(
+    client: TestClient, admin_headers: dict[str, str]
+) -> None:
+    response = client.post(
+        _SKU_ENDPOINT,
+        headers=admin_headers | {"Idempotency-Key": str(uuid4())},
+        json={"capacityId": _ALLOWED_CAPACITY, "sku": "F4", "reason": "Cost optimisation"},
+    )
+    assert response.status_code == 200
+    data = response.json()["data"]
+    assert data["status"] == "SIMULATED"
+    assert data["sku"] == "F4"
+    assert data["previousSku"] == "F2"
+    assert data["state"] == "Paused"  # scale does not change lifecycle state
+    assert "operationId" in data
+    assert "auditRef" in data
+    assert data["capacityId"] == _ALLOWED_CAPACITY
+
+
+def test_capacity_sku_change_invalid_sku(
+    client: TestClient, admin_headers: dict[str, str]
+) -> None:
+    response = client.post(
+        _SKU_ENDPOINT,
+        headers=admin_headers | {"Idempotency-Key": str(uuid4())},
+        json={"capacityId": _ALLOWED_CAPACITY, "sku": "F999", "reason": "Test"},
+    )
+    assert response.status_code == 422
+    assert response.json()["code"] == "VALIDATION_ERROR"
+    assert "F2" in response.json()["message"]
+    assert "F4" in response.json()["message"]
+    assert "F8" in response.json()["message"]
+
+
+def test_capacity_sku_change_non_allowlisted_capacity(
+    client: TestClient, admin_headers: dict[str, str]
+) -> None:
+    response = client.post(
+        _SKU_ENDPOINT,
+        headers=admin_headers | {"Idempotency-Key": str(uuid4())},
+        json={"capacityId": "cap-unknown-xyz", "sku": "F4", "reason": "Test"},
+    )
+    assert response.status_code == 403
+    assert response.json()["code"] == "POLICY_DENIED"
+
+
+def test_capacity_sku_change_same_sku_is_conflict(
+    client: TestClient, admin_headers: dict[str, str]
+) -> None:
+    # Default SKU is F2; requesting F2 again is a conflict
+    response = client.post(
+        _SKU_ENDPOINT,
+        headers=admin_headers | {"Idempotency-Key": str(uuid4())},
+        json={"capacityId": _ALLOWED_CAPACITY, "sku": "F2", "reason": "No-op test"},
+    )
+    assert response.status_code == 409
+    assert response.json()["code"] == "CAPACITY_STATE_CONFLICT"
+
+
+def test_capacity_sku_change_idempotent_replay(
+    client: TestClient, admin_headers: dict[str, str]
+) -> None:
+    key = str(uuid4())
+    body = {"capacityId": _ALLOWED_CAPACITY, "sku": "F8", "reason": "Scale up"}
+    first = client.post(_SKU_ENDPOINT, headers=admin_headers | {"Idempotency-Key": key}, json=body)
+    second = client.post(_SKU_ENDPOINT, headers=admin_headers | {"Idempotency-Key": key}, json=body)
+    assert first.status_code == second.status_code == 200
+    assert first.json() == second.json()
+
+
+def test_capacity_sku_change_missing_idempotency_key(
+    client: TestClient, admin_headers: dict[str, str]
+) -> None:
+    response = client.post(
+        _SKU_ENDPOINT,
+        headers=admin_headers,  # no Idempotency-Key
+        json={"capacityId": _ALLOWED_CAPACITY, "sku": "F4", "reason": "Test"},
+    )
+    assert response.status_code == 400
+    assert response.json()["code"] == "IDEMPOTENCY_KEY_REQUIRED"

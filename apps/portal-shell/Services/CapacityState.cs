@@ -13,6 +13,14 @@ public sealed class CapacityState
     private static readonly string[] StartSequence = ["ResumeRequested", "Resuming", "ReadinessCheck", "Running"];
     private static readonly string[] PauseSequence = ["DrainRequested", "Draining", "SuspendRequested", "Paused"];
 
+    /// <summary>
+    /// SKUs the portal may request. Kept in step with the BFF allow-list
+    /// (<c>BFF_CAPACITY_SKU_ALLOWLIST</c>) and the Azure Policy guardrail
+    /// <c>restrict-fabric-capacity-sku.json</c>; the server is authoritative and
+    /// overrides this fallback through <c>skuOptions</c> on the status payload.
+    /// </summary>
+    private static readonly string[] DefaultSkuOptions = ["F2", "F4", "F8"];
+
     private readonly CapacityService _service;
     private readonly AuthDemoContext _auth;
     private readonly ShellOptions _options;
@@ -41,6 +49,10 @@ public sealed class CapacityState
 
     public bool CanManage => _auth.HasRole("Platform.Capacity.Manage");
 
+    /// <summary>SKUs offered by the capacity dialog, server-authoritative when available.</summary>
+    public IReadOnlyList<string> SkuOptions =>
+        Status.SkuOptions is { Count: > 0 } options ? options : DefaultSkuOptions;
+
     public bool MutationsLocked => Status.State is
         "ResumeRequested" or "Resuming" or "ReadinessCheck" or
         "DrainRequested" or "Draining" or "SuspendRequested";
@@ -54,6 +66,21 @@ public sealed class CapacityState
     public void ClosePanel()
     {
         PanelOpen = false;
+        Notify();
+    }
+
+    /// <summary>
+    /// Opens the panel without toggling, so an analytics tile can request the
+    /// control surface without ever closing an already-open dialog.
+    /// </summary>
+    public void OpenPanel()
+    {
+        if (PanelOpen)
+        {
+            return;
+        }
+
+        PanelOpen = true;
         Notify();
     }
 
@@ -130,6 +157,77 @@ public sealed class CapacityState
         Status = Status with { State = current, DemoModeSimulated = true, Stale = false };
     }
 
+    /// <summary>
+    /// Requests a Fabric capacity SKU change. Scaling does not change the
+    /// lifecycle state: a Running capacity stays Running and a Paused capacity
+    /// stays Paused, so the demo can resize without a resume/pause round trip.
+    /// </summary>
+    public async Task RequestSkuAsync(string sku, string reason, string locale)
+    {
+        if (!CanManage)
+        {
+            LastMessage = "Read-only: only Platform.Capacity.Manage may change the SKU.";
+            Notify();
+            return;
+        }
+
+        var requested = (sku ?? string.Empty).Trim().ToUpperInvariant();
+        if (!SkuOptions.Contains(requested))
+        {
+            LastMessage = $"SKU must be one of {string.Join(", ", SkuOptions)}.";
+            Notify();
+            return;
+        }
+
+        if (MutationsLocked)
+        {
+            LastMessage = $"A lifecycle operation is in progress ({Status.State}); the SKU cannot change until it settles.";
+            Notify();
+            return;
+        }
+
+        if (string.Equals(requested, Status.Sku, StringComparison.OrdinalIgnoreCase))
+        {
+            LastMessage = $"Capacity is already running SKU {Status.Sku}.";
+            Notify();
+            return;
+        }
+
+        Busy = true;
+        LastMessage = null;
+        Notify();
+
+        var effectiveReason = string.IsNullOrWhiteSpace(reason) ? "rehearsal readiness" : reason.Trim();
+        var previousSku = Status.Sku;
+        var result = await _service.RequestSkuAsync(requested, effectiveReason, locale);
+        if (result.Data is not null)
+        {
+            Source = "bff";
+            var applied = result.Data.Sku ?? requested;
+            AppendTransition(Status.State, result.Data.State, $"{effectiveReason} (SKU {previousSku} → {applied})", result.Data.OperationId ?? "bff");
+            Status = Status with { State = result.Data.State, Sku = applied, DemoModeSimulated = true, Stale = false };
+            LastMessage = $"SKU change accepted by the BFF: {previousSku} → {applied} ({result.Data.Status}).";
+        }
+        else if (result.ErrorMessage is not null)
+        {
+            LastMessage = $"SKU change refused. {result.ErrorMessage}";
+        }
+        else
+        {
+            Source = "simulated";
+            AppendTransition(
+                Status.State,
+                Status.State,
+                $"{effectiveReason} (SKU {previousSku} → {requested})",
+                Guid.NewGuid().ToString("N")[..12]);
+            Status = Status with { Sku = requested, DemoModeSimulated = true, Stale = false };
+            LastMessage = $"SKU change simulated locally (BFF unavailable): {previousSku} → {requested}; no ARM operation fired.";
+        }
+
+        Busy = false;
+        Notify();
+    }
+
     private void AppendTransition(string from, string to, string reason, string correlationId)
     {
         Transitions.Insert(
@@ -148,7 +246,7 @@ public sealed class CapacityState
     }
 
     private CapacityStatusDto Simulated(string state) =>
-        new(_options.CapacityId, "demo", state, "F2", DemoModeSimulated: true, Stale: false);
+        new(_options.CapacityId, "demo", state, "F2", DemoModeSimulated: true, Stale: false, SkuOptions: DefaultSkuOptions);
 
     private void Notify() => Changed?.Invoke();
 }

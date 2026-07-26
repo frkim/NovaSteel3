@@ -5,8 +5,9 @@ namespace PortalShell.Services;
 
 /// <summary>
 /// Shell-owned, BFF-mediated Fabric capacity client. The browser only calls the
-/// FastAPI BFF (<c>GET /v1/platform/capacity</c> and the start/pause request
-/// routes); it never reaches ARM and never scales a SKU.
+/// FastAPI BFF (<c>GET /v1/platform/capacity</c> plus the start, pause and
+/// SKU-change request routes); it never reaches ARM directly. Every SKU change
+/// is allow-list checked, role-gated and audited server-side.
 /// </summary>
 public sealed class CapacityService
 {
@@ -72,6 +73,58 @@ public sealed class CapacityService
         catch (Exception)
         {
             return null;
+        }
+    }
+
+    /// <summary>
+    /// Requests a Fabric capacity SKU change through the BFF. Unlike start/pause,
+    /// a refusal carries a reason the operator must see (an unsupported SKU, a
+    /// lifecycle operation in flight, or a capacity outside the allow-list), so
+    /// the server's message is returned rather than collapsed into null.
+    /// </summary>
+    public async Task<CapacityCallResult> RequestSkuAsync(
+        string sku,
+        string reason,
+        string locale,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Post, "/v1/platform/capacity/sku-requests")
+            {
+                Content = JsonContent.Create(new CapacitySkuRequest(_options.CapacityId, sku, reason)),
+            };
+            ApplyHeaders(request, locale);
+            request.Headers.TryAddWithoutValidation("Idempotency-Key", Guid.NewGuid().ToString("N"));
+            using var response = await _http.SendAsync(request, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await ReadErrorAsync(response, cancellationToken);
+                return new CapacityCallResult(null, error);
+            }
+
+            var envelope = await response.Content.ReadFromJsonAsync<CapacityMutationEnvelope>(cancellationToken: cancellationToken);
+            return new CapacityCallResult(envelope?.Data, null);
+        }
+        catch (Exception)
+        {
+            // Unreachable BFF: the caller falls back to a simulated local change.
+            return new CapacityCallResult(null, null);
+        }
+    }
+
+    private static async Task<string?> ReadErrorAsync(
+        HttpResponseMessage response,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var error = await response.Content.ReadFromJsonAsync<BffErrorEnvelope>(cancellationToken: cancellationToken);
+            return string.IsNullOrWhiteSpace(error?.Message) ? null : $"{error!.Code}: {error.Message}";
+        }
+        catch (Exception)
+        {
+            return $"The BFF refused the request ({(int)response.StatusCode}).";
         }
     }
 

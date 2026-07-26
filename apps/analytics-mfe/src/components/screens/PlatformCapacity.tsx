@@ -8,7 +8,7 @@ import type { CapacityStatus, CapacityTransition } from '../../api/domain'
 import { StateBoundary } from '../primitives/StateBoundary'
 import { SeverityPill } from '../primitives/SeverityPill'
 import { DataTable, type DataTableColumn } from '../primitives/DataTable'
-import { KpiBand, PanelCard, SectionStack } from './common'
+import { KpiBand, PanelCard, SectionStack, revealPanel } from './common'
 import { formatDateTime } from '../../utils/format'
 import type { KpiCardModel } from '../primitives/KpiCard'
 
@@ -45,12 +45,52 @@ export function PlatformCapacity() {
   const status = capacityState.data
   const locked = status ? MUTATION_LOCK_STATES.has(status.state) : true
   const canManage = can('platform.capacity.manage')
+  const skuOptions = status?.skuOptions ?? []
 
   const metrics: KpiCardModel[] = [
-    { id: 'state', label: 'Capacity state', value: status?.state ?? '—', deltaLabel: status?.demoModeSimulated ? 'Simulated' : undefined, target: `SKU ${status?.sku ?? '—'}`, asOf: capacityState.asOf, source: capacityState.source },
-    { id: 'sku', label: 'SKU', value: status?.sku ?? '—', target: 'non-production', trend: 'flat' },
-    { id: 'env', label: 'Environment', value: status?.environment ?? '—', target: 'demo namespace', trend: 'flat' },
-    { id: 'policy', label: 'Lifecycle policy', value: '01:00', unit: 'Europe/Luxembourg', target: 'non-production check', trend: 'flat' },
+    {
+      id: 'state',
+      label: 'Capacity state',
+      value: status?.state ?? '—',
+      deltaLabel: status?.demoModeSimulated ? 'Simulated' : undefined,
+      target: `SKU ${status?.sku ?? '—'}`,
+      asOf: capacityState.asOf,
+      source: capacityState.source,
+      tooltip:
+        'Current Fabric capacity lifecycle state read through the BFF. Paused and Running are settled states; ResumeRequested, Resuming, ReadinessCheck, DrainRequested, Draining and SuspendRequested are in-flight transitions during which mutations are blocked.',
+      actionHint: 'the transition audit trail',
+      onClick: () => revealPanel('capacity-transitions'),
+    },
+    {
+      id: 'sku',
+      label: 'SKU',
+      value: status?.sku ?? '—',
+      target: skuOptions.length > 0 ? `selectable: ${skuOptions.join(' · ')}` : 'non-production',
+      trend: 'flat',
+      tooltip:
+        'Fabric capacity size. Capacity units scale linearly, so F4 costs about twice F2 per hour and F8 about four times. Change it in the shell top-bar capacity dialog: the request is allow-list checked, role-gated and audited by the BFF.',
+      actionHint: 'the shell capacity dialog',
+      onClick: () => emit('capacity.panel', { open: true }),
+    },
+    {
+      id: 'env',
+      label: 'Environment',
+      value: status?.environment ?? '—',
+      target: 'demo namespace',
+      trend: 'flat',
+      tooltip:
+        'Environment this capacity belongs to. Only non-production environments expose start, pause and resize controls; a production capacity is never paused automatically and is not resizable from this portal.',
+    },
+    {
+      id: 'policy',
+      label: 'Lifecycle policy',
+      value: '01:00',
+      unit: 'Europe/Luxembourg',
+      target: 'non-production check',
+      trend: 'flat',
+      tooltip:
+        'A Logic App runs a nightly pause check at 01:00 Europe/Luxembourg so an idle non-production capacity does not bill overnight. It never pauses a capacity that is still draining or serving a demo.',
+    },
   ]
 
   const requestCapacity = (action: 'start' | 'pause') => {
@@ -86,7 +126,8 @@ export function PlatformCapacity() {
             <Stack spacing={2}>
               <Typography variant="body2" color="text.secondary">
                 The authoritative control lives in the shell top-bar capacity panel; this mirror requests
-                non-production start/pause through the BFF only. No browser-to-ARM call or SKU scaling is possible.
+                non-production start/pause through the BFF only. Resizing between {skuOptions.length > 0 ? skuOptions.join(', ') : 'the allowed SKUs'} is
+                available in that shell panel, not here. No browser-to-ARM call is possible from either surface.
               </Typography>
               <Box sx={{ display: 'grid', gap: 1, gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
                 <Typography variant="body2"><strong>Capacity:</strong> {capacity.capacityId}</Typography>
@@ -133,7 +174,7 @@ export function PlatformCapacity() {
         )}
       </StateBoundary>
 
-      <PanelCard title="Recent transitions">
+      <PanelCard id="capacity-transitions" title="Recent transitions">
         <DataTable
           caption="Capacity lifecycle transitions audit trail"
           rows={transitions}

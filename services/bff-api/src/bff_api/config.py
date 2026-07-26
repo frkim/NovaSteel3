@@ -7,6 +7,8 @@ from dataclasses import dataclass
 from enum import StrEnum
 from urllib.parse import urlparse
 
+from .capacity import SCALABLE_SKUS
+
 
 class DemoMode(StrEnum):
     """The only demo mode accepted by the foundation."""
@@ -59,6 +61,7 @@ class Settings:
     jwt_audience: str = ""
     capacity_mode: str = "local"
     capacity_allowlist: tuple[str, ...] = ("cap-novasteel-demo-sc",)
+    capacity_sku_allowlist: tuple[str, ...] = ("F2", "F4", "F8")
 
     @property
     def is_demo_mode(self) -> bool:
@@ -78,6 +81,14 @@ class Settings:
             raise ConfigurationError("BFF_CAPACITY_MODE must be 'local' or 'arm'.")
         if not self.capacity_allowlist:
             raise ConfigurationError("BFF_CAPACITY_ALLOWLIST must contain at least one capacity.")
+        if not self.capacity_sku_allowlist:
+            raise ConfigurationError("BFF_CAPACITY_SKU_ALLOWLIST must contain at least one SKU.")
+        invalid = [s for s in self.capacity_sku_allowlist if s not in SCALABLE_SKUS]
+        if invalid:
+            raise ConfigurationError(
+                f"BFF_CAPACITY_SKU_ALLOWLIST contains invalid SKUs: {invalid}. "
+                f"Permitted: {list(SCALABLE_SKUS)}."
+            )
 
     @classmethod
     def from_environment(cls) -> Settings:
@@ -144,6 +155,13 @@ class Settings:
                 value.strip()
                 for value in os.getenv(
                     "BFF_CAPACITY_ALLOWLIST", "cap-novasteel-demo-sc"
+                ).split(",")
+                if value.strip()
+            ),
+            capacity_sku_allowlist=tuple(
+                value.strip().upper()
+                for value in os.getenv(
+                    "BFF_CAPACITY_SKU_ALLOWLIST", "F2,F4,F8"
                 ).split(",")
                 if value.strip()
             ),

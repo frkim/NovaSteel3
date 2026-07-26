@@ -15,7 +15,7 @@ param location string
 @description('Common resource tags. The `expiry` tag is mandatory for demo/dev/test per deployment-topology.md §3.1.')
 param tags object
 
-@description('Fabric capacity SKU: F2 (cost-conscious initial demo) or F4 (measured contention fallback). Never default to a larger SKU without a measured/owner-approved reason (deployment-topology.md §6).')
+@description('Fabric capacity SKU: F2 (cost-conscious initial demo), F4 (measured contention fallback), or F8 (pre-approved demo-day burst tier). Never default to a larger SKU without a measured/owner-approved reason (deployment-topology.md §6).')
 @allowed([
   'F2'
   'F4'

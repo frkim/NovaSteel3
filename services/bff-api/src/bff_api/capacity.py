@@ -3,10 +3,22 @@
 from __future__ import annotations
 
 import itertools
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any, Protocol
 
+
+SCALABLE_SKUS: tuple[str, ...] = ("F2", "F4", "F8")
+
+_MID_TRANSITION_STATES = frozenset({
+    "ResumeRequested",
+    "Resuming",
+    "ReadinessCheck",
+    "DrainRequested",
+    "Draining",
+    "SuspendRequested",
+})
 
 CAPACITY_STATES = frozenset(
     {
@@ -43,6 +55,9 @@ class CapacityAdapter(Protocol):
     def pause(self, *, reason: str, actor: str) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         """Request a pause transition."""
 
+    def scale(self, *, sku: str, reason: str, actor: str) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+        """Request a SKU change."""
+
     def operation(self, operation_id: str) -> dict[str, Any] | None:
         """Read a lifecycle operation."""
 
@@ -62,6 +77,9 @@ class ArmCapacityClient(Protocol):
     def poll(self, operation_id: str) -> Mapping[str, Any]:
         """Poll ARM long-running operation state respecting Retry-After."""
 
+    def update_sku(self, capacity_id: str, sku: str) -> Mapping[str, Any]:
+        """PATCH the capacity SKU and return LRO metadata."""
+
 
 @dataclass
 class LocalCapacityAdapter:
@@ -73,6 +91,7 @@ class LocalCapacityAdapter:
     state: str = "Paused"
     operations: dict[str, dict[str, Any]] = field(default_factory=dict)
     _sequence: itertools.count = field(default_factory=lambda: itertools.count(1))
+    sku_options: tuple[str, ...] = field(default_factory=lambda: SCALABLE_SKUS)
 
     def status(self) -> dict[str, Any]:
         return {
@@ -82,6 +101,7 @@ class LocalCapacityAdapter:
             "sku": self.sku,
             "demoModeSimulated": True,
             "stale": False,
+            "skuOptions": list(self.sku_options),
         }
 
     def start(self, *, reason: str, actor: str) -> tuple[dict[str, Any], list[dict[str, Any]]]:
@@ -138,6 +158,44 @@ class LocalCapacityAdapter:
         operation = self.operations.get(operation_id)
         return dict(operation) if operation else None
 
+    def scale(self, *, sku: str, reason: str, actor: str) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+        if self.state in _MID_TRANSITION_STATES:
+            raise CapacityError("A lifecycle operation is already in progress.")
+        if sku == self.sku:
+            raise CapacityError(f"Capacity is already running SKU {sku}.")
+        previous_sku = self.sku
+        self.sku = sku
+        operation_id = f"cap-local-{next(self._sequence):05d}"
+        self.operations[operation_id] = {
+            "operationId": operation_id,
+            "state": self.state,
+            "armStatus": "SimulatedSucceeded",
+            "startedAt": _utc_now(),
+            "reason": reason,
+            "simulated": True,
+        }
+        transitions = [
+            {
+                "capacityId": self.capacity_id,
+                "fromState": self.state,
+                "toState": self.state,
+                "actor": actor,
+                "fromSku": previous_sku,
+                "toSku": sku,
+            }
+        ]
+        return (
+            {
+                "status": "SIMULATED",
+                "state": self.state,
+                "sku": sku,
+                "previousSku": previous_sku,
+                "operationId": operation_id,
+                "capacityId": self.capacity_id,
+            },
+            transitions,
+        )
+
     def _transition(self, states: list[str], actor: str) -> list[dict[str, Any]]:
         transitions = []
         for next_state in states:
@@ -159,10 +217,17 @@ class ArmCapacityAdapter:
 
     api_version = "2023-11-01"
 
-    def __init__(self, client: ArmCapacityClient, capacity_id: str, environment: str) -> None:
+    def __init__(
+        self,
+        client: ArmCapacityClient,
+        capacity_id: str,
+        environment: str,
+        sku_options: tuple[str, ...] = SCALABLE_SKUS,
+    ) -> None:
         self._client = client
         self._capacity_id = capacity_id
         self._environment = environment
+        self._sku_options = sku_options
 
     def status(self) -> dict[str, Any]:
         remote = self._client.get_capacity(self._capacity_id)
@@ -173,6 +238,7 @@ class ArmCapacityAdapter:
             "sku": str(remote.get("sku", "F2")),
             "demoModeSimulated": False,
             "stale": False,
+            "skuOptions": list(self._sku_options),
         }
 
     def start(self, *, reason: str, actor: str) -> tuple[dict[str, Any], list[dict[str, Any]]]:
@@ -199,6 +265,20 @@ class ArmCapacityAdapter:
             [],
         )
 
+    def scale(self, *, sku: str, reason: str, actor: str) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+        result = self._client.update_sku(self._capacity_id, sku)
+        return (
+            {
+                "status": "ACCEPTED",
+                "state": str(result.get("state", "Running")),
+                "sku": sku,
+                "previousSku": str(result.get("previousSku", "")),
+                "operationId": result.get("operationId"),
+                "capacityId": self._capacity_id,
+            },
+            [],
+        )
+
     def operation(self, operation_id: str) -> dict[str, Any] | None:
         return dict(self._client.poll(operation_id))
 
@@ -209,6 +289,7 @@ class UnconfiguredArmCapacityAdapter:
 
     capacity_id: str
     environment: str
+    sku_options: tuple[str, ...] = field(default_factory=lambda: SCALABLE_SKUS)
 
     def status(self) -> dict[str, Any]:
         return {
@@ -218,12 +299,16 @@ class UnconfiguredArmCapacityAdapter:
             "sku": "unknown",
             "demoModeSimulated": False,
             "stale": True,
+            "skuOptions": list(self.sku_options),
         }
 
     def start(self, *, reason: str, actor: str) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         raise CapacityUpstreamError("Managed-identity ARM capacity adapter is not configured.")
 
     def pause(self, *, reason: str, actor: str) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+        raise CapacityUpstreamError("Managed-identity ARM capacity adapter is not configured.")
+
+    def scale(self, *, sku: str, reason: str, actor: str) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         raise CapacityUpstreamError("Managed-identity ARM capacity adapter is not configured.")
 
     def operation(self, operation_id: str) -> dict[str, Any] | None:

@@ -734,6 +734,21 @@ def register_routes(app: FastAPI) -> None:
             request, body, idempotency_key, user, action="pause"
         )
 
+    @app.post(
+        "/v1/platform/capacity/sku-requests",
+        tags=["Platform"],
+        operation_id="requestCapacitySkuChange",
+    )
+    async def scale_capacity(
+        request: Request,
+        body: dict[str, Any] = Body(...),
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+        user: UserContext = Depends(current_user),
+    ) -> JSONResponse:
+        return _capacity_mutation(
+            request, body, idempotency_key, user, action="scale"
+        )
+
     @app.get("/v1/platform/capacity/operations/{operation_id}", tags=["Platform"])
     async def capacity_operation(
         operation_id: str,
@@ -875,15 +890,33 @@ def _capacity_mutation(
     action: str,
 ) -> JSONResponse:
     require_any_role(user, "Platform.Capacity.Manage")
-    _require_exact_keys(body, {"capacityId", "reason"})
+    if action == "scale":
+        _require_exact_keys(body, {"capacityId", "sku", "reason"})
+    else:
+        _require_exact_keys(body, {"capacityId", "reason"})
     capacity_id = _required_string(body, "capacityId")
     services = request.app.state.services
     if capacity_id not in services.settings.capacity_allowlist:
         raise ApiError(
             403, ErrorCode.POLICY_DENIED, "The requested capacity is not allow-listed."
         )
+    sku = ""
+    if action == "scale":
+        sku = _required_string(body, "sku")
+        permitted_skus = services.settings.capacity_sku_allowlist
+        if sku not in permitted_skus:
+            permitted = ", ".join(permitted_skus)
+            raise ApiError(
+                422,
+                ErrorCode.VALIDATION_ERROR,
+                f"Fabric capacity SKU must be one of {permitted}.",
+            )
     key = IdempotencyStore.require_key(idempotency_key)
-    route = f"/v1/platform/capacity/{action}-requests"
+    route = (
+        "/v1/platform/capacity/sku-requests"
+        if action == "scale"
+        else f"/v1/platform/capacity/{action}-requests"
+    )
     replay = services.idempotency.replay_or_none(route=route, key=key, body=body)
     if replay:
         return _replay_response(replay)
@@ -892,9 +925,15 @@ def _capacity_mutation(
             result, transitions = services.capacity.start(
                 reason=_required_string(body, "reason"), actor=user.user_id
             )
-        else:
+        elif action == "pause":
             result, transitions = services.capacity.pause(
                 reason=_required_string(body, "reason"), actor=user.user_id
+            )
+        else:
+            result, transitions = services.capacity.scale(
+                sku=sku,
+                reason=_required_string(body, "reason"),
+                actor=user.user_id,
             )
     except CapacityError as exc:
         raise ApiError(409, ErrorCode.CAPACITY_STATE_CONFLICT, str(exc)) from exc

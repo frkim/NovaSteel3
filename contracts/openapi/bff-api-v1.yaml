@@ -452,6 +452,33 @@ paths:
                 $ref: '#/components/schemas/DataEnvelope'
         default:
           $ref: '#/components/responses/ErrorResponse'
+  /v1/platform/capacity/sku-requests:
+    post:
+      tags: [Platform]
+      operationId: requestCapacitySkuChange
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CapacitySkuRequest'
+      responses:
+        '200':
+          description: Simulated SKU change (demo mode).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEnvelope'
+        '202':
+          description: ARM SKU change accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
   /v1/platform/capacity/operations/{operationId}:
     get:
       tags: [Platform]
@@ -1122,6 +1149,10 @@ components:
           type: boolean
         stale:
           type: boolean
+        skuOptions:
+          type: array
+          items:
+            type: string
     CapacityRequest:
       type: object
       additionalProperties: false
@@ -1129,6 +1160,20 @@ components:
       properties:
         capacityId:
           type: string
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+    CapacitySkuRequest:
+      type: object
+      additionalProperties: false
+      required: [capacityId, sku, reason]
+      properties:
+        capacityId:
+          type: string
+        sku:
+          type: string
+          enum: [F2, F4, F8]
         reason:
           type: string
           minLength: 1

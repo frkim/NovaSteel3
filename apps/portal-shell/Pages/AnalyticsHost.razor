@@ -65,6 +65,12 @@
                         $"{capacityRequest.Action} request routed through the shell to the BFF.");
                 }
                 break;
+            case "capacity.panel":
+                // A capacity tile in the microfrontend asks the shell to surface its
+                // own control dialog; the microfrontend never owns that surface.
+                Capacity.OpenPanel();
+                await Capacity.RefreshAsync(Shell.Locale);
+                break;
             case "toast":
                 var toast = analyticsEvent.Payload.Deserialize<ToastNotification>();
                 if (toast is not null)
