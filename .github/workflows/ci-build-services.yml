@@ -1,0 +1,246 @@
+name: CI build service images
+
+on:
+  pull_request:
+    paths:
+      - "services/bff-api/**"
+      - "services/optimizer-worker/**"
+      - "services/scoring-worker/**"
+      - "services/ingest-relay/**"
+      - "services/knowledge-orchestrator/**"
+  push:
+    branches:
+      - main
+    paths:
+      - "services/bff-api/**"
+      - "services/optimizer-worker/**"
+      - "services/scoring-worker/**"
+      - "services/ingest-relay/**"
+      - "services/knowledge-orchestrator/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  packages: write
+
+concurrency:
+  group: ci-images-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  REGISTRY: ${{ vars.ACR_LOGIN_SERVER }}
+  PIP_INDEX_URL: https://packagefeedproxy.microsoft.io/pypi/simple
+  PIP_EXTRA_INDEX_URL: ""
+
+jobs:
+  changes:
+    name: Detect changed services
+    runs-on: ubuntu-latest
+    outputs:
+      bff-api: ${{ steps.filter.outputs.bff-api }}
+      optimizer-worker: ${{ steps.filter.outputs.optimizer-worker }}
+      scoring-worker: ${{ steps.filter.outputs.scoring-worker }}
+      ingest-relay: ${{ steps.filter.outputs.ingest-relay }}
+      knowledge-orchestrator: ${{ steps.filter.outputs.knowledge-orchestrator }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.2.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - id: filter
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          all=false
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            all=true
+          fi
+
+          changed_file=.ci-changed-images
+          if [ "$all" = false ]; then
+            if [ -n "${BASE_SHA:-}" ] && git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null; then
+              git diff --name-only "$BASE_SHA" "$HEAD_SHA" > "$changed_file"
+            else
+              git ls-files > "$changed_file"
+            fi
+          fi
+
+          emit() {
+            local name="$1"
+            local pattern="$2"
+            if [ "$all" = true ] || grep -Eq "$pattern" "$changed_file"; then
+              echo "$name=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "$name=false" >> "$GITHUB_OUTPUT"
+            fi
+          }
+
+          emit bff-api '^services/bff-api/'
+          emit optimizer-worker '^services/optimizer-worker/'
+          emit scoring-worker '^services/scoring-worker/'
+          emit ingest-relay '^services/ingest-relay/'
+          emit knowledge-orchestrator '^services/knowledge-orchestrator/'
+
+  build-bff-api:
+    name: Build bff-api
+    needs: changes
+    if: needs.changes.outputs.bff-api == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
+      - name: Azure login via workload identity federation
+        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: ACR login
+        run: az acr login --name "${REGISTRY%%.*}"
+      - name: Build and push bff-api
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198f0a48d24ad5 # v6.18.0
+        with:
+          context: services/bff-api
+          build-contexts: |
+            optimizer-worker=services/optimizer-worker
+            scoring-worker=services/scoring-worker
+            knowledge=services/knowledge-orchestrator
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            ${{ env.REGISTRY }}/novasteel/bff-api:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-optimizer-worker:
+    name: Build optimizer-worker
+    needs: changes
+    if: needs.changes.outputs.optimizer-worker == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
+      - name: Azure login via workload identity federation
+        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: ACR login
+        run: az acr login --name "${REGISTRY%%.*}"
+      - name: Build and push optimizer-worker
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198f0a48d24ad5 # v6.18.0
+        with:
+          context: services/optimizer-worker
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            ${{ env.REGISTRY }}/novasteel/optimizer-worker:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-scoring-worker:
+    name: Build scoring-worker
+    needs: changes
+    if: needs.changes.outputs.scoring-worker == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
+      - name: Azure login via workload identity federation
+        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: ACR login
+        run: az acr login --name "${REGISTRY%%.*}"
+      - name: Build and push scoring-worker
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198f0a48d24ad5 # v6.18.0
+        with:
+          context: services/scoring-worker
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            ${{ env.REGISTRY }}/novasteel/scoring-worker:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-ingest-relay:
+    name: Build ingest-relay
+    needs: changes
+    if: needs.changes.outputs.ingest-relay == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
+      - name: Azure login via workload identity federation
+        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: ACR login
+        run: az acr login --name "${REGISTRY%%.*}"
+      - name: Build and push ingest-relay
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198f0a48d24ad5 # v6.18.0
+        with:
+          context: services/ingest-relay
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            ${{ env.REGISTRY }}/novasteel/ingest-relay:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-knowledge-orchestrator:
+    name: Build knowledge-orchestrator
+    needs: changes
+    if: needs.changes.outputs.knowledge-orchestrator == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
+      - name: Azure login via workload identity federation
+        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: ACR login
+        run: az acr login --name "${REGISTRY%%.*}"
+      - name: Build and push knowledge-orchestrator
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198f0a48d24ad5 # v6.18.0
+        with:
+          context: services/knowledge-orchestrator
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            ${{ env.REGISTRY }}/novasteel/knowledge-orchestrator:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

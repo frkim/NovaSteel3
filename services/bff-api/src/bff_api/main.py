@@ -24,6 +24,10 @@ from .contracts import (
 from .errors import ApiError
 from .routes import register_routes
 from .services import BffServices
+from .telemetry import configure_logging, configure_telemetry, inject_correlation_to_trace
+
+configure_logging()
+configure_telemetry("novasteel-bff-api")
 
 logger = logging.getLogger(__name__)
 CORRELATION_ID_HEADER = "X-Correlation-ID"
@@ -96,6 +100,8 @@ def create_app(
     ) -> JSONResponse:
         candidate = request.headers.get(CORRELATION_ID_HEADER, "").strip()
         request.state.correlation_id = candidate if candidate else str(uuid.uuid4())
+        # Map correlation ID onto the active W3C trace context
+        inject_correlation_to_trace(request.state.correlation_id)
         response = await call_next(request)
         if CORRELATION_ID_HEADER not in response.headers:
             response.headers[CORRELATION_ID_HEADER] = request.state.correlation_id

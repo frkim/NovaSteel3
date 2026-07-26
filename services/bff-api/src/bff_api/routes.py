@@ -23,6 +23,8 @@ from .idempotency import IdempotencyStore
 from .services import OptimizationError, ScoringError
 from .table import apply_table_query
 
+from scoring_worker.metrics import record_quality_metrics  # noqa: E402
+
 
 def register_routes(app: FastAPI) -> None:
     """Register the complete BFF domain surface against one app-local service graph."""
@@ -474,6 +476,8 @@ def register_routes(app: FastAPI) -> None:
             )
         except (ScoringError, ValueError) as exc:
             raise ApiError(400, ErrorCode.VALIDATION_ERROR, str(exc)) from exc
+        # Emit quality yield metric (side-effect free, no-op offline)
+        record_quality_metrics(result)
         record = request.app.state.services.audit.append(
             domain="quality",
             entity_id=batch["batchId"],

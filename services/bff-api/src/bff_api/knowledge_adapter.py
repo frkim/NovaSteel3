@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import sys
 from pathlib import Path
 from typing import Any
@@ -9,19 +10,26 @@ from typing import Any
 from .contracts import ErrorCode
 from .errors import ApiError
 
+logger = logging.getLogger(__name__)
 
 _ROOT = Path(__file__).resolve().parents[4]
 _KNOWLEDGE_SRC = _ROOT / "services" / "knowledge-orchestrator" / "src"
 
 
 class KnowledgeAdapter:
-    """Delegates the consent/review workflow without reimplementing its internals."""
+    """Delegates the consent/review workflow without reimplementing its internals.
+
+    Selects the Azure Foundry adapter when FOUNDRY_ENDPOINT is configured,
+    falling back to the local deterministic agent otherwise. The local path
+    is the default and preserves byte-stable demo results.
+    """
 
     def __init__(self, *, demo_mode: bool) -> None:
         if str(_KNOWLEDGE_SRC) not in sys.path:
             sys.path.insert(0, str(_KNOWLEDGE_SRC))
         try:
             from knowledge_orchestrator import KnowledgeOrchestrator
+            from knowledge_orchestrator.adapter_factory import create_agent
             from knowledge_orchestrator.models import AudioMetadata
             from knowledge_orchestrator.orchestrator import (
                 ConflictError,
@@ -30,7 +38,11 @@ class KnowledgeAdapter:
             )
         except ImportError as exc:  # pragma: no cover - repository integration failure
             raise RuntimeError("knowledge-orchestrator is required by the BFF.") from exc
-        self._orchestrator = KnowledgeOrchestrator()
+
+        # Select agent via the adapter factory (Azure when FOUNDRY_ENDPOINT set,
+        # local fixture otherwise). Fail-safe: factory handles import failures.
+        agent = create_agent()
+        self._orchestrator = KnowledgeOrchestrator(agent=agent)
         self._audio_metadata = AudioMetadata
         self._errors = (NotFoundError, ForbiddenError, ConflictError)
         self._demo_mode = demo_mode

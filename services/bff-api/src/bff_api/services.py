@@ -7,12 +7,12 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Mapping
 
-from .audit import AppendOnlyAudit
+from .adapters import AuditStorePort, IdempotencyStorePort
+from .adapters.factory import create_audit_store, create_idempotency_store
 from .auth import Authenticator
 from .capacity import CapacityAdapter, LocalCapacityAdapter, UnconfiguredArmCapacityAdapter
 from .config import Settings
 from .events import AlertEventBuffer
-from .idempotency import IdempotencyStore
 from .knowledge_adapter import KnowledgeAdapter
 from .repository import DemoRepository
 
@@ -26,7 +26,9 @@ for _source in (
         sys.path.insert(0, str(_source))
 
 from optimizer_worker import EnergyDispatchOptimizer, OptimizationError  # noqa: E402
+from optimizer_worker.metrics import record_dispatch_metrics  # noqa: E402
 from scoring_worker import ScoringError, ScoringWorker  # noqa: E402
+from scoring_worker.metrics import record_quality_metrics, record_rul_metrics  # noqa: E402
 
 
 @dataclass
@@ -36,8 +38,8 @@ class BffServices:
     settings: Settings
     repository: DemoRepository
     authenticator: Authenticator
-    audit: AppendOnlyAudit
-    idempotency: IdempotencyStore
+    audit: AuditStorePort
+    idempotency: IdempotencyStorePort
     events: AlertEventBuffer
     capacity: CapacityAdapter
     knowledge: KnowledgeAdapter
@@ -68,8 +70,8 @@ class BffServices:
             settings=settings,
             repository=repository,
             authenticator=Authenticator(settings),
-            audit=AppendOnlyAudit(),
-            idempotency=IdempotencyStore(),
+            audit=create_audit_store(),
+            idempotency=create_idempotency_store(),
             events=AlertEventBuffer(repository.alerts_rows()),
             capacity=capacity,
             knowledge=KnowledgeAdapter(demo_mode=settings.is_demo_mode),
@@ -103,6 +105,8 @@ class BffServices:
                 "riskScore": result["riskScore"],
             },
         )
+        # Emit RUL metrics (side-effect free, no-op when telemetry inactive)
+        record_rul_metrics(result)
         self.forecasts[asset_id] = (dict(result), record.audit_id)
         return dict(result) | {"auditRef": record.audit_id}
 
@@ -124,6 +128,8 @@ class BffServices:
             batches=self.repository.raw_heat_batches(site),
             constraints=constraints,
         )
+        # Emit dispatch metrics (side-effect free, no-op when telemetry inactive)
+        record_dispatch_metrics(result)
         recommendation_id = result["recommendationId"]
         existing = self.recommendations.get(recommendation_id)
         if existing is None:
