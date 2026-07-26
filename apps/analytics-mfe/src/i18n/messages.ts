@@ -1,3 +1,5 @@
+import { COPILOT_CATALOGS } from './copilotMessages'
+
 export type TranslateFn = (key: string, params?: Record<string, string | number>) => string
 
 type Catalog = Record<string, string>
@@ -204,11 +206,11 @@ const ES: Catalog = {
 }
 
 const CATALOGS: Record<string, Catalog> = {
-  en: EN,
-  fr: FR,
-  de: DE,
-  nl: NL,
-  es: ES,
+  en: { ...EN, ...COPILOT_CATALOGS.en },
+  fr: { ...FR, ...COPILOT_CATALOGS.fr },
+  de: { ...DE, ...COPILOT_CATALOGS.de },
+  nl: { ...NL, ...COPILOT_CATALOGS.nl },
+  es: { ...ES, ...COPILOT_CATALOGS.es },
 }
 
 export const SUPPORTED_LANGUAGES = ['en', 'fr', 'de', 'nl', 'es'] as const
@@ -231,7 +233,7 @@ export function createTranslator(locale: string): TranslateFn {
   const language = languageOf(locale)
   const catalog = CATALOGS[language]
   return (key, params) => {
-    const template = catalog[key] ?? EN[key] ?? key
+    const template = catalog[key] ?? CATALOGS.en[key] ?? key
     return interpolate(template, params)
   }
 }

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { AnalyticsDashboard } from './AnalyticsDashboard'
 import { testShellContext } from '../test/renderWithProviders'
 
@@ -29,8 +30,7 @@ describe('AnalyticsDashboard (UI smoke)', () => {
     expect(await screen.findByText(/21-day horizon/i)).toBeInTheDocument()
   })
 
-  it('keeps quality detail requests dormant until a batch is selected', async () => {
-    render(
+  it('keeps quality detail requests dormant until a batch is selected', async () => {    render(
       <AnalyticsDashboard
         context={testShellContext({
           activePersona: 'QualityEngineer',
@@ -42,5 +42,25 @@ describe('AnalyticsDashboard (UI smoke)', () => {
 
     expect(await screen.findByRole('heading', { name: 'Quality', level: 1 })).toBeInTheDocument()
     expect(screen.queryByRole('region', { name: /Batch .* detail/ })).not.toBeInTheDocument()
+  })
+
+  it('docks the Copilot chat beside the dashboard only once it is opened', async () => {
+    const user = userEvent.setup()
+    render(<AnalyticsDashboard context={testShellContext()} emit={() => undefined} />)
+
+    await screen.findByRole('heading', { name: 'Command Center', level: 1 })
+    expect(screen.queryByTestId('copilot-dock')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('copilot-panel')).not.toBeInTheDocument()
+
+    await user.click(screen.getByTestId('copilot-toggle'))
+
+    expect(await screen.findByTestId('copilot-dock')).toBeInTheDocument()
+    expect(await screen.findByTestId('copilot-panel')).toBeInTheDocument()
+    expect(screen.getByText('Enterprise data protection applies to this chat.')).toBeInTheDocument()
+    // The dashboard itself stays mounted inside the dock.
+    expect(await screen.findByRole('heading', { name: 'Command Center', level: 1 })).toBeInTheDocument()
+
+    await user.click(screen.getByTestId('copilot-toggle'))
+    expect(screen.queryByTestId('copilot-dock')).not.toBeInTheDocument()
   })
 })

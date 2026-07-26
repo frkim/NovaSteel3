@@ -15,8 +15,10 @@ import {
 } from '@mui/material'
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayArrow'
 import StopCircleIcon from '@mui/icons-material/Stop'
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import { createNovaSteelTheme, resolveThemeMode } from '../designTokens'
 import { DataClient } from '../api/dataClient'
+import { CopilotClient } from '../api/copilotClient'
 import { AnalyticsContext, type AnalyticsContextValue } from '../context/analytics'
 import { createTranslator } from '../i18n/messages'
 import { resolveSection } from '../personaRoutes'
@@ -24,6 +26,8 @@ import type { MicrofrontendEmitter, ShellContext } from '../types'
 import { resolveScreen } from './screens/screenRegistry'
 import { ErrorBoundary } from './ErrorBoundary'
 import { DemoTour } from './DemoTour'
+import { CopilotDock } from './copilot/CopilotDock'
+import { CopilotPanel } from './copilot/CopilotPanel'
 
 interface AnalyticsDashboardProps {
   context: ShellContext
@@ -33,12 +37,18 @@ interface AnalyticsDashboardProps {
 export function AnalyticsDashboard({ context, emit }: AnalyticsDashboardProps) {
   const theme = useMemo(() => createNovaSteelTheme(context.themeMode), [context.themeMode])
   const [tourOpen, setTourOpen] = useState(false)
+  const [copilotOpen, setCopilotOpen] = useState(false)
 
   const client = useMemo(
     () => new DataClient(context),
     // Recreate only when request-shaping fields change to avoid refetch storms.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [context.bffBaseUrl, context.locale, context.demoMode],
+  )
+  const copilotClient = useMemo(
+    () => new CopilotClient(context),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [context.bffBaseUrl, context.locale],
   )
   const translator = useMemo(() => createTranslator(context.locale), [context.locale])
 
@@ -113,6 +123,16 @@ export function AnalyticsDashboard({ context, emit }: AnalyticsDashboardProps) {
           </Box>
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
             <Chip variant="outlined" size="small" label={section.persona} />
+            <Button
+              size="small"
+              variant={copilotOpen ? 'contained' : 'outlined'}
+              startIcon={<AutoAwesomeIcon />}
+              aria-pressed={copilotOpen}
+              data-testid="copilot-toggle"
+              onClick={() => setCopilotOpen((open) => !open)}
+            >
+              {copilotOpen ? translator('copilot.close') : translator('copilot.title')}
+            </Button>
             {context.demoMode && (
               <Button
                 size="small"
@@ -143,9 +163,29 @@ export function AnalyticsDashboard({ context, emit }: AnalyticsDashboardProps) {
         )}
 
         <AnalyticsContext.Provider value={contextValue}>
-          <ErrorBoundary key={`${section.section}/${tab.slug}`}>
-            <Box component="main">{Screen ? <Screen /> : <MissingScreen title={section.title} />}</Box>
-          </ErrorBoundary>
+          <CopilotDock
+            open={copilotOpen}
+            themeMode={resolveThemeMode(context.themeMode)}
+            workspace={
+              <ErrorBoundary key={`${section.section}/${tab.slug}`}>
+                <Box component="main">
+                  {Screen ? <Screen /> : <MissingScreen title={section.title} />}
+                </Box>
+              </ErrorBoundary>
+            }
+            copilot={
+              <CopilotPanel
+                client={copilotClient}
+                section={section.section}
+                subView={tab.slug}
+                site={context.site}
+                screenTitle={section.title}
+                persona={section.persona}
+                locale={context.locale}
+                onClose={() => setCopilotOpen(false)}
+              />
+            }
+          />
           {context.demoMode && (
             <DemoTour open={tourOpen} onClose={() => setTourOpen(false)} emit={emit} site={context.site} />
           )}

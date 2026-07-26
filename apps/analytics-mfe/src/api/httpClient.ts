@@ -143,4 +143,9 @@ export class HttpClient {
       headers: { 'Content-Type': 'application/json', ...headers },
     })
   }
+
+  /** DELETE returns 204 with an empty body, so callers get `null`. */
+  del(path: string): Promise<null> {
+    return this.request<null>(path, { method: 'DELETE' })
+  }
 }

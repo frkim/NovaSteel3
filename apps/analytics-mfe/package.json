@@ -17,6 +17,7 @@
     "@mui/icons-material": "9.2.0",
     "@mui/material": "9.2.0",
     "d3": "7.9.0",
+    "dockview-react": "7.0.2",
     "react": "19.2.7",
     "react-dom": "19.2.7"
   },
