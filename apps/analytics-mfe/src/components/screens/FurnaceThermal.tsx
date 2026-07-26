@@ -10,7 +10,7 @@ import { DataTable, type DataTableColumn } from '../primitives/DataTable'
 import { Heatmap } from '../charts/Heatmap'
 import { LineChart } from '../charts/LineChart'
 import { ChartContainer } from '../charts/ChartContainer'
-import { KpiBand, PanelCard, SectionStack, TwoColumn } from './common'
+import { KpiBand, PanelCard, SectionStack, TwoColumn, revealPanel } from './common'
 import { formatDateTime, formatNumber, formatTime, msOf } from '../../utils/format'
 import type { KpiCardModel } from '../primitives/KpiCard'
 
@@ -52,10 +52,10 @@ export function FurnaceThermal() {
   )
 
   const metrics: KpiCardModel[] = [
-    { id: 'peak', label: `${selectedZone} peak`, value: formatNumber(Math.max(...matrix.values[zoneIndex]), locale), unit: '°C', trend: 'up', goodDirection: 'down', deltaLabel: 'rising', target: `anomaly ≥ ${ANOMALY_THRESHOLD} °C` },
-    { id: 'slope', label: '6-hour slope', value: '3.4', unit: '°C/h', trend: 'up', goodDirection: 'down', deltaLabel: 'HEARTH-07', target: 'watch trend' },
-    { id: 'anomalies', label: 'Anomaly cells', value: String(anomalies.length), trend: 'up', goodDirection: 'down', target: 'zones × hours' },
-    { id: 'cooling', label: 'Cooling ΔT', value: '9.4', unit: '°C', trend: 'flat', target: 'inlet vs outlet' },
+    { id: 'peak', label: `${selectedZone} peak`, value: formatNumber(Math.max(...matrix.values[zoneIndex]), locale), unit: '°C', trend: 'up', goodDirection: 'down', deltaLabel: 'rising', target: `anomaly ≥ ${ANOMALY_THRESHOLD} °C`, tooltip: '24-hour peak temperature for the selected hearth sector from the thermocouple array; values at or above 700 °C are classified as anomalies and flagged on the heatmap.', onClick: () => revealPanel('thermal-sensor-trend'), actionHint: 'the selected sensor trend chart' },
+    { id: 'slope', label: '6-hour slope', value: '3.4', unit: '°C/h', trend: 'up', goodDirection: 'down', deltaLabel: 'HEARTH-07', target: 'watch trend', tooltip: 'Rate of temperature change for HEARTH-07 over the last six hours, derived from adjacent thermocouple readings; a rising slope corroborated by heat-flux residuals indicates a developing hotspot.', onClick: () => revealPanel('thermal-sensor-trend'), actionHint: 'the selected sensor trend chart' },
+    { id: 'anomalies', label: 'Anomaly cells', value: String(anomalies.length), trend: 'up', goodDirection: 'down', target: 'zones × hours', tooltip: 'Count of zone–hour cells in the 24-hour thermal matrix where temperature meets or exceeds the 700 °C anomaly threshold, aggregated across all hearth sectors.', onClick: () => revealPanel('thermal-anomalies'), actionHint: 'the thermal anomaly table' },
+    { id: 'cooling', label: 'Cooling ΔT', value: '9.4', unit: '°C', trend: 'flat', target: 'inlet vs outlet', tooltip: 'Temperature differential between cooling-circuit inlet and outlet for the primary cooling loop; a rising ΔT indicates reduced heat-removal capacity and should be trended against lining wear.' },
   ]
 
   const anomalyColumns: DataTableColumn<AnomalyRow>[] = [
@@ -87,6 +87,7 @@ export function FurnaceThermal() {
         }
         side={
           <PanelCard
+            id="thermal-sensor-trend"
             title="Selected sensor"
             action={
               <ToggleButtonGroup
@@ -122,7 +123,7 @@ export function FurnaceThermal() {
           </PanelCard>
         }
       />
-      <PanelCard title="Thermal anomalies">
+      <PanelCard id="thermal-anomalies" title="Thermal anomalies">
         <StateBoundary state={telemetryState} isEmpty={() => anomalies.length === 0} emptyMessage="No anomalies detected.">
           {() => (
             <DataTable

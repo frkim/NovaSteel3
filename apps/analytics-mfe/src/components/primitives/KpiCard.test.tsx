@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { fireEvent, screen } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../test/renderWithProviders'
 import { KpiCard, type KpiCardModel } from './KpiCard'
 
@@ -44,5 +44,38 @@ describe('KpiCard', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Why?' }))
 
     expect(onClick).not.toHaveBeenCalled()
+  })
+
+  it('exposes the explanation tooltip on hover and to assistive technology', async () => {
+    const tooltip = 'Remaining useful life of the furnace lining at the P50 confidence level.'
+    renderWithProviders(<KpiCard metric={{ ...metric, tooltip }} />)
+
+    const labelGroup = screen.getByLabelText(`Furnace lining RUL. ${tooltip}`)
+    expect(labelGroup).toBeInTheDocument()
+
+    fireEvent.mouseOver(labelGroup)
+    await waitFor(() => expect(screen.getByRole('tooltip')).toHaveTextContent(tooltip))
+  })
+
+  it('names the drill-down action with its destination', () => {
+    const onClick = vi.fn()
+    renderWithProviders(
+      <KpiCard metric={{ ...metric, onClick, actionHint: 'the lining forecast' }} />,
+    )
+
+    const action = screen.getByRole('button', {
+      name: 'Furnace lining RUL: open the lining forecast',
+    })
+    fireEvent.click(action)
+
+    expect(onClick).toHaveBeenCalledTimes(1)
+  })
+
+  it('stays inert when no drill-down is available', () => {
+    renderWithProviders(<KpiCard metric={metric} />)
+
+    expect(
+      screen.queryByRole('button', { name: /Furnace lining RUL: open/ }),
+    ).not.toBeInTheDocument()
   })
 })

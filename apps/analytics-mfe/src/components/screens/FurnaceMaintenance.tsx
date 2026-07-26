@@ -8,7 +8,7 @@ import { SeverityPill } from '../primitives/SeverityPill'
 import { DataTable, type DataTableColumn } from '../primitives/DataTable'
 import { GanttChart, type GanttTask } from '../charts/GanttChart'
 import { ChartContainer } from '../charts/ChartContainer'
-import { KpiBand, PanelCard, SectionStack } from './common'
+import { KpiBand, PanelCard, SectionStack, revealPanel } from './common'
 import { formatDateTime } from '../../utils/format'
 import type { KpiCardModel } from '../primitives/KpiCard'
 
@@ -30,10 +30,10 @@ export function FurnaceMaintenance() {
   }, [tokens])
 
   const metrics: KpiCardModel[] = [
-    { id: 'open', label: 'Open work orders', value: String((workOrdersState.data ?? []).filter((row) => row.status !== 'COMPLETED').length), target: 'planned + in progress', asOf: workOrdersState.asOf, source: workOrdersState.source },
-    { id: 'urgent', label: 'Urgent', value: '1', trend: 'up', goodDirection: 'down', deltaLabel: 'BF-01', target: 'hearth inspection' },
-    { id: 'window', label: 'Relining window', value: '18–24', unit: 'd', target: 'aligned to RUL P50' },
-    { id: 'completed', label: 'Completed (30d)', value: '7', trend: 'up', goodDirection: 'up', target: 'synthetic history' },
+    { id: 'open', label: 'Open work orders', value: String((workOrdersState.data ?? []).filter((row) => row.status !== 'COMPLETED').length), target: 'planned + in progress', asOf: workOrdersState.asOf, source: workOrdersState.source, tooltip: 'Total count of work orders with status PLANNED or IN_PROGRESS for all furnace assets, sourced from the CMMS integration.', onClick: () => revealPanel('maintenance-work-orders'), actionHint: 'the work order table' },
+    { id: 'urgent', label: 'Urgent', value: '1', trend: 'up', goodDirection: 'down', deltaLabel: 'BF-01', target: 'hearth inspection', tooltip: 'Work orders flagged as urgent due to immediate safety or availability risk; BF-01 hearth inspection (WO-1042) is currently overdue relative to the lining RUL model output.', onClick: () => revealPanel('maintenance-work-orders'), actionHint: 'the work order table' },
+    { id: 'window', label: 'Relining window', value: '18–24', unit: 'd', target: 'aligned to RUL P50', tooltip: 'Planned refractory relining maintenance window in days from today, timed to align with the P50 RUL forecast so the furnace goes offline before the 80% risk threshold is breached.', onClick: () => revealPanel('maintenance-work-orders'), actionHint: 'the maintenance schedule work orders' },
+    { id: 'completed', label: 'Completed (30d)', value: '7', trend: 'up', goodDirection: 'up', target: 'synthetic history', tooltip: 'Work orders closed with status COMPLETED in the rolling 30-day window, drawn from synthetic CMMS history for demo purposes.' },
   ]
 
   const columns: DataTableColumn<WorkOrderRow>[] = [
@@ -55,7 +55,7 @@ export function FurnaceMaintenance() {
       >
         <GanttChart tasks={tasks} height={240} xFormat={(value) => formatDateTime(value, locale, { month: 'short', day: 'numeric' })} />
       </ChartContainer>
-      <PanelCard title="Work orders">
+      <PanelCard id="maintenance-work-orders" title="Work orders">
         <StateBoundary state={workOrdersState} isEmpty={(rows) => rows.length === 0}>
           {(rows) => (
             <DataTable

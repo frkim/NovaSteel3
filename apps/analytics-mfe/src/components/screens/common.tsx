@@ -45,16 +45,18 @@ export function TwoColumn({
 }
 
 export function PanelCard({
+  id,
   title,
   action,
   children,
 }: {
+  id?: string
   title: string
   action?: ReactNode
   children: ReactNode
 }) {
   return (
-    <Card component="section" aria-label={title}>
+    <Card id={id} component="section" aria-label={title} sx={{ scrollMarginTop: 16 }}>
       <CardContent>
         <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
           <Typography variant="h3">{title}</Typography>
@@ -64,6 +66,24 @@ export function PanelCard({
       </CardContent>
     </Card>
   )
+}
+
+/**
+ * Scroll a same-screen detail panel into view for a KPI tile drill-down.
+ * Used when the detail for a metric already lives on the current screen, so
+ * navigating to another tab would lose context.
+ */
+export function revealPanel(id: string) {
+  if (typeof document === 'undefined') {
+    return
+  }
+  const panel = document.getElementById(id)
+  if (!panel) {
+    return
+  }
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  panel.setAttribute('tabindex', '-1')
+  panel.focus({ preventScroll: true })
 }
 
 export function SectionStack({ children }: { children: ReactNode }) {

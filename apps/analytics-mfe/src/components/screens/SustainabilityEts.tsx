@@ -7,7 +7,7 @@ import { StateBoundary } from '../primitives/StateBoundary'
 import { GaugeChart } from '../charts/GaugeChart'
 import { LineChart } from '../charts/LineChart'
 import { ChartContainer } from '../charts/ChartContainer'
-import { KpiBand, PanelCard, SectionStack, TwoColumn } from './common'
+import { KpiBand, PanelCard, SectionStack, TwoColumn, revealPanel } from './common'
 import { formatCurrency, formatNumber } from '../../utils/format'
 import type { KpiCardModel } from '../primitives/KpiCard'
 
@@ -33,10 +33,10 @@ export function SustainabilityEts() {
   const metrics = useMemo<KpiCardModel[]>(() => {
     const price = summaryState.data?.etsAllowancePriceEurTonne ?? 86
     return [
-      { id: 'used', label: 'Allowances used', value: String(USED_PCT), unit: '%', trend: 'up', goodDirection: 'down', target: `cap ${CAP_PCT}%`, asOf: summaryState.asOf, source: summaryState.source },
-      { id: 'price', label: 'ETS price', value: formatCurrency(price, locale), unit: '/t', target: 'market', trend: 'flat' },
-      { id: 'overage', label: 'Projected overage', value: 'Month 5', trend: 'up', goodDirection: 'down', target: `crosses cap ~${OVERAGE_THRESHOLD}%` },
-      { id: 'exposure', label: 'Exposure', value: formatCurrency(248000, locale, 'EUR', { notation: 'compact' }), trend: 'down', goodDirection: 'down', target: 'period forecast' },
+      { id: 'used', label: 'Allowances used', value: String(USED_PCT), unit: '%', trend: 'up', goodDirection: 'down', target: `cap ${CAP_PCT}%`, asOf: summaryState.asOf, source: summaryState.source, tooltip: `Percentage of the period's granted EU ETS allowances committed to date. At ${USED_PCT}%, cumulative use is on track to breach the 100% cap around month 5 at the current burn rate.`, actionHint: 'the allowance gauge', onClick: () => revealPanel('ets-gauge') },
+      { id: 'price', label: 'ETS price', value: formatCurrency(price, locale), unit: '/t', target: 'market', trend: 'flat', tooltip: 'Current EU ETS market allowance price per tonne of CO₂, sourced from the day-ahead market via the BFF. This price drives the period monetary exposure calculation.' },
+      { id: 'overage', label: 'Projected overage', value: 'Month 5', trend: 'up', goodDirection: 'down', target: `crosses cap ~${OVERAGE_THRESHOLD}%`, tooltip: `Forecast month in which cumulative allowance use will cross the 100% period cap at the current burn rate. The ${OVERAGE_THRESHOLD}% guidance threshold triggers early mitigation review.`, actionHint: 'the ETS projection chart', onClick: () => revealPanel('ets-projection') },
+      { id: 'exposure', label: 'Exposure', value: formatCurrency(248000, locale, 'EUR', { notation: 'compact' }), trend: 'down', goodDirection: 'down', target: 'period forecast', tooltip: 'Estimated total period financial exposure from the projected allowance deficit—calculated as modeled overage tonnes × current ETS market price. A synthetic forward estimate, not a financial commitment.' },
     ]
   }, [summaryState.data, summaryState.asOf, summaryState.source, locale])
 
@@ -45,6 +45,7 @@ export function SustainabilityEts() {
       <KpiBand metrics={metrics} />
       <TwoColumn
         main={
+          <div id="ets-projection">
           <ChartContainer
             title="ETS allowance projection"
             summary={`Cumulative allowance use projected to breach the cap around month 5; threshold guidance at ${OVERAGE_THRESHOLD}%.`}
@@ -66,11 +67,12 @@ export function SustainabilityEts() {
               yFormat={(value) => `${formatNumber(value, locale)}%`}
             />
           </ChartContainer>
+          </div>
         }
         side={
           <StateBoundary state={summaryState}>
             {() => (
-              <PanelCard title="Allowances used vs cap">
+              <PanelCard id="ets-gauge" title="Allowances used vs cap">
                 <GaugeChart
                   value={USED_PCT}
                   min={0}

@@ -8,7 +8,7 @@ import { SeverityPill } from '../primitives/SeverityPill'
 import { DataTable, type DataTableColumn } from '../primitives/DataTable'
 import { LineChart } from '../charts/LineChart'
 import { ChartContainer } from '../charts/ChartContainer'
-import { KpiBand, PanelCard, SectionStack } from './common'
+import { KpiBand, PanelCard, SectionStack, revealPanel } from './common'
 import { formatDateTime, formatNumber } from '../../utils/format'
 import type { KpiCardModel } from '../primitives/KpiCard'
 import { QualityBatchDrawer } from './QualityBatchDrawer'
@@ -16,7 +16,7 @@ import { QualityBatchDrawer } from './QualityBatchDrawer'
 const RESULT_RANK: Record<string, number> = { FAIL: 0, REVIEW: 1, PASS: 2 }
 
 export function QualityBatches() {
-  const { client, locale } = useAnalytics()
+  const { client, emit, locale, site } = useAnalytics()
   const tokens = useTokens()
   const batchesState = useResource(() => client.getQualityBatches(), [client])
   const [selected, setSelected] = useState<QualityBatchRow | null>(null)
@@ -27,10 +27,10 @@ export function QualityBatches() {
   }, [batchesState.data])
 
   const metrics: KpiCardModel[] = [
-    { id: 'yield', label: 'High-grade yield', value: '94.8', unit: '%', trend: 'up', goodDirection: 'up', deltaLabel: '+1.2 pts', target: 'target 95%', asOf: batchesState.asOf, source: batchesState.source, sparkline: yieldTrend.map((point) => point.y) },
-    { id: 'firstpass', label: 'First-pass yield', value: '97.1', unit: '%', trend: 'up', goodDirection: 'up', deltaLabel: '+0.6 pts', target: 'target 97%' },
-    { id: 'ncr', label: 'Open NCRs', value: String((batchesState.data ?? []).filter((row) => row.resultStatus !== 'PASS').length), trend: 'down', goodDirection: 'down', target: 'under review' },
-    { id: 'defect', label: 'Defect rate', value: '182', unit: 'ppm', trend: 'down', goodDirection: 'down', deltaLabel: '−12%', target: 'target 170' },
+    { id: 'yield', label: 'High-grade yield', value: '94.8', unit: '%', trend: 'up', goodDirection: 'up', deltaLabel: '+1.2 pts', target: 'target 95%', asOf: batchesState.asOf, source: batchesState.source, sparkline: yieldTrend.map((point) => point.y), tooltip: 'Rolling percentage of production classified as high-grade, derived by inverting the per-batch process risk score; target is 95% per the annual quality agreement.', onClick: () => revealPanel('quality-batches-table'), actionHint: 'the batch table' },
+    { id: 'firstpass', label: 'First-pass yield', value: '97.1', unit: '%', trend: 'up', goodDirection: 'up', deltaLabel: '+0.6 pts', target: 'target 97%', tooltip: 'Percentage of batches that pass the quality inspection on the first attempt without rework, calculated from LIMS records over the rolling production cycle.', onClick: () => revealPanel('quality-batches-table'), actionHint: 'the batch table' },
+    { id: 'ncr', label: 'Open NCRs', value: String((batchesState.data ?? []).filter((row) => row.resultStatus !== 'PASS').length), trend: 'down', goodDirection: 'down', target: 'under review', tooltip: 'Count of open non-conformance records: batches with status REVIEW or FAIL that require corrective action before shipment release.', onClick: () => revealPanel('quality-batches-table'), actionHint: 'the batch table' },
+    { id: 'defect', label: 'Defect rate', value: '182', unit: 'ppm', trend: 'down', goodDirection: 'down', deltaLabel: '−12%', target: 'target 170', tooltip: 'Rolling 30-day defect rate in parts per million across all inspected batches and grades; target is 170 ppm per the customer quality plan.', onClick: () => emit('nav.intent', { route: `/${site}/quality/spc` }), actionHint: 'the SPC control chart' },
   ]
 
   const columns: DataTableColumn<QualityBatchRow>[] = [
@@ -64,7 +64,7 @@ export function QualityBatches() {
           yFormat={(value) => formatNumber(value, locale)}
         />
       </ChartContainer>
-      <PanelCard title="Batches">
+      <PanelCard id="quality-batches-table" title="Batches">
         <StateBoundary state={batchesState} isEmpty={(rows) => rows.length === 0}>
           {(rows) => (
             <DataTable

@@ -6,7 +6,7 @@ import { DataTable, type DataTableColumn } from '../primitives/DataTable'
 import { ControlChart } from '../charts/ControlChart'
 import { ParetoChart } from '../charts/ParetoChart'
 import { ChartContainer } from '../charts/ChartContainer'
-import { KpiBand, PanelCard, SectionStack, TwoColumn } from './common'
+import { KpiBand, PanelCard, SectionStack, TwoColumn, revealPanel } from './common'
 import { formatNumber } from '../../utils/format'
 import type { KpiCardModel } from '../primitives/KpiCard'
 
@@ -36,10 +36,10 @@ export function QualitySpc() {
   }, [pareto])
 
   const metrics: KpiCardModel[] = [
-    { id: 'ooc', label: 'Out-of-control points', value: String(outOfControl), trend: outOfControl > 0 ? 'up' : 'flat', goodDirection: 'down', target: 'I-MR, 3σ limits' },
-    { id: 'cpk', label: 'Process Cpk', value: '1.18', trend: 'up', goodDirection: 'up', target: 'target ≥ 1.33' },
-    { id: 'top', label: 'Top defect share', value: formatNumber(defectRows[0]?.cumulativePct ?? 0, locale), unit: '%', target: 'Pareto 80/20' },
-    { id: 'total', label: 'Defects (30d)', value: String(defectRows.reduce((sum, row) => sum + row.count, 0)), trend: 'down', goodDirection: 'down', target: 'synthetic' },
+    { id: 'ooc', label: 'Out-of-control points', value: String(outOfControl), trend: outOfControl > 0 ? 'up' : 'flat', goodDirection: 'down', target: 'I-MR, 3σ limits', tooltip: 'Count of sample points that breach the ±3σ control limits on the I-MR chart for coiling temperature bias; each violation requires a root-cause investigation per the control plan.', onClick: () => revealPanel('spc-defects-table'), actionHint: 'the defect breakdown table' },
+    { id: 'cpk', label: 'Process Cpk', value: '1.18', trend: 'up', goodDirection: 'up', target: 'target ≥ 1.33', tooltip: 'Process capability index (Cpk) for coiling temperature bias: measures how well the process distribution fits within the specification limits; Cpk ≥ 1.33 is the minimum acceptable standard for high-grade output.' },
+    { id: 'top', label: 'Top defect share', value: formatNumber(defectRows[0]?.cumulativePct ?? 0, locale), unit: '%', target: 'Pareto 80/20', tooltip: 'Share of total 30-day defects attributed to the single highest-frequency defect type; a concentration above 50% indicates a single dominant root cause suitable for targeted corrective action.', onClick: () => revealPanel('spc-defects-table'), actionHint: 'the defect breakdown table' },
+    { id: 'total', label: 'Defects (30d)', value: String(defectRows.reduce((sum, row) => sum + row.count, 0)), trend: 'down', goodDirection: 'down', target: 'synthetic', tooltip: 'Total defect events logged in the quality inspection system over the rolling 30-day window across all product types and production lines.', onClick: () => revealPanel('spc-defects-table'), actionHint: 'the defect table' },
   ]
 
   const columns: DataTableColumn<DefectRow>[] = [
@@ -86,7 +86,7 @@ export function QualitySpc() {
           </ChartContainer>
         }
       />
-      <PanelCard title="Defects">
+      <PanelCard id="spc-defects-table" title="Defects">
         <DataTable
           caption="Defect analytics linked to the Pareto"
           rows={defectRows}

@@ -8,12 +8,12 @@ import { DataTable, type DataTableColumn } from '../primitives/DataTable'
 import { LineChart } from '../charts/LineChart'
 import { BarChart } from '../charts/BarChart'
 import { ChartContainer } from '../charts/ChartContainer'
-import { KpiBand, PanelCard, SectionStack, TwoColumn } from './common'
+import { KpiBand, PanelCard, SectionStack, TwoColumn, revealPanel } from './common'
 import { formatCurrency, formatDateTime, formatNumber, msOf } from '../../utils/format'
 import type { KpiCardModel } from '../primitives/KpiCard'
 
 export function SustainabilityEmissions() {
-  const { client, locale } = useAnalytics()
+  const { client, emit, locale, site } = useAnalytics()
   const tokens = useTokens()
   const emissionsState = useResource(() => client.getEmissions(), [client])
   const summaryState = useResource(() => client.getSustainabilitySummary(), [client])
@@ -29,12 +29,12 @@ export function SustainabilityEmissions() {
     const summary = summaryState.data
     const totalScope2T = summary ? summary.scope2KgCo2e / 1000 : 0
     return [
-      { id: 'co2', label: 'CO₂ (Scope 2)', value: formatNumber(totalScope2T, locale), unit: 't/day', trend: 'down', goodDirection: 'down', deltaLabel: '−2.8%', target: 'target −22%', asOf: summaryState.asOf, source: summaryState.source },
-      { id: 'intensity', label: 'CO₂ / t steel', value: '1.42', unit: 't/t', trend: 'down', goodDirection: 'down', deltaLabel: '−3%', target: 'target 1.35' },
-      { id: 'allowance', label: 'ETS allowances left', value: '71', unit: '%', target: 'period cap', trend: 'flat' },
-      { id: 'exposure', label: 'ETS € exposure', value: summary ? formatCurrency((summary.scope1KgCo2e + summary.scope2KgCo2e) / 1000 * summary.etsAllowancePriceEurTonne, locale, 'EUR', { notation: 'compact' }) : '—', trend: 'down', goodDirection: 'down', target: `€${summary?.etsAllowancePriceEurTonne ?? 86}/t`, asOf: summaryState.asOf, source: summaryState.source },
+      { id: 'co2', label: 'CO₂ (Scope 2)', value: formatNumber(totalScope2T, locale), unit: 't/day', trend: 'down', goodDirection: 'down', deltaLabel: '−2.8%', target: 'target −22%', asOf: summaryState.asOf, source: summaryState.source, tooltip: 'Total Scope 2 (purchased-electricity) CO₂-equivalent emissions for the day, derived from grid carbon intensity × energy consumption across all intervals. Target is −22% vs the prior-year baseline.', actionHint: 'the CO₂ trend chart', onClick: () => revealPanel('co2-trend-chart') },
+      { id: 'intensity', label: 'CO₂ / t steel', value: '1.42', unit: 't/t', trend: 'down', goodDirection: 'down', deltaLabel: '−3%', target: 'target 1.35', tooltip: 'Carbon intensity of production: total Scope 2 CO₂-equivalent tonnes divided by finished steel tonnage. The target of 1.35 t/t tracks operational efficiency improvements across the fleet.', actionHint: 'the emissions ledger', onClick: () => revealPanel('emissions-ledger') },
+      { id: 'allowance', label: 'ETS allowances left', value: '71', unit: '%', target: 'period cap', trend: 'flat', tooltip: 'Remaining EU ETS allowance budget as a percentage of the period cap, based on committed allocations vs granted allowances. Navigate to the ETS exposure tab for the full period projection.', actionHint: 'the ETS exposure tab', onClick: () => emit('nav.intent', { route: `/${site}/sustainability-compliance/ets-exposure` }) },
+      { id: 'exposure', label: 'ETS € exposure', value: summary ? formatCurrency((summary.scope1KgCo2e + summary.scope2KgCo2e) / 1000 * summary.etsAllowancePriceEurTonne, locale, 'EUR', { notation: 'compact' }) : '—', trend: 'down', goodDirection: 'down', target: `€${summary?.etsAllowancePriceEurTonne ?? 86}/t`, asOf: summaryState.asOf, source: summaryState.source, tooltip: "Estimated monetary exposure if today's combined Scope 1 and Scope 2 CO₂ required spot-market ETS allowance purchases at the current market price per tonne.", actionHint: 'the ETS exposure tab', onClick: () => emit('nav.intent', { route: `/${site}/sustainability-compliance/ets-exposure` }) },
     ]
-  }, [summaryState.data, summaryState.asOf, summaryState.source, locale])
+  }, [summaryState.data, summaryState.asOf, summaryState.source, locale, emit, site])
 
   const ledgerColumns: DataTableColumn<EmissionRow>[] = [
     { key: 'eventTs', label: 'Date', type: 'date', render: (row) => formatDateTime(row.eventTs, locale) },
@@ -49,6 +49,7 @@ export function SustainabilityEmissions() {
       <KpiBand metrics={metrics} />
       <TwoColumn
         main={
+          <div id="co2-trend-chart">
           <ChartContainer
             title="CO₂ trend vs target"
             summary="Scope 2 emissions per interval trend below the daily target line after optimized dispatch."
@@ -69,6 +70,7 @@ export function SustainabilityEmissions() {
               yFormat={(value) => formatNumber(value, locale)}
             />
           </ChartContainer>
+          </div>
         }
         side={
           <StateBoundary state={summaryState}>
@@ -92,7 +94,7 @@ export function SustainabilityEmissions() {
           </StateBoundary>
         }
       />
-      <PanelCard title="Emissions ledger (immutable)">
+      <PanelCard id="emissions-ledger" title="Emissions ledger (immutable)">
         <StateBoundary state={emissionsState} isEmpty={(rows) => rows.length === 0}>
           {(rows) => (
             <DataTable

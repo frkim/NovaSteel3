@@ -7,7 +7,7 @@ import type { EnergyRecommendation } from '../../api/domain'
 import { StateBoundary } from '../primitives/StateBoundary'
 import { BarChart } from '../charts/BarChart'
 import { ChartContainer } from '../charts/ChartContainer'
-import { KpiBand, PanelCard, SectionStack, TwoColumn } from './common'
+import { KpiBand, PanelCard, SectionStack, TwoColumn, revealPanel } from './common'
 import { formatCurrency, formatNumber } from '../../utils/format'
 import type { KpiCardModel } from '../primitives/KpiCard'
 
@@ -28,10 +28,10 @@ export function EnergySimulator() {
   }, [maxShift, maxConcurrent])
 
   const metrics: KpiCardModel[] = [
-    { id: 'estimate', label: 'Estimated saving (live)', value: formatNumber(estimatedSavingsPct, locale), unit: '%', trend: 'down', goodDirection: 'up', deltaLabel: 'client estimate', target: 'press Simulate to confirm' },
-    { id: 'server', label: 'Confirmed saving', value: recState.data ? formatNumber(recState.data.savings.costPct, locale) : '—', unit: '%', deltaLabel: recState.data ? formatCurrency(recState.data.savings.costEur, locale) : undefined, target: 'BFF optimizer', asOf: recState.asOf, source: recState.source },
-    { id: 'peak', label: 'Peak reduction', value: recState.data ? formatNumber(recState.data.savings.peakPct, locale) : '—', unit: '%', trend: 'down', goodDirection: 'up', target: 'lower evening peak' },
-    { id: 'violations', label: 'Hard violations', value: recState.data ? String(recState.data.hardConstraintViolations) : '—', trend: 'flat', goodDirection: 'down', target: 'must be 0' },
+    { id: 'estimate', label: 'Estimated saving (live)', value: formatNumber(estimatedSavingsPct, locale), unit: '%', trend: 'down', goodDirection: 'up', deltaLabel: 'client estimate', target: 'press Simulate to confirm', tooltip: 'Instant client-side estimate updated as you move the sliders, using a linear heuristic (shift-window factor × concurrency factor). Press Simulate schedule to replace this with the BFF MILP-optimized result.', actionHint: 'the baseline vs optimized chart', onClick: () => revealPanel('simulator-chart') },
+    { id: 'server', label: 'Confirmed saving', value: recState.data ? formatNumber(recState.data.savings.costPct, locale) : '—', unit: '%', deltaLabel: recState.data ? formatCurrency(recState.data.savings.costEur, locale) : undefined, target: 'BFF optimizer', asOf: recState.asOf, source: recState.source, tooltip: 'MILP-optimized (PuLP/CBC) cost saving confirmed by the BFF for the last submitted scenario, reported on a whole-dispatch basis. The demo scenario yields 7.25% (€2,688.7) whole-dispatch; the flexible-only portion is 21.74%.', actionHint: 'the baseline vs optimized chart', onClick: () => revealPanel('simulator-chart') },
+    { id: 'peak', label: 'Peak reduction', value: recState.data ? formatNumber(recState.data.savings.peakPct, locale) : '—', unit: '%', trend: 'down', goodDirection: 'up', target: 'lower evening peak', tooltip: 'Reduction in peak electrical demand achieved by shifting flexible batches away from high-price hours. In the demo scenario, peak falls from 56.0 to 51.58 MW (−7.89%).', actionHint: 'the baseline vs optimized chart', onClick: () => revealPanel('simulator-chart') },
+    { id: 'violations', label: 'Hard violations', value: recState.data ? String(recState.data.hardConstraintViolations) : '—', trend: 'flat', goodDirection: 'down', target: 'must be 0', tooltip: 'Count of MILP hard constraints violated in the last simulation—must be zero for a feasible schedule. Hard constraints include tonnage conservation (960.0 t) and batch-window feasibility.' },
   ]
 
   return (
@@ -39,6 +39,7 @@ export function EnergySimulator() {
       <KpiBand metrics={metrics} />
       <TwoColumn
         main={
+          <div id="simulator-chart">
           <StateBoundary state={recState}>
             {(rec: EnergyRecommendation) => (
               <ChartContainer
@@ -70,6 +71,7 @@ export function EnergySimulator() {
               </ChartContainer>
             )}
           </StateBoundary>
+          </div>
         }
         side={
           <PanelCard title="Scenario controls">

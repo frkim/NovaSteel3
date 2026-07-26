@@ -10,14 +10,14 @@ import { SeverityPill } from '../primitives/SeverityPill'
 import { DataTable, type DataTableColumn } from '../primitives/DataTable'
 import { LineChart } from '../charts/LineChart'
 import { ChartContainer } from '../charts/ChartContainer'
-import { KpiBand, PanelCard, SectionStack, TwoColumn } from './common'
+import { KpiBand, PanelCard, SectionStack, TwoColumn, revealPanel } from './common'
 import { formatDateTime, formatNumber } from '../../utils/format'
 import type { KpiCardModel } from '../primitives/KpiCard'
 
 const SEVERITY_RANK: Record<string, number> = { CRITICAL: 0, WARNING: 1, INFO: 2 }
 
 export function Operations() {
-  const { client, locale } = useAnalytics()
+  const { client, emit, locale, site } = useAnalytics()
   const tokens = useTokens()
   const alertsState = useResource(() => client.getAlerts(), [client])
   usePolling(alertsState.reload, 10000)
@@ -33,11 +33,11 @@ export function Operations() {
   const target = useMemo(() => throughput.map((point) => ({ x: point.x, y: 130 })), [throughput])
 
   const metrics: KpiCardModel[] = [
-    { id: 'throughput', label: 'Throughput', value: '128.4', unit: 't/h', trend: 'up', goodDirection: 'up', deltaLabel: '+3.2%', target: 'target 130 t/h', sparkline: throughput.map((point) => point.y) },
-    { id: 'oee', label: 'OEE', value: '84.1', unit: '%', trend: 'up', goodDirection: 'up', deltaLabel: '+0.8 pts', target: 'target 85%' },
-    { id: 'alerts', label: 'Active alerts', value: String(alertsState.data?.length ?? 0), deltaLabel: `${(alertsState.data ?? []).filter((a) => a.severity === 'CRITICAL').length} critical`, trend: 'flat', target: 'triage now', asOf: alertsState.asOf, source: alertsState.source },
-    { id: 'energy', label: 'Energy intensity', value: '312', unit: '€/t', trend: 'down', goodDirection: 'down', deltaLabel: '−4.1%', target: 'target 300' },
-    { id: 'ontime', label: 'On-time', value: '96.4', unit: '%', trend: 'up', goodDirection: 'up', deltaLabel: '+0.4 pts', target: 'target 97%' },
+    { id: 'throughput', label: 'Throughput', value: '128.4', unit: 't/h', trend: 'up', goodDirection: 'up', deltaLabel: '+3.2%', target: 'target 130 t/h', sparkline: throughput.map((point) => point.y), tooltip: 'Rolling average crude steel throughput in tonnes per hour for the current 8-hour shift window, sourced from the rolling-mill weighbridge telemetry. Target is 130 t/h.' },
+    { id: 'oee', label: 'OEE', value: '84.1', unit: '%', trend: 'up', goodDirection: 'up', deltaLabel: '+0.8 pts', target: 'target 85%', tooltip: 'Overall Equipment Effectiveness — product of Availability, Performance, and Quality ratios for the current shift window. Sourced from the MES machine-event stream; target is 85%.' },
+    { id: 'alerts', label: 'Active alerts', value: String(alertsState.data?.length ?? 0), deltaLabel: `${(alertsState.data ?? []).filter((a) => a.severity === 'CRITICAL').length} critical`, trend: 'flat', target: 'triage now', asOf: alertsState.asOf, source: alertsState.source, tooltip: 'Number of currently open alerts across all severities for this site, polled every 10 seconds. The critical count is shown separately.', actionHint: 'the alerts table', onClick: () => revealPanel('ops-alerts') },
+    { id: 'energy', label: 'Energy intensity', value: '312', unit: '€/t', trend: 'down', goodDirection: 'down', deltaLabel: '−4.1%', target: 'target 300', tooltip: 'Rolling cost of energy per tonne of steel produced in euros per tonne, measured across the current shift window. Sourced from meter readings combined with the real-time spot price.', actionHint: 'the spot-price schedule', onClick: () => emit('nav.intent', { route: `/${site}/energy-optimization/spot-price-schedule` }) },
+    { id: 'ontime', label: 'On-time', value: '96.4', unit: '%', trend: 'up', goodDirection: 'up', deltaLabel: '+0.4 pts', target: 'target 97%', tooltip: 'Percentage of planned coil orders delivered on schedule in the current rolling 24-hour window, measured against the production plan timestamps. Target is 97%.' },
   ]
 
   const columns: DataTableColumn<AlertRow>[] = [
@@ -96,7 +96,7 @@ export function Operations() {
           </PanelCard>
         }
       />
-      <PanelCard title="Alerts & incidents">
+      <PanelCard id="ops-alerts" title="Alerts & incidents">
         <StateBoundary state={alertsState} isEmpty={(rows) => rows.length === 0}>
           {(rows) => (
             <DataTable

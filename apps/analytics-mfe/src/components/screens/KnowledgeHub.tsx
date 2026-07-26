@@ -11,7 +11,7 @@ import { StateBoundary } from '../primitives/StateBoundary'
 import { SeverityPill } from '../primitives/SeverityPill'
 import { DataTable, type DataTableColumn } from '../primitives/DataTable'
 import { ProgressBullet } from '../charts/ProgressBullet'
-import { KpiBand, PanelCard, SectionStack, TwoColumn } from './common'
+import { KpiBand, PanelCard, SectionStack, TwoColumn, revealPanel } from './common'
 import type { KpiCardModel } from '../primitives/KpiCard'
 
 function statusSeverity(status: string): string {
@@ -39,10 +39,10 @@ export function KnowledgeHub() {
   const coverage = useMemo(() => knowledgeCoverage(), [])
 
   const metrics: KpiCardModel[] = [
-    { id: 'approved', label: 'Approved procedures', value: String(procedures.filter((row) => row.status === 'APPROVED').length), target: 'published only', asOf: proceduresState.asOf, source: proceduresState.source },
-    { id: 'review', label: 'In review', value: String(procedures.filter((row) => row.status === 'IN_REVIEW').length), trend: 'up', goodDirection: 'up', target: 'publisher action' },
-    { id: 'coverage', label: 'Coverage', value: String(Math.round(coverage.reduce((sum, item) => sum + item.coveragePct, 0) / coverage.length)), unit: '%', trend: 'up', goodDirection: 'up', target: 'target 80%' },
-    { id: 'sessions', label: 'Capture sessions', value: '3', target: 'consent-bound', trend: 'flat' },
+    { id: 'approved', label: 'Approved procedures', value: String(procedures.filter((row) => row.status === 'APPROVED').length), target: 'published only', asOf: proceduresState.asOf, source: proceduresState.source, tooltip: 'Count of procedures in APPROVED status—reviewed by a domain expert and published to the knowledge library. Only approved procedures are surfaced to operators during production.', actionHint: 'the procedure cards', onClick: () => revealPanel('knowledge-procedures') },
+    { id: 'review', label: 'In review', value: String(procedures.filter((row) => row.status === 'IN_REVIEW').length), trend: 'up', goodDirection: 'up', target: 'publisher action', tooltip: 'Count of procedures currently in IN_REVIEW status, awaiting expert sign-off before publication. Users with the knowledge.publish capability can approve directly from the procedure card.', actionHint: 'the procedure cards', onClick: () => revealPanel('knowledge-procedures') },
+    { id: 'coverage', label: 'Coverage', value: String(Math.round(coverage.reduce((sum, item) => sum + item.coveragePct, 0) / coverage.length)), unit: '%', trend: 'up', goodDirection: 'up', target: 'target 80%', tooltip: 'Average knowledge-capture completeness across all operational domains, each targeting 80%. Computed from the fixture-derived domain coverage matrix.', actionHint: 'the capture completeness chart', onClick: () => revealPanel('capture-completeness') },
+    { id: 'sessions', label: 'Capture sessions', value: '3', target: 'consent-bound', trend: 'flat', tooltip: 'Number of expert interview capture sessions active or recently completed. Sessions are consent-bound and progress through speech-to-text, DRAFT review, and expert approval before publication.', actionHint: 'the interview capture status', onClick: () => revealPanel('capture-status') },
   ]
 
   const columns: DataTableColumn<ProcedureRow>[] = [
@@ -74,7 +74,7 @@ export function KnowledgeHub() {
       />
       <TwoColumn
         main={
-          <PanelCard title="Procedure cards">
+          <PanelCard id="knowledge-procedures" title="Procedure cards">
             <StateBoundary state={proceduresState} isEmpty={(rows) => rows.length === 0} emptyMessage="No procedures match your search.">
               {(rows) => (
                 <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))' }}>
@@ -117,7 +117,7 @@ export function KnowledgeHub() {
         }
         side={
           <Stack spacing={2}>
-            <PanelCard title="Capture completeness">
+            <PanelCard id="capture-completeness" title="Capture completeness">
               <ProgressBullet
                 items={coverage.map((item, index) => ({
                   label: item.domain,
@@ -127,7 +127,7 @@ export function KnowledgeHub() {
                 }))}
               />
             </PanelCard>
-            <PanelCard title="Interview capture status">
+            <PanelCard id="capture-status" title="Interview capture status">
               <Stack spacing={1}>
                 {[
                   { id: 'OP-DEMO-014', status: 'Transcript ready · DRAFT — expert review required', tone: 'WARNING' },

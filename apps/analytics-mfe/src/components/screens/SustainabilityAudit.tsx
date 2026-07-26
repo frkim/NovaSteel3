@@ -3,7 +3,7 @@ import { useResource } from '../../hooks/useResource'
 import type { AuditRow } from '../../api/domain'
 import { StateBoundary } from '../primitives/StateBoundary'
 import { DataTable, type DataTableColumn } from '../primitives/DataTable'
-import { KpiBand, PanelCard, SectionStack } from './common'
+import { KpiBand, PanelCard, SectionStack, revealPanel } from './common'
 import { formatDateTime } from '../../utils/format'
 import type { KpiCardModel } from '../primitives/KpiCard'
 
@@ -13,10 +13,10 @@ export function SustainabilityAudit() {
 
   const rows = auditState.data ?? []
   const metrics: KpiCardModel[] = [
-    { id: 'records', label: 'Decision records', value: String(rows.length), target: 'append-only', asOf: auditState.asOf, source: auditState.source },
-    { id: 'domains', label: 'Domains covered', value: String(new Set(rows.map((row) => row.domain)).size), target: 'energy, furnace, quality…' },
-    { id: 'models', label: 'Model-linked', value: String(rows.filter((row) => row.modelVersion).length), target: 'input→model→decision' },
-    { id: 'immutable', label: 'Immutability', value: '100%', trend: 'flat', target: 'no inline edit' },
+    { id: 'records', label: 'Decision records', value: String(rows.length), target: 'append-only', asOf: auditState.asOf, source: auditState.source, tooltip: 'Total count of immutable AI decision records logged in the append-only audit store. Each record captures actor, action, domain, entity, and model version for full regulatory traceability.', actionHint: 'the audit evidence table', onClick: () => revealPanel('audit-evidence') },
+    { id: 'domains', label: 'Domains covered', value: String(new Set(rows.map((row) => row.domain)).size), target: 'energy, furnace, quality…', tooltip: 'Number of distinct operational domains (e.g. energy, furnace, quality) that have at least one audited AI-assisted decision in the current log.', actionHint: 'the audit evidence table', onClick: () => revealPanel('audit-evidence') },
+    { id: 'models', label: 'Model-linked', value: String(rows.filter((row) => row.modelVersion).length), target: 'input→model→decision', tooltip: 'Count of audit records that include a model version reference, enabling input → model → decision traceability. Records without a model version represent rule-based or human decisions.', actionHint: 'the audit evidence table', onClick: () => revealPanel('audit-evidence') },
+    { id: 'immutable', label: 'Immutability', value: '100%', trend: 'flat', target: 'no inline edit', tooltip: 'Confirms that all audit records are append-only: the BFF API enforces no inline edit or delete. Records are written exactly once at the moment of decision and cannot be altered.' },
   ]
 
   const columns: DataTableColumn<AuditRow>[] = [
@@ -33,7 +33,7 @@ export function SustainabilityAudit() {
   return (
     <SectionStack>
       <KpiBand metrics={metrics} />
-      <PanelCard title="Audit & decision evidence (read-only)">
+      <PanelCard id="audit-evidence" title="Audit & decision evidence (read-only)">
         <StateBoundary state={auditState} isEmpty={(data) => data.length === 0}>
           {(data) => (
             <DataTable

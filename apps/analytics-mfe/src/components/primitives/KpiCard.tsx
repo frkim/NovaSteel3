@@ -1,7 +1,9 @@
 import type { MouseEvent } from 'react'
-import { Box, Card, CardActionArea, CardContent, Stack, Typography } from '@mui/material'
+import { Box, Card, CardActionArea, CardContent, Stack, Tooltip, Typography } from '@mui/material'
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import RemoveIcon from '@mui/icons-material/Remove'
 import type { DataSource } from '../../api/domain'
 import type { Driver } from '../../api/envelope'
@@ -30,6 +32,10 @@ export interface KpiCardModel {
   asOf?: string | null
   source?: DataSource | null
   why?: KpiWhy
+  /** Plain-language explanation of what the metric means and how it is derived. */
+  tooltip?: string
+  /** What clicking the tile opens, e.g. "the spot-price schedule". */
+  actionHint?: string
   onClick?: () => void
 }
 
@@ -68,6 +74,12 @@ export function KpiCard({ metric }: KpiCardProps) {
             </Typography>
           </Stack>
         )}
+        {metric.onClick && (
+          <ChevronRightIcon
+            aria-hidden
+            sx={{ color: 'primary.main', fontSize: '1.1rem', ml: 'auto', opacity: 0.85 }}
+          />
+        )}
       </Stack>
 
       {metric.sparkline && metric.sparkline.length > 1 && (
@@ -94,14 +106,51 @@ export function KpiCard({ metric }: KpiCardProps) {
     </>
   )
 
+  const labelText = (
+    <Typography color="text.secondary" variant="body2" sx={{ fontWeight: 600 }}>
+      {metric.label}
+    </Typography>
+  )
+
+  const label = metric.tooltip ? (
+    <Tooltip title={metric.tooltip} placement="top-start" arrow enterDelay={200} describeChild>
+      <Stack
+        component="span"
+        direction="row"
+        spacing={0.5}
+        tabIndex={0}
+        aria-label={`${metric.label}. ${metric.tooltip}`}
+        sx={{ alignItems: 'center', cursor: 'help', minWidth: 0 }}
+      >
+        {labelText}
+        <InfoOutlinedIcon aria-hidden sx={{ fontSize: '0.95rem', flexShrink: 0, opacity: 0.6 }} />
+      </Stack>
+    </Tooltip>
+  ) : (
+    labelText
+  )
+
+  const actionArea = (
+    <CardActionArea
+      aria-label={`${metric.label}: open ${metric.actionHint ?? 'details'}`}
+      sx={{ alignItems: 'stretch', flex: 1, justifyContent: 'flex-start', textAlign: 'left' }}
+      onClick={(event: MouseEvent) => {
+        event.preventDefault()
+        metric.onClick?.()
+      }}
+    >
+      <Stack sx={{ height: '100%', width: '100%' }} spacing={0.5}>
+        {details}
+      </Stack>
+    </CardActionArea>
+  )
+
   return (
     <Card component="article" aria-label={metric.label} sx={{ height: '100%' }}>
       <CardContent sx={{ height: '100%' }}>
         <Stack sx={{ height: '100%' }} spacing={0.5}>
           <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-            <Typography color="text.secondary" variant="body2" sx={{ fontWeight: 600 }}>
-              {metric.label}
-            </Typography>
+            {label}
             {metric.why && (
               <WhyPopover
                 modelVersion={metric.why.modelVersion}
@@ -113,17 +162,13 @@ export function KpiCard({ metric }: KpiCardProps) {
           </Stack>
 
           {metric.onClick ? (
-            <CardActionArea
-              sx={{ alignItems: 'stretch', flex: 1, justifyContent: 'flex-start', textAlign: 'left' }}
-              onClick={(event: MouseEvent) => {
-                event.preventDefault()
-                metric.onClick?.()
-              }}
-            >
-              <Stack sx={{ height: '100%', width: '100%' }} spacing={0.5}>
-                {details}
-              </Stack>
-            </CardActionArea>
+            metric.actionHint ? (
+              <Tooltip title={`Open ${metric.actionHint}`} placement="bottom" enterDelay={400}>
+                {actionArea}
+              </Tooltip>
+            ) : (
+              actionArea
+            )
           ) : (
             details
           )}
