@@ -287,11 +287,11 @@ Use UCUM codes where possible: `Cel`, `bar`, `m3/h`, `kW/m2`, `MW`, `MWh`, `EUR/
   "asset_id": "LUX-BF-01",
   "component_id": "HEARTH-SECTOR-07",
   "prediction": {
-    "remaining_useful_life_days_p50": 21.0,
-    "remaining_useful_life_days_p10": 16.8,
-    "remaining_useful_life_days_p90": 27.5,
+    "remaining_useful_life_days_p50": 19.65,
+    "remaining_useful_life_days_p10": 18.69,
+    "remaining_useful_life_days_p90": 20.61,
     "estimated_minimum_lining_mm": 344,
-    "risk_score": 0.87,
+    "risk_score": 0.8995,
     "severity": "HIGH"
   },
   "top_factors": [
@@ -431,7 +431,7 @@ At a deterministic simulated time, a day-ahead scarcity interval raises spot pri
 - reduces modeled peak demand without changing total finished tonnage;
 - reports savings separately from tariff and carbon effects.
 
-Expected demo result: 8-13% energy-cost reduction for the displayed planning horizon, 3-7% peak-demand reduction, and no violated production or quality constraint. These are scenario results, not promises of realized production savings.
+Expected demo result: 7.25% energy-cost reduction (whole-dispatch basis), 3.29% CO₂ reduction, 7.89% peak-demand reduction (baseline 56.0 → optimized 51.58 MW), equal tonnage (960 t conserved), and no violated production or quality constraint. These are scenario results, not promises of realized production savings. Flexible-load-only figures (21.74% cost / 31.71% CO₂) are available in the API for transparency but must not be quoted as headlines.
 
 ### 8.3 Quality drift
 

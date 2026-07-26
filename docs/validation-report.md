@@ -4,8 +4,10 @@
 > **Scope:** documentation, runnable local demonstration, source contracts,
 > simulator, application, IaC, Fabric assets, presentation, and supply-chain
 > gates.  
-> **Deployment status:** local deterministic validation only; no cloud tenant
-> resources are deployed.
+> **Deployment status:** deployed live to Azure Sweden Central (resource group
+> `rg-novasteelv3-demo-sc`); passes 66/66 automated live API checks. Offline
+> deterministic path retained as fallback. Production tenant hardening (real
+> plant data, DPO sign-off, security review) is not yet complete.
 
 ## Result summary
 
@@ -39,8 +41,8 @@ under [`artifacts\demo-validation`](../artifacts/demo-validation/):
 | Evidence | Verified result |
 |---|---|
 | Persona/demo driver | 66/66 checks passed across DM-1…DM-6, telemetry, tables, authorization, audit, and simulated capacity lifecycle |
-| Furnace RUL | P10/P50/P90 = 16.8/21.0/27.5 days; risk 0.87 HIGH; synthetic work order `WO-DEMO-LUX-1042` |
-| Energy | 280 EUR/MWh peak; 960 = 960 tonnes; zero hard violations; 9.94% modeled cost reduction |
+| Furnace RUL | P10/P50/P90 = 18.69/19.65/20.61 days; risk 0.8995 HIGH; confidence 0.78; synthetic work order `WO-DEMO-LUX-1042` |
+| Energy | 280 EUR/MWh peak; 960 = 960 tonnes; zero hard violations; 7.25% modeled cost reduction; 3.29% CO₂; 7.89% peak (56.0→51.58 MW) |
 | Quality | Full genealogy and bounded prediction 88% → 95%; no operational write |
 | Knowledge | Consent, transcript confidence/speaker data, draft-only agent output, human approval, approved-search result |
 | Determinism | Two independent generations and BFF re-runs matched; fixture checksum/tamper protection passed |

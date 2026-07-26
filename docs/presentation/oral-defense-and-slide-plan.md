@@ -208,14 +208,14 @@ Legend used throughout:
 - **Visual:** Hearth thermal map with sector 07 warming; a P10/P50/P90 RUL fan chart; a driver bar (heat-flux slope, spatial contrast, cooling residual).
 - **On-slide content:**
   - Physics-informed model on silver thermal/cooling features → feature snapshot → RUL
-  - 🔬 **EVIDENCE (synthetic scenario):** P50 **21.0 d**, P10 **16.8**, P90 **27.5**, risk **0.87**, `HIGH`
+  - 🔬 **EVIDENCE (synthetic scenario):** P50 **~20 d** (19.65), P10 **18.69**, P90 **20.61**, risk **0.90**, confidence **0.78**, `HIGH`
   - Explains itself: heat-flux 6h slope, spatial temperature contrast, cooling-efficiency residual
   - Advisory only → acknowledge → **linked CMMS work order** → no furnace actuation
   - Pilot scoring is **daily**; near-real-time is a measured later enhancement, not an MVP claim
-- **Speaker notes:** "This is the capability that turns an eight-million-euro surprise into a planned intervention. The model is physics-informed — it isn't a black box fitting noise; it's constrained by heat-flux and cooling physics. On our synthetic warning scenario it estimates a P50 remaining life of twenty-one days with a P10 of about seventeen and a P90 of about twenty-eight — I always show the band, never the point alone — and it explains itself with three drivers. The engineer stays accountable: they acknowledge the alert and it links to a CMMS work order recommending inspection and ultrasound. The platform does not touch the furnace. And note the honesty: pilot scoring is daily; I'm not promising real-time inference as an MVP feature."
-- 🛈 **SOURCE CUE:** solution-architecture.md §4.2; demo-runbook.md §5 (cue: P50 21.0/P10 16.8/P90 27.5/risk 0.87); solution-requirements.md FR-FUR; synthetic-data-and-simulators.md §8.1.
-- **Anticipated objection:** *"Is 21 days validated?"* → "It's the calibrated output of a deterministic synthetic scenario — evidence the mechanics and uncertainty work. Twenty-one days as a *fleet-wide guarantee* is a target requiring pilot validation against real relines."
-- ⛑ **FALLBACK:** none on slide; the *demo* equivalent falls back to saved alert JSON (ensure P10 < 21 < P90, risk ≥ 0.80).
+- **Speaker notes:** "This is the capability that turns an eight-million-euro surprise into a planned intervention. The model is physics-informed — it isn't a black box fitting noise; it's constrained by heat-flux and cooling physics. On our synthetic warning scenario it estimates a P50 remaining life of about twenty days with a tight band — P10 about nineteen, P90 about twenty-one — and it explains itself with three drivers. The model confidence is zero-point-seven-eight from an r-squared of zero-point-eight-eight. The engineer stays accountable: they acknowledge the alert and it links to a CMMS work order recommending inspection and ultrasound. The platform does not touch the furnace. And note the honesty: pilot scoring is daily; I'm not promising real-time inference as an MVP feature."
+- 🛈 **SOURCE CUE:** solution-architecture.md §4.2; demo-runbook.md §5 (cue: P50 19.65/P10 18.69/P90 20.61/risk 0.8995); solution-requirements.md FR-FUR; synthetic-data-and-simulators.md §8.1.
+- **Anticipated objection:** *"Is 21 days validated?"* → "The measured P50 on this scenario is about twenty days — close to the target, not exactly it. Twenty-one days as a fleet-wide guarantee is the target requiring pilot validation across many relines. The model gives an actionable advance warning in the right order of magnitude and, critically, with a confidence estimate."
+- ⛑ **FALLBACK:** none on slide; the *demo* equivalent falls back to saved alert JSON (ensure risk ≥ 0.80, confidence ≥ 0.70, P50 ≈ 19.65).
 
 ### Slide 13 — Deep dive: energy dispatch optimization
 - **Duration:** 1:30 · **Running clock:** 18:15 → 19:45
@@ -224,9 +224,9 @@ Legend used throughout:
 - **On-slide content:**
   - Inputs: day-ahead price + grid carbon intensity + production/maintenance constraints
   - Deterministic optimizer moves **only eligible flexible loads**; preserves soak times, delivery, capacity, planned tonnage
-  - 🔬 **EVIDENCE (synthetic):** 280 EUR/MWh peak → **8–13%** modeled energy-cost cut, **3–7%** lower peak, **equal tonnage, zero hard-constraint violations**
+  - 🔬 **EVIDENCE (synthetic):** 280 EUR/MWh peak → **7.25%** modeled energy-cost cut, **7.89%** lower peak (56.0→51.58 MW), **3.29%** CO₂ reduction, **equal tonnage (960 t)**, zero hard-constraint violations
   - Human accepts / modifies / **rejects with reason code**; realized savings tracked in an auditable ledger
-- **Speaker notes:** "Energy is the fastest payback. Tomorrow evening has a scarcity peak at two-hundred-eighty euros a megawatt-hour. The optimizer shifts only *eligible* reheat batches — the urgent automotive coil stays fixed — and it never silently relaxes a hard production constraint. On this synthetic horizon that's an eight-to-thirteen-percent modeled energy-cost reduction and a lower peak, with identical planned tonnage and zero hard-constraint violations. That range is modeled scenario evidence, not banked savings — realized savings are tracked separately in an auditable ledger, which is how the fourteen-percent target eventually gets *proven* rather than asserted."
+- **Speaker notes:** "Energy is the fastest payback. Tomorrow evening has a scarcity peak at two-hundred-eighty euros a megawatt-hour. The optimizer shifts one eligible reheat batch by a hundred-and-twenty minutes — the urgent automotive coil stays fixed — and it never silently relaxes a hard production constraint. On this synthetic horizon that's a seven-point-two-five-percent modeled energy-cost reduction, a seven-point-nine-percent peak reduction from fifty-six to fifty-one-point-six megawatts, and three-point-three-percent CO₂ reduction — all on the whole-dispatch basis with identical planned tonnage at nine-sixty tonnes and zero hard-constraint violations. Those are single-scenario evidence, not banked savings — realized savings are tracked separately in an auditable ledger, which is how the fourteen-percent annual target eventually gets *proven* rather than asserted."
 - 🛈 **SOURCE CUE:** solution-architecture.md §4.2; demo-runbook.md §5; solution-requirements.md FR-ENE; synthetic-data-and-simulators.md §8.2.
 - ⛑ **FALLBACK:** demo reveals cached feasible result after ≤5 s; never leave a solver spinner visible.
 
@@ -342,8 +342,8 @@ The demo is executed strictly per [demo-runbook.md](../demo/demo-runbook.md) §4
 | Demo minute (runbook §4) | Tab / action | Bridge line connecting to the slides |
 |---|---|---|
 | 00:00–02:00 | Plant Manager → Fabric Core | "Slide 8's map, now live: one fleet view, and behind it the Fabric core with bronze-silver-gold lineage from Slide 10." |
-| 02:00–04:30 | Demo Control → Energy Manager | "We're accelerating *time*, not fabricating UI. Slide 13: only eligible loads move; eight-to-thirteen-percent modeled cost cut; zero hard-constraint violations; no production schedule write." |
-| 04:30–07:00 | Reliability Engineer → RUL alert and synthetic work order | "This is Slide 12 live. Watch the band: P50 twenty-one days, P10 seventeen, P90 twenty-eight — evidence, not a guarantee. Advisory only; no furnace actuation." |
+| 02:00–04:30 | Demo Control → Energy Manager | "We're accelerating *time*, not fabricating UI. Slide 13: only eligible loads move; seven-point-two-five-percent modeled cost cut; peak down from fifty-six to fifty-one-point-six megawatts; tonnage conserved; zero hard-constraint violations; no production schedule write." |
+| 04:30–07:00 | Reliability Engineer → RUL alert and synthetic work order | "This is Slide 12 live. Watch the band: P50 about twenty days, P10 nineteen, P90 twenty-one — a tight, confident prediction. Advisory only; no furnace actuation." |
 | 07:00–09:30 | Quality Engineer → what-if | "Slide 14: genealogy heat-by-heat, predicted yield eighty-eight to ninety-five percent, no recipe write-back." |
 | 09:30–12:00 | Operator Knowledge | "Slide 15: consented synthetic interview, cited draft, stays DRAFT until a human approves." |
 | 12:00–14:00 | Plant Manager / Sustainability / Executive → ETS, ROI, audit | "The targets are not banked savings; this is the semantic-model and audit evidence that makes them measurable." |
@@ -352,7 +352,7 @@ The demo is executed strictly per [demo-runbook.md](../demo/demo-runbook.md) §4
 ### 3.3 Backup / fallback transitions during the demo
 Use the runbook's binding fallback ladder — **live cloud → local deterministic replay → cached interactive → recorded flow → static proof pack** — and **never diagnose for more than 10 seconds** on screen (runbook §6, §8). Spoken bridges (memorize):
 - No live events → "I'll switch to our deterministic replay so we keep the same event sequence."
-- Model endpoint slow → "For a predictable demo we cache the signed result from this exact seed." (Ensure P10 < 21 < P90, risk ≥ 0.80.)
+- Model endpoint slow → "For a predictable demo we cache the signed result from this exact seed." (Ensure risk ≥ 0.80 and confidence ≥ 0.70.)
 - Optimizer infeasible → "The platform never relaxes hard production constraints silently — here's the known feasible result and its constraint table."
 - STT fails → "We support offline replay; the review workflow is unchanged." (Play WAV, else paste approved transcript.)
 - Value out of expected band → stop the stream, load the manifest result: "The live run differs from the rehearsed seed, so I'm switching to the validated scenario."
@@ -398,7 +398,7 @@ Rehearse against these hard gates; if a checkpoint slips by more than ~30 s, cut
 | Four headline outcomes (14/22/21/8) | usecase.md; solution-requirements.md §4, §13 | Always **TARGET**; baselines quoted make them falsifiable |
 | Fabric-centered architecture, ADRs | solution-architecture.md §3, §10 | Architecture facts |
 | Ingestion, identity, quarantine | solution-architecture.md §4.1, ADR-005; deployment-topology.md §3 | Architecture facts |
-| Live scenario numbers (RUL 21/16.8/27.5, energy 8–13%, quality 88→95%) | demo-runbook.md §5; synthetic-data-and-simulators.md §8 | Always **EVIDENCE** (synthetic, reproducible) |
+| Live scenario numbers (RUL ~20/18.7/20.6, energy 7.25%, CO₂ 3.29%, peak 7.89%, quality 88→95%) | demo-runbook.md §5; synthetic-data-and-simulators.md §8 | Always **EVIDENCE** (synthetic, reproducible) |
 | RAI / EU AI Act / Prompt Shields | security-governance-and-threat-model.md §12, §15, §16 | Governance posture |
 | Security / identity / residency | solution-architecture.md §8; deployment-topology.md §2; security doc §1/§3/§6/§16/§19/§20 | Architecture + policy |
 | Synthetic determinism & physics | synthetic-data-and-simulators.md §1/§4/§6/§9 | Method credibility |

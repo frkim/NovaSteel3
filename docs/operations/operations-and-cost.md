@@ -290,6 +290,193 @@ Proceed only when: all displayed data is labeled synthetic; deterministic manife
 3. If throttling or latency measurably degrades the presenter experience (subjective threshold: any fallback-ladder trigger attributable to capacity contention rather than a genuine fault), escalate to F4 with the same budget/owner sign-off as any other cost-driver change (§8.1 row 1).
 4. F4 is never selected merely to obtain a Power BI licensing side-effect — that decision is independently governed by the Pro/PPU/trial rule in §8.1 row 2, per `solution-architecture.md` §2 reconciliation table.
 
+### 8.5 Production business case — illustrative cost/benefit/payback model
+
+> ⚠️ **Honesty discipline.** Every figure in this subsection is 🎯 **TARGET / illustrative**.
+> These are modelled estimates drawn from the project's original business-case proposal, using
+> stated assumptions that must be validated with NovaSteel actuals and an Azure pricing-calculator
+> assessment. They are **not measured outcomes** and they are **not a quote**.
+>
+> The **demo environment** currently runs on a Fabric **F2** capacity with a nightly auto-pause
+> Logic App (§5) — its actual measured Azure cost is 🔬 **EVIDENCE** and is intentionally small
+> (< €100/month estimated). That demo cost is **not** the production cost model; it demonstrates
+> the platform mechanics only.
+
+#### 8.5.1 Assumptions (challenge these first)
+
+| # | Assumption | 🎯 TARGET value (illustrative) |
+|---|---|---|
+| A1 | Annual production — in-scope site (at scale) | ~1.0 Mt/year |
+| A1b | Annual production — pilot line (Phase 1) | ~0.3 Mt/year |
+| A2 | Production cost | ~€500/t |
+| A3 | Energy share of cost | 35% → ~€175/t |
+| A4 | Energy reduction target (O1) | −14% of energy cost *(🎯 TARGET for full-plant annual pilot; 🔬 EVIDENCE: 7.25% whole-dispatch cost saving demonstrated on one 24 h synthetic scenario at one site)* |
+| A5 | CO₂ price (EU ETS) | ~€70/tCO₂ |
+| A6 | CO₂ reduction target (O2) | −22% *(🎯 TARGET for full-plant annual pilot; 🔬 EVIDENCE: 3.29% whole-dispatch CO₂ saving demonstrated on one 24 h synthetic scenario — scope difference explains gap, see §8.5.6)* |
+| A7 | Furnace failure cost | ~€8M per event |
+| A8 | Failure frequency (pilot line) | ~1 every 2–3 years |
+| A9 | High-grade yield uplift target (O4) | +8% on premium tonnage |
+| A10 | EU regions, consumption pricing | Sweden Central / West Europe |
+
+> Replace each value with NovaSteel's measured actuals during a design workshop.
+> A4 and A6 percentages will be updated once the MILP optimizer and RUL model produce
+> physics-derived KPI outputs — see §8.5.6 below.
+
+#### 8.5.2 🎯 TARGET — Azure run cost (annual, pilot) — illustrative
+
+| Category | Representative services | Indicative €/yr |
+|---|---|---|
+| Data platform | Microsoft Fabric capacity, OneLake | €120k–€220k |
+| Ingestion | Event Hubs (ingress buffer) | €40k–€80k |
+| AI/ML | Fabric Data Science compute (train/score) | €90k–€180k |
+| GenAI | Microsoft Foundry (Azure OpenAI tokens) | €30k–€90k |
+| Apps & experience | Container Apps, Power BI Pro/PPU | €20k–€50k |
+| Security & governance | Defender, Purview, Key Vault, Monitor | €30k–€60k |
+| Networking | VNet, private endpoints, egress | €10k–€30k |
+| **Indicative annual run total** | | **≈ €340k–€710k** |
+
+> Optimization levers: Fabric capacity right-sizing, reservations/savings plans, autoscale,
+> dev/test shutdown, batch scheduling of training. The §8.1 cost-driver table and FinOps
+> cadence (§10) govern ongoing optimization.
+
+#### 8.5.3 🎯 TARGET — Implementation cost (one-off) — illustrative
+
+| Item | Indicative € |
+|---|---|
+| Foundation (landing zone, data platform, ingestion) | €150k–€300k |
+| Three AI workloads (build, MLOps, Responsible AI) | €250k–€500k |
+| Experience, integration, enablement | €100k–€200k |
+| Compliance (DPIA, AI Act file) & change management | €60k–€120k |
+| **Indicative implementation total** | **≈ €560k–€1.12M** |
+
+#### 8.5.4 🎯 TARGET — Benefit model (annual, at scale across ~1.0 Mt site) — illustrative
+
+> **Pilot vs. scale.** The pilot proves the **percentages** on the ~0.3 Mt pilot line first
+> (≈ ⅓ of the figures below). Values here are the **at-scale** annual run-rate once
+> rolled out across the in-scope site.
+
+| Lever | Calculation (illustrative) | Indicative €/yr |
+|---|---|---|
+| Energy savings (O1) | 1.0 Mt × €175/t × *energy-reduction-%* | **~€24.5M** at 14% *(🎯 TARGET — derives from the 14% annual pilot target, not from the 7.25% single-scenario evidence)* |
+| Avoided ETS penalty (O2) | tonnage × tCO₂/t × €70 × *CO₂-reduction-%* | **€ several M** (site-specific) |
+| Avoided furnace failure (O3) | €8M × (1 / 2.5 yr) | **~€3.2M/yr expected** |
+| High-grade yield (O4) | premium tonnage × margin × 8% | **€ several M** |
+
+> Even under conservative haircuts the **energy and avoided-failure** levers alone dominate
+> the cost base. The dominant driver is **O1 energy** because energy is 35% of a large cost.
+
+#### 8.5.5 🎯 TARGET — Return and payback — illustrative
+
+| Metric | Conservative | Base | Optimistic |
+|---|---|---|---|
+| Year-1 net benefit | Clearly positive | Strongly positive | Very strong |
+| **Payback** | **< 12 months** | **< 9 months** | **< 6 months** |
+| 3-yr ROI | High multiple | Higher | Highest |
+
+Because annual benefits (energy alone ~€24.5M illustrative at 14%) vastly exceed build
+(~€0.6–1.1M) plus run (~€0.3–0.7M/yr), **payback is well under a year** even after
+large conservative discounts. NPV/IRR should be computed with NovaSteel's discount
+rate during a formal workshop.
+
+**Sensitivity — what could change the answer:**
+
+| Driver | If lower than assumed | Mitigation |
+|---|---|---|
+| Energy saving < 14% | Benefit shrinks but still large | Pilot proves real % before scale |
+| CO₂ reduction < 22% | ETS avoidance smaller | Pilot measurement; treat as validated only after shadow-scoring |
+| Failure frequency lower | O3 benefit smaller | Treat O3 as upside, not base-case justification |
+| Yield uplift < 8% | O4 smaller | Prove via SPC before crediting |
+| Azure cost higher | Run cost increases | Reservations, right-sizing, FinOps cadence (§10) |
+
+#### 8.5.6 Validated model outputs and scope reconciliation
+
+The MILP optimizer and RUL regression have been validated. The table below reconciles
+🎯 TARGET (annual pilot at full-plant scope) with 🔬 EVIDENCE (single deterministic
+synthetic scenario, one site, 24 hours, seed `240725`):
+
+**Energy dispatch (PuLP/CBC MILP) — whole-dispatch basis:**
+
+| Metric | 🔬 EVIDENCE (one scenario) | 🎯 TARGET (annual pilot) | Scope note |
+|---|---|---|---|
+| Energy cost saving | **7.25 %** | **−14 %** | Scenario = one 24 h day, one site; target = annualised across variable conditions |
+| CO₂ saving | **3.29 %** | **−22 %** | Scenario covers only dispatch-attributable CO₂; target includes broader process decarbonisation |
+| Peak reduction | **7.89 %** | — | Dispatch-attributable; verified by test (different schedule → different figure) |
+
+> *Flexible-load-only figures* (21.74 % cost / 31.71 % CO₂) are exposed in the API as
+> `rawFlexibleCostPct` / `rawFlexibleCo2Pct` for transparency only. They include only
+> the movable reheat load in the denominator and would overstate the headline ~6× on CO₂
+> if quoted without qualification. **Never use them as headlines.**
+
+**Furnace lining RUL (physics-informed heat-flux regression) — `LUX-BF-01`:**
+
+| Metric | 🔬 EVIDENCE (regressed) | 🎯 TARGET |
+|---|---|---|
+| P50 RUL | **19.65 d** | ≥ 21 days |
+| P10 / P90 | **18.69 / 20.61 d** | — |
+| Risk score | **0.8995** (HIGH) | — |
+| Model confidence | **0.7846** (from r² = 0.88) | — |
+| Wear slope (fitted) | **−3.21 mm/day** | — |
+
+**Why the evidence does not contradict the target:**
+
+- **Energy/CO₂:** The 7.25 %/3.29 % figures cover one scenario at one site. The 14 %/22 %
+  targets assume annualised optimisation across variable spot-price days, seasonal demand,
+  and four countries — a larger action space the pilot will measure.
+- **RUL:** The measured P50 of ~20 days confirms the model produces a timely, actionable
+  advance warning in the right order of magnitude. The ≥ 21-day target is for the fleet
+  mean over many relines — the pilot proves whether the fleet average reaches it.
+
+**Dependency — ~€24.5M/yr energy benefit:**
+
+This figure is explicitly derived from the **14 % 🎯 TARGET assumption** (1.0 Mt × €175/t × 14%).
+It is **not** recomputed from the 7.25 % single-scenario evidence. It remains a valid illustrative
+TARGET contingent on A4. If the pilot validates a different annual percentage, the benefit
+recalculates as: `1.0 Mt × €175/t × validated-%`.
+
+#### 8.5.7 🔬 EVIDENCE — Demo environment actual cost (contrast)
+
+The Phase 0 demo environment cost posture for comparison:
+
+- **Fabric capacity:** F2 (smallest SKU), Sweden Central
+- **Cost control:** 01:00 Europe/Luxembourg auto-pause Logic App (§5); no overage enabled
+- **Estimated actual Azure spend:** < €100/month (Fabric F2 ~€263/month list but paused ~18 h/day; Container Apps consumption tier; minimal Event Hubs)
+- **Purpose:** Prove platform mechanics on synthetic data; not a production cost reference
+- **Budget Bicep:** `infra/bicep/modules/budget.bicep` enforces alerts at 50%/80%/100% thresholds
+
+This demo cost is 🔬 **EVIDENCE** — it reflects what the platform actually costs to *demonstrate*, not what production at 1.0 Mt would cost.
+
+---
+
+<!-- BEGIN CFO BRIDGE SLIDE CONTENT — lift onto a slide after Slide 19 ("Deployment, capacity, cost & scale") -->
+
+### 8.5.8 CFO bridge — cost / benefit / payback summary (slide-ready)
+
+> **Slide placement:** insert as a new slide **after Slide 19** and before the demo handoff
+> (renumber Slide 20 to Slide 21). Title: *"Investment & Return — Illustrative Business Case"*.
+
+**On-slide content (one-page summary):**
+
+| | 🎯 TARGET (illustrative) |
+|---|---|
+| **Build** | €0.6–1.1M one-off |
+| **Run** | €0.3–0.7M/yr |
+| **Energy benefit (O1)** | ~€24.5M/yr at scale *(dominant lever — 14% × 35% of cost × 1 Mt)* |
+| **Avoided failures (O3)** | ~€3.2M/yr expected *(€8M × 1 event / 2.5 yr)* |
+| **Payback** | **< 12 months** (conservative); < 9 months (base) |
+
+**Key messages for the slide:**
+
+1. Build cost is < 5% of Year-1 energy benefit alone → payback is structural, not marginal.
+2. Pilot proves the *percentages* on ~0.3 Mt before any multi-site commitment.
+3. De-risked: time-boxed, measured, gated — not a single large bet.
+4. All figures are **🎯 TARGET / illustrative** — confirm with actuals and an Azure assessment.
+
+**Speaker notes (suggested):**
+
+> "For the CFO seat: build is under one-point-one million, run under seven-hundred-thousand a year, and the energy lever alone is roughly twenty-four-and-a-half million at scale — because fourteen percent of thirty-five percent of a one-million-ton cost base is a structural number, not a rounding error. Payback is well under a year even with conservative haircuts. But I won't leave you with a single number: the sensitivity table behind this shows what happens if the percentage is lower, and the answer is 'it shrinks but stays large.' The pilot proves the real percentage before we commit at scale."
+
+<!-- END CFO BRIDGE SLIDE CONTENT -->
+
 ---
 
 ## 9. Resilience, DR posture, and production caveats
@@ -361,5 +548,6 @@ Before any non-synthetic pilot/production traffic is onboarded, operations must 
 | Capacity lifecycle (01:00 pause, GUI start) | §5 | `deployment-topology.md` §5 |
 | Incident response | §6 | `security-governance-and-threat-model.md` §10, §17–§18 |
 | Demo reset | §7 | `demo-runbook.md` §9–§10 |
-| Cost model | §8 | `deployment-topology.md` §6 |
+| Cost model (controls) | §8.1–8.4 | `deployment-topology.md` §6 |
+| Production business case (illustrative) | §8.5 | Project A cost-estimate (transplanted, all 🎯 TARGET) |
 | Resilience/DR/production caveats | §9 | `deployment-topology.md` §7; `solution-architecture.md` §9.1 |

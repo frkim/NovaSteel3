@@ -83,10 +83,10 @@ Every route returning a model-produced prediction or recommendation uses this ex
 
 ```json
 {
-  "value": 21.0,
+  "value": 19.65,
   "unit": "d",
-  "confidence": { "p10": 16.8, "p50": 21.0, "p90": 27.5 },
-  "modelVersion": "registered-version",
+  "confidence": { "p10": 18.69, "p50": 19.65, "p90": 20.61 },
+  "modelVersion": "lining-rul-piml:1.3.0-demo",
   "scoredAt": "2026-07-25T08:30:00Z",
   "drivers": [{ "name": "heat_flux_6h_slope", "contribution": 0.29 }],
   "sourceRefs": ["event:...", "procedure:..."]
@@ -94,7 +94,7 @@ Every route returning a model-produced prediction or recommendation uses this ex
 ```
 
 - `value`/`unit`/`confidence.p50` are always internally consistent (`p10 <= p50 <= p90`); a violating response is a scoring-worker bug, not an acceptable edge case, and is caught by `BE-005`'s contract test (`implementation-guide.md` §6.3).
-- `modelVersion` is the exact registered model-registry version string, never `"latest"` — reproducibility requires pinning the version that produced this specific value.
+- `modelVersion` is the exact registered model-registry version string (e.g. `lining-rul-piml:1.3.0-demo`), never `"latest"` — reproducibility requires pinning the version that produced this specific value.
 - `drivers` is ordered by `|contribution|` descending; `sourceRefs` are opaque URIs resolvable by `/v1/audit/decisions` (§9) for lineage drill-down.
 
 ### 2.3 Single-resource envelope
@@ -194,7 +194,7 @@ Response `data` is the AI-derived value envelope (§2.2) with `unit: "d"` and an
 
 Request body: `{ "site": "NS-DEMO-LUX-01", "horizonHours": 48, "scenario": "evening-scarcity", "constraints": { ... } }`.
 
-Response `data`: `{ "baseline": {...}, "optimized": {...}, "constraintReport": [{"constraint": "min_soak_time", "status": "SATISFIED"}], "savings": {"costPct": 10.4, "peakPct": -5.1, "co2Pct": 8.7} }`. This route **never** writes an operational schedule; it always returns a proposal (`solution-architecture.md` §5.3).
+Response `data`: `{ "baseline": {"peakDemandMw": 56.0, ...}, "optimized": {"peakDemandMw": 51.58, ...}, "constraintReport": [{"constraint": "min_soak_time", "status": "SATISFIED"}], "savings": {"costPct": 7.25, "costEur": 2688.7, "peakPct": -7.89, "co2Pct": 3.29, "co2KgBaseline": 169268.99, "co2KgOptimized": 163705.39, "rawFlexibleCostPct": 21.74, "rawFlexibleCo2Pct": 31.71} }`. This route **never** writes an operational schedule; it always returns a proposal (`solution-architecture.md` §5.3). `rawFlexibleCostPct`/`rawFlexibleCo2Pct` report savings over only the movable reheat load (transparency); headlines use whole-dispatch basis (`costPct`/`co2Pct`).
 
 **`POST /v1/energy/recommendations/{id}:approve`** — `EnergyPlanner.Approve` + policy gate.
 

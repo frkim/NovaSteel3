@@ -177,7 +177,7 @@ Yes. Named scenarios: healthy baseline (`240725`), 21-day lining warning (`24072
 Physical and logical isolation. The demo uses only `NS-DEMO-*` namespaces on separate capacity; no Fabric workspace, OneLake shortcut, Eventstream connection, Key Vault secret, or managed identity may bridge demo and prod. Every record carries `data_classification: SYNTHETIC` / `privacy_label: DEMO-NONPERSONAL`, enforced in schema validation and shown as a persistent UI banner (ADR-008).
 
 **Q43. Are the demo's live numbers trustworthy or cherry-picked?**
-They're deterministic outputs of a signed scenario, validated by contract, physics, and scenario assertions before the run is presentable, with an expected cue sheet (e.g., RUL P50 21.0 / P10 16.8 / P90 27.5 / risk 0.87). If a live value lands outside its expected band, we switch to the cached deterministic result rather than change the narrative or hide the discrepancy.
+They're deterministic outputs of a signed scenario, validated by contract, physics, and scenario assertions before the run is presentable, with an expected cue sheet (e.g., RUL P50 19.65 / P10 18.69 / P90 20.61 / risk 0.90 / confidence 0.78; energy cost −7.25% / CO₂ −3.29% / peak −7.89%). If a live value lands outside its expected band, we switch to the cached deterministic result rather than change the narrative or hide the discrepancy.
 
 ---
 

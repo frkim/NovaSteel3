@@ -307,10 +307,10 @@ AI-derived values use a common shape:
 
 ```json
 {
-  "value": 21.0,
+  "value": 19.65,
   "unit": "d",
-  "confidence": {"p10": 16.8, "p50": 21.0, "p90": 27.5},
-  "modelVersion": "registered-version",
+  "confidence": {"p10": 18.69, "p50": 19.65, "p90": 20.61},
+  "modelVersion": "lining-rul-piml:1.3.0-demo",
   "scoredAt": "2026-07-25T08:30:00Z",
   "drivers": [{"name": "heat_flux_6h_slope", "contribution": 0.29}],
   "sourceRefs": ["event:...", "procedure:..."]
