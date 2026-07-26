@@ -336,7 +336,58 @@ Purpose: cross-persona triage landing. Layout:
 - Results screen (S-18) groups by entity type with per-group filters and a global text filter.
 - Empty/no-match uses `STATE-EMPTY` with suggested scopes; errors use `STATE-ERROR`.
 
-### 9.6 Theme, locale, demo-mode, capacity — top-bar controls
+### 9.6 Copilot Chat (global dock)
+
+The analytics header includes a **Copilot** button next to the persona chip. Activating it opens the chat assistant in a Dockview grid (`dockview-react@7.0.2`) beside the current dashboard. While Copilot is closed, no dock grid or portal is rendered; the dashboard surface remains the same DOM structure and layout it uses without chat.
+
+```text
++--------------------------- DASHBOARD WORKSPACE ------------------+----------- COPILOT -----------+
+| KPI cards, charts, tables and current persona screen              | Shield · language · controls   |
+|                                                                   | transcript                     |
+|                                                                   | suggestions / composer         |
+|                                                                   | glossary / conversations       |
++-------------------------------------------------------------------+-------------------------------+
+```
+
+**Dock behaviour**
+
+| Capability | Requirement |
+| --- | --- |
+| Entry/exit | Header **Copilot** button toggles the dock; close button inside the panel returns to the undocked dashboard. |
+| Default position | Chat docks to the right of the dashboard at first open, with an initial width suitable for a chat transcript. |
+| Repositioning | The Copilot tab can be dragged to any edge of the Dockview grid. |
+| No floating | Floating groups are disabled. Copilot is always docked, never a free-floating window over the dashboard. |
+| Persistence | Dock layout persists in `localStorage` under `novasteel.copilot.dock.v1`; invalid or unavailable storage falls back to the default right-docked layout without breaking the page. |
+
+**Panel controls and content**
+
+| Area | Spec |
+| --- | --- |
+| Enterprise data protection | A green shield row reads **"Enterprise data protection applies to this chat."** It is visible before any message is sent. |
+| Context chip | Shows the current screen as chat context; the request also sends `section`, `subView`, and `site` so ambiguous questions are resolved by screen. On Furnace Health, "What is the risk?" is treated as **Lining risk**. |
+| Language selector | `EN/US`, `FR`, `DE`, `NL`, `ES`; changing it re-localizes panel chrome, suggestions, glossary lookups, source labels, errors, and subsequent answer requests. |
+| Temporary chat | Toggle marks the current turn as temporary; temporary answers render normally but are not saved to conversation history. |
+| New chat | Starts an empty thread without deleting saved conversations. |
+| Online-search switch | Allows answers to cite the curated offline public-context corpus with official URLs. It is not a live search engine and must not be described as one in UI help. |
+| Reasoning | Toggle group: Auto / Default / High reasoning. Auto is resolved server-side and the answered tier is shown on the assistant bubble. |
+| Suggestions | Persona/screen-specific chips render before the first turn; selecting a chip sends that question with the same context as typed input. |
+| Transcript | User and assistant bubbles show role labels; assistant bubbles show the resolved reasoning tier and a source list. Online sources link to their official URL; screen and glossary sources are text-only. |
+| Composer | Multiline text field; `Enter` sends, `Shift+Enter` inserts a newline. Send is disabled for blank input or while a turn is pending. |
+| Dictation | Microphone uses the browser Web Speech API only. Audio never reaches the NovaSteel backend, creating no consent or retention obligation. Unsupported browsers show a disabled microphone with an explanatory tooltip. |
+| Glossary box | Instant definition lookup below the composer; it searches terms and wording inside definitions, previews current-screen terms when empty, and updates with the chat language. |
+| Conversations | Saved conversations list most-recently updated first; each row restores the thread and has a delete button. Delete removes only that owner-scoped in-process history; a container restart clears it by design. |
+
+Answers use constrained markdown only: paragraphs separated by blank lines, `**bold**`, and `_italic_`. The renderer is deliberately minimal and does not accept model-produced links or HTML; links appear only in the structured source list returned by the BFF.
+
+**Accessibility and states**
+
+- Every interactive control has an accessible name (`aria-label`, visible label, or labelled MUI control); toggle state is conveyed with `aria-pressed`/native switch semantics.
+- The transcript is a polite live region so newly appended messages and "thinking" status are announced without stealing focus.
+- The panel is keyboard-operable end to end: tab order follows header → transcript → suggestions/composer → glossary/history; `Enter` sends from the composer and `Shift+Enter` inserts a newline.
+- Errors render as `STATE-ERROR` inside the transcript using `role="alert"`. The failed question is restored into the composer, the optimistic user bubble is removed, and no fallback answer is invented.
+- Source type is never color-only: each item is labelled as screen context, glossary, NovaSteel knowledge, or online result.
+
+### 9.7 Theme, locale, demo-mode, capacity — top-bar controls
 
 Covered in §11 (capacity), §18 (locale), §19 (theme), §20 (demo mode).
 
@@ -356,7 +407,10 @@ flowchart TD
   TopBar --> ThemeToggle
   TopBar --> LocaleSwitch
   TopBar --> AccountMenu
+  TopBar --> CopilotToggle["Copilot button"]
   RouterOutlet --> AnalyticsMFE["AnalyticsMicrofrontend (React/MUI)"]
+  AnalyticsMFE --> CopilotDock["CopilotDock (Dockview grid)"]
+  CopilotDock --> CopilotPanel
   AnalyticsMFE --> PageLayout
   PageLayout --> Breadcrumb
   PageLayout --> SectionTabs
@@ -748,7 +802,7 @@ The UI binds to a **BFF (Backend-for-Frontend)** whose contracts are owned by `s
 | S-12 Knowledge | `/v1/knowledge/search`, `/v1/knowledge/procedures`, `/v1/knowledge/interviews` | Search only approved procedures |
 | S-13 Executive | BFF executive read projections and optional internal Power BI mediation | Optional Power BI |
 | S-14/15/16 Platform | `/v1/platform/capacity` and start/pause request routes | No browser ARM call or scale action |
-| Global | `/v1/me`, `/v1/search`, BFF locale projection | Shell bootstrap |
+| Global | `/v1/me`, `/v1/search`, `/v1/copilot/suggestions`, `/v1/copilot/glossary`, `/v1/copilot/conversations`, `/v1/copilot/chat`, BFF locale projection | Shell bootstrap and Copilot chat; chat history is in-process only |
 
 ### 16.3 Realtime
 

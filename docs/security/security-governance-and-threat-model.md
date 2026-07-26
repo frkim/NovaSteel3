@@ -288,6 +288,21 @@ The energy-dispatch optimization agent (tool-calling) and the GenAI knowledge-ca
 6. **Human review checkpoints** for any AI-suggested action with real-world/financial/safety effect follow the documented human-review-for-automation pattern rather than allowing fully autonomous execution. [Human review for automation with a prompt](https://learn.microsoft.com/microsoft-copilot-studio/azure-openai-human-review).
 7. **Global Secure Access prompt-injection protection** (where the tenant has Microsoft Entra Internet Access/Global Secure Access deployed) provides an additional network-layer inspection point for GenAI traffic egress. [Protect enterprise generative AI applications with prompt injection protection](https://learn.microsoft.com/entra/global-secure-access/how-to-ai-prompt-injection-protection).
 8. **Best practices for the interview/RAG skill** used by the knowledge-capture system (grounding, citation of source documents, refusal on out-of-scope requests) follow Azure AI Search's documented responsible-AI guidance for GenAI prompt skills. [Best practices for GenAI Prompt skill](https://learn.microsoft.com/azure/search/responsible-ai-best-practices-genai-prompt-skill#best-practices-to-mitigate-risks).
+9. **The Copilot chat surface has no tools at all.** It accepts untrusted free text from an authenticated user, so it is treated as an injection target by construction: the agent is given no function, no connector, and no data-plane credential, and `knowledge-orchestrator` assembles the entire grounding payload (screen profile, glossary entries, and — only on explicit user opt-in — a curated public-context corpus) before the call. A successful injection therefore yields at most a differently-worded answer over material the caller was already entitled to see; it cannot cause a read the caller is not entitled to, and it cannot cause a write of any kind. The curated corpus is authored in-repository and reviewed, so no live third-party page can enter the prompt. Answers return their sources, so an unsupported assertion is visibly unsupported.
+
+### 12.1 Copilot chat data-protection claim
+
+The chat displays "Enterprise data protection applies to this chat." The claim is supported by five concrete properties, each of which is a release gate:
+
+| Property | Control |
+|---|---|
+| No credential leaves the tenant | The browser calls only `bff-api`; the model is an Azure-hosted Foundry deployment reached with managed identity over `https://cognitiveservices.azure.com/.default`. No key, no consumer endpoint. |
+| Prompts are not used for training | Azure OpenAI/Foundry contractual position for enterprise deployments; no consumer service is in the path. |
+| No new personal-data store | Conversation history is in-process, owner-scoped, capped, and dropped on restart. Nothing is written to OneLake, Eventhouse, or any durable store (solution architecture ADR-012). |
+| No audio processing | Dictation uses the browser Web Speech API. Audio never reaches NovaSteel, so §13's consent obligations are not triggered by the chat. |
+| No privilege escalation through chat | Every request carries the caller's identity and passes the same persona/plant authorization as any other `/v1` route; a conversation owned by another user returns `404`, so history is not enumerable. |
+
+If any of these ceases to hold — for example if a tool is ever added, or if history is moved to durable storage — the shield copy must be changed in the same pull request and the DPO consulted before merge.
 
 ---
 
@@ -314,6 +329,8 @@ The GenAI knowledge-capture system interviews operators via speech; this is pers
 | Operator interview transcripts / knowledge-base entries (de-identified) | Indefinite, as structured operational knowledge, once identity is decoupled per §13 | Legitimate business interest, GDPR-compliant post de-identification |
 | Security/audit logs (Sentinel/Log Analytics) | 1 year hot + 6 years archive | GDPR accountability, EU AI Act logging obligations, internal audit |
 | GitHub Actions build provenance / SBOM | 2 years minimum | Supply-chain audit, incident forensics |
+| Copilot chat conversations | **Not retained.** Held in the `bff-api` process, owner-scoped, capped at 25 conversations × 60 messages, dropped on restart or deployment; deletable by the owner at any time; temporary chats are never stored | Data minimization (GDPR Art. 5(1)(c)) — no durable store means no Art. 17 propagation obligation for this surface (§12.1) |
+| Copilot dictation audio | **Not processed.** Speech recognition runs in the browser; no audio is transmitted to NovaSteel | Data minimization; §13 consent obligations are not triggered |
 
 Deletion/erasure requests (GDPR Art. 17) are executed against the identified source system first (Fabric Lakehouse tables, Speech transcripts store), then propagated to Purview lineage-linked derivatives and Sentinel-logged copies where technically feasible, with any exception (e.g., immutable audit log) documented and justified under GDPR Art. 17(3).
 

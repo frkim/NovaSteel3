@@ -222,15 +222,121 @@ Request body requires a `reasonCode` from a closed enum (`FR-ENE-05` in `solutio
 
 **`GET /v1/knowledge/search?q=`** — search-first entry point backed by the derived retrieval index of **approved** procedures only (§5.5 documents the search-specific ranking/highlighting behavior).
 
-### 4.8 Audit
+### 4.8 Copilot chat
+
+All Copilot routes require the normal `/v1` authentication boundary: bearer-token validation in Entra mode, or the documented `X-Demo-User`/`X-Demo-Roles`/`X-Demo-Plants` headers in local demo mode (§1.3). Authorization is `require_reader`: any standard reader application role may use the surface, and conversations are scoped to `user.user_id`, not to a browser session or plant alone.
+
+Every successful response except `DELETE` uses the single-resource envelope (§2.3):
+
+```json
+{
+  "data": { "...": "..." },
+  "asOf": "2026-07-26T16:15:37Z",
+  "correlationId": "01K0YB4N4P1W8Q5Z3A2E7M9C0D"
+}
+```
+
+| Route | Query/body | Response `data` | Status codes |
+|---|---|---|---|
+| `GET /v1/copilot/suggestions?section=&locale=` | `section` is a dashboard section slug; missing `locale` uses the user's locale; unsupported languages normalize to English | `{ "section", "persona", "language", "questions": [...] }`; five predefined questions per known section/language, otherwise the default set | `200`; `401`; `403` |
+| `GET /v1/copilot/glossary?q=&section=&locale=&limit=` | `q` optional; `section` adds a screen-ranking bonus or scopes the empty-query listing; `limit` defaults to `8` and is bounded `1..50` | `{ "query", "language", "entries": [{ "termId", "term", "definition", "language", "screens": [...] }] }`; search ranks exact term, prefix/word/substring term hits, then definition-wording hits | `200`; `400 VALIDATION_ERROR` for invalid `limit`; `401`; `403` |
+| `GET /v1/copilot/conversations` | none | `{ "conversations": [{ "conversationId", "title", "language", "createdAt", "updatedAt", "messageCount", "temporary": false }] }`, most-recently updated first | `200`; `401`; `403` |
+| `GET /v1/copilot/conversations/{conversationId}` | path `conversationId` | Conversation summary plus `messages[]`; each message has `messageId`, `role`, `content`, `createdAt`, `sources[]`, and assistant-only `reasoning`, `onlineSearch`, `agent` | `200`; `404 NOT_FOUND` for an unknown or non-owned conversation; `401`; `403` |
+| `DELETE /v1/copilot/conversations/{conversationId}` | path `conversationId` | no body | `204`; `404 NOT_FOUND` for an unknown or non-owned conversation; `401`; `403` |
+| `POST /v1/copilot/chat` | body below | Grounded answer turn, conversation metadata, `resolvedReasoning`, `resolvedConcepts`, `onlineSearchUsed`, and `persisted` | `200`; `400 VALIDATION_ERROR`; `401`; `403` |
+
+`POST /v1/copilot/chat` request body:
+
+| Field | Type | Required | Semantics |
+|---|---|---|---|
+| `question` | string, non-empty, max `1500` characters in the current service | yes | User question. Empty/blank strings and over-length values return `400 VALIDATION_ERROR`. |
+| `conversationId` | string | no | Continues an existing owner-scoped conversation when found. Ignored for temporary chats; a missing stored conversation in the current implementation starts a new non-temporary conversation. |
+| `locale` | `en|fr|de|nl|es` | no | Answer language. Missing or unsupported values normalize to English after taking the two-letter language prefix. |
+| `reasoning` | `auto|default|high` | no | Defaults to `auto`. Invalid values return `400 VALIDATION_ERROR`. `auto` is resolved server-side and echoed as `resolvedReasoning`. |
+| `onlineSearch` | boolean | no | Enables the curated public-context corpus. Non-boolean values return `400 VALIDATION_ERROR`. |
+| `temporary` | boolean | no | Answers the turn without writing it to the conversation store. Non-boolean values return `400 VALIDATION_ERROR`. |
+| `context` | object | no | `{ "site", "section", "subView", "persona" }` screen context. A non-object value returns `400 VALIDATION_ERROR`; unknown fields at the top level also return `400`. |
+
+Reasoning tiers are explicit. `default` maps to `FOUNDRY_CHAT_DEPLOYMENT`; `high` maps to `FOUNDRY_REASONING_DEPLOYMENT`. The `auto` selector resolves to `high` when the question is at least 120 characters or contains a why/compare/simulate-style marker in English, French, German, Dutch, or Spanish; otherwise it resolves to `default`. The resolved value is returned in `data.resolvedReasoning` and attached to the assistant message so the user never has to infer which tier answered.
+
+Foundry access uses managed identity (`DefaultAzureCredential`) against scope `https://cognitiveservices.azure.com/.default`. If `FOUNDRY_ENDPOINT` is absent, `COPILOT_CHAT_MODE=local`, an agent cannot be initialised, or the Foundry completion call fails, the service answers from the deterministic grounded local agent instead of failing the request. The local path uses the same screen context, glossary, and optional public-context corpus; it never fabricates numbers and the system prompt for the Foundry path enforces the TARGET-vs-EVIDENCE boundary: −14% energy, −22% CO₂, +8% yield, and ≥21-day warning are pilot targets, while 7.25% cost, 3.29% CO₂, and RUL P50 19.65 days are measured demo values.
+
+Screen context is part of the contract, not UI decoration. The orchestrator maintains 25 domain concepts with multilingual trigger words and nine screen profiles matching the `analytics-mfe` persona sections. It ranks explicitly named concepts first; when the question is ambiguous, it uses the current section/sub-view ordering. For example, asking **"What is the risk?"** on `section="furnace-health", subView="lining-forecast"` resolves to **Lining risk**; the same bare wording on `sustainability-compliance/ets-exposure` resolves to **EU ETS exposure**.
+
+The glossary contains 36 terms in five languages. Search is accent- and case-insensitive and ranks both the localized term and wording inside the localized definition, with a small current-screen bonus. Suggestions are five predefined questions per screen per language, with a five-question default set for unknown sections.
+
+"Online search" is deliberately not a live web search. The container has no outbound internet path for this feature; the toggle unlocks a curated offline corpus of eight durable public-context entries with official URLs. Answers and sources indicate whether that corpus was used (`onlineSearchUsed`, `source.kind = "online"`). With the toggle off, answers use only NovaSteel internal material and screen/glossary grounding.
+
+Conversations are in-process, owner-scoped, and bounded to 25 conversations per owner and 60 messages per conversation. They are deliberately not persisted to Fabric because free-text questions from named users would widen the data-protection surface for no demo value. A container restart clears history; this is intended behaviour. Temporary chats are represented in the response but never written to the store and never appear in `GET /v1/copilot/conversations`.
+
+Example:
+
+```http
+POST /v1/copilot/chat HTTP/1.1
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "question": "What is the risk?",
+  "locale": "en",
+  "reasoning": "auto",
+  "onlineSearch": false,
+  "temporary": false,
+  "context": {
+    "site": "NS-DEMO-LUX-01",
+    "section": "furnace-health",
+    "subView": "lining-forecast",
+    "persona": "Furnace Operator"
+  }
+}
+```
+
+```json
+{
+  "data": {
+    "conversationId": "conv-8f4b6d2a91c0",
+    "title": "What is the risk?",
+    "language": "en",
+    "temporary": false,
+    "persisted": true,
+    "resolvedReasoning": "default",
+    "resolvedConcepts": ["Lining risk", "Remaining useful life", "Furnace campaign"],
+    "onlineSearchUsed": false,
+    "question": {
+      "messageId": "msg-4b2e7eec9a31",
+      "role": "user",
+      "content": "What is the risk?",
+      "createdAt": "2026-07-26T16:15:37Z",
+      "sources": []
+    },
+    "answer": {
+      "messageId": "msg-7fd1db3df5a8",
+      "role": "assistant",
+      "content": "You are on **Furnace Health** (Furnace Operator & Maintenance/Reliability Engineer), so I read this as a question about **Lining risk**.\n\n**Lining risk** — The modelled probability that a furnace refractory lining reaches its minimum safe thickness within the forecast horizon.\n\nOnline search is off, so this answer uses NovaSteel's internal material only.\n\n_All figures in this demo come from synthetic data._",
+      "createdAt": "2026-07-26T16:15:37Z",
+      "sources": [
+        { "kind": "screen", "sourceId": "furnace-health", "title": "Furnace Health", "snippet": "Refractory lining wear forecasting, thermal signatures and the maintenance plan derived from remaining useful life." },
+        { "kind": "glossary", "sourceId": "lining-risk", "title": "Lining risk", "snippet": "The modelled probability that a furnace refractory lining reaches its minimum safe thickness within the forecast horizon." }
+      ],
+      "reasoning": "default",
+      "onlineSearch": false,
+      "agent": "copilot-chat-local"
+    }
+  },
+  "asOf": "2026-07-26T16:15:37Z",
+  "correlationId": "01K0YB4N4P1W8Q5Z3A2E7M9C0D"
+}
+```
+
+### 4.9 Audit
 
 **`GET /v1/audit/decisions?domain=&entityId=&from=&to=&page=&size=`** — `Compliance.Auditor` or the resource's authorized owner. Returns an append-only, export-audited record with model/input/decision/outcome lineage; every field is read-only at the API level — there is no `PATCH`/`DELETE` route for this resource anywhere in the contract.
 
-### 4.9 Platform capacity
+### 4.10 Platform capacity
 
 See §8 for the full capacity lifecycle contract (`GET /v1/platform/capacity`, `POST /v1/platform/capacity/start-requests`, `POST /v1/platform/capacity/pause-requests`, `POST /v1/platform/capacity/sku-requests`).
 
-### 4.9.1 Additive operational projections
+### 4.10.1 Additive operational projections
 
 The canonical OpenAPI also exposes additive, read-only projections used by the
 local deterministic dashboard and table views: `GET /v1/dashboard/kpis`,
@@ -240,7 +346,7 @@ local deterministic dashboard and table views: `GET /v1/dashboard/kpis`,
 `GET /v1/sustainability/emissions`. Collection routes use the same TBL-STD
 query semantics in §5; they are advisory/read-only and plant-scoped.
 
-### 4.10 Route summary table
+### 4.11 Route summary table
 
 | Route | Method | Auth | Mutating | Idempotency-Key required |
 |---|---|---|---|---|
@@ -266,6 +372,12 @@ query semantics in §5; they are advisory/read-only and plant-scoped.
 | `/v1/knowledge/procedures` | GET | knowledge read | no | no |
 | `/v1/knowledge/procedures/{id}:approve` | POST | `Knowledge.Publisher` | yes | **yes** |
 | `/v1/knowledge/search` | GET | any authenticated | no | no |
+| `/v1/copilot/suggestions` | GET | reader role | no | no |
+| `/v1/copilot/glossary` | GET | reader role | no | no |
+| `/v1/copilot/conversations` | GET | reader role | no | no |
+| `/v1/copilot/conversations/{conversationId}` | GET | reader role + owner | no | no |
+| `/v1/copilot/conversations/{conversationId}` | DELETE | reader role + owner | yes (history delete) | no |
+| `/v1/copilot/chat` | POST | reader role | yes (history unless temporary) | no |
 | `/v1/audit/decisions` | GET | `Compliance.Auditor`/owner | no | no |
 | `/v1/platform/capacity` | GET | any authenticated | no | no |
 | `/v1/platform/capacity/start-requests` | POST | `Platform.Capacity.Manage` | yes | **yes** |
@@ -365,7 +477,7 @@ The server caps outbound event rate per connection at 20 events/second with coal
 
 ### 7.2 Idempotency
 
-- Every mutating route listed with **yes** in §4.10's Idempotency-Key column requires an `Idempotency-Key: <client-generated-UUID>` header.
+- Every mutating route listed with **yes** in §4.11's Idempotency-Key column requires an `Idempotency-Key: <client-generated-UUID>` header.
 - `bff-api` stores `(route, idempotencyKey) → (requestHash, responseSnapshot, status)` for 24 hours.
 - A repeated request with the same key and an **identical** request body returns the original response (replayed, not re-executed) with the original status code — this is what prevents a double-click "approve" from creating two audit events.
 - A repeated request with the same key and a **different** request body returns `409 IDEMPOTENCY_CONFLICT` — the client must generate a new key for a genuinely different request.

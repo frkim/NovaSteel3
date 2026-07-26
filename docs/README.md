@@ -26,16 +26,17 @@ systems, CMMS, or production schedules.
 
 | Area | Implemented and evidenced | Not yet deployed/proven |
 |---|---|---|
-| Application | Portal shell, analytics MFE, BFF routes, authorization stubs, audit hash-chain (durable via Table Storage), simulated capacity control | Entra production validation, cloud query adapters |
+| Application | Portal shell, analytics MFE, Dockview Copilot chat, BFF routes, authorization stubs, audit hash-chain (durable via Table Storage), simulated capacity control | Entra production validation, cloud query adapters |
 | Data/demo | Deterministic simulator, committed fixture, PuLP/CBC MILP optimizer, physics-informed RUL regressor, six persona moments, offline fallback | OT ingestion and non-synthetic data |
 | Fabric | Source-controlled item/catalog/KQL/Lakehouse/notebook/pipeline/semantic/RTI assets; local structural validator | Fabric tenant workspace, capacity, item deployment, RLS/query behavior |
 | Azure IaC | Bicep, policy, OIDC deployment scripts, alert rules, static validation — **deployed to Sweden Central** | Private-network hardening proof, DR rehearsal |
 | Observability | OpenTelemetry traces, JSON logs with correlation_id, four business KPI metrics | Production dashboards and alert tuning |
-| AI/knowledge | Consent, draft/review, grounding, restricted tools, critic loop, agent handoff, live GPT-4o adapter with local fallback | Tenant Foundry Agent Service, model/quota, live Speech, private-network proof |
+| AI/knowledge | Consent, draft/review, grounding, restricted tools, critic loop, agent handoff, live GPT-4o adapter with local fallback, screen-aware Copilot chat (5 languages, tool-free, per-tier agents) | Tenant Foundry Agent Service, model/quota, live Speech, private-network proof |
 | Defense | 26-slide PowerPoint, runbook, FAQ, scripted rehearsal, response/fallback evidence | Live-cloud rehearsal and presenter-browser screenshots |
 
-The rehearsal passed 66/66 BFF checks and 12/12 offline-fallback checks; 365
-automated tests and all 19 validation gates pass.
+The rehearsal passed 66/66 BFF checks and 12/12 offline-fallback checks; 571
+automated tests and all 19 validation gates pass — 8 contract, 60 simulator, 112
+backend/integration, 230 knowledge/Copilot, 47 frontend, and 114 infrastructure.
 See [the rehearsal report](../artifacts/demo-validation/rehearsal-report.md),
 [final handoff](../artifacts/final-handoff.md), and the root
 [`README.md`](../README.md) for exact commands and the live endpoint URLs.
@@ -56,6 +57,10 @@ See [the rehearsal report](../artifacts/demo-validation/rehearsal-report.md),
 5. Adapters select their Azure implementation when configuration is present and
    fall back to deterministic, checksummed synthetic fixtures otherwise, so the
    API and contract boundaries are identical in both modes.
+6. A docked Copilot chat explains what is on screen. `knowledge-orchestrator`
+   assembles the grounding — screen profile, glossary, and an optional curated
+   public-context corpus — and the chat agents have no tools, so the assistant
+   answers about meaning while the dashboard remains the only source of values.
 
 ## Reading paths
 

@@ -236,3 +236,32 @@ Because that discipline *is* the trustworthiness. A vendor who converts every sy
 
 **Q57. If the whole cloud is down during the defense, can you still make your case?**
 Yes. The demo is rehearsed once online and once fully offline; a checksummed fallback pack (screenshots, thermal sequences, alert/optimizer/quality JSON, licensed synthetic WAV/transcript, Fabric lineage image, 90-second recording) lets the presenter finish the entire story with no network — announced honestly as replay/cached, never as live.
+
+---
+
+## N. Copilot chat assistant
+
+**Q58. What is the Copilot chat actually allowed to do?**
+Explain, not retrieve. The chat agents are given **no tools at all** (ADR-011). `knowledge-orchestrator` assembles the grounding material — the profile of the screen the user is on, the glossary definitions matching the question, and, only if the user ticks *Online search*, a curated corpus of public-context entries — and the model answers from that. It cannot query the lakehouse, the KQL database, or any operational API, so it cannot surface a value the caller was not already entitled to see. The dashboard remains the only source of numbers; the chat is the source of meaning.
+
+**Q59. How does it know what "the risk" means when I don't say?**
+Every question carries the active section, sub-view, and site. On Furnace Health, an under-specified "what is the risk" resolves to **lining risk** because that screen's profile declares it. Twenty-five concepts are matched against the question, each pinned to a glossary entry, and the answer names the sources it used so the resolution is visible rather than magical. Concept matching is token-aware and handles compound nouns, which is why it also works in German (*Zustellungsrisiko*) and Dutch (*vuurvastrisico*).
+
+**Q60. Is this just a wrapper that hallucinates in five languages?**
+The five languages are first-class data, not machine translation at runtime: 36 glossary terms, nine screen profiles, and the suggested questions all exist in EN/FR/DE/NL/ES and are verified by test. More importantly, the answer is constrained by the same grounding in every language — including the TARGET-versus-EVIDENCE discipline, so the assistant will not convert the 22 % CO₂ *target* into a measured result any more than the presenter will.
+
+**Q61. Why isn't "Online search" a real web search?**
+Deliberate. A live search engine would make the demo non-reproducible, would put untrusted third-party text into the prompt, and would let a page that changed overnight contradict the rehearsed narrative. The tick instead consults a small curated corpus of durable public-context entries — each with its official source URL — and the answer states that the corpus was used. It is honest about its own limits: the assistant tells you when it cannot answer rather than inventing a citation.
+
+**Q62. Where do the conversations go? Is this a new GDPR surface?**
+Nowhere durable. History lives **in the API process**, scoped to the calling user, and is dropped on restart (ADR-012). Free-text questions attributable to a named operator never enter the governed Fabric estate, so no new retention, classification, or subject-access obligation is created for a demonstration. A temporary-chat toggle skips storage entirely — and it genuinely skips the store, it is not a cosmetic switch — and any conversation can be deleted by its owner. A conversation belonging to another user returns `404`, not `403`, so history is not even enumerable.
+
+**Q63. What does the green shield claim, and is the claim true?**
+It reads "Enterprise data protection applies to this chat." That holds because the traffic stays inside the same Entra-authenticated BFF as every other call, the model is an Azure-hosted Foundry deployment reached with managed identity (no key, no consumer endpoint), prompts are not used for training, and nothing the chat touches leaves the tenant. Dictation is likewise **browser-side only** (Web Speech API), so audio never reaches the backend and creates no consent or retention obligation.
+
+**Q64. Why multiple agents for reasoning tiers instead of one model?**
+Because the honest answer to "which model answered this?" should never be hidden. *Default* serves short definitional questions cheaply; *High reasoning* serves multi-step questions; *Auto* picks between them from the shape of the question and then **echoes back the tier that actually answered**, so the user sees the trade-off rather than trusting a black box. If Foundry is unconfigured or a call fails, a deterministic local agent answers from exactly the same grounding material and the sources are identical — degraded, but never fabricated.
+
+**Q65. What does the dock buy you that a modal or drawer would not?**
+Dockview gives the user a real workspace: the chat can sit at any edge and be resized against the dashboard, so a question can be asked *while* the chart that provoked it is still visible — which is the whole point of screen-aware grounding. Floating groups are disabled, so the panel can never detach into a stray window that gets lost behind the browser. The layout is remembered per browser, and a stored layout that does not restore cleanly is discarded in favour of the default. While the chat is closed no grid is mounted at all, so the default dashboard render path is unchanged.
+

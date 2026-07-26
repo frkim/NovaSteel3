@@ -146,6 +146,13 @@ to `NS-DEMO-LUX-01`. Useful direct routes are:
 | Executive overview | `http://localhost:5266/lu/executive-overview` |
 | Platform capacity simulation | `http://localhost:5266/lu/platform-ops/capacity` |
 
+The **Copilot** button in the dashboard header opens a docked chat panel on any
+of these routes. It answers from the active screen's grounding material — screen
+profile, glossary, and an optional curated public-context corpus — in EN/FR/DE/
+NL/ES, and reports the reasoning tier and the sources it used. It has no tools
+and no data-plane access, and conversations are held in the API process only.
+See [ADR-011 and ADR-012](docs/architecture/solution-architecture.md#10-architecture-decision-records).
+
 ### 4. Run the scripted API demonstration
 
 With the BFF running:
@@ -211,7 +218,7 @@ in `artifacts\demo-validation\rehearsal-report.md`; final handoff is
 
 ## Validated proof
 
-- 66/66 live BFF checks passed against the deterministic scenario; 365 automated
+- 66/66 live BFF checks passed against the deterministic scenario; 571 automated
   tests and all 19 repository validation gates pass.
 - RUL: P10/P50/P90 = 18.69/19.65/20.61 days, risk 0.8995 HIGH, confidence 0.7846.
   Regressed wear slope −3.21 mm/day at r² = 0.88 — the forecast moves when the
@@ -236,8 +243,8 @@ the difference is scope, not a shortfall against the model.
 | Path | Purpose |
 |---|---|
 | `apps\portal-shell` | Blazor WASM host, routing, demo identity, capacity mediation |
-| `apps\analytics-mfe` | React/TypeScript MUI/D3 persona dashboard |
-| `services` | FastAPI BFF, optimizer, scoring, ingest relay, knowledge orchestration |
+| `apps\analytics-mfe` | React/TypeScript MUI/D3 persona dashboard with the Dockview Copilot chat |
+| `services` | FastAPI BFF, optimizer, scoring, ingest relay, knowledge orchestration and Copilot grounding |
 | `simulator` | Deterministic synthetic scenarios, validators, CLI |
 | `contracts` | OpenAPI, event, data, and UI interop contracts |
 | `infra` | Bicep control-plane IaC, policy, OIDC-only deployment scripts |

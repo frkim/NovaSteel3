@@ -256,6 +256,33 @@ flowchart TD
 5. The raw recording is held in a restricted EU store for the approved retention period. The BFF records consent state, language, speaker role, retention deadline, and deletion request linkage before submitting audio. A transcript is classified Highly Confidential until de-identified/approved.
 6. The Foundry knowledge agent has a restricted procedure search/retrieval corpus and a separate draft-writing tool. It cannot publish. The `Knowledge Engineer/Admin` approves, edits, or rejects a versioned draft; only the approved version is indexed for general retrieval.
 7. The energy agent is an explanatory/orchestration surface. Its only OpenAPI tools are read/forecast/simulate and a separated propose endpoint. A commit endpoint independently validates a human approval record and is disabled outside approved production phases.
+8. The **Copilot chat agents** are a third, read-only Foundry surface. They have **no tools at all**: the grounding material — screen profile, glossary definitions, and optionally the curated public-context corpus — is assembled by `knowledge-orchestrator` and passed in the prompt, so the model cannot reach data the caller is not entitled to see. One deployment serves the `default` tier and a separate reasoning deployment serves the `high` tier; `auto` is resolved before the deployment is chosen and the resolved tier is returned to the browser. If Foundry is unconfigured or a call fails, the service answers from the same grounding material through a deterministic local agent rather than failing or inventing.
+
+### 4.4 Copilot chat grounding boundary
+
+```mermaid
+flowchart LR
+  U["Browser — Copilot panel"]
+  BFF["bff-api /v1/copilot/*"]
+  KO["knowledge-orchestrator\ncopilot service"]
+  CTX["Screen profile + 25 concepts"]
+  GL["Glossary — 36 terms x 5 languages"]
+  ON["Curated public-context corpus"]
+  F["Foundry chat / reasoning deployment"]
+  L["Deterministic local agent"]
+  U -->|question + screen context| BFF
+  BFF --> KO
+  KO --> CTX
+  KO --> GL
+  KO -->|only when online search is ticked| ON
+  KO -->|grounded prompt, managed identity| F
+  F -.->|unconfigured or failed| L
+  KO -->|answer + sources + resolved tier| BFF
+```
+
+The chat never queries the lakehouse, the KQL database, or any operational API. It answers about *meaning* — what a metric is, how a model reaches it, what the regulation requires — while the dashboard itself remains the only source of *values*. That separation is what keeps a free-text surface inside the demo's data-protection envelope.
+
+Conversation history is held in the `bff-api` process, scoped to the calling user, and is deliberately **not** persisted to Fabric: free-text questions attributable to a named operator would widen the classification surface for no demonstrative benefit. A container restart clears history, and the temporary-chat toggle skips the store entirely.
 
 ## 5. Experience, backend, and API design
 
@@ -266,16 +293,21 @@ flowchart LR
   B["Browser"]
   S["Blazor WASM shell\nC#, MSAL, route/theme/locale"]
   R["React analytics MFE\nTypeScript, MUI, D3"]
+  D["Copilot dock\nDockview, docked only"]
   P["Power BI internal embed\noptional"]
   A["Python FastAPI BFF"]
   B --> S
   S <-->|typed same-page interop| R
+  R -->|hosts workspace + chat panels| D
+  D -->|question + active screen context| A
   R --> P
   S -->|short-lived user access token| A
   R -->|host token broker; no stored service token| A
 ```
 
 The shell is a host, not a second business backend. The React bundle is versioned with the shell for Phase 0 to avoid shell/MFE contract skew. The shell exposes only typed context/events: `themeMode`, `locale`, `activePersona`, `site`, `demoMode`, navigation intent, toast, capacity request, and telemetry. It does **not** hand a workload credential to React.
+
+The Copilot dock is a layout host inside the MFE, not a second application. Dockview manages a two-panel grid — the analytics workspace and the chat — with floating groups disabled, so the panel can be moved to any edge but never detaches into a free window. While the chat is closed no grid is mounted at all, which keeps the default dashboard render path unchanged. The layout is persisted per browser in `localStorage`; a stored layout that does not restore exactly the two known panels is discarded in favour of the default. The chat sends the active section, sub-view, and site with every question so an under-specified question such as "what is the risk" resolves against what the user is actually looking at.
 
 ### 5.2 Python service responsibilities
 
@@ -285,7 +317,7 @@ The shell is a host, not a second business backend. The React bundle is versione
 | `optimizer-worker` | Price/constraint validation, deterministic feasible schedule, what-if and recommendation persistence | Autonomous production schedule commit |
 | `scoring-worker` | Approved RUL/quality scoring, model-version capture, drift metrics | Retraining/promotion without review |
 | `ingest-relay` | Event Hubs consumer, canonical envelope validation, Custom Endpoint publisher, replay/health metrics | Curated-data access or user-facing APIs |
-| `knowledge-orchestrator` | Consent/workflow coordination, STT request, draft/review state, Foundry tool mediation | Publishing unreviewed procedures |
+| `knowledge-orchestrator` | Consent/workflow coordination, STT request, draft/review state, Foundry tool mediation, Copilot chat grounding and conversation state | Publishing unreviewed procedures, answering from ungrounded model knowledge |
 | `capacity-operator` | ARM long-running-operation mediation after policy checks | Browser-accessible capacity credentials or production auto-pause |
 
 ### 5.3 API contract
@@ -333,6 +365,8 @@ AI-derived values use a common shape:
 | `/v1/platform/capacity/start-requests` | POST | `Platform.Capacity.Manage` | Requests a demo-capacity resume outside Demo Mode; server-side policy and ARM polling only. |
 | `/v1/platform/capacity/pause-requests` | POST | `Platform.Capacity.Manage` | Requests a demo-capacity pause after drain checks; never accepts an alert-triggered request. |
 | `/v1/platform/capacity/sku-requests` | POST | `Platform.Capacity.Manage` | Resizes the non-production capacity within the policy-enforced SKU allow-list; leaves lifecycle state unchanged and is refused mid-transition. |
+| `/v1/copilot/chat` | POST | Any persona-scoped reader | Answers from assembled grounding material only; returns the sources used, the resolved reasoning tier, and whether the curated public corpus was consulted. Never returns an operational value the caller could not already see. |
+| `/v1/copilot/conversations/{id}` | GET, DELETE | Owning user only | History is owner-scoped and in-process; a conversation belonging to another user is indistinguishable from one that does not exist (`404`). |
 
 Errors use `{ "code", "message", "correlationId", "retryable" }`. The BFF is the enforcement point; the frontend can hide an action but cannot authorize it.
 
@@ -348,7 +382,7 @@ Errors use `{ "code", "message", "correlationId", "retryable" }`. The BFF is the
 | Lakehouse/OneLake | Bronze/silver/gold data products and lineage | Eventstream/batch/pipeline data | Delta facts/dimensions | Direct OT control |
 | Fabric Data Science | Feature engineering, training/evaluation, MLflow lineage | Silver/gold | Evaluations, approved predictions | Autonomous model promotion |
 | Python workers | Optimization/scoring and domain validation | Gold/features/approved inputs | Recommendations, predictions, audit intent | Fabric security administration |
-| Foundry Agent Service | Grounded dialogue, retrieval, structured draft/explanation | Approved corpus and constrained API results | Agent traces/drafts | Direct planner/CMMS/OT mutation |
+| Foundry Agent Service | Grounded dialogue, retrieval, structured draft/explanation, per-tier Copilot chat answers | Approved corpus, constrained API results, and prompt-supplied chat grounding | Agent traces/drafts | Direct planner/CMMS/OT mutation, or reading data the caller cannot see |
 | Azure Speech | STT only | Consent-approved audio | Transcript result | Procedure publication |
 | BFF | User API, authorization, mediation, audit/correlation | KQL/gold/domain services | API response, workflow requests | Raw data lake ownership |
 | Blazor/React | Persona experience and accessibility | BFF/Power BI only | User intent | Authorization or workload operations |
@@ -501,6 +535,18 @@ Every flow propagates `correlation_id`; a decision audit record links it to even
 **Decision:** Internal NovaSteel personas use Entra-based Embed for your organization/direct Power BI access, with RLS/role scope preserved.  
 **Consequences:** App-owns-data embedding is not an internal authorization workaround and needs a new external-sharing design if ever proposed.
 
+### ADR-011 — The Copilot chat explains, it does not retrieve operational values
+
+**Status:** Accepted.  
+**Decision:** The chat agents receive no tools. `knowledge-orchestrator` assembles the grounding material — active screen profile, matched glossary definitions, and, only when the user ticks Online search, a curated corpus of durable public-context entries with official sources. The model answers from that material and the answer carries the sources it used. Live web search is not enabled.  
+**Consequences:** The chat cannot leak a value the caller is not entitled to see, and it cannot cite a page that changed after the demo was rehearsed. It also cannot answer a genuinely novel operational question — that is the dashboard's job, and the answer says so. Extending coverage means extending the glossary and screen profiles, which are reviewable artifacts, rather than widening a model's reach.
+
+### ADR-012 — Conversations are in-process and never persisted to Fabric
+
+**Status:** Accepted.  
+**Decision:** Chat history lives in the `bff-api` process, keyed by the calling user, and is dropped on restart. A temporary-chat toggle skips storage entirely, and any conversation can be deleted by its owner.  
+**Consequences:** Free-text questions attributable to a named operator never enter the governed estate, so no new retention, classification, or subject-access obligation is created for a demonstration. The cost is that history does not survive a deployment; that is stated in the UI rather than hidden. Dictation is likewise browser-side only, so no audio reaches the backend.
+
 ## 11. Implemented repository topology
 
 ```text
@@ -513,7 +559,7 @@ Every flow propagates `correlation_id`; a decision audit record links it to even
 │   ├── optimizer-worker/             # Constraint solver and recommendation worker
 │   ├── scoring-worker/               # RUL/quality inference and monitoring
 │   ├── ingest-relay/                 # Event Hubs → Eventstream Custom Endpoint
-│   └── knowledge-orchestrator/       # Consent, STT, draft/review workflow
+│   └── knowledge-orchestrator/       # Consent, STT, draft/review workflow, Copilot chat grounding
 ├── simulator/
 │   ├── manifests/                     # Seeded JSON scenarios, no personal data
 │   ├── cli.py, generator.py           # Deterministic scenario entry point/orchestrator
