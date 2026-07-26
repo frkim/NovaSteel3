@@ -265,3 +265,38 @@ Because the honest answer to "which model answered this?" should never be hidden
 **Q65. What does the dock buy you that a modal or drawer would not?**
 Dockview gives the user a real workspace: the chat can sit at any edge and be resized against the dashboard, so a question can be asked *while* the chart that provoked it is still visible — which is the whole point of screen-aware grounding. Floating groups are disabled, so the panel can never detach into a stray window that gets lost behind the browser. The layout is remembered per browser, and a stored layout that does not restore cleanly is discarded in favour of the default. While the chat is closed no grid is mounted at all, so the default dashboard render path is unchanged.
 
+---
+
+## O. Device Operations and Simulator
+
+**Q66. If the device simulator is synthetic, does it represent a real OT connection?**
+No — it has no connection to any OT system, PLC, historian, or real plant network, and no code path in the device simulator or BFF adapter has the capability to reach one. All 34 sensor values are generated from a seeded pseudo-random number generator advancing a deterministic clock. The Device Fleet, Sensor Explorer, and Device Simulator screens show only this synthetic ring-buffer data. The safety boundary is architectural, not a configuration toggle: the adapter has no network socket, no Event Hubs consumer, no historian client, and no write-back path. (ADR-013 and security §25.4.)
+
+**Q67. Why does the simulator run inside the BFF rather than as a separate service?**
+Because the ring buffer's memory footprint is small (~2 MB for 34 sensors × 1440 samples) and the Device Operations routes are the only consumer. Adding a separate Container App would cost approximately the same as the BFF itself and would add a network hop, a new deployment artifact, and an extra health-check surface — all for a subsystem with no independently scalable load. The pattern mirrors `optimizer-worker` and `scoring-worker`, both of which are importable Python libraries rather than microservices. The standalone FastAPI app and Dockerfile are also shipped for teams that need out-of-process deployment; that path requires only a change to `device_adapter.py` and no API contract modification.
+
+**Q68. The Device Fleet shows `LUX-BF-01` as degraded from the start — is that a bug?**
+No — it is intentional. The BFF demo-mode adapter starts with the `lining-degradation-21d` seed (240726) and pre-seeds a `degrading-furnace` incident on `LUX-BF-01` during warm-up. On every read it re-arms the incident once it expires. This ensures the Device Fleet page always shows meaningful sensor deviation without the presenter having to manually inject an incident. Any explicit operator command (e.g., `stop`, `reset`, `set-scenario`) disables the auto-seeding permanently for that process lifetime. It is a deliberate UX choice: a perfectly green all-OK fleet is not a compelling opening for a reliability conversation.
+
+---
+
+## P. GDPR Erasure and the Immutable Audit Chain
+
+**Q69. GDPR Art. 17 requires data deletion — but you say the audit chain is immutable. How do you reconcile those two requirements?**
+By separating data categories. Personal data (operator voice recordings, interview transcripts, and Copilot conversation text attributable to a named user) is held in stores that support hard deletion. The hash-chained audit log records *decision events* — model version, inputs, output, confidence, human action — and these are retained for safety and regulatory traceability. GDPR Art. 17(3)(d) provides an exemption for processing necessary for scientific or historical research and for reasons of public interest where erasure would seriously impair the achievement of that processing. For a blast-furnace decision trail, the exemption is engaged.
+
+Practically: executing an erasure request appends an `erasure.executed` tombstone to the audit chain. The chain is never mutated. `verify()` returns `True` both before and after. The receipt carries `chainVerifiedBefore` and `chainVerifiedAfter`, both `true`. This lets an auditor confirm that (a) the personal data was erased and (b) the decision evidence is intact, without one claim contradicting the other.
+
+**Q70. The erasure receipt carries `subjectPseudonym` instead of the original ID — can the subject be re-identified?**
+The pseudonym is a salted SHA-256 digest of the `subjectId`. Without the salt, computing the digest from a known `subjectId` is possible but the digest cannot be reversed to recover the `subjectId`. The salt is held in the Key Vault under the same access controls as other production secrets. The raw `subjectId` is write-only at the API level: it is accepted in the request body, hashed on receipt, and never echoed in any response, list view, or audit export. This limits re-identification risk even if an audit log is exported to a less-controlled environment.
+
+---
+
+## Q. Grounded RAG and the Decline Behaviour
+
+**Q71. Why does the knowledge query endpoint decline rather than always returning an answer?**
+Because a confident wrong answer to a furnace-safety procedure question is more dangerous than a clear refusal. The pipeline retrieves from approved procedures only, then applies a content-term overlap guard before generating an answer. If no approved chunk shares a content term with the question, the system returns `declined: true, declineReason: "no_grounded_source"` rather than fabricating an answer from the model's parametric knowledge. The same decline fires for content-policy violations and for generated sentences that lack mandatory inline citations. This is the correct posture for a safety-critical knowledge system: the absence of a grounded source is information, not a failure.
+
+**Q72. The pipeline uses "reciprocal rank fusion." Why not just threshold the relevance score?**
+Because RRF scores are rank-aggregation artefacts with no absolute meaning. RRF fuses BM25 lexical ranking and cosine-similarity ranking by position, not by magnitude: a `fusedScore` of 0.8 from RRF does not mean "80% confidence of relevance" — it means the chunk ranked highly on both individual methods. Even a completely unrelated query will always produce a "best" chunk from RRF, because RRF always produces an ordered list. A hard threshold on `fusedScore` would therefore be arbitrary and would not prevent ungrounded answers. The content-term overlap guard is the correct semantic gate: it checks whether the retrieved chunk shares domain vocabulary with the query, which is a meaningful relevance signal independent of rank arithmetic.
+

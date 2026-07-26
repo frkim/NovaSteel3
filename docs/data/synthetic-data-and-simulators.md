@@ -551,3 +551,110 @@ The committed requirements are exact-version pins but do not carry hash entries,
 so do not add `--require-hashes` until a hash-locked file is committed. Do not
 add `--extra-index-url` for public registries. NuGet-based components must use
 `https://packagefeedproxy.microsoft.io/nuget/v3/index.json`.
+
+## 13. Device Operations simulator estate
+
+Wave 3 introduces a real-time device-telemetry simulator (`services/device-simulator`) that is separate from the batch scenario generator above. It produces a live, clock-driven ring buffer of sensor readings from a six-device industrial estate and is consumed by the BFF's Device Operations routes.
+
+### 13.1 Device catalog
+
+Site identifier: `NS-DEMO-LUX-01` (Moselle Integrated Works, Luxembourg).
+
+**Total: 6 devices, 34 sensors** (18 core + 16 extended).
+
+| Device ID | Area | Asset type | Core sensors | Extended sensors |
+|---|---|---|---|---|
+| `LUX-BF-01` | Ironmaking | Blast furnace | 18 | 0 |
+| `LUX-BOF-01` | Steelmaking | Basic oxygen furnace | 0 | 5 |
+| `LUX-CC-01` | Casting | Slab caster | 0 | 5 |
+| `LUX-RHF-01` | Rolling | Reheat furnace | 0 | 0 (shares core) |
+| `LUX-HSM-01` | Rolling | Hot strip mill | 0 | 0 (shares core) |
+| `LUX-UTIL-01` | Utilities | Energy system | 0 | 6 |
+
+The 18 core sensors on `LUX-BF-01` mirror the thermal-process signals defined in `simulator/config.py` (hearth-shell thermocouples by sector, cooling-water inlet/outlet temperatures and flow, local heat flux, hot-blast temperature and pressure, top pressure, PCI rate, hot-metal temperature, production rate). Extended sensors on `LUX-BOF-01`, `LUX-CC-01`, and `LUX-UTIL-01` add steelmaking, casting, and utility-energy signals specific to those asset classes.
+
+### 13.2 Determinism guarantees
+
+| Parameter | Value |
+|---|---|
+| Simulation start | `2024-07-25T06:00:00Z` |
+| Default tick interval | 5 seconds |
+| Ring buffer capacity | 1 440 samples per sensor |
+| Maximum catch-up ticks per read | 500 |
+| Seed derivation | child seed = first 64 bits of `SHA-256(parent_seed ‖ scenario ‖ sensor_id)` |
+
+Reads auto-advance the deterministic clock by the elapsed wall-clock delta (up to 500 ticks per call) without requiring a background thread, which makes the adapter safe to run in-process inside the BFF.
+
+### 13.3 Scenarios
+
+| Scenario ID | Nominal seed | Characteristic |
+|---|---|---|
+| `healthy-baseline` | 240725 | All signals nominal; no incidents |
+| `lining-degradation-21d` | 240726 | Hearth lining wear develops on `LUX-BF-01` over ~21 simulated days |
+| `energy-price-spike` | 240727 | Spot price and site-active-power spike on `LUX-UTIL-01` |
+| `quality-drift` | 240728 | Dimensional signals drift on `LUX-CC-01` and `LUX-HSM-01` |
+| `edge-outage-recovery` | 240729 | Sensors go stale then recover, exercising buffering and reconnect |
+| `demo-full` | 240725 | Full-estate composite; the BFF demo-mode adapter starts this with seed `240726` (lining-degradation seed) to pre-warm hearth thermal signals |
+
+> **Note:** The device-simulator `README.md` states "23 signals" and "5 demo scenarios." These figures are incorrect; the source code (`catalog.py`) defines **34 sensors** and `SCENARIO_SEEDS` contains **6 entries**. The README predates the extension of the catalog and has not been updated; `catalog.py` is the authoritative source.
+
+### 13.4 Incident catalog
+
+Seven parameterised incidents can be injected at runtime. `Platform.Capacity.Manage` is required.
+
+| Incident ID | Severity | Default duration | Default target | Effect |
+|---|---|---|---|---|
+| `degrading-furnace` | high | 30 min | `LUX-BF-01` | Hearth-shell-temperature rise and heat-flux increase; mirrors lining-wear signature |
+| `cooling-water-loss` | critical | 15 min | `LUX-BF-01` | Cooling-circuit signals drop; shell temperature rises sharply |
+| `sensor-drift` | medium | 60 min | (operator-selected) | Additive bias applied to the target sensor |
+| `sensor-dropout` | medium | 10 min | (operator-selected) | Sensor quality goes `bad`; status becomes `stale` |
+| `energy-price-spike` | medium | 45 min | `LUX-UTIL-01` | `spot_price` and `site_active_power` spike |
+| `quality-drift` | high | 45 min | `LUX-CC-01`, `LUX-HSM-01` | Dimensional signals drift progressively |
+| `edge-outage-recovery` | low | 20 min | (operator-selected) | All sensors on the target go stale, then recover sequentially |
+
+Active incidents are visible in the Device Simulator panel's active-incident list with elapsed time and a progress bar. Any incident can be cleared early via `DELETE /v1/devices/incidents/{activeIncidentId}`.
+
+### 13.5 Sensor status — approach-band rule
+
+The status module (`status.py`) applies an OT-standard approach-band algorithm rather than a naive "outside range" test:
+
+| Condition (evaluated in order) | Status |
+|---|---|
+| Sensor quality is `bad` | `stale` |
+| Sample age exceeds 3 × sample period | `stale` |
+| Value is within the inner 90 % of the `[low, high]` span (i.e., > 5 % away from either limit) | `normal` |
+| Value is within 5 % of span from either limit (on the inside) | `warning` |
+| Value exceeds a limit by more than 5 % of span (on the outside) | `alarm` |
+
+**Rationale:** the waveform generator clamps output values to the `[low, high]` range before writing to the ring buffer. A naive "outside range" check would therefore never fire `alarm`, because a saturated sensor appears healthy. The approach band solves this by firing `warning` as the value approaches the clamp point, and `alarm` when the signal would have exceeded the limit. This is consistent with IEC 62682 alarm-management practice.
+
+Device health scores and device-level status are derived from sensor states:
+
+- `alarm` or `stale` → penalty 1.0; `warning` → penalty 0.4; `normal` → penalty 0.0.
+- Device score = 1 − weighted bad-sensor fraction.
+- Device status: any `stale` sensor → `offline`; any `alarm` → `fault`; any `warning` → `degraded`; all `normal` → `healthy`.
+
+### 13.6 Demo-mode auto-seeding
+
+When the BFF starts in demo mode the `DeviceAdapter`:
+
+1. Starts with scenario `demo-full`, seed `240726`, speed factor 1.0.
+2. Runs 720 warm-up ticks (≈ 8 hours of simulated history).
+3. Seeds a `degrading-furnace` incident on `LUX-BF-01` for 90 minutes, then advances 918 more ticks (~85 % incident progress).
+4. On every subsequent read, re-arms the incident when it expires (`_ensure_demo_incident()`), so the Device Fleet page is never an all-green, empty-chart fleet.
+5. Any explicit `Platform.Capacity.Manage` simulator command sets `_auto_demo = False` and disables re-arming permanently for that process lifetime.
+
+This is a deliberate design choice: the demo must immediately show meaningful sensor deviation without the presenter having to manually inject an incident.
+
+### 13.7 Relationship to the batch scenario generator
+
+The device simulator (`services/device-simulator`) and the batch scenario generator (`simulator/`) address different layers:
+
+| | Batch generator | Device simulator |
+|---|---|---|
+| Output | JSON fixture files for the BFF's fixture adapters | In-process ring buffer for the `/v1/devices/*` routes |
+| Clock model | Static manifest with configurable simulated clock | Advancing wall-clock delta on each read |
+| Primary use | RUL / energy / quality / knowledge demo moments | Device Operations screen (fleet, sensor explorer, simulator controls) |
+| Storage | `services/bff-api/fixtures/demo-full/` | In-memory ring buffer (per-process) |
+
+Both paths use deterministic seeds, so results are reproducible independently of one another.

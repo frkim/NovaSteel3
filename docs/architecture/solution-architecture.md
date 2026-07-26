@@ -313,12 +313,13 @@ The Copilot dock is a layout host inside the MFE, not a second application. Dock
 
 | Python service | Responsibility | Forbidden responsibility |
 |---|---|---|
-| `bff-api` | Entra token validation, persona/plant authorization, response shaping, SSE, audit initiation, capacity request mediation, Power BI internal embed mediation | Direct browser-to-Fabric credentials, direct PLC/MES control, authorization based only on hidden UI elements |
+| `bff-api` | Entra token validation, persona/plant authorization, response shaping, SSE, audit initiation, capacity request mediation, Power BI internal embed mediation, device operations routing (in-process `DeviceAdapter`) | Direct browser-to-Fabric credentials, direct PLC/MES control, authorization based only on hidden UI elements |
 | `optimizer-worker` | Price/constraint validation, deterministic feasible schedule, what-if and recommendation persistence | Autonomous production schedule commit |
 | `scoring-worker` | Approved RUL/quality scoring, model-version capture, drift metrics | Retraining/promotion without review |
 | `ingest-relay` | Event Hubs consumer, canonical envelope validation, Custom Endpoint publisher, replay/health metrics | Curated-data access or user-facing APIs |
-| `knowledge-orchestrator` | Consent/workflow coordination, STT request, draft/review state, Foundry tool mediation, Copilot chat grounding and conversation state | Publishing unreviewed procedures, answering from ungrounded model knowledge |
+| `knowledge-orchestrator` | Consent/workflow coordination, STT request, draft/review state, Foundry tool mediation, Copilot chat grounding and conversation state, grounded RAG query pipeline, GDPR Art. 17 erasure service | Publishing unreviewed procedures, answering from ungrounded model knowledge |
 | `capacity-operator` | ARM long-running-operation mediation after policy checks | Browser-accessible capacity credentials or production auto-pause |
+| `device-simulator` | Deterministic clock-driven ring-buffer simulation of 6 devices / 34 sensors at site `NS-DEMO-LUX-01`; importable library inside `bff-api` (in-process) and also ships a standalone FastAPI app + Dockerfile for teams that want it out-of-process | OT control writes, production device management |
 
 ### 5.3 API contract
 
@@ -367,8 +368,73 @@ AI-derived values use a common shape:
 | `/v1/platform/capacity/sku-requests` | POST | `Platform.Capacity.Manage` | Resizes the non-production capacity within the policy-enforced SKU allow-list; leaves lifecycle state unchanged and is refused mid-transition. |
 | `/v1/copilot/chat` | POST | Any persona-scoped reader | Answers from assembled grounding material only; returns the sources used, the resolved reasoning tier, and whether the curated public corpus was consulted. Never returns an operational value the caller could not already see. |
 | `/v1/copilot/conversations/{id}` | GET, DELETE | Owning user only | History is owner-scoped and in-process; a conversation belonging to another user is indistinguishable from one that does not exist (`404`). |
+| `/v1/devices` | GET | Reader role | All devices for the caller's plant scope with current status and health score. |
+| `/v1/devices/{deviceId}` | GET | Reader role | Single device with current status, health score, and active incidents. |
+| `/v1/devices/sensors` | GET | Reader role | All sensors; optional `deviceId` filter. |
+| `/v1/devices/sensors/{sensorId}/series` | GET | Reader role | Time-series ring-buffer data; `window` (default 1h) and `points` (default 120, max 1440). |
+| `/v1/devices/simulator` | GET | Reader role | Current simulator state (state, scenario, seed, speed, clock, ticks, active incidents). |
+| `/v1/devices/simulator/commands` | POST | `Platform.Capacity.Manage` | State-machine commands (`start`, `pause`, `resume`, `stop`, `reset`, `set-speed`, `set-scenario`). `409 SIMULATOR_STATE_CONFLICT` for illegal transitions. |
+| `/v1/devices/incidents` | POST | `Platform.Capacity.Manage` | Inject a parameterised incident by `incidentId`; optional `deviceId`/`sensorId`/`durationMinutes`. |
+| `/v1/devices/incidents/{activeIncidentId}` | DELETE | `Platform.Capacity.Manage` | Clear an active incident early. |
+| `/v1/knowledge/query` | POST | Reader role | Grounded RAG query over approved procedures; `declined: true` with `declineReason` when no grounded source, content policy violation, or citation enforcement fails. |
+| `/v1/privacy/erasure-requests` | POST | `Compliance.Auditor` | Create GDPR Art. 17 erasure request; body: `{subjectType, subjectId, reason}`. |
+| `/v1/privacy/erasure-requests` | GET | `Compliance.Auditor` | List erasure requests; optional `status` filter. |
+| `/v1/privacy/erasure-requests/{requestId}` | GET | `Compliance.Auditor` | Single erasure request with status and pseudonym. |
+| `/v1/privacy/erasure-requests/{requestId}:execute` | POST | `Compliance.Auditor` | Execute the erasure; requires `Idempotency-Key`; returns receipt with `chainVerifiedBefore`/`chainVerifiedAfter`. |
 
 Errors use `{ "code", "message", "correlationId", "retryable" }`. The BFF is the enforcement point; the frontend can hide an action but cannot authorize it.
+
+### 5.4 Device Operations subsystem
+
+#### 5.4.1 Overview
+
+The Device Operations subsystem provides real-time device fleet monitoring, sensor exploration, and controlled incident injection for the six-device, 34-sensor estate at `NS-DEMO-LUX-01`. It consists of three integrated layers:
+
+1. **`services/device-simulator`** — a deterministic ring-buffer simulator (seed 240726, simulated clock from 2024-07-25T06:00Z, 5-second tick, 1440-sample buffer per sensor). Ships as both an importable Python library and a standalone FastAPI app with Dockerfile.
+2. **`bff-api/device_adapter.py`** — runs the simulator in-process, mirroring the pattern of `optimizer-worker` and `scoring-worker`. Exposes the eight Device Operations BFF routes.
+3. **`analytics-mfe` Device Operations section** — three subviews: Device Fleet, Sensor Explorer, and Device Simulator. All strings are translated into EN/FR/DE/NL/ES via `deviceMessages.ts`.
+
+#### 5.4.2 In-process deployment rationale
+
+See **ADR-013** below. Running the simulator in-process avoids the cost and operational complexity of an eighth Container App while preserving the standalone FastAPI path for teams that require out-of-process deployment.
+
+#### 5.4.3 Route registration order
+
+Routes `/v1/devices/sensors` and `/v1/devices/simulator` are registered in FastAPI **before** `/v1/devices/{deviceId}` to prevent the path-parameter route from consuming literal path segments. This is an important implementation constraint that must be preserved on any route-order refactoring.
+
+#### 5.4.4 GDPR Art. 17 erasure — audit-chain invariant
+
+The knowledge orchestrator's erasure service (`erasure.py`) handles GDPR Art. 17 right-to-erasure requests across four target stores:
+
+| Store | Erasure action | GDPR basis |
+|---|---|---|
+| Interview transcripts | Hard delete | Art. 17(1) |
+| Knowledge procedures | Attribution pseudonymized (salted SHA-256 of `subjectId`); procedure body retained | Art. 17(3)(d) — scientific/historical research exemption for safety-critical industrial procedures |
+| Copilot conversations | Hard delete | Art. 17(1) |
+| Audit chain | Tombstone appended (`erasure.executed` event) | Never mutated |
+
+> **Invariant:** the hash-chained audit log is **never mutated**. Executing an erasure appends an `erasure.executed` tombstone; `verify()` returns `True` both before and after the tombstone is written. The erasure receipt carries `chainVerifiedBefore` and `chainVerifiedAfter` (both `true` under normal operation) and `auditChainRef` for traceability. The raw `subjectId` is write-only and is never echoed in any response; receipts carry `subjectPseudonym` (salted SHA-256 digest).
+
+This preserves audit integrity for furnace-safety and energy-dispatch decisions while satisfying Art. 17 for personal data.
+
+#### 5.4.5 Grounded RAG query pipeline (P4 Knowledge persona)
+
+`POST /v1/knowledge/query` executes the following pipeline in `answer_query()` inside `knowledge-orchestrator/orchestrator.py`:
+
+1. **Content Safety screen — input**: Azure Content Safety provider (with `LocalHeuristicContentSafety` as offline fallback); block threshold severity ≥ 4.
+2. **Hybrid retrieval**: BM25 lexical scoring fused with cosine-similarity vector scoring using reciprocal rank fusion (RRF) over **approved procedures only**.
+3. **Content-term overlap guard**: checks that retrieved chunks share at least one content term (≥ 4 characters) with the query. This guard is necessary because RRF is rank-only — `fusedScore` carries no absolute relevance and cannot be thresholded. A query with no domain match still returns a "best" chunk from RRF, so the overlap guard is the semantic gate.
+4. **Per-sentence citation enforcement**: every sentence of the generated answer must carry an inline `[[{chunk_id}]]` citation before its terminal punctuation.
+5. **PII redaction**: emails, phone numbers, IBANs, role-contextual person names, employee IDs (format `EMP-#####`), IPv4 addresses, and dates of birth are redacted from the answer.
+6. **Content Safety screen — output**: same provider and threshold applied to the generated answer.
+
+The service declines rather than answering when grounding fails:
+
+| `declineReason` | Condition |
+|---|---|
+| `no_grounded_source` | Content-term overlap guard finds no match, or retrieval returns no chunks |
+| `content_policy_violation` | Input or output fails the Content Safety screen |
+| `citation_enforcement_failed` | One or more generated sentences lack a valid citation |
 
 ## 6. Component responsibility matrix
 
@@ -547,6 +613,13 @@ Every flow propagates `correlation_id`; a decision audit record links it to even
 **Decision:** Chat history lives in the `bff-api` process, keyed by the calling user, and is dropped on restart. A temporary-chat toggle skips storage entirely, and any conversation can be deleted by its owner.  
 **Consequences:** Free-text questions attributable to a named operator never enter the governed estate, so no new retention, classification, or subject-access obligation is created for a demonstration. The cost is that history does not survive a deployment; that is stated in the UI rather than hidden. Dictation is likewise browser-side only, so no audio reaches the backend.
 
+### ADR-013 — Device simulator runs in-process inside the BFF
+
+**Status:** Accepted.  
+**Decision:** The device simulator (`services/device-simulator`) is imported as a Python library by `bff-api/device_adapter.py` and runs in the same process as the BFF, mirroring the established pattern of `optimizer-worker` and `scoring-worker`. The package also ships a standalone FastAPI app and Dockerfile for teams that require out-of-process deployment.  
+**Context:** An additional Container App for the device simulator would cost approximately the same as the BFF itself, yet the simulator serves only the Device Operations screen and has no independently scalable load. In-process execution keeps the demo deployment to the same Container App count as the preceding wave.  
+**Consequences:** The BFF process memory grows by the ring buffer (34 sensors × 1440 samples × ~40 bytes ≈ ~2 MB). The simulator's deterministic clock advances on reads rather than via a background thread, which is safe in-process but means the simulated time tracks wall-clock drift only when the BFF is receiving requests. For any team that needs continuous clock advance independent of request load, the standalone FastAPI option is the recommended path. Any future decision to move the simulator to a separate Container App requires updating only `device_adapter.py` and the BFF environment configuration; no API contract change is required because the BFF routes remain the consumer surface.
+
 ## 11. Implemented repository topology
 
 ```text
@@ -559,7 +632,8 @@ Every flow propagates `correlation_id`; a decision audit record links it to even
 │   ├── optimizer-worker/             # Constraint solver and recommendation worker
 │   ├── scoring-worker/               # RUL/quality inference and monitoring
 │   ├── ingest-relay/                 # Event Hubs → Eventstream Custom Endpoint
-│   └── knowledge-orchestrator/       # Consent, STT, draft/review workflow, Copilot chat grounding
+│   ├── knowledge-orchestrator/       # Consent, STT, draft/review workflow, Copilot chat grounding, grounded RAG query, GDPR Art. 17 erasure
+│   └── device-simulator/             # Deterministic ring-buffer device/sensor simulator (6 devices, 34 sensors); in-process library + standalone FastAPI app
 ├── simulator/
 │   ├── manifests/                     # Seeded JSON scenarios, no personal data
 │   ├── cli.py, generator.py           # Deterministic scenario entry point/orchestrator
@@ -631,6 +705,9 @@ Research links below are official-source research documents; direct Microsoft Le
 | Eventstream managed private endpoint limits and Event Hubs path | [Connect Azure resources securely using managed private endpoints](https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/set-up-private-endpoint) |
 | Foundry agent regions, tools, identity, EU model placement, STT | [Azure AI regions research](../research/azure-ai-regions.md); [Agent limits/regions](https://learn.microsoft.com/azure/foundry/agents/concepts/limits-quotas-regions); [Foundry authentication](https://learn.microsoft.com/azure/foundry/concepts/authentication-authorization-foundry); [model deployment types](https://learn.microsoft.com/azure/ai-foundry/foundry-models/concepts/deployment-types); [Fast transcription](https://learn.microsoft.com/azure/ai-services/speech-service/fast-transcription-create) |
 | Functional, security, demo, and synthetic contract requirements | [Solution requirements](../specs/solution-requirements.md), [personas](../personas/personas-and-journeys.md), [synthetic data](../data/synthetic-data-and-simulators.md), [demo runbook](../demo/demo-runbook.md), [UX specification](../ux/dashboard-specification.md), [security/governance](../security/security-governance-and-threat-model.md) |
+| Fabric medallion (bronze/silver/gold) pattern present | `fabric/notebooks/ns-bronze-to-silver.Notebook`, `ns-silver-to-gold.Notebook`, `ns-initialize-lakehouses.Notebook` — three-tier medallion is implemented; `docs/_upgrade` finding "medallion missing" is **closed**. |
+| Fabric Real-Time Intelligence assets present | `fabric/rti/activator-rules.template.json`, `fabric/rti/dashboard-spec.json`, `fabric/kql/dashboard-queries.kql` — RTI/KQL dashboard is implemented; `docs/_upgrade` finding "RTI missing" is **closed**. |
+| Wave 3 closed items | Device Operations subsystem (§5.4, ADR-013), GDPR Art. 17 erasure (§5.4.4), grounded RAG query pipeline (§5.4.5), Dashboard Collections, and PII/Content Safety pipeline are all implemented in source code and documented in this wave; remaining `docs/_upgrade` items not yet addressed are deferred to a future wave. |
 
 ## 15. Open production-validation items
 

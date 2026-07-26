@@ -228,3 +228,80 @@ Proceed only when:
 - presenter can finish the story entirely offline.
 
 If any synthetic-data boundary, privacy control, or safety disclaimer is missing, the demo is **no-go**.
+
+## 11. Device Operations demo beats (wave 3)
+
+These beats are optional supplementary demonstrations for audiences specifically interested in device monitoring, OT-level visibility, or simulator controls. They can be inserted after DM-1 (command center) or as a standalone extension. Total added time: approximately 4–5 minutes.
+
+### 11.1 Device Fleet overview (~1 min)
+
+Navigate to **Device Operations → Device Fleet** (`/lu/device-operations/fleet`).
+
+| Time | Action | Presenter narrative | Proof point / fallback |
+|---|---|---|---|
+| +0:00 | Open Device Fleet | Show the KPI band: 6 devices, X healthy, X degraded, mean health score, active incidents, sensors online. | "Six devices, 34 sensors, all deterministic and synthetic. The health scores derive from individual sensor alarm/warning states — no manual override." |
+| +0:30 | Point to LUX-BF-01 row (status: degraded) | Click to open the device detail panel. Show the sensor list — one or more sensors in `warning` status. | "The blast furnace is already degraded because the demo-mode auto-seeding has pre-armed the lining-wear incident. The platform never shows you a perfectly green all-OK fleet when something is developing." |
+| +0:50 | "Open in Sensor Explorer" link | Navigate to Sensor Explorer pre-filtered to LUX-BF-01. | Link carries `deviceId` pre-selected. |
+
+### 11.2 Sensor Explorer + chart (~1.5 min)
+
+Stay on **Device Operations → Sensor Explorer** (pre-filtered to LUX-BF-01).
+
+| Time | Action | Presenter narrative | Proof point / fallback |
+|---|---|---|---|
+| +0:00 | Show sensor table | Point to `hearth_temp_s07` row: status = `warning`, trend = `rising`, deviation % non-zero. | "The approach-band rule fires a warning before the value saturates. A naive threshold rule would never alarm because the waveform generator clamps values at the limit." |
+| +0:25 | Click `hearth_temp_s07` row | Chart panel opens. Switch to **Control chart** type. | Line/area/bar/control chart types all load from the same series endpoint. |
+| +0:50 | Show statistics strip | Min/max/mean/std dev/last computed over the visible window. | "All computed from the ring buffer — 1440 samples, 5-second tick, fully deterministic." |
+| +1:10 | Toggle **Normalize (0–1)** | Curve rescales to [0, 1]. | Useful for showing multiple sensors on one axis if the audience wants to see correlated drift. |
+| +1:20 | Click **View as table** | HTML table fallback renders. | "WCAG 2.2 AA — every chart has a screen-reader-navigable table equivalent." |
+
+### 11.3 Live incident injection (Degrading Furnace) (~1.5 min)
+
+Navigate to **Device Operations → Device Simulator** (`/lu/device-operations/simulator`).
+
+> **Prerequisites:** the BFF must be running. The presenter must hold `Platform.Capacity.Manage` (or use the local demo header).
+
+| Time | Action | Presenter narrative | Proof point / fallback |
+|---|---|---|---|
+| +0:00 | Show Simulator KPI band | State = `running`, scenario = `demo-full`, seed = 240726, speed = 1.0×, elapsed hours, tick count, active incidents = 1. | "The simulator started with a lining-degradation seed and has been running since BFF startup. One incident is already active." |
+| +0:25 | In the IncidentPanel, click **Trigger** next to `degrading-furnace` | Target-selection dialog appears. Leave device as `LUX-BF-01`, accept default 30-minute duration. Confirm. | The incident appears in the Active Incidents list with a progress bar. |
+| +0:45 | Navigate back to Device Fleet | LUX-BF-01 row should now show the refreshed status. Navigate to Sensor Explorer and watch `hearth_temp_s07` rise. | "I just injected an incident from the UI. No OT system was touched — the ring buffer updated in-process. The UI reflects it on the next 5-second poll." |
+| +1:10 | Clear the incident | Back in Device Simulator, click **Clear** on the active `degrading-furnace` entry. | Active incident disappears; sensor readings return to their pre-incident trajectory within a few ticks. |
+| +1:25 | Explain the boundary | "The simulator is synthetic. It controls only the in-memory ring buffer inside the BFF process. It has no path to OT, no network connection to a PLC or historian, and no way to actuate anything real." | Use the security §25.4 language if pressed on the OT boundary. |
+
+**Expected values for the cue sheet:**
+
+| Cue | Expected |
+|---|---|
+| Device Fleet KPI band | totalDevices = 6; at least 1 degraded or fault |
+| LUX-BF-01 initial status | `degraded` (pre-armed incident) |
+| hearth_temp_s07 status | `warning` |
+| Active incident after trigger | 1 or 2 (pre-armed + new), progressing |
+| After clear | Active incidents reduced by 1 |
+
+If any value is outside the expected band, use a cached screenshot/JSON and continue with the narrative.
+
+## 12. Grounded-RAG decline demo beat (wave 3)
+
+This beat demonstrates the knowledge query pipeline's decline-rather-than-hallucinate behaviour. Insert during or after DM-5 (Knowledge Hub). Adds approximately 1 minute.
+
+### 12.1 Decline on ungrounded query
+
+Navigate to **Knowledge Hub → Procedures** (or use the API directly with `drive_demo.py`).
+
+| Time | Action | Presenter narrative | Proof point / fallback |
+|---|---|---|---|
+| +0:00 | POST to `/v1/knowledge/query` with a question outside procedure scope (e.g., `"What is the capital of France?"`) | Show the response: `"declined": true, "declineReason": "no_grounded_source"`. | "The grounded-RAG pipeline declines when no approved procedure shares a content term with the query. It does not invent an answer." |
+| +0:20 | POST with a legitimate procedure question (e.g., `"What do I check when hearth sector temperature rises but cooling flow is normal?"`) | Show the response: `"declined": false`, answer with inline `[[chunk-id]]` citations, and `citations[]` referencing approved procedure IDs. | "Now it finds a grounded match and enforces per-sentence citations. Every sentence that makes a claim must carry a source reference." |
+| +0:40 | Highlight the PII-clean output | Point out that no personal names, emails, or employee IDs appear in the answer. | "PII redaction runs on the generated answer before it leaves the service." |
+| +0:55 | Close the beat | "The system declines rather than hallucinating. For a safety-critical industrial procedure library, a confident wrong answer is more dangerous than a clear 'I cannot answer this from approved sources'." | |
+
+**Decline reasons for the FAQ:**
+
+| `declineReason` | When it fires |
+|---|---|
+| `no_grounded_source` | RRF retrieval finds no chunk sharing a content term with the query, or retrieval returns empty |
+| `content_policy_violation` | Input or output fails the Content Safety screen (severity ≥ 4) |
+| `citation_enforcement_failed` | One or more generated sentences lack a valid `[[chunk_id]]` citation |
+
+If the BFF is unavailable, use the cached decline-response JSON from the fallback pack and narrate the pipeline from the architecture diagram.

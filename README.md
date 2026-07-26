@@ -145,6 +145,10 @@ to `NS-DEMO-LUX-01`. Useful direct routes are:
 | Sustainability / audit | `http://localhost:5266/lu/sustainability-compliance/emissions-ledger` |
 | Executive overview | `http://localhost:5266/lu/executive-overview` |
 | Platform capacity simulation | `http://localhost:5266/lu/platform-ops/capacity` |
+| Device Fleet (wave 3) | `http://localhost:5266/lu/device-operations/fleet` |
+| Sensor Explorer (wave 3) | `http://localhost:5266/lu/device-operations/sensors` |
+| Device Simulator (wave 3) | `http://localhost:5266/lu/device-operations/simulator` |
+| Dashboard Collections (wave 3) | `http://localhost:5266/lu/dashboards/collections` |
 
 The **Copilot** button in the dashboard header opens a docked chat panel on any
 of these routes. It answers from the active screen's grounding material — screen
@@ -189,6 +193,23 @@ and can be generated, validated, and removed safely:
 & .\services\bff-api\.venv\Scripts\python.exe -m simulator.cli validate --run-dir .\output\demo
 & .\services\bff-api\.venv\Scripts\python.exe -m simulator.cli reset --out .\output\demo
 ```
+
+The wave-3 **device simulator** runs in-process inside the BFF (no extra
+Container App) and seeds the `degrading-furnace` incident automatically so the
+Device Operations screens show a live fault on first load. To run it as a
+standalone out-of-process service instead (e.g., for a team that wants to scale
+it independently):
+
+```powershell
+# Standalone device simulator (optional, out-of-process)
+& .\services\bff-api\.venv\Scripts\python.exe -m uvicorn device_simulator.app:app `
+    --app-dir .\services\device-simulator\src `
+    --host 127.0.0.1 --port 8081
+```
+
+Point the BFF at it by setting `DEVICE_SIMULATOR_URL=http://127.0.0.1:8081` in
+the BFF environment. When the variable is absent, the BFF uses its built-in
+in-process adapter (the default for the demo).
 
 Stop both local listeners after the rehearsal:
 
@@ -245,6 +266,7 @@ the difference is scope, not a shortfall against the model.
 | `apps\portal-shell` | Blazor WASM host, routing, demo identity, capacity mediation |
 | `apps\analytics-mfe` | React/TypeScript MUI/D3 persona dashboard with the Dockview Copilot chat |
 | `services` | FastAPI BFF, optimizer, scoring, ingest relay, knowledge orchestration and Copilot grounding |
+| `services\device-simulator` | Deterministic 6-device/34-sensor fleet simulator (runs in-process inside BFF; standalone FastAPI app also ships) |
 | `simulator` | Deterministic synthetic scenarios, validators, CLI |
 | `contracts` | OpenAPI, event, data, and UI interop contracts |
 | `infra` | Bicep control-plane IaC, policy, OIDC-only deployment scripts |

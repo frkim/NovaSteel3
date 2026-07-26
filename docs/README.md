@@ -1,12 +1,42 @@
 # NovaSteel documentation
 
-> **Documentation status:** v1.1 · **Implemented baseline:** local deterministic
+> **Documentation status:** v1.2 · **Implemented baseline:** local deterministic
 > demo, application source, tests/CI, Bicep IaC, and Fabric source assets are
 > present and locally validated.  
 > **Cloud status:** no Azure, Fabric, Foundry, Speech, Eventstream, or Power BI
 > tenant deployment has been performed.  
 > **Technical authority:** [solution architecture](architecture/solution-architecture.md)
-> and [deployment topology](architecture/deployment-topology.md) · **Freshness:** 2026-07-25
+> and [deployment topology](architecture/deployment-topology.md) · **Freshness:** 2026-07-26
+
+## Wave 3 summary and closed analysis findings
+
+Wave 3 (completed 2026-07-26) added the following capabilities; all are now
+documented:
+
+- **Device Operations** — 6-device, 34-sensor deterministic fleet simulator
+  running in-process inside the BFF; Device Fleet, Sensor Explorer, and Device
+  Simulator UI screens; 7 fault-incident catalog; approach-band sensor status
+  rule (§13, [synthetic-data-and-simulators.md](data/synthetic-data-and-simulators.md);
+  §5.4 and ADR-013, [solution-architecture.md](architecture/solution-architecture.md)).
+- **Dashboard Collections** — 6 predefined role-scoped dashboard bundles
+  (screen S-23, [dashboard-specification.md](ux/dashboard-specification.md)).
+- **GDPR Art. 17 erasure** — 4-store targeting (hard delete / pseudonymization /
+  tombstone); hash-chained audit log invariant preserved through erasure
+  (§25.1, [security-governance-and-threat-model.md](security/security-governance-and-threat-model.md)).
+- **Grounded RAG with safety pipeline** — hybrid BM25+cosine retrieval, RRF
+  fusion, content-term overlap guard, citation enforcement, PII redaction,
+  dual Azure Content Safety screens, structured decline (FR-KNW-08;
+  §4.7, [api-contracts.md](implementation/api-contracts.md)).
+
+Two findings from `docs/_upgrade/` are now **closed**:
+
+| Finding | Status | Implementing artifacts |
+|---|---|---|
+| Medallion (bronze/silver/gold) pattern missing | **Closed** | `fabric/notebooks/ns-bronze-to-silver.Notebook`, `fabric/notebooks/ns-silver-to-gold.Notebook`, `fabric/kql/dashboard-queries.kql` |
+| Fabric Real-Time Intelligence (RTI) missing | **Closed** | `fabric/rti/activator-rules.template.json`, `fabric/rti/dashboard-spec.json` |
+
+All remaining `docs/_upgrade/` items addressed in wave 3 are noted in
+§14 of [solution-architecture.md](architecture/solution-architecture.md).
 
 ## Executive summary
 
@@ -26,7 +56,7 @@ systems, CMMS, or production schedules.
 
 | Area | Implemented and evidenced | Not yet deployed/proven |
 |---|---|---|
-| Application | Portal shell, analytics MFE, Dockview Copilot chat, BFF routes, authorization stubs, audit hash-chain (durable via Table Storage), simulated capacity control | Entra production validation, cloud query adapters |
+| Application | Portal shell, analytics MFE (including Device Fleet, Sensor Explorer, Device Simulator, and Dashboard Collections screens), Dockview Copilot chat, BFF routes, authorization stubs, audit hash-chain (durable via Table Storage), simulated capacity control | Entra production validation, cloud query adapters |
 | Data/demo | Deterministic simulator, committed fixture, PuLP/CBC MILP optimizer, physics-informed RUL regressor, six persona moments, offline fallback | OT ingestion and non-synthetic data |
 | Fabric | Source-controlled item/catalog/KQL/Lakehouse/notebook/pipeline/semantic/RTI assets; local structural validator | Fabric tenant workspace, capacity, item deployment, RLS/query behavior |
 | Azure IaC | Bicep, policy, OIDC deployment scripts, alert rules, static validation — **deployed to Sweden Central** | Private-network hardening proof, DR rehearsal |
@@ -85,7 +115,7 @@ The PowerPoint has 26 slides: 20 primary narrative/demo-handoff slides and six
 FAQ backup slides. The package validator found no placeholders and confirms
 alignment to the demo transitions.
 
-## Repository/document index
+| Repository/document index
 
 | Area | Primary artifacts |
 |---|---|
@@ -93,6 +123,7 @@ alignment to the demo transitions.
 | Architecture | [Solution architecture](architecture/solution-architecture.md), [deployment topology](architecture/deployment-topology.md), [editable diagrams](diagrams/README.md) |
 | Implementation | [Root quick start](../README.md), [implementation guide](implementation/implementation-guide.md), [API contracts](implementation/api-contracts.md) |
 | Data/Fabric | [Synthetic data](data/synthetic-data-and-simulators.md), [Fabric README](../fabric/README.md), [Fabric research](research/fabric-platform.md) |
+| Device Operations | [Synthetic data §13](data/synthetic-data-and-simulators.md#13-device-simulator-estate), [UX spec §12.9–12.10](ux/dashboard-specification.md), [API contracts §4.12](implementation/api-contracts.md#412-device-operations), [Operations §12](operations/operations-and-cost.md) |
 | Security/operations | [Security governance](security/security-governance-and-threat-model.md), [operations](operations/operations-and-cost.md), [package-feed policy](tech/security_requirement.md) |
 | Validation | [Validation report](validation-report.md), [local evidence](../artifacts/validation/final/evidence-manifest.json), [rehearsal report](../artifacts/demo-validation/rehearsal-report.md) |
 

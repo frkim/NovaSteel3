@@ -175,6 +175,7 @@ Legend: **Primary user** = persona(s) most responsible for acting on the require
 | FR-KNW-05 | The platform shall version procedures and retain a full edit/approval history. | Knowledge Engineer/Admin | — |
 | FR-KNW-06 | The platform shall produce a coverage/gap report identifying operational topics/equipment not yet documented, to prioritize future interviews. | Knowledge Engineer/Admin | — |
 | FR-KNW-07 | Operators providing interview content shall be informed of and able to exercise data-subject rights (consent, access, deletion) over their recorded contributions per GDPR. | Knowledge Engineer/Admin | — |
+| FR-KNW-08 | The platform shall provide a grounded natural-language query endpoint over approved procedures only, declining to answer when no approved source is found, a content-policy violation is detected, or citation enforcement fails. | All (reader access) | DM-5 |
 
 ### 8.5 Cross-Cutting Platform & Reporting (FR-PLT)
 
@@ -196,6 +197,28 @@ Legend: **Primary user** = persona(s) most responsible for acting on the require
 | FR-GOV-03 | The platform shall support role-based access control (RBAC) aligned to the 8 personas, enforcing least-privilege read/write/approve permissions (detailed matrix owned by `security-spec`, referenced here for traceability). | Knowledge Engineer/Admin | — |
 | FR-GOV-04 | The platform shall provide an auditor/regulator-ready export of decision logs and model documentation for a specified time range and site. | Sustainability Officer, Knowledge Engineer/Admin, Executive | DM-6 |
 | FR-GOV-05 | The platform shall flag and route to a human reviewer any AI recommendation classified as high-risk (safety-adjacent or with financial impact above a configurable threshold) before execution. | Plant Manager, Maintenance Engineer | — |
+
+### 8.7 Device Operations (FR-DEV)
+
+| ID | Requirement | Primary user | Demo |
+|---|---|---|---|
+| FR-DEV-01 | The platform shall provide a real-time device fleet view showing health status, health score, and active incidents for all devices registered at a site. | Maintenance Engineer, Plant Manager, Furnace Operator | Optional device-ops beat |
+| FR-DEV-02 | Device health status shall be derived from individual sensor alarm/warning states using an OT-standard approach-band rule that fires warnings before a value reaches its configured limit (not a naive outside-range check). | Maintenance Engineer | — |
+| FR-DEV-03 | The platform shall provide a sensor explorer allowing filtering by device and status, with sortable/searchable table and per-sensor time-series chart. | Maintenance Engineer, Furnace Operator | Optional device-ops beat |
+| FR-DEV-04 | The sensor time-series chart shall support line, area, bar, and control-chart display types; statistical descriptors (min/max/mean/std dev/last) over the visible window; zoom; live polling; and a WCAG 2.2 AA "View as table" fallback. | Maintenance Engineer | — |
+| FR-DEV-05 | The platform shall expose a deterministic device simulator with a controlled state machine (stopped/running/paused) allowing authorized operators to start, pause, resume, stop, reset, change speed, and change scenario. | Platform Ops (`Platform.Capacity.Manage`) | Optional device-ops beat |
+| FR-DEV-06 | The simulator shall support injection and early clearance of parameterised fault incidents (hearth lining degradation, cooling-water loss, sensor drift, sensor dropout, energy-price spike, quality drift, edge-outage-recovery) for live demonstration and operator training. | Platform Ops | Optional device-ops beat |
+| FR-DEV-07 | The simulator shall run in-process inside the BFF to avoid an additional Container App deployment; a standalone out-of-process option shall also be available for teams requiring independent scaling. | Platform Ops / Platform Admin | — |
+
+### 8.8 Privacy / GDPR Art. 17 (FR-PRI)
+
+| ID | Requirement | Primary user | Demo |
+|---|---|---|---|
+| FR-PRI-01 | The platform shall implement GDPR Article 17 right-to-erasure requests, covering interview transcripts (hard delete), knowledge procedures (attribution pseudonymization, body retained under Art. 17(3)), Copilot conversations (hard delete), and audit chain (tombstone). | Compliance Auditor (`Compliance.Auditor`) | Optional compliance beat |
+| FR-PRI-02 | Erasure execution shall be idempotent: repeated requests with the same `Idempotency-Key` shall return the original receipt without re-executing the erasure. | Compliance Auditor | — |
+| FR-PRI-03 | The hash-chained audit log shall not be mutated by erasure; an `erasure.executed` tombstone shall be appended; `verify()` shall return `true` both before and after. | Compliance Auditor, Security Engineer | — |
+| FR-PRI-04 | The raw `subjectId` shall be write-only and never echoed in any API response; receipts shall carry a salted SHA-256 pseudonym (`subjectPseudonym`) only. | Compliance Auditor | — |
+| FR-PRI-05 | The grounded RAG query pipeline shall apply PII redaction (email, phone, IBAN, role-contextual person name, employee ID, IPv4, date of birth) to generated answers before returning them to callers. | All (reader access) | — |
 
 ---
 

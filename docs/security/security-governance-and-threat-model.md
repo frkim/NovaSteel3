@@ -583,3 +583,71 @@ No feature or environment promotion (dev → test → prod) proceeds without all
 2. **Confirm EU AI Act risk classification** for the furnace-lining model and energy-dispatch agent with Legal/Compliance (§16.2) before production go-live.
 3. **Validate target-tenant Fabric capacity, Foundry, Speech, and query-adapter availability in Sweden Central** before finalizing the production data-residency evidence.
 4. **Confirm OT vendor/protocol specifics** (PLC/SCADA vendor, historian product) with plant engineering to finalize the industrial-DMZ gateway bill of materials in §11.
+
+---
+
+## 25. Wave 3 Security Controls
+
+### 25.1 GDPR Article 17 Erasure — Crypto-shredding and Pseudonymisation
+
+The knowledge orchestrator (`erasure.py`) implements GDPR Art. 17 right-to-erasure requests subject to Art. 17(3) retention obligations for safety-critical industrial procedures.
+
+**Authorization:** all four erasure routes require `Compliance.Auditor`. Execution additionally requires an `Idempotency-Key` header.
+
+**Target stores and actions:**
+
+| Store | Action | Basis |
+|---|---|---|
+| Interview transcripts | Hard delete — all records for the data subject | Art. 17(1) |
+| Knowledge procedures | Attribution pseudonymized with a salted SHA-256 digest of `subjectId`; procedure body retained | Art. 17(3)(d) — scientific/historical research / public interest in safety |
+| Copilot conversations | Hard delete | Art. 17(1) |
+| Audit chain | Tombstone appended (`erasure.executed` event); chain is never mutated | Integrity preservation |
+
+**Audit-chain invariant:** the hash-chained audit log is **never mutated**. Erasure appends a tombstone; `verify()` returns `True` both before and after. The execution receipt carries `chainVerifiedBefore` and `chainVerifiedAfter` (both must be `true`); a `false` value is an integrity anomaly requiring incident triage. This design satisfies Art. 17 for personal data while preserving furnace-safety and energy-dispatch decision trails.
+
+**Subject identity:** the raw `subjectId` is write-only. It is hashed on receipt and never echoed in any API response; all receipts and list views carry `subjectPseudonym` (salted SHA-256 digest). This limits re-identification risk even in audit exports.
+
+**STRIDE controls:** pseudonymization bounds the Information Disclosure risk from an audit-log export; the append-only chain prevents Tampering; `Compliance.Auditor` + PIM bounds elevation and repudiation.
+
+### 25.2 PII Redaction in RAG Query Responses
+
+The `pii.py` module redacts PII categories from grounded RAG answers before they are returned to the caller, as part of the `POST /v1/knowledge/query` pipeline. The redaction covers:
+
+| Category | Pattern |
+|---|---|
+| Email address | RFC 5321 local-part@domain pattern |
+| Phone number | International E.164 and common national formats |
+| IBAN | ISO 13616 bank account number |
+| Person name (role-contextual) | Detected only in person-referencing syntactic contexts |
+| Employee ID | Format `EMP-#####` (five digits) |
+| IPv4 address | Dotted-decimal notation |
+| Date of birth | Common date formats preceded by date-of-birth context tokens |
+
+Redacted tokens are replaced with the category label in brackets (e.g., `[EMAIL]`). Redaction occurs before the Content Safety screen on the output, so the safety classifier never sees raw PII either.
+
+### 25.3 Azure Content Safety Integration
+
+The `POST /v1/knowledge/query` pipeline applies Content Safety screening at both the input and output stages.
+
+**Providers:**
+
+| Provider | Use | Fallback |
+|---|---|---|
+| `AzureContentSafetyProvider` | Cloud-backed moderation (requires `AZURE_CONTENT_SAFETY_ENDPOINT`) | Falls back to `LocalHeuristicContentSafety` when unavailable |
+| `LocalHeuristicContentSafety` | Offline fallback — pattern-based heuristic; lower recall | Used when Azure provider is unconfigured or fails |
+
+**Severity model:** 0–7 integer scale. Requests or responses with any category at severity **≥ 4** are blocked; the endpoint returns `declined: true, declineReason: "content_policy_violation"`.
+
+**STRIDE controls:** the dual-stage screen (input and output) bounds Spoofing of policy constraints via prompt injection through retrieved procedure content. The local heuristic fallback ensures the screen never silently degrades to "allow all."
+
+### 25.4 Device Simulator Authorization Boundary
+
+The device simulator is **purely synthetic**. It connects to no OT system, PLC, historian, or real plant network. All sensor values are generated deterministically from a seeded PRNG. The following controls enforce this boundary:
+
+1. **No production data path:** the `DeviceAdapter` and `device-simulator` package contain no code that reads from an OT historian, Event Hub, or any live data source. The adapter's only external interface is the BFF's in-memory ring buffer.
+2. **Write-scoped commands require `Platform.Capacity.Manage`:** simulator start/stop/reset/speed commands and incident injection are gated behind this role, which is a restricted non-production lifecycle operator role with no data-plane access (§2.3). Unauthorized callers receive `403 FORBIDDEN_ROLE`.
+3. **Synthetic-only scope:** the BFF accepts `NS-DEMO-*` plant scope only in local demo mode. A device route request for a scope outside `NS-DEMO-*` receives `403 FORBIDDEN_SCOPE`.
+4. **No physical actuator path:** the simulator has no "send to device" or "write setpoint" capability. The incident injection modifies the in-memory ring buffer only. This is a hard architectural constraint, not a configuration option.
+5. **Audit logging:** all `Platform.Capacity.Manage` actions (simulator commands and incident injection) are written to the append-only audit chain, enabling forensic reconstruction of simulator state transitions during a rehearsal or investigation.
+
+**STRIDE assessment:** Spoofing — `Platform.Capacity.Manage` is PIM-eligible, not permanently assigned; Elevation — the role has no data-plane or production-capacity access; Tampering — audit trail of all commands; DoS — incident injection is bounded to the in-memory buffer with no external impact. The OT boundary (§11) remains entirely unaffected by simulator operation.

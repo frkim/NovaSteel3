@@ -141,6 +141,8 @@ Every non-2xx response uses this exact shape, per `solution-architecture.md` §5
 | `UPSTREAM_UNAVAILABLE` | 503 | true | A dependency (Fabric query adapter, Foundry, Speech, ARM) is unavailable; caller should retry or fall back |
 | `UPSTREAM_STALE` | 200 (payload flagged, not an error status) | n/a | Data returned is served from cache/last-known-good; see `freshness` field (§2.1 extension per route) |
 | `CAPACITY_STATE_CONFLICT` | 409 | false | Capacity lifecycle request conflicts with current state (§8) |
+| `SIMULATOR_STATE_CONFLICT` | 409 | false | Simulator command conflicts with the current state machine state (e.g., `pause` when already `paused`, `start` when already `running`) |
+| `ERASURE_STATE_CONFLICT` | 409 | false | Erasure-request state transition is invalid (e.g., executing a request that has already been executed or cancelled) |
 | `POLICY_DENIED` | 403 | false | Request is well-formed and authorized by role, but denied by an explicit business/security policy (e.g., allow-list, budget cap, Demo Mode restriction) |
 | `INTERNAL_ERROR` | 500 | true | Unhandled server fault; logged with `correlationId` for support triage |
 
@@ -221,6 +223,38 @@ Request body requires a `reasonCode` from a closed enum (`FR-ENE-05` in `solutio
 **`POST /v1/knowledge/procedures/{id}:approve`** — `Knowledge.Publisher` only. Publishes a reviewed immutable version and triggers a derived-index update; a `DRAFT` or `IN_REVIEW` procedure is never independently reachable through general retrieval before this call succeeds (`solution-architecture.md` §4.3 item 6).
 
 **`GET /v1/knowledge/search?q=`** — search-first entry point backed by the derived retrieval index of **approved** procedures only (§5.5 documents the search-specific ranking/highlighting behavior).
+
+**`POST /v1/knowledge/query`** — any authenticated reader. Executes the grounded RAG query pipeline over approved procedures.
+
+Request body:
+
+| Field | Type | Required | Semantics |
+|---|---|---|---|
+| `question` | string, non-empty | yes | Natural-language query. |
+| `topK` | integer, 1–20 | no | Maximum chunks to retrieve; default 5. |
+
+Response `data` when an answer is found:
+
+```json
+{
+  "answer": "The recommended checks are... [[chunk-id-001]]",
+  "citations": [{"chunkId": "chunk-id-001", "procedureId": "PROC-BF-034", "snippet": "..."}],
+  "declined": false
+}
+```
+
+Response `data` when declined:
+
+```json
+{
+  "declined": true,
+  "declineReason": "no_grounded_source"
+}
+```
+
+Valid `declineReason` values: `no_grounded_source` | `content_policy_violation` | `citation_enforcement_failed`.
+
+> **Design note — RRF and the content-term overlap guard:** Reciprocal rank fusion fuses BM25 lexical and cosine-similarity scores by rank position only. The resulting `fusedScore` is a rank-aggregation artefact with no absolute relevance meaning and cannot be used as a hard threshold: an unrelated query will always produce a "best" chunk from RRF even when no chunk is topically relevant. The pipeline therefore applies a separate content-term overlap guard (`_shares_content_term`) after retrieval; if no retrieved chunk shares a content token (≥ 4 characters) with the query, the response is `declined: true, declineReason: "no_grounded_source"`. This is a deliberate design decision, not a limitation to be worked around.
 
 ### 4.8 Copilot chat
 
@@ -372,6 +406,7 @@ query semantics in §5; they are advisory/read-only and plant-scoped.
 | `/v1/knowledge/procedures` | GET | knowledge read | no | no |
 | `/v1/knowledge/procedures/{id}:approve` | POST | `Knowledge.Publisher` | yes | **yes** |
 | `/v1/knowledge/search` | GET | any authenticated | no | no |
+| `/v1/knowledge/query` | POST | reader role | no | no |
 | `/v1/copilot/suggestions` | GET | reader role | no | no |
 | `/v1/copilot/glossary` | GET | reader role | no | no |
 | `/v1/copilot/conversations` | GET | reader role | no | no |
@@ -385,8 +420,214 @@ query semantics in §5; they are advisory/read-only and plant-scoped.
 | `/v1/platform/capacity/sku-requests` | POST | `Platform.Capacity.Manage` | yes | **yes** |
 | `/v1/workorders` | POST | `MaintenanceEngineer.Read`+ (create) | yes | **yes** |
 | `/v1/workorders/{id}` | GET | assigned plant reader | no | no |
+| `/v1/devices` | GET | reader role | no | no |
+| `/v1/devices/{deviceId}` | GET | reader role | no | no |
+| `/v1/devices/sensors` | GET | reader role | no | no |
+| `/v1/devices/sensors/{sensorId}/series` | GET | reader role | no | no |
+| `/v1/devices/simulator` | GET | reader role | no | no |
+| `/v1/devices/simulator/commands` | POST | `Platform.Capacity.Manage` | yes | no |
+| `/v1/devices/incidents` | POST | `Platform.Capacity.Manage` | yes | no |
+| `/v1/devices/incidents/{activeIncidentId}` | DELETE | `Platform.Capacity.Manage` | yes | no |
+| `/v1/privacy/erasure-requests` | POST | `Compliance.Auditor` | yes | no |
+| `/v1/privacy/erasure-requests` | GET | `Compliance.Auditor` | no | no |
+| `/v1/privacy/erasure-requests/{requestId}` | GET | `Compliance.Auditor` | no | no |
+| `/v1/privacy/erasure-requests/{requestId}:execute` | POST | `Compliance.Auditor` | yes | **yes** |
 
 `/v1/workorders` is included here because the demo runbook (`demo-runbook.md` minute 06:00–07:00) requires creating/linking a synthetic work order from an alert; it was implicit in the architecture's alert-acknowledgment flow and is made explicit here for contract completeness.
+
+### 4.12 Device Operations routes
+
+All eight routes are in the `device-operations` group. Reads require any standard reader role (enforced at the `plant_scope` level). Simulator commands and incident injection require `Platform.Capacity.Manage`. All mutating commands are logged to the append-only audit chain.
+
+> **Route-registration ordering note:** `/v1/devices/sensors` and `/v1/devices/simulator` are registered in FastAPI before `/v1/devices/{deviceId}`. Reversing this order causes the path-parameter route to match the literal strings `sensors` and `simulator` as a `deviceId`, producing incorrect responses. This ordering must be preserved.
+
+**`GET /v1/devices?site=`** — reader role.
+
+Response: list envelope of device objects.
+
+```json
+{
+  "items": [
+    {
+      "deviceId": "LUX-BF-01",
+      "site": "NS-DEMO-LUX-01",
+      "area": "Ironmaking",
+      "assetType": "Blast furnace",
+      "status": "degraded",
+      "healthScore": 0.72,
+      "activeIncidents": 1,
+      "sensorsOnline": 17,
+      "sensorsTotal": 18,
+      "lastSampleAt": "2024-07-25T14:32:05Z"
+    }
+  ]
+}
+```
+
+`status` is one of `healthy | degraded | fault | offline`. `site` query param is optional and is always subject to the caller's `plant_scope`.
+
+**`GET /v1/devices/{deviceId}`** — reader role. Returns the same shape as a single list item plus an array of current sensor snapshots. Returns `403 FORBIDDEN_SCOPE` if the device's site is outside the caller's plant scope.
+
+**`GET /v1/devices/sensors?deviceId=&status=`** — reader role. Returns a list envelope of sensor snapshot objects.
+
+```json
+{
+  "items": [
+    {
+      "sensorId": "LUX-BF-01.hearth_temp_s07",
+      "deviceId": "LUX-BF-01",
+      "displayName": "Hearth shell temp — sector 07",
+      "area": "Ironmaking",
+      "signalCode": "hearth_temp_s07",
+      "unit": "°C",
+      "value": 312.4,
+      "status": "warning",
+      "quality": "good",
+      "trend": "rising",
+      "deviationPct": 4.2,
+      "lastSampleAt": "2024-07-25T14:32:05Z"
+    }
+  ]
+}
+```
+
+Both `deviceId` and `status` query params are optional. `status` accepts `normal | warning | alarm | stale`.
+
+**`GET /v1/devices/sensors/{sensorId}/series?window=&points=`** — reader role. Returns time-series data from the ring buffer.
+
+```json
+{
+  "sensorId": "LUX-BF-01.hearth_temp_s07",
+  "window": "1h",
+  "points": [
+    {"ts": "2024-07-25T13:32:05Z", "value": 298.1, "quality": "good"},
+    {"ts": "2024-07-25T13:32:10Z", "value": 298.3, "quality": "good"}
+  ],
+  "stats": {
+    "min": 292.1, "max": 316.8, "mean": 301.4, "stdDev": 4.7, "last": 312.4
+  },
+  "nominalLow": 200.0,
+  "nominalHigh": 350.0,
+  "ucl": null,
+  "lcl": null
+}
+```
+
+`window` accepts ISO 8601 duration strings; default `"1h"`. `points` default 120, max 1440.
+
+**`GET /v1/devices/simulator`** — reader role. Returns current simulator state.
+
+```json
+{
+  "state": "running",
+  "scenario": "demo-full",
+  "seed": 240726,
+  "speedFactor": 1.0,
+  "simulatedClock": "2024-07-25T22:41:55Z",
+  "elapsedHours": 16.7,
+  "tickCount": 12024,
+  "deviceCount": 6,
+  "sensorCount": 34,
+  "activeIncidents": [
+    {
+      "activeIncidentId": "ai-001",
+      "incidentId": "degrading-furnace",
+      "deviceId": "LUX-BF-01",
+      "severity": "high",
+      "startedAt": "2024-07-25T14:00:00Z",
+      "durationMinutes": 90,
+      "elapsedMinutes": 14.2,
+      "progressPct": 15.8
+    }
+  ]
+}
+```
+
+**`POST /v1/devices/simulator/commands`** — `Platform.Capacity.Manage`. Logged to audit.
+
+Request body:
+
+| Field | Type | Required | Semantics |
+|---|---|---|---|
+| `command` | `start \| pause \| resume \| stop \| reset \| set-speed \| set-scenario` | yes | State-machine command |
+| `scenario` | string | conditional | Required for `start` and `set-scenario` |
+| `speedFactor` | number > 0 | conditional | Required for `set-speed` |
+| `seed` | integer | no | Overrides the scenario's default seed |
+
+Returns `409 SIMULATOR_STATE_CONFLICT` for illegal state-machine transitions (e.g., `pause` when `stopped`, `resume` when `running`).
+
+**`POST /v1/devices/incidents`** — `Platform.Capacity.Manage`. Logged to audit.
+
+Request body:
+
+| Field | Type | Required | Semantics |
+|---|---|---|---|
+| `incidentId` | string | yes | One of the 7 catalog incident IDs |
+| `deviceId` | string | no | Overrides the incident's default target device |
+| `sensorId` | string | no | Targets a specific sensor (for `sensor-drift` / `sensor-dropout`) |
+| `durationMinutes` | number > 0 | no | Overrides the incident's default duration |
+
+Returns `404 NOT_FOUND` for an unknown `incidentId`. Returns `400 VALIDATION_ERROR` if the simulator is not in `running` state.
+
+**`DELETE /v1/devices/incidents/{activeIncidentId}`** — `Platform.Capacity.Manage`. Logged to audit. Clears an active incident early. Returns `404 NOT_FOUND` for an unknown or already-expired `activeIncidentId`.
+
+### 4.13 Privacy / GDPR Art. 17 erasure routes
+
+All four routes require `Compliance.Auditor`. The execute route additionally requires an `Idempotency-Key` header (UUID). The raw `subjectId` is write-only; it is hashed on receipt and never echoed in any response. Receipts carry `subjectPseudonym` (salted SHA-256 digest).
+
+**`POST /v1/privacy/erasure-requests`**
+
+Request body:
+
+```json
+{
+  "subjectType": "INTERVIEW_PARTICIPANT",
+  "subjectId": "<opaque identifier — write-only>",
+  "reason": "Data-subject request under GDPR Art. 17"
+}
+```
+
+`subjectType` must be one of `INTERVIEW_PARTICIPANT | COPILOT_USER | OPERATOR`.
+
+Response `data`:
+
+```json
+{
+  "requestId": "er-2026-07-25-0001",
+  "subjectPseudonym": "sha256:a3f8...",
+  "status": "PENDING",
+  "targetStores": ["interview-transcripts", "copilot-conversations"],
+  "createdAt": "2026-07-25T09:00:00Z"
+}
+```
+
+**`GET /v1/privacy/erasure-requests?status=`** — returns list envelope. `status` filter: `PENDING | EXECUTING | COMPLETED | FAILED`.
+
+**`GET /v1/privacy/erasure-requests/{requestId}`** — returns single request with current status and store-level results if completed.
+
+**`POST /v1/privacy/erasure-requests/{requestId}:execute`** — requires `Idempotency-Key` header (UUID). Idempotent replay supported: a second request with the same key and body returns the original receipt without re-executing.
+
+Response `data` on success:
+
+```json
+{
+  "requestId": "er-2026-07-25-0001",
+  "subjectPseudonym": "sha256:a3f8...",
+  "status": "COMPLETED",
+  "executedAt": "2026-07-25T09:05:00Z",
+  "storeResults": [
+    {"store": "interview-transcripts", "action": "hard-delete", "recordsAffected": 3},
+    {"store": "knowledge-procedures", "action": "pseudonymize-attribution", "recordsAffected": 1},
+    {"store": "copilot-conversations", "action": "hard-delete", "recordsAffected": 7},
+    {"store": "audit-chain", "action": "tombstone-appended", "recordsAffected": 1}
+  ],
+  "chainVerifiedBefore": true,
+  "chainVerifiedAfter": true,
+  "auditChainRef": "ac-2026-07-25T09:05:00Z-er-0001"
+}
+```
+
+The audit chain is never mutated; the tombstone is an append. `chainVerifiedBefore` and `chainVerifiedAfter` must both be `true` under normal operation. A `false` value indicates an integrity anomaly and requires incident investigation.
 
 ---
 

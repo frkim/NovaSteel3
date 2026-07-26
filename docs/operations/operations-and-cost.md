@@ -551,3 +551,85 @@ Before any non-synthetic pilot/production traffic is onboarded, operations must 
 | Cost model (controls) | §8.1–8.4 | `deployment-topology.md` §6 |
 | Production business case (illustrative) | §8.5 | Project A cost-estimate (transplanted, all 🎯 TARGET) |
 | Resilience/DR/production caveats | §9 | `deployment-topology.md` §7; `solution-architecture.md` §9.1 |
+| Device simulator operations | §12 | `solution-architecture.md` §5.4; `synthetic-data-and-simulators.md` §13 |
+
+---
+
+## 12. Device Simulator Operations
+
+The device simulator runs **in-process inside `bff-api`** (see ADR-013 in `solution-architecture.md`). It adds no Container App to the deployment and requires no additional Azure resource. This section covers operator procedures for controlling the simulator during a rehearsal or live demo.
+
+### 12.1 Deployment topology
+
+- The simulator library (`services/device-simulator`) is imported by `bff-api/device_adapter.py`.
+- The ring buffer is in-process; a BFF restart clears it and the adapter re-seeds automatically in demo mode.
+- `services/device-simulator` also ships a standalone FastAPI app (`app.py`) and Dockerfile for teams that need out-of-process deployment. That path requires an additional Container App and is not the default demo topology.
+
+### 12.2 Simulator state machine
+
+| State | Allowed transitions |
+|---|---|
+| `stopped` | → `running` (via `start`) |
+| `running` | → `paused` (via `pause`), → `stopped` (via `stop`), → `stopped` (via `reset`) |
+| `paused` | → `running` (via `resume`), → `stopped` (via `stop`), → `stopped` (via `reset`) |
+
+Illegal transitions return `409 SIMULATOR_STATE_CONFLICT`. Valid commands: `start`, `pause`, `resume`, `stop`, `reset`, `set-speed`, `set-scenario`. All commands require `Platform.Capacity.Manage` and are written to the audit chain.
+
+### 12.3 Starting the simulator for a rehearsal
+
+```powershell
+# All simulator commands go through the BFF. The BFF must be running first.
+$base = "http://127.0.0.1:8080"
+$headers = @{ "X-Demo-User" = "platform-ops"; "X-Demo-Roles" = "Platform.Capacity.Manage" }
+
+# 1. Start with the demo-full scenario (seed 240726 produces warm lining signals)
+Invoke-RestMethod -Uri "$base/v1/devices/simulator/commands" -Method Post -Headers $headers `
+    -ContentType "application/json" `
+    -Body '{"command":"start","scenario":"demo-full","seed":240726}'
+
+# 2. Verify state
+Invoke-RestMethod -Uri "$base/v1/devices/simulator" -Headers $headers
+```
+
+Expected: `"state": "running"`, `"scenario": "demo-full"`, `"tickCount"` > 0 after a few seconds.
+
+### 12.4 Controlling speed
+
+```powershell
+# Accelerate to 5× wall-clock speed (5 simulated seconds per real second)
+Invoke-RestMethod -Uri "$base/v1/devices/simulator/commands" -Method Post -Headers $headers `
+    -ContentType "application/json" `
+    -Body '{"command":"set-speed","speedFactor":5.0}'
+```
+
+Valid `speedFactor` values are any positive number. Use speed acceleration in rehearsal-only contexts; during a live demo, the default 1× speed is recommended to keep elapsed-hours figures interpretable.
+
+### 12.5 Injecting and clearing incidents
+
+```powershell
+# Trigger the degrading-furnace incident on LUX-BF-01 for 30 minutes (default)
+Invoke-RestMethod -Uri "$base/v1/devices/incidents" -Method Post -Headers $headers `
+    -ContentType "application/json" `
+    -Body '{"incidentId":"degrading-furnace","deviceId":"LUX-BF-01"}'
+
+# Clear the incident early (use the activeIncidentId from the simulator status)
+$state = Invoke-RestMethod -Uri "$base/v1/devices/simulator" -Headers $headers
+$id = $state.activeIncidents[0].activeIncidentId
+Invoke-RestMethod -Uri "$base/v1/devices/incidents/$id" -Method Delete -Headers $headers
+```
+
+### 12.6 Resetting the simulator
+
+```powershell
+# Reset returns the simulator to stopped state and clears the ring buffer.
+# The BFF's demo-mode auto-seeding will re-arm degrading-furnace on the next read.
+Invoke-RestMethod -Uri "$base/v1/devices/simulator/commands" -Method Post -Headers $headers `
+    -ContentType "application/json" `
+    -Body '{"command":"reset"}'
+```
+
+### 12.7 Cost note — no additional Container App
+
+The device simulator adds no Azure Container App, no Event Hub consumer group, and no Fabric workspace resource. Its memory footprint is approximately 2 MB (34 sensors × 1440 samples × ~40 bytes). This is well within the BFF's existing memory allocation. The §8 cost model is unchanged.
+
+If a future decision is made to move the simulator out-of-process, the cost impact is approximately one additional Container App (the same class as the existing BFF Container App at the same F2-demo-tier compute level). That decision requires an ADR update and a cost/benefit re-evaluation.

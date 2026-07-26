@@ -260,6 +260,10 @@ Tokens are the single source of truth; MUI theme and Blazor CSS variables both c
 | S-17 | Settings & Profile | all | `/settings` | Theme, locale, persona default, demo mode, units |
 | S-18 | Global Search Results | all | `/search?q=` | Grouped results, filters |
 | S-19 | Notifications / Alert Detail | all | overlay/`/alerts/{id}` | Alert detail, ack/assign, timeline |
+| S-20 | Device Fleet | all (reader) | `/{site}/device-operations/fleet` | KPI band, device table, device detail panel with sensor list |
+| S-21 | Sensor Explorer | all (reader) | `/{site}/device-operations/sensors` | Device/status filters, sensor table, SensorChartPanel |
+| S-22 | Device Simulator | `Platform.Capacity.Manage` | `/{site}/device-operations/simulator` | KPI band, SimulatorControls, IncidentPanel |
+| S-23 | Dashboard Collections | all (reader) | `/{site}/dashboards/collections` | Collection card grid, role/tag filters, constituent-screen links |
 
 Every screen also defines its four cross-cutting states (`STATE-LOAD`, `STATE-EMPTY`, `STATE-ERROR`, `STATE-STALE`) per §15.
 
@@ -632,6 +636,105 @@ Covered by §11 (Fabric Capacity), plus:
 - **Jobs & Pipelines (S-15):** job `TBL-STD` (Run id, pipeline, status, started, duration, actor) with per-column search, status filter, export; row → run detail drawer with logs link.
 - **Cost & Telemetry (S-16):** C-LINE cost trend, C-AREA capacity utilization, KPI cards (spend to date, cost/hr, utilization %).
 - **Acceptance:** AC-P8-1 capacity lifecycle meets §11; AC-P8-2 job table auto-refreshes with visible last-updated + manual refresh; AC-P8-3 cost chart supports range selection.
+
+---
+
+### 12.9 Device Operations (S-20/21/22)
+
+**Purpose:** real-time monitoring and controlled simulation of the 6-device, 34-sensor industrial estate at site `NS-DEMO-LUX-01`. Serves the `device-operations` route group (`device-operations/fleet`, `device-operations/sensors`, `device-operations/simulator`). All strings are translated into EN/FR/DE/NL/ES via `deviceMessages.ts`.
+
+#### S-20 — Device Fleet (`device-operations/fleet`)
+
+**Purpose:** fleet-level health overview with a sensor detail panel for the selected device.
+
+**KPI band (7 cards):**
+
+| Card label | Source field | Tooltip |
+|---|---|---|
+| Total devices | `kpi.totalDevices` | Total registered for the site |
+| Healthy | `kpi.healthyCount` | All sensors normal, no active incidents |
+| Degraded | `kpi.degradedCount` | ≥ 1 sensor in warning state |
+| Fault / offline | `kpi.faultCount` | ≥ 1 sensor in alarm or stale state |
+| Mean health score | `kpi.meanHealthScore` | Average 0–1 across all devices |
+| Active incidents | `kpi.activeIncidents` | Count of active incidents on site |
+| Sensors online | `kpi.sensorsOnline` | Sensors reporting good/uncertain quality |
+
+**Device table:** columns `deviceId`, `area`, `assetType`, `status` (chip: healthy/degraded/fault/offline), `healthScore` (progress bar), `activeIncidents`, `sensorsOnline/sensorsTotal`, `lastSampleAt`. Status filter chips above the table (All / Healthy / Degraded / Fault / Offline). `pageSizeOptions=[10,25,100]`.
+
+**Device detail panel:** shown inline when a device row is selected. Lists the device's sensors in a compact table (displayName, status chip, value, unit, lastSampleAt). "Open in Sensor Explorer" link navigates to S-21 pre-filtered to the selected device.
+
+**Acceptance:** AC-S20-1 fleet KPI band reflects current sensor-status derivations; AC-S20-2 status filter chips update the table without a page reload; AC-S20-3 selecting a device row loads its sensors; AC-S20-4 "Open in Sensor Explorer" navigates with `deviceId` pre-selected.
+
+#### S-21 — Sensor Explorer (`device-operations/sensors`)
+
+**Purpose:** cross-device sensor investigation with time-series chart drill-down.
+
+**Filters:** device dropdown (All devices / individual device IDs), status dropdown (All statuses / normal / warning / alarm / stale).
+
+**Sensor table:** `TBL-STD` compliant. Columns: displayName, deviceId, area, signalCode, unit, value, status (chip), quality, trend (rising/falling/flat), deviationPct, lastSampleAt. Sortable and per-column-searchable on all columns. `pageSizeOptions=[10,25,100]`. Clicking a row opens the `SensorChartPanel` below (or in a side panel on `lg`+).
+
+**SensorChartPanel features:**
+
+| Feature | Detail |
+|---|---|
+| Chart types | Line, Area, Bar, Control chart (with UCL/LCL and nominal band) |
+| Time window | Selectable (e.g., 15m / 1h / 6h / 24h); maps to `window` query param |
+| Normalize | Toggle 0–1 normalisation for multi-sensor comparison |
+| Live polling | Auto-refresh every 5 s when enabled |
+| Zoom | Zoom in / zoom out / reset buttons |
+| Statistics strip | Min / Max / Mean / Std dev / Last — computed over the visible window |
+| Accessible fallback | "View as table" (WCAG 2.2 AA) renders the series as an HTML `<table>` |
+| Nominal band | Shaded `[nominalLow, nominalHigh]` reference region |
+| UCL/LCL | Control-chart limits shown when `ucl`/`lcl` are present in the series response |
+
+The panel header shows the sensor display name, device ID, unit, and a close button.
+
+**Acceptance:** AC-S21-1 device/status filters combined correctly narrow the table; AC-S21-2 clicking a row opens the chart panel; AC-S21-3 all chart types render and switch without error; AC-S21-4 "View as table" fallback is keyboard-reachable; AC-S21-5 live polling badge indicates polling state.
+
+#### S-22 — Device Simulator (`device-operations/simulator`)
+
+**Purpose:** operator-controlled simulator state machine and incident injection.
+
+**KPI band (6 cards):**
+
+| Card label | Source field | Detail |
+|---|---|---|
+| Simulator state | `kpi.state` | stopped / running / paused |
+| Scenario | `kpi.scenario` | Active scenario name |
+| Speed | `kpi.speed` | Acceleration factor (e.g., 1.0×, 5.0×) |
+| Elapsed hours | `kpi.elapsed` | Simulated hours since last start |
+| Ticks | `kpi.ticks` | Total tick count |
+| Active incidents | `kpi.incidents` | Count of active incidents |
+
+**SimulatorControls:** Start / Pause / Resume / Stop / Reset buttons. A scenario dropdown and seed/speed-factor inputs. Read-only when the caller does not hold `Platform.Capacity.Manage`; a permission hint is shown (`device.simulator.permissionHint`). Controls are unavailable in offline/fixture mode (`device.simulator.offlineHint`).
+
+**IncidentPanel (two sub-panels):**
+
+- *Available incidents:* catalog list showing each incident's ID, severity chip, default duration, and a "Trigger" button. On click, a target-selection dialog appears (target device dropdown, optional sensor dropdown, optional duration override).
+- *Active incidents:* list of currently active incidents with a progress bar (`elapsedMinutes / durationMinutes`), a "Clear" button, and remaining-time display.
+
+**Acceptance:** AC-S22-1 simulator KPI band updates on every read; AC-S22-2 start/pause/resume/stop transitions respect the state machine (invalid transitions show a clear error, not a silent failure); AC-S22-3 triggering an incident appears in the active list within one poll cycle; AC-S22-4 clearing an incident removes it from the active list; AC-S22-5 read-only mode is enforced when the caller lacks `Platform.Capacity.Manage`.
+
+---
+
+### 12.10 Dashboard Collections (`dashboards/collections`, S-23)
+
+**Purpose:** pre-built, role-annotated collections of screens to scaffold a multi-tab investigation workflow. Route: `dashboards/collections`.
+
+**Screen layout:** a grid of collection cards. Each card shows the collection name, a role badge (recommended persona/role), the estimated time, tags (e.g., `daily`, `reliability`, `energy`), and an ordered list of constituent screens with links. Clicking a card launches the constituent screens in a multi-tab layout or opens the first screen and provides a breadcrumb to the collection.
+
+**Predefined collections (wave 3, from `dashboardCollections.ts`):**
+
+| Collection ID | Name | Role | Est. time | Tags | Constituent screens |
+|---|---|---|---|---|---|
+| `morning-shift-handover` | Morning Shift Handover | Plant Manager | 6 min | daily, triage | Command Center · Operations · Device Fleet · Lining Forecast |
+| `furnace-risk-investigation` | Furnace Risk Investigation | Maintenance/Reliability Engineer | 8 min | reliability, root-cause | Lining Forecast · Thermal Explorer · Sensor Explorer · Maintenance Planner |
+| `energy-cost-review` | Energy Cost Review | Energy Manager | 7 min | energy, cost | Spot & Schedule · Load-Shift Simulator · Emissions Ledger · ETS Exposure |
+| `quality-escape-review` | Quality Escape Review | Quality Engineer | 6 min | quality, root-cause | Batch Quality · Defect Analytics SPC · Sensor Explorer |
+| `compliance-evidence-pack` | Compliance Evidence Pack | Sustainability Officer, Auditor | 7 min | compliance, audit, eu-ai-act | Audit & Reports · Emissions Ledger · Procedures |
+| `platform-health-review` | Platform Health Review | Platform Ops | 5 min | platform, cost | Fabric Capacity · Jobs & Pipelines · Simulator Control · Cost & Telemetry |
+
+**Acceptance:** AC-S23-1 all six predefined collections render; AC-S23-2 constituent-screen links deep-link correctly; AC-S23-3 role badges and time estimates are visible; AC-S23-4 tags are filterable.
 
 ---
 
