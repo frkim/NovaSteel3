@@ -248,7 +248,9 @@ describe('CopilotPanel', () => {
     renderPanel(stub)
 
     await screen.findByText('What is the risk?')
-    await user.type(screen.getByLabelText('Ask a question about this screen…'), 'What changed?')
+    fireEvent.change(screen.getByLabelText('Ask a question about this screen…'), {
+      target: { value: 'What changed?' },
+    })
     await user.click(screen.getByRole('button', { name: 'Send' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent('The assistant could not answer.')

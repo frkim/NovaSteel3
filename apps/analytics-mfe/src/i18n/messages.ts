@@ -1,4 +1,5 @@
 import { COPILOT_CATALOGS } from './copilotMessages'
+import { DEVICE_CATALOGS } from './deviceMessages'
 
 export type TranslateFn = (key: string, params?: Record<string, string | number>) => string
 
@@ -47,6 +48,17 @@ const EN: Catalog = {
   'demo.tour.next': 'Next',
   'demo.tour.prev': 'Back',
   'demo.tour.auto': 'Auto-advance',
+  'dashboards.title': "Dashboard collections",
+  'dashboards.intro': "Each collection is an ordered set of screens that answers one question end to end. Open the whole path, or jump straight to a single panel.",
+  'dashboards.search': "Search collections",
+  'dashboards.allTags': "All",
+  'dashboards.minutes': "{minutes} min",
+  'dashboards.panels': "{count} panels",
+  'dashboards.empty': "No collection matches the current search.",
+  'dashboards.start': "Start",
+  'dashboards.open': "Open",
+  'dashboards.openPanel': "Open {panel}",
+  'dashboards.openAllHint': "Opens the first panel of this collection.",
 }
 
 const FR: Catalog = {
@@ -86,6 +98,17 @@ const FR: Catalog = {
   'demo.tour.next': 'Suivant',
   'demo.tour.prev': 'Retour',
   'demo.tour.auto': 'Avance automatique',
+  'dashboards.title': "Collections de tableaux de bord",
+  'dashboards.intro': "Chaque collection est une suite ordonnée d’écrans qui répond à une question de bout en bout. Ouvrez tout le parcours ou accédez directement à un panneau.",
+  'dashboards.search': "Rechercher une collection",
+  'dashboards.allTags': "Toutes",
+  'dashboards.minutes': "{minutes} min",
+  'dashboards.panels': "{count} panneaux",
+  'dashboards.empty': "Aucune collection ne correspond à la recherche.",
+  'dashboards.start': "Démarrer",
+  'dashboards.open': "Ouvrir",
+  'dashboards.openPanel': "Ouvrir {panel}",
+  'dashboards.openAllHint': "Ouvre le premier panneau de cette collection.",
 }
 
 const DE: Catalog = {
@@ -125,6 +148,17 @@ const DE: Catalog = {
   'demo.tour.next': 'Weiter',
   'demo.tour.prev': 'Zurück',
   'demo.tour.auto': 'Automatisch weiter',
+  'dashboards.title': "Dashboard-Sammlungen",
+  'dashboards.intro': "Jede Sammlung ist eine geordnete Folge von Ansichten, die eine Frage vollständig beantwortet. Öffnen Sie den gesamten Pfad oder springen Sie direkt zu einem Panel.",
+  'dashboards.search': "Sammlungen durchsuchen",
+  'dashboards.allTags': "Alle",
+  'dashboards.minutes': "{minutes} Min.",
+  'dashboards.panels': "{count} Panels",
+  'dashboards.empty': "Keine Sammlung entspricht der Suche.",
+  'dashboards.start': "Starten",
+  'dashboards.open': "Öffnen",
+  'dashboards.openPanel': "{panel} öffnen",
+  'dashboards.openAllHint': "Öffnet das erste Panel dieser Sammlung.",
 }
 
 const NL: Catalog = {
@@ -164,6 +198,17 @@ const NL: Catalog = {
   'demo.tour.next': 'Volgende',
   'demo.tour.prev': 'Terug',
   'demo.tour.auto': 'Automatisch verdergaan',
+  'dashboards.title': "Dashboardcollecties",
+  'dashboards.intro': "Elke collectie is een geordende reeks schermen die één vraag volledig beantwoordt. Open het hele traject of ga direct naar één paneel.",
+  'dashboards.search': "Collecties zoeken",
+  'dashboards.allTags': "Alle",
+  'dashboards.minutes': "{minutes} min",
+  'dashboards.panels': "{count} panelen",
+  'dashboards.empty': "Geen collectie komt overeen met de zoekopdracht.",
+  'dashboards.start': "Starten",
+  'dashboards.open': "Openen",
+  'dashboards.openPanel': "{panel} openen",
+  'dashboards.openAllHint': "Opent het eerste paneel van deze collectie.",
 }
 
 const ES: Catalog = {
@@ -203,14 +248,25 @@ const ES: Catalog = {
   'demo.tour.next': 'Siguiente',
   'demo.tour.prev': 'Atrás',
   'demo.tour.auto': 'Avance automático',
+  'dashboards.title': "Colecciones de paneles",
+  'dashboards.intro': "Cada colección es un conjunto ordenado de pantallas que responde a una pregunta de principio a fin. Abra todo el recorrido o vaya directamente a un panel.",
+  'dashboards.search': "Buscar colecciones",
+  'dashboards.allTags': "Todas",
+  'dashboards.minutes': "{minutes} min",
+  'dashboards.panels': "{count} paneles",
+  'dashboards.empty': "Ninguna colección coincide con la búsqueda.",
+  'dashboards.start': "Iniciar",
+  'dashboards.open': "Abrir",
+  'dashboards.openPanel': "Abrir {panel}",
+  'dashboards.openAllHint': "Abre el primer panel de esta colección.",
 }
 
 const CATALOGS: Record<string, Catalog> = {
-  en: { ...EN, ...COPILOT_CATALOGS.en },
-  fr: { ...FR, ...COPILOT_CATALOGS.fr },
-  de: { ...DE, ...COPILOT_CATALOGS.de },
-  nl: { ...NL, ...COPILOT_CATALOGS.nl },
-  es: { ...ES, ...COPILOT_CATALOGS.es },
+  en: { ...EN, ...COPILOT_CATALOGS.en, ...DEVICE_CATALOGS.en },
+  fr: { ...FR, ...COPILOT_CATALOGS.fr, ...DEVICE_CATALOGS.fr },
+  de: { ...DE, ...COPILOT_CATALOGS.de, ...DEVICE_CATALOGS.de },
+  nl: { ...NL, ...COPILOT_CATALOGS.nl, ...DEVICE_CATALOGS.nl },
+  es: { ...ES, ...COPILOT_CATALOGS.es, ...DEVICE_CATALOGS.es },
 }
 
 export const SUPPORTED_LANGUAGES = ['en', 'fr', 'de', 'nl', 'es'] as const

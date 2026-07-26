@@ -29,6 +29,8 @@ public sealed class ShellState
         new("Sustainability", "sustainability-compliance", "emissions-ledger", "SustainabilityOfficer", "♧"),
         new("Knowledge Hub", "knowledge-hub", "procedures", "KnowledgeEngineer", "⌕"),
         new("Executive Overview", "executive-overview", null, "Executive", "▤"),
+        new("Device Operations", "device-operations", "fleet", "PlatformOps", "◈"),
+        new("Dashboards", "dashboards", "collections", "PlantManager", "▦"),
         new("Platform Ops", "platform-ops", "capacity", "PlatformOps", "⚙")
     ];
 

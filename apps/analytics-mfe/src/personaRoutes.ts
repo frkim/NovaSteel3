@@ -98,6 +98,27 @@ export const personaSections: PersonaSection[] = [
     ],
   },
   {
+    section: 'device-operations',
+    title: 'Device Operations',
+    persona: 'OT Systems Engineer',
+    description:
+      'Fleet health for every simulated device, a searchable sensor explorer, and the incident simulator that drives the demo.',
+    defaultSubView: 'fleet',
+    tabs: [
+      { slug: 'fleet', label: 'Device Fleet' },
+      { slug: 'sensors', label: 'Sensor Explorer' },
+      { slug: 'simulator', label: 'Simulator Control' },
+    ],
+  },
+  {
+    section: 'dashboards',
+    title: 'Dashboard Collections',
+    persona: 'All personas',
+    description: 'Curated, ready-to-open dashboard sets grouped by the question each one answers.',
+    defaultSubView: 'collections',
+    tabs: [{ slug: 'collections', label: 'Collections' }],
+  },
+  {
     section: 'platform-ops',
     title: 'Platform Ops',
     persona: 'Platform Ops',

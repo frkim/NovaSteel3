@@ -17,6 +17,10 @@ import { ExecutivePowerBi } from './ExecutivePowerBi'
 import { PlatformCapacity } from './PlatformCapacity'
 import { PlatformJobs } from './PlatformJobs'
 import { PlatformCost } from './PlatformCost'
+import { DeviceFleet } from './DeviceFleet'
+import { DeviceSensors } from './DeviceSensors'
+import { DeviceSimulator } from './DeviceSimulator'
+import { DashboardCollections } from './DashboardCollections'
 
 /** Maps `${section}/${subView}` to the screen component that renders it. */
 export const screenRegistry: Record<string, ComponentType> = {
@@ -39,6 +43,10 @@ export const screenRegistry: Record<string, ComponentType> = {
   'platform-ops/capacity': PlatformCapacity,
   'platform-ops/jobs': PlatformJobs,
   'platform-ops/cost-telemetry': PlatformCost,
+  'device-operations/fleet': DeviceFleet,
+  'device-operations/sensors': DeviceSensors,
+  'device-operations/simulator': DeviceSimulator,
+  'dashboards/collections': DashboardCollections,
 }
 
 export function resolveScreen(section: string, subView: string): ComponentType | null {

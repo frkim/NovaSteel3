@@ -1,5 +1,6 @@
 import { createContext, useContext } from 'react'
 import type { DataClient } from '../api/dataClient'
+import type { DeviceClient } from '../api/deviceClient'
 import type { MicrofrontendEmitter, ShellContext } from '../types'
 import type { UnitSystem } from '../utils/format'
 import type { TranslateFn } from '../i18n/messages'
@@ -8,6 +9,7 @@ export interface AnalyticsContextValue {
   context: ShellContext
   emit: MicrofrontendEmitter
   client: DataClient
+  deviceClient: DeviceClient
   locale: string
   site: string
   unitSystem: UnitSystem

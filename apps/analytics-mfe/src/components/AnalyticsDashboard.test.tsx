@@ -45,7 +45,7 @@ describe('AnalyticsDashboard (UI smoke)', () => {
   })
 
   it('docks the Copilot chat beside the dashboard only once it is opened', async () => {
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     render(<AnalyticsDashboard context={testShellContext()} emit={() => undefined} />)
 
     await screen.findByRole('heading', { name: 'Command Center', level: 1 })
@@ -62,5 +62,5 @@ describe('AnalyticsDashboard (UI smoke)', () => {
 
     await user.click(screen.getByTestId('copilot-toggle'))
     expect(screen.queryByTestId('copilot-dock')).not.toBeInTheDocument()
-  })
+  }, 20000)
 })

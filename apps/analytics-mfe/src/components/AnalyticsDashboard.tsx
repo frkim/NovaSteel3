@@ -19,6 +19,7 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import { createNovaSteelTheme, resolveThemeMode } from '../designTokens'
 import { DataClient } from '../api/dataClient'
 import { CopilotClient } from '../api/copilotClient'
+import { DeviceClient } from '../api/deviceClient'
 import { AnalyticsContext, type AnalyticsContextValue } from '../context/analytics'
 import { createTranslator } from '../i18n/messages'
 import { resolveSection } from '../personaRoutes'
@@ -50,6 +51,11 @@ export function AnalyticsDashboard({ context, emit }: AnalyticsDashboardProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [context.bffBaseUrl, context.locale],
   )
+  const deviceClient = useMemo(
+    () => new DeviceClient(context),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [context.bffBaseUrl, context.locale],
+  )
   const translator = useMemo(() => createTranslator(context.locale), [context.locale])
 
   const contextValue = useMemo<AnalyticsContextValue>(() => {
@@ -58,6 +64,7 @@ export function AnalyticsDashboard({ context, emit }: AnalyticsDashboardProps) {
       context,
       emit,
       client,
+      deviceClient,
       locale: context.locale,
       site: context.site,
       unitSystem: 'metric',
@@ -65,7 +72,7 @@ export function AnalyticsDashboard({ context, emit }: AnalyticsDashboardProps) {
       demoMode: context.demoMode,
       can: (action: string) => !permitted || permitted.length === 0 || permitted.includes(action),
     }
-  }, [context, emit, client, translator])
+  }, [context, emit, client, deviceClient, translator])
 
   const { section, tab } = resolveSection(context.navigation.section, context.navigation.subView)
   const Screen = resolveScreen(section.section, tab.slug) ?? resolveScreen(section.section, section.defaultSubView)
