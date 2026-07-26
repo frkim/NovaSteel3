@@ -1,0 +1,22 @@
+stateDiagram-v2
+    EXTRACTING : EXTRACTING
+    CRITIQUING : CRITIQUING
+    DRAFT : DRAFT
+    IN_REVIEW : IN_REVIEW [HITL gate]
+    APPROVED : APPROVED (terminal)
+    REJECTED : REJECTED (terminal)
+    DECLINED : DECLINED (terminal)
+
+    [*] --> EXTRACTING
+    EXTRACTING --> CRITIQUING : extract_complete
+    CRITIQUING --> DRAFT : critic_approve
+    CRITIQUING --> EXTRACTING : critic_revise [iterations < 2]
+    CRITIQUING --> DECLINED : critic_reject [max iterations reached]
+    EXTRACTING --> DECLINED : extraction_refused
+    DRAFT --> IN_REVIEW : submit_for_review 👤
+    IN_REVIEW --> APPROVED : approve [Knowledge.Publisher role] 👤
+    IN_REVIEW --> REJECTED : reject [Knowledge.Publisher role] 👤
+    DRAFT --> REJECTED : reject [Knowledge.Publisher role] 👤
+    APPROVED --> [*]
+    REJECTED --> [*]
+    DECLINED --> [*]

@@ -1,0 +1,17 @@
+# Build context = services/knowledge-orchestrator.
+# Keep the context minimal: only requirements.txt, src/ and fixtures/ are needed.
+.venv/
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+tests/
+docs/
+demo_local.py
+*.md
+pyproject.toml
+Dockerfile
+.dockerignore
+pip.conf
