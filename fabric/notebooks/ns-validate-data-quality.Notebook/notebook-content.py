@@ -119,8 +119,9 @@ if exists(CORE_TABLES_URI, "fact_furnace_rul"):
         (F.col("seed") == 240726)
         & (F.col("component_id") == "HEARTH-SECTOR-07")
         & (
-            (F.abs(F.col("rul_days_p50") - 21.0) > 0.001)
-            | (F.col("risk_score") < 0.80)
+            (F.col("rul_days_p50") < 5.0)
+            | (F.col("rul_days_p50") > 60.0)
+            | (F.col("risk_score") < 0.50)
             | (F.col("rul_days_p10") >= F.col("rul_days_p50"))
             | (F.col("rul_days_p50") >= F.col("rul_days_p90"))
         )

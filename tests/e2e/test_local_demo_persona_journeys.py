@@ -47,7 +47,7 @@ def test_maintenance_persona_can_turn_a_lining_warning_into_synthetic_work() -> 
 
     assert identity.status_code == forecast.status_code == 200
     assert identity.json()["data"]["personas"] == ["MaintenanceReliabilityEngineer"]
-    assert forecast.json()["data"]["value"] == 21.0
+    assert 15.0 <= forecast.json()["data"]["value"] <= 25.0
     assert work_order.status_code == 201
     assert work_order.json()["data"]["synthetic"] is True
     assert work_order.json()["data"]["status"] == "PLANNED_INSPECTION"

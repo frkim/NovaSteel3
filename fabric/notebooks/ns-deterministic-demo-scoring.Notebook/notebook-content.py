@@ -93,21 +93,14 @@ risk_raw = (
     / 180.0
     * 0.15
 )
-demo_warning = (
-    (F.col("seed") == F.lit(240726))
-    & (F.col("asset_id") == F.lit("LUX-BF-01"))
-)
 scored = (
     features.withColumn("risk_score", F.least(F.greatest(risk_raw, F.lit(0.01)), F.lit(0.99)))
-    .withColumn("risk_score", F.when(demo_warning, F.lit(0.87)).otherwise("risk_score"))
     .withColumn(
         "rul_p50",
-        F.when(demo_warning, F.lit(21.0)).otherwise(
-            F.greatest(F.lit(3.0), F.lit(90.0) * (F.lit(1.0) - F.col("risk_score")))
-        ),
+        F.greatest(F.lit(3.0), F.lit(90.0) * (F.lit(1.0) - F.col("risk_score")))
     )
-    .withColumn("rul_p10", F.when(demo_warning, F.lit(16.8)).otherwise(F.col("rul_p50") * 0.80))
-    .withColumn("rul_p90", F.when(demo_warning, F.lit(27.5)).otherwise(F.col("rul_p50") * 1.30))
+    .withColumn("rul_p10", F.col("rul_p50") * 0.80)
+    .withColumn("rul_p90", F.col("rul_p50") * 1.30)
     .withColumn("component_id", F.lit("HEARTH-SECTOR-07"))
     .withColumn(
         "inference_id",
@@ -132,7 +125,7 @@ scored = (
         ),
     )
     .withColumn("scored_at", F.col("feature_snapshot_ts"))
-    .withColumn("confidence", F.when(demo_warning, F.lit(0.92)).otherwise(F.lit(0.84)))
+    .withColumn("confidence", F.lit(0.84))
     .withColumn(
         "top_factors_json",
         F.to_json(
@@ -312,15 +305,6 @@ print(
         "rul_silver_written": rul_silver_written,
         "rul_gold_written": rul_gold_written,
         "quality_inference_written": quality_written,
-        "deterministic_warning": {
-            "seed": 240726,
-            "asset_id": "LUX-BF-01",
-            "component_id": "HEARTH-SECTOR-07",
-            "p10": 16.8,
-            "p50": 21.0,
-            "p90": 27.5,
-            "risk": 0.87,
-        },
     }
 )
 

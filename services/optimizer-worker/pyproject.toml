@@ -5,8 +5,9 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "novasteel-optimizer-worker"
 version = "0.1.0"
-description = "Deterministic, constraint-aware NovaSteel energy dispatch optimizer"
+description = "Constraint-aware NovaSteel energy dispatch optimizer (MILP + heuristic fallback)"
 requires-python = ">=3.13"
+dependencies = ["pulp==3.3.2"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

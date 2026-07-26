@@ -84,14 +84,10 @@ def test_scoring_and_quality_what_if_match_demo_cues(
     )
     assert forecast.status_code == 200
     value = forecast.json()["data"]
-    assert value["value"] == 21.0
-    assert value["confidence"] == {"p10": 16.8, "p50": 21.0, "p90": 27.5}
+    assert 15.0 <= value["value"] <= 25.0, "RUL from physics regression"
+    assert value["confidence"]["p10"] < value["confidence"]["p50"] < value["confidence"]["p90"]
     assert value["riskLevel"] == "HIGH"
-    assert [driver["name"] for driver in value["drivers"]] == [
-        "heat_flux_6h_slope",
-        "sector_to_ring_temp_delta",
-        "cooling_efficiency_residual",
-    ]
+    assert len(value["drivers"]) >= 3
 
     what_if = client.post(
         "/v1/quality/what-if",
@@ -123,8 +119,13 @@ def test_energy_recommendation_is_constrained_auditable_and_idempotent(
     )
     assert simulation.status_code == 200
     recommendation = simulation.json()["data"]
-    assert 8 <= recommendation["savings"]["costPct"] <= 13
-    assert -7 <= recommendation["savings"]["peakPct"] <= -3
+    # Cost savings: MILP multi-objective (CO₂ + cost) produces genuine ~7% cost savings.
+    assert 5 <= recommendation["savings"]["costPct"] <= 12
+    # Peak: genuine dispatch-attributable change (old test asserted the [3,7%] fake clamp).
+    assert recommendation["savings"]["peakPct"] < 0
+    # CO₂: physics-derived from per-slot carbon intensity — no longer a constant multiplier.
+    assert recommendation["savings"]["co2Pct"] > 0
+    assert recommendation["solver"] in ("MILP_CBC", "DETERMINISTIC_HEURISTIC")
     assert recommendation["baseline"]["tonnage"] == recommendation["optimized"]["tonnage"]
     assert recommendation["hardConstraintViolations"] == 0
     assert all(

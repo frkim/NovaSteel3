@@ -6,13 +6,22 @@ from datetime import UTC, datetime
 from math import isfinite
 from typing import Any, Iterable, Mapping
 
+from .physics_features import extract_thermal_features
+from .rul_model import estimate_rul
+
 
 class ScoringError(ValueError):
     """Raised when a requested score cannot be calculated safely."""
 
 
 class ScoringWorker:
-    """Computes explainable, bounded predictions from synthetic feature snapshots."""
+    """Computes explainable, bounded predictions from synthetic feature snapshots.
+
+    The lining model performs least-squares regression on the refractory-
+    thickness time-series, extrapolates time-to-failure to the minimum-safe
+    threshold (300 mm), and derives P10/P50/P90 from the standard error of
+    the fitted slope (delta-method uncertainty propagation).
+    """
 
     lining_model_version = "lining-rul-piml:1.3.0-demo"
     quality_model_version = "quality-risk:1.0.0-demo"
@@ -26,53 +35,39 @@ class ScoringWorker:
         source_ref: str,
     ) -> dict[str, Any]:
         sector = component_id.rsplit("-", 1)[-1]
-        values = self._latest_by_signal(telemetry, sector)
-        thickness = float(values.get("hearth_refractory_estimate", 363.0))
-        if not isfinite(thickness) or thickness <= 0:
+        # Materialize telemetry so we can iterate twice (features + timestamp)
+        telemetry_list = list(telemetry)
+        scored_at = self._latest_timestamp(telemetry_list)
+
+        features = extract_thermal_features(telemetry_list, sector)
+        if features is None:
+            raise ScoringError("Insufficient thermal telemetry for physics regression.")
+        if not isfinite(features.thickness_current_mm) or features.thickness_current_mm <= 0:
             raise ScoringError("Lining thickness feature is invalid.")
-        minimum_safe = 300.0
-        degradation_rate = 3.0 if sector == "07" else 0.02
-        p50 = max(0.0, round((thickness - minimum_safe) / degradation_rate, 2))
-        p10 = round(max(0.0, p50 * 0.8), 2)
-        p90 = round(max(p50, p50 * 1.3095238), 2)
-        risk = self._risk_for_rul(p50)
-        risk_level = "HIGH" if risk >= 0.8 else "MEDIUM" if risk >= 0.45 else "LOW"
-        scored_at = self._latest_timestamp(telemetry)
-        inlet = float(values.get("cooling_water_inlet_temperature", 28.0))
-        outlet = float(values.get("cooling_water_outlet_temperature", inlet + 8.0))
-        flow = float(values.get("cooling_water_flow", 200.0))
-        heat_flux = float(values.get("local_heat_flux", 100.0))
-        cooling_delta = max(0.0, outlet - inlet)
-        # A simple water-side energy proxy keeps the advisory model tied to
-        # measurable thermal behavior as well as its monotonic lining state.
-        water_heat_proxy = flow * cooling_delta * 1.163 / 10
-        thermal_resistance = round(max(0.0, (1180.0 - 150.0) / max(heat_flux, 0.1)), 4)
-        drivers = [
-            {"name": "heat_flux_6h_slope", "contribution": 0.29},
-            {"name": "sector_to_ring_temp_delta", "contribution": 0.24},
-            {"name": "cooling_efficiency_residual", "contribution": 0.18},
-        ]
+
+        rul_result = estimate_rul(features)
+        if rul_result is None:
+            raise ScoringError("Unable to estimate RUL from current telemetry.")
+
         return {
             "assetId": asset_id,
             "componentId": component_id,
-            "value": p50,
+            "value": rul_result["p50"],
             "unit": "d",
-            "confidence": {"p10": p10, "p50": p50, "p90": p90},
-            "riskScore": risk,
-            "riskLevel": risk_level,
-            "estimatedMinimumLiningMm": minimum_safe,
+            "confidence": {
+                "p10": rul_result["p10"],
+                "p50": rul_result["p50"],
+                "p90": rul_result["p90"],
+            },
+            "riskScore": rul_result["riskScore"],
+            "riskLevel": rul_result["riskLevel"],
+            "estimatedMinimumLiningMm": rul_result["estimatedMinimumLiningMm"],
             "modelVersion": self.lining_model_version,
             "scoredAt": scored_at,
-            "drivers": drivers,
-            "featureSnapshot": {
-                "liningThicknessMm": thickness,
-                "coolingDeltaC": round(cooling_delta, 3),
-                "coolingFlowM3h": flow,
-                "heatFluxKwM2": heat_flux,
-                "waterHeatProxyKw": round(water_heat_proxy, 3),
-                "apparentThermalResistance": thermal_resistance,
-            },
+            "drivers": rul_result["drivers"],
+            "featureSnapshot": rul_result["featureSnapshot"],
             "sourceRefs": [source_ref],
+            "modelConfidence": rul_result["confidence"],
         }
 
     def score_quality(self, batch: Mapping[str, Any]) -> dict[str, Any]:
@@ -148,30 +143,6 @@ class ScoringWorker:
                 "operationalWrite": False,
             },
         }
-
-    @staticmethod
-    def _risk_for_rul(rul_days: float) -> float:
-        if rul_days <= 30:
-            return round(min(0.99, 0.6 + (30 - rul_days) * 0.03), 4)
-        return 0.02
-
-    @staticmethod
-    def _latest_by_signal(
-        telemetry: Iterable[Mapping[str, Any]], sector: str
-    ) -> dict[str, float]:
-        selected: dict[str, float] = {}
-        for row in telemetry:
-            payload = row.get("payload", row)
-            sensor_id = str(payload.get("sensor_id", payload.get("sensorId", "")))
-            if f"H{sector}" not in sensor_id:
-                continue
-            signal = str(payload.get("signal_code", payload.get("signalCode", "")))
-            value = payload.get("value")
-            try:
-                selected[signal] = float(value)
-            except (TypeError, ValueError):
-                continue
-        return selected
 
     @staticmethod
     def _latest_timestamp(telemetry: Iterable[Mapping[str, Any]]) -> str:

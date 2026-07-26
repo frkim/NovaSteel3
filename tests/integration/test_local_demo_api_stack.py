@@ -38,6 +38,6 @@ def test_local_demo_stack_uses_generated_simulator_fixture_end_to_end() -> None:
 
     assert app.state.services.repository.source == "simulator-fixture:demo-full"
     assert summary.status_code == forecast.status_code == energy.status_code == quality.status_code == 200
-    assert forecast.json()["data"]["value"] == 21.0
+    assert 15.0 <= forecast.json()["data"]["value"] <= 25.0
     assert energy.json()["total"] == 96
     assert quality.json()["total"] == 1

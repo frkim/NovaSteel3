@@ -378,9 +378,26 @@ if (-not $pythonCommand) {
 $demoScoring = Get-Content -LiteralPath (
     Join-Path $FabricRoot 'notebooks\ns-deterministic-demo-scoring.Notebook\notebook-content.py'
 ) -Raw -Encoding UTF8
-foreach ($cue in @('240726', '21.0', '16.8', '27.5', '0.87', 'HEARTH-SECTOR-07')) {
+foreach ($cue in @(
+    'HEARTH-SECTOR-07',
+    'hearth_shell_temperature',
+    'local_heat_flux',
+    'cooling_water_flow',
+    'heat_flux_6h_slope',
+    'risk_score',
+    'novasteel-demo-deterministic/1.0.0',
+    '240728'
+)) {
     Add-Result -Name "demo-score-cue:$cue" -Passed ($demoScoring.Contains($cue)) `
-        -Detail 'Deterministic documented cue.'
+        -Detail 'Physics-derived scoring cue.'
+}
+# Regression guard: the demo scorer must derive its answer from telemetry features,
+# never restate a pre-baked verdict. These constants were the old hard-coded
+# demo_warning block (risk 0.87 / P50 21.0 / P10 16.8 / P90 27.5) removed in M2.
+foreach ($banned in @('0.87', '16.8', '27.5')) {
+    Add-Result -Name "demo-score-no-hardcode:$banned" `
+        -Passed (-not $demoScoring.Contains($banned)) `
+        -Detail 'Scorer must not hard-code a demo RUL verdict.'
 }
 Add-Result -Name 'demo-score-prod-deny' `
     -Passed ($demoScoring -match 'hard-disabled outside dev/test/demo') `

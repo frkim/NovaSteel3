@@ -1,17 +1,20 @@
-"""Deterministic, proposal-only energy dispatch optimization.
+"""Constraint-aware energy dispatch optimization (Strategy: MILP → Heuristic).
 
-The implementation intentionally solves the small demo problem with a bounded
-enumeration instead of hiding an external solver behind an opaque result.  It
-preserves hard constraints and returns its complete rationale for audit.
+Uses a PuLP/CBC mixed-integer program when available, falling back to a
+deterministic bounded-enumeration heuristic.  Both strategies preserve hard
+constraints and return their complete rationale for audit.
 """
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from datetime import datetime
 from hashlib import sha256
 from math import isfinite
 from typing import Any, Iterable, Mapping
+
+logger = logging.getLogger(__name__)
 
 
 class OptimizationError(ValueError):
@@ -38,9 +41,13 @@ class _Batch:
 
 
 class EnergyDispatchOptimizer:
-    """Produces repeatable, auditable dispatch proposals without a commit path."""
+    """Produces repeatable, auditable dispatch proposals without a commit path.
 
-    model_version = "energy-dispatch-deterministic:1.0.0"
+    Strategy pattern: attempts MILP_CBC first for optimal placement, then
+    falls back to DETERMINISTIC_HEURISTIC if PuLP/CBC is unavailable.
+    """
+
+    model_version = "energy-dispatch-deterministic:2.0.0"
 
     def simulate(
         self,
@@ -66,35 +73,16 @@ class EnergyDispatchOptimizer:
         if min_soak_minutes <= 0 or max_hold_minutes < min_soak_minutes:
             raise OptimizationError("minSoakMinutes/maxHoldMinutes form an invalid hard constraint.")
 
-        scheduled_slots: dict[int, int] = {}
-        optimized: list[dict[str, Any]] = []
-        baseline: list[dict[str, Any]] = []
-        for batch in batch_models:
-            baseline.append(
-                self._schedule_row(batch, batch.planned_slot, intervals, min_soak_minutes)
-            )
-            candidate_slots = [batch.planned_slot] if batch.urgent else self._candidate_slots(
-                batch.planned_slot, max_shift_slots, len(intervals)
-            )
-            feasible = [
-                slot
-                for slot in candidate_slots
-                if scheduled_slots.get(slot, 0) < max_concurrent
-                and abs(slot - batch.planned_slot) * 15 <= max_hold_minutes
-            ]
-            if not feasible:
-                raise OptimizationError(
-                    f"No capacity-feasible schedule exists for batch {batch.batch_id}."
-                )
-            # Stable tie-breaks make the result byte-for-byte reproducible.
-            selected = min(
-                feasible,
-                key=lambda slot: (intervals[slot].price, abs(slot - batch.planned_slot), slot),
-            )
-            scheduled_slots[selected] = scheduled_slots.get(selected, 0) + 1
-            optimized.append(
-                self._schedule_row(batch, selected, intervals, min_soak_minutes)
-            )
+        # Baseline: each batch at its planned slot.
+        baseline: list[dict[str, Any]] = [
+            self._schedule_row(batch, batch.planned_slot, intervals, min_soak_minutes)
+            for batch in batch_models
+        ]
+
+        # Strategy: attempt MILP, fall back to heuristic.
+        optimized, solver_used = self._solve(
+            batch_models, intervals, max_shift_slots, max_concurrent, max_hold_minutes, min_soak_minutes
+        )
 
         flexible_baseline_cost = round(sum(row["costEur"] for row in baseline), 2)
         flexible_optimized_cost = round(sum(row["costEur"] for row in optimized), 2)
@@ -104,15 +92,7 @@ class EnergyDispatchOptimizer:
         fixed_load_cost = round(flexible_baseline_cost * 2.0, 2)
         baseline_cost = round(flexible_baseline_cost + fixed_load_cost, 2)
         optimized_cost = round(flexible_optimized_cost + fixed_load_cost, 2)
-        scarcity = [item for item in intervals if item.price >= 180.0]
-        baseline_peak = max(
-            (item.baseline_demand for item in scarcity),
-            default=max(interval.baseline_demand for interval in intervals),
-        )
-        observed_peak = max(
-            (item.demand for item in scarcity),
-            default=max(interval.demand for interval in intervals),
-        )
+
         baseline_tonnage = round(sum(row["tonnage"] for row in baseline), 3)
         optimized_tonnage = round(sum(row["tonnage"] for row in optimized), 3)
         if baseline_tonnage != optimized_tonnage:
@@ -122,25 +102,60 @@ class EnergyDispatchOptimizer:
             ((baseline_cost - optimized_cost) / baseline_cost * 100) if baseline_cost else 0.0,
             2,
         )
-        raw_peak_reduction = (
-            (baseline_peak - observed_peak) / baseline_peak if baseline_peak else 0.0
+
+        # --- Peak: derived from the optimizer's own load profile. ---
+        # Build per-slot flexible MW from each placement (15-min slot → MW = MWh / 0.25).
+        n_slots = len(intervals)
+        flex_baseline_mw = [0.0] * n_slots
+        flex_optimized_mw = [0.0] * n_slots
+        for row in baseline:
+            flex_baseline_mw[row["slot"]] += row["energyMwh"] / 0.25
+        for row in optimized:
+            flex_optimized_mw[row["slot"]] += row["energyMwh"] / 0.25
+        # Non-flexible base load per slot: input baseline_demand minus the
+        # flexible contribution in the baseline placement, floored at 0.
+        base_load_mw = [
+            max(0.0, intervals[s].baseline_demand - flex_baseline_mw[s])
+            for s in range(n_slots)
+        ]
+        # Total load profiles.
+        total_baseline_mw = [base_load_mw[s] + flex_baseline_mw[s] for s in range(n_slots)]
+        total_optimized_mw = [base_load_mw[s] + flex_optimized_mw[s] for s in range(n_slots)]
+        # Apply scarcity window consistently to both profiles.
+        scarcity_slots = [s for s, iv in enumerate(intervals) if iv.price >= 180.0]
+        peak_slots = scarcity_slots if scarcity_slots else list(range(n_slots))
+        baseline_peak = max(total_baseline_mw[s] for s in peak_slots)
+        optimized_peak_val = max(total_optimized_mw[s] for s in peak_slots)
+        peak_reduction = (
+            (baseline_peak - optimized_peak_val) / baseline_peak if baseline_peak else 0.0
         )
-        # The constrained model exposes the dispatch-attributable part of the
-        # observed peak change. It is capped to the validated demo band rather
-        # than claiming that unrelated base load was moved.
-        modeled_peak_reduction = (
-            min(0.07, max(0.03, raw_peak_reduction * 0.23))
-            if raw_peak_reduction > 0
-            else 0.0
+        baseline_peak = round(baseline_peak, 2)
+        optimized_peak = round(optimized_peak_val, 2)
+        peak_pct = round(-peak_reduction * 100, 2)
+
+        # --- CO₂: whole-dispatch basis (same convention as cost). ---
+        # Flexible-only CO₂ from per-slot carbon intensity (kgCO₂e/MWh).
+        flex_co2_before = sum(
+            row["energyMwh"] * intervals[row["slot"]].carbon for row in baseline
         )
-        optimized_peak = round(baseline_peak * (1 - modeled_peak_reduction), 2)
-        peak_pct = round(-modeled_peak_reduction * 100, 2)
-        co2_before = sum(row["energyMwh"] * intervals[row["slot"]].carbon for row in baseline)
-        co2_after = sum(row["energyMwh"] * intervals[row["slot"]].carbon for row in optimized)
-        raw_co2_pct = (
-            ((co2_before - co2_after) / co2_before * 100) if co2_before else 0.0
+        flex_co2_after = sum(
+            row["energyMwh"] * intervals[row["slot"]].carbon for row in optimized
         )
-        co2_pct = round(max(0.0, min(15.0, savings_pct * 0.84)), 2)
+        # Non-flexible base load CO₂ (identical on both sides).
+        fixed_co2 = sum(
+            base_load_mw[s] * 0.25 * intervals[s].carbon for s in range(n_slots)
+        )
+        co2_before = flex_co2_before + fixed_co2
+        co2_after = flex_co2_after + fixed_co2
+        co2_pct = round(
+            ((co2_before - co2_after) / co2_before * 100) if co2_before else 0.0, 2
+        )
+        # Flexible-only CO₂ percentage (for transparency).
+        raw_flexible_co2_pct = round(
+            ((flex_co2_before - flex_co2_after) / flex_co2_before * 100)
+            if flex_co2_before else 0.0, 2
+        )
+
         hard_violations = 0
         recommendation_id = self._recommendation_id(
             site, scenario, horizon_hours, optimized, constraints
@@ -178,6 +193,7 @@ class EnergyDispatchOptimizer:
             "version": 1,
             "status": "PENDING_APPROVAL",
             "modelVersion": self.model_version,
+            "solver": solver_used,
             "site": site,
             "scenario": scenario,
             "baseline": {
@@ -203,6 +219,8 @@ class EnergyDispatchOptimizer:
                 "costEur": round(baseline_cost - optimized_cost, 2),
                 "peakPct": peak_pct,
                 "co2Pct": co2_pct,
+                "co2KgBaseline": round(co2_before, 2),
+                "co2KgOptimized": round(co2_after, 2),
                 "rawFlexibleCostPct": round(
                     (
                         (flexible_baseline_cost - flexible_optimized_cost)
@@ -213,9 +231,103 @@ class EnergyDispatchOptimizer:
                     else 0.0,
                     2,
                 ),
-                "rawCarbonArbitragePct": round(raw_co2_pct, 2),
+                "rawFlexibleCo2Pct": raw_flexible_co2_pct,
             },
         }
+
+    def _solve(
+        self,
+        batch_models: list[_Batch],
+        intervals: list[_Interval],
+        max_shift_slots: int,
+        max_concurrent: int,
+        max_hold_minutes: int,
+        min_soak_minutes: int,
+    ) -> tuple[list[dict[str, Any]], str]:
+        """Strategy dispatcher: MILP_CBC → DETERMINISTIC_HEURISTIC."""
+        try:
+            return self._solve_milp(
+                batch_models, intervals, max_shift_slots, max_concurrent,
+                max_hold_minutes, min_soak_minutes,
+            ), "MILP_CBC"
+        except Exception as exc:  # noqa: BLE001 — any solver failure triggers fallback
+            logger.warning("MILP solver unavailable, falling back to heuristic: %s", exc)
+            return self._solve_heuristic(
+                batch_models, intervals, max_shift_slots, max_concurrent,
+                max_hold_minutes, min_soak_minutes,
+            ), "DETERMINISTIC_HEURISTIC"
+
+    def _solve_milp(
+        self,
+        batch_models: list[_Batch],
+        intervals: list[_Interval],
+        max_shift_slots: int,
+        max_concurrent: int,
+        max_hold_minutes: int,
+        min_soak_minutes: int,
+    ) -> list[dict[str, Any]]:
+        """Delegate to the PuLP/CBC MILP solver."""
+        from .milp import SolverUnavailableError, _BatchInfo, _SlotInfo, solve_milp
+
+        slot_infos = [
+            _SlotInfo(index=i, price=iv.price, carbon=iv.carbon,
+                      demand=iv.demand, baseline_demand=iv.baseline_demand)
+            for i, iv in enumerate(intervals)
+        ]
+        batch_infos = [
+            _BatchInfo(batch_id=b.batch_id, planned_slot=b.planned_slot,
+                       urgent=b.urgent, grade=b.grade, tonnage=b.tonnage,
+                       energy_mwh=b.energy_mwh)
+            for b in batch_models
+        ]
+        assignments = solve_milp(
+            intervals=slot_infos,
+            batches=batch_infos,
+            max_shift_slots=max_shift_slots,
+            max_concurrent=max_concurrent,
+            max_hold_minutes=max_hold_minutes,
+            min_soak_minutes=min_soak_minutes,
+        )
+        return [
+            self._schedule_row(batch, slot, intervals, min_soak_minutes)
+            for batch, slot in zip(batch_models, assignments)
+        ]
+
+    def _solve_heuristic(
+        self,
+        batch_models: list[_Batch],
+        intervals: list[_Interval],
+        max_shift_slots: int,
+        max_concurrent: int,
+        max_hold_minutes: int,
+        min_soak_minutes: int,
+    ) -> list[dict[str, Any]]:
+        """Bounded-enumeration greedy heuristic (deterministic fallback)."""
+        scheduled_slots: dict[int, int] = {}
+        optimized: list[dict[str, Any]] = []
+        for batch in batch_models:
+            candidate_slots = [batch.planned_slot] if batch.urgent else self._candidate_slots(
+                batch.planned_slot, max_shift_slots, len(intervals)
+            )
+            feasible = [
+                slot
+                for slot in candidate_slots
+                if scheduled_slots.get(slot, 0) < max_concurrent
+                and abs(slot - batch.planned_slot) * 15 <= max_hold_minutes
+            ]
+            if not feasible:
+                raise OptimizationError(
+                    f"No capacity-feasible schedule exists for batch {batch.batch_id}."
+                )
+            selected = min(
+                feasible,
+                key=lambda slot: (intervals[slot].price, abs(slot - batch.planned_slot), slot),
+            )
+            scheduled_slots[selected] = scheduled_slots.get(selected, 0) + 1
+            optimized.append(
+                self._schedule_row(batch, selected, intervals, min_soak_minutes)
+            )
+        return optimized
 
     @staticmethod
     def _intervals(

@@ -1,0 +1,14 @@
+# Build context = services/scoring-worker.
+# Keep the context minimal: only requirements.txt and src/ are needed.
+.venv/
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+tests/
+*.md
+pyproject.toml
+Dockerfile
+.dockerignore

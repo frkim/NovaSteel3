@@ -46,8 +46,9 @@ def test_scoring_worker_keeps_uncertainty_ordered_and_bounded() -> None:
         source_ref="simulator:test",
     )
 
-    assert result["value"] == 21.0
-    assert result["confidence"]["p10"] <= result["value"] <= result["confidence"]["p90"]
+    # Physics model derives RUL from regression on refractory thickness
+    assert 15.0 <= result["value"] <= 25.0, f"RUL {result['value']} outside expected range"
+    assert result["confidence"]["p10"] < result["value"] <= result["confidence"]["p90"]
     assert result["riskScore"] >= 0.8
 
 
