@@ -225,11 +225,72 @@ resource speechDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-pre
   }
 }
 
+// --- Model Deployments (M3) -------------------------------------------------
+// GPT-4o for knowledge extraction + text-embedding-3-large for grounded RAG.
+// Content Safety is enforced via the content_filter_policy on the deployment.
+// Authentication: managed identity only (disableLocalAuth: true on parent account).
+
+@description('GPT model deployment name.')
+param gptDeploymentName string = 'gpt-4o'
+
+@description('GPT model version (use a current GA version).')
+param gptModelVersion string = '2024-11-20'
+
+@description('Embedding model deployment name.')
+param embeddingDeploymentName string = 'text-embedding-3-large'
+
+@description('Embedding model version.')
+param embeddingModelVersion string = '1'
+
+@description('Tokens-per-minute capacity for GPT deployment (in thousands).')
+param gptCapacity int = 30
+
+@description('Tokens-per-minute capacity for embedding deployment (in thousands).')
+param embeddingCapacity int = 120
+
+resource gptDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
+  parent: foundryAccount
+  name: gptDeploymentName
+  sku: {
+    name: 'Standard'
+    capacity: gptCapacity
+  }
+  properties: {
+    model: {
+      format: 'OpenAI'
+      name: 'gpt-4o'
+      version: gptModelVersion
+    }
+    raiPolicyName: 'Microsoft.DefaultV2'
+  }
+}
+
+resource embeddingDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
+  parent: foundryAccount
+  name: embeddingDeploymentName
+  dependsOn: [gptDeployment]
+  sku: {
+    name: 'Standard'
+    capacity: embeddingCapacity
+  }
+  properties: {
+    model: {
+      format: 'OpenAI'
+      name: 'text-embedding-3-large'
+      version: embeddingModelVersion
+    }
+  }
+}
+
 output foundryAccountId string = foundryAccount.id
 output foundryAccountName string = foundryAccount.name
 output foundryEndpoint string = foundryAccount.properties.?endpoint ?? ''
 output speechAccountId string = speechAccount.id
 output speechAccountName string = speechAccount.name
 output speechEndpoint string = speechAccount.properties.?endpoint ?? ''
+output gptDeploymentId string = gptDeployment.id
+output gptDeploymentModelName string = gptDeploymentName
+output embeddingDeploymentId string = embeddingDeployment.id
+output embeddingDeploymentModelName string = embeddingDeploymentName
 @description('True only when the manual Agent Service validation gate has been recorded as complete. Application deployment automation should treat Agent Service features as unavailable until this is true AND the corresponding tenant-side project/agent has actually been created.')
 output foundryAgentServiceGateCleared bool = foundryAgentServiceManuallyValidated

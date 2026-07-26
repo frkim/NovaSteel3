@@ -26,6 +26,9 @@ param infrastructureSubnetId string
 @description('Placeholder container image for every service until services/* publishes real images via cd-services.yml.')
 param placeholderImage string = 'mcr.microsoft.com/k8se/quickstart:latest'
 
+@description('Per-service container image overrides. Keys match serviceNames (bff-api, optimizer-worker, scoring-worker, ingest-relay, knowledge-orchestrator). Unset services use placeholderImage.')
+param serviceImages object = {}
+
 @description('Map of serviceName -> { identityId, keyVaultUri } used to wire each Container App to its own managed identity and Key Vault. Expected keys: bffApi, optimizerWorker, scoringWorker, ingestRelay, knowledgeOrchestrator.')
 param services object
 
@@ -37,6 +40,27 @@ param simulatorIdentityId string = ''
 
 @description('Internal-only ingress for the Container Apps environment (no public internet ingress) per security-governance-and-threat-model.md §4.1. Set to false only for a component that must be reachable directly, e.g. behind an approved WAF/App Gateway.')
 param internalOnly bool = true
+
+@description('Application Insights connection string for OpenTelemetry telemetry export (azure-monitor-opentelemetry).')
+param appInsightsConnectionString string
+
+@description('Whether the environment is production — drives zone redundancy.')
+param isProduction bool = false
+
+@description('Table endpoint for the BFF audit log / idempotency store (Azure Table Storage). Empty string disables — BFF degrades to in-memory.')
+param bffTableEndpoint string = ''
+
+@description('Storage account name for the BFF audit log / idempotency store.')
+param bffStorageAccountName string = ''
+
+@description('Foundry (Cognitive Services) endpoint for knowledge extraction and RAG. Empty string disables — services degrade to offline/fallback.')
+param foundryEndpoint string = ''
+
+@description('GPT model deployment name from foundry-speech module (wired, not hardcoded).')
+param foundryChatDeployment string = ''
+
+@description('Embedding model deployment name from foundry-speech module (wired, not hardcoded).')
+param foundryEmbedDeployment string = ''
 
 resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' = {
   name: 'cae-ns-${environment}'
@@ -53,7 +77,7 @@ resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2024-03-01'
       infrastructureSubnetId: infrastructureSubnetId
       internal: internalOnly
     }
-    zoneRedundant: false
+    zoneRedundant: isProduction
   }
 }
 
@@ -114,12 +138,12 @@ resource placeholderApps 'Microsoft.App/containerApps@2024-03-01' = [
         containers: [
           {
             name: svc
-            image: placeholderImage
+            image: serviceImages[?svc] ?? placeholderImage
             resources: {
               cpu: json('0.5')
               memory: '1Gi'
             }
-            env: [
+            env: concat([
               {
                 name: 'NOVASTEEL_ENVIRONMENT'
                 value: environment
@@ -129,10 +153,45 @@ resource placeholderApps 'Microsoft.App/containerApps@2024-03-01' = [
                 value: services[serviceKeys[i]].keyVaultUri
               }
               {
-                name: 'NOVASTEEL_PLACEHOLDER'
-                value: 'true'
+                name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+                value: appInsightsConnectionString
               }
-            ]
+              {
+                name: 'OTEL_SERVICE_NAME'
+                value: 'novasteel-${svc}'
+              }
+              {
+                name: 'NOVASTEEL_LOG_FORMAT'
+                value: 'json'
+              }
+            ], svc == 'bff-api' && !empty(bffTableEndpoint) ? [
+              {
+                name: 'NOVASTEEL_TABLE_ENDPOINT'
+                value: bffTableEndpoint
+              }
+              {
+                name: 'NOVASTEEL_STORAGE_ACCOUNT_NAME'
+                value: bffStorageAccountName
+              }
+            ] : [], (svc == 'bff-api' || svc == 'knowledge-orchestrator') && !empty(foundryEndpoint) ? [
+              {
+                name: 'FOUNDRY_ENDPOINT'
+                value: foundryEndpoint
+              }
+              {
+                name: 'KNOWLEDGE_AGENT_MODE'
+                value: 'azure'
+              }
+            ] : [], svc == 'knowledge-orchestrator' && !empty(foundryChatDeployment) ? [
+              {
+                name: 'FOUNDRY_CHAT_DEPLOYMENT'
+                value: foundryChatDeployment
+              }
+              {
+                name: 'FOUNDRY_EMBED_DEPLOYMENT'
+                value: foundryEmbedDeployment
+              }
+            ] : [])
           }
         ]
         scale: {
@@ -180,8 +239,8 @@ resource simulatorJob 'Microsoft.App/jobs@2024-03-01' = if (deploySimulatorJob &
               value: environment
             }
             {
-              name: 'NOVASTEEL_PLACEHOLDER'
-              value: 'true'
+              name: 'NOVASTEEL_LOG_FORMAT'
+              value: 'json'
             }
           ]
         }

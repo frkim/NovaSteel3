@@ -40,6 +40,9 @@ param privateDnsZoneId string
 @description('Log Analytics workspace resource ID for diagnostic logs.')
 param logAnalyticsWorkspaceId string
 
+@description('Whether the environment is production — drives zone redundancy.')
+param isProduction bool = false
+
 var eventHubsDataSenderRoleId = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '2b629674-e913-4c01-ae53-ef4638d8f975')
 var eventHubsDataReceiverRoleId = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'a638d3c7-ab3a-418d-83e6-5f17a39d4fde')
 
@@ -56,7 +59,7 @@ resource namespace 'Microsoft.EventHub/namespaces@2024-01-01' = {
     disableLocalAuth: true
     minimumTlsVersion: '1.2'
     publicNetworkAccess: 'Disabled'
-    zoneRedundant: false
+    zoneRedundant: isProduction
   }
 }
 

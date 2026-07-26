@@ -235,6 +235,8 @@ var privateDnsZoneNames = [
   'privatelink.cognitiveservices.azure.com'
   'privatelink.openai.azure.com'
   'privatelink.azurecr.io'
+  #disable-next-line no-hardcoded-env-urls
+  'privatelink.table.core.windows.net'
 ]
 
 resource privateDnsZones 'Microsoft.Network/privateDnsZones@2024-06-01' = [
@@ -289,4 +291,5 @@ output privateDnsZoneIds object = {
   cognitiveServices: privateDnsZones[3].id
   openAi: privateDnsZones[4].id
   containerRegistry: privateDnsZones[5].id
+  table: privateDnsZones[6].id
 }

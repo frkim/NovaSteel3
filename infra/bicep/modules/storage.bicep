@@ -29,6 +29,9 @@ param privateEndpointSubnetId string
 @description('Private DNS zone resource ID for privatelink.blob.core.windows.net.')
 param privateDnsZoneId string
 
+@description('Private DNS zone resource ID for privatelink.table.core.windows.net (required when tables are provisioned).')
+param tablePrivateDnsZoneId string = ''
+
 @description('Log Analytics workspace resource ID for diagnostic logs.')
 param logAnalyticsWorkspaceId string
 
@@ -40,6 +43,9 @@ param blobRetentionDays int = 30
 
 @description('Disable local (shared-key) authentication so only Entra ID/RBAC can access data — matches the "no SAS/keys" rule used elsewhere in this architecture.')
 param disableSharedKeyAccess bool = true
+
+@description('Table names to create (empty array = no table service provisioning).')
+param tables array = []
 
 resource storage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   name: name
@@ -163,6 +169,57 @@ resource diagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' 
   }
 }
 
+// --- Table Storage (opt-in via non-empty `tables` param) ---------------------
+resource tableService 'Microsoft.Storage/storageAccounts/tableServices@2023-05-01' = if (!empty(tables)) {
+  parent: storage
+  name: 'default'
+}
+
+resource storageTables 'Microsoft.Storage/storageAccounts/tableServices/tables@2023-05-01' = [
+  for t in tables: {
+    parent: tableService
+    name: t
+  }
+]
+
+resource tablePrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-11-01' = if (!empty(tables) && !empty(tablePrivateDnsZoneId)) {
+  name: 'pe-${name}-table'
+  location: location
+  tags: tags
+  properties: {
+    subnet: {
+      id: privateEndpointSubnetId
+    }
+    privateLinkServiceConnections: [
+      {
+        name: 'pe-${name}-table-connection'
+        properties: {
+          privateLinkServiceId: storage.id
+          groupIds: [
+            'table'
+          ]
+        }
+      }
+    ]
+  }
+}
+
+resource tablePrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2023-11-01' = if (!empty(tables) && !empty(tablePrivateDnsZoneId)) {
+  parent: tablePrivateEndpoint
+  name: 'default'
+  properties: {
+    privateDnsZoneConfigs: [
+      {
+        name: 'privatelink-table-core-windows-net'
+        properties: {
+          privateDnsZoneId: tablePrivateDnsZoneId
+        }
+      }
+    ]
+  }
+}
+
 output storageAccountId string = storage.id
 output storageAccountName string = storage.name
 output primaryBlobEndpoint string = storage.properties.?primaryEndpoints.?blob ?? ''
+output primaryTableEndpoint string = storage.properties.?primaryEndpoints.?table ?? ''

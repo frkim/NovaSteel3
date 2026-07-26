@@ -94,6 +94,20 @@ param foundryAgentServiceManuallyValidated bool = false
 @description('Deploy the placeholder Container Apps (bff-api, workers, ingest-relay, knowledge-orchestrator) and, for non-prod, the simulator publisher Job. Set false to provision only the platform (network/identity/data/monitoring) layer first.')
 param deployContainerAppsPlaceholders bool = true
 
+@description('Secondary EU region for disaster recovery validation (ADR-003). Never silently enabled as a replica — requires DPO approval and tested restore runbook before production use.')
+@allowed([
+  'westeurope'
+  'northeurope'
+  'francecentral'
+])
+param secondaryLocation string = 'westeurope'
+
+@description('Email address for operational alert notifications.')
+param alertEmail string = ''
+
+@description('Optional webhook URI for PagerDuty/Teams alert integration.')
+param alertWebhookUri string = ''
+
 var isProd = environment == 'prod'
 var regionAbbrev = location == 'swedencentral' ? 'sc' : 'we'
 // Computed (not module-output-derived) so the Fabric capacity module and the Logic App lifecycle
@@ -312,13 +326,23 @@ module storageFallback 'modules/storage.bicep' = {
       'fallback-pack'
       'proof-pack'
     ]
+    tables: [
+      'bffauditlog'
+      'bffidempotency'
+    ]
     privateEndpointSubnetId: network.outputs.subnetIds.apps
     privateDnsZoneId: network.outputs.privateDnsZoneIds.blob
+    tablePrivateDnsZoneId: network.outputs.privateDnsZoneIds.table
     logAnalyticsWorkspaceId: monitoring.outputs.logAnalyticsWorkspaceId
     roleAssignments: [
       {
         principalId: identity.outputs.bffPrincipalId
         roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')
+      }
+      {
+        // Storage Table Data Contributor for BFF audit log + idempotency store (M10)
+        principalId: identity.outputs.bffPrincipalId
+        roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3')
       }
       {
         principalId: identity.outputs.simulatorPrincipalId
@@ -344,6 +368,7 @@ module eventHubs 'modules/eventhubs.bicep' = {
     privateEndpointSubnetId: network.outputs.subnetIds.integration
     privateDnsZoneId: network.outputs.privateDnsZoneIds.serviceBus
     logAnalyticsWorkspaceId: monitoring.outputs.logAnalyticsWorkspaceId
+    isProduction: isProd
   }
 }
 
@@ -400,12 +425,19 @@ module foundrySpeech 'modules/foundry-speech.bicep' = {
     foundryAgentServiceManuallyValidated: foundryAgentServiceManuallyValidated
     foundryRoleAssignments: [
       {
+        // Cognitive Services OpenAI User — required for data-plane chat/embedding inference
         principalId: identity.outputs.bffPrincipalId
-        roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'a97b65f3-24c7-4388-baec-2e87135dc908')
+        roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd')
       }
       {
+        // Cognitive Services OpenAI User — required for data-plane chat/embedding inference
         principalId: identity.outputs.workerPrincipalId
-        roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'a97b65f3-24c7-4388-baec-2e87135dc908')
+        roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd')
+      }
+      {
+        // Cognitive Services OpenAI User — knowledge-orchestrator makes live GPT-4o calls (M3)
+        principalId: identity.outputs.knowledgeOrchestratorPrincipalId
+        roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd')
       }
     ]
     speechRoleAssignments: [
@@ -430,6 +462,13 @@ module containerApps 'modules/containerapps.bicep' = if (deployContainerAppsPlac
     logAnalyticsWorkspaceId: monitoring.outputs.logAnalyticsWorkspaceId
     logAnalyticsCustomerId: monitoring.outputs.logAnalyticsCustomerId
     infrastructureSubnetId: network.outputs.subnetIds.containerAppsInfra
+    appInsightsConnectionString: monitoring.outputs.appInsightsConnectionString
+    isProduction: isProd
+    bffTableEndpoint: storageFallback.outputs.primaryTableEndpoint
+    bffStorageAccountName: storageFallback.outputs.storageAccountName
+    foundryEndpoint: foundrySpeech.outputs.foundryEndpoint
+    foundryChatDeployment: foundrySpeech.outputs.gptDeploymentModelName
+    foundryEmbedDeployment: foundrySpeech.outputs.embeddingDeploymentModelName
     deploySimulatorJob: !isProd
     simulatorIdentityId: isProd ? '' : identity.outputs.simulatorIdentityId
     services: {
@@ -479,6 +518,24 @@ module budget 'modules/budget.bicep' = {
 }
 
 // ---------------------------------------------------------------------------
+// Operational alerts (operations-and-cost.md §4 — 10 alert rules)
+// ---------------------------------------------------------------------------
+module alerts 'modules/alerts.bicep' = {
+  name: 'ns-${environment}-alerts'
+  scope: rgMonitoring
+  params: {
+    environment: environment
+    location: location
+    tags: commonTags
+    logAnalyticsWorkspaceId: monitoring.outputs.logAnalyticsWorkspaceId
+    appInsightsId: monitoring.outputs.appInsightsId
+    alertEmail: alertEmail
+    webhookUri: alertWebhookUri
+    enableAlerts: isProd || environment == 'demo'
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Outputs consumed by app/Fabric setup automation (fabric/deployment-parameters/<env>.json,
 // infra/scripts, and CI/CD) — implementation-guide.md §9.3.
 // ---------------------------------------------------------------------------
@@ -508,3 +565,5 @@ output containerAppsEnvironmentId string = deployContainerAppsPlaceholders ? (co
 output capacityLifecycleLogicAppId string = isProd ? '' : (logicAppCapacityLifecycle.?outputs.?workflowId ?? '')
 output audioStorageAccountName string = storageAudio.outputs.storageAccountName
 output fallbackStorageAccountName string = storageFallback.outputs.storageAccountName
+output secondaryLocation string = secondaryLocation
+output alertsActionGroupId string = alerts.outputs.actionGroupId
