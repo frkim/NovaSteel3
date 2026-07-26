@@ -39,10 +39,10 @@ const STEPS: TourStep[] = [
     headline: '8–13% modeled cost reduction · zero hard-constraint violations.',
   },
   {
-    title: 'Reliability Engineer — 21-day RUL',
+    title: 'Reliability Engineer — advance warning on the lining',
     route: 'furnace-health/lining-forecast',
     narrative: 'Neighboring thermocouples, cooling ΔT, and heat-flux residual agree — this is unlike a single bad sensor.',
-    headline: 'P50 21.0 days · P10 16.8 · P90 27.5 · risk 0.87 (HIGH).',
+    headline: 'P50 19.65 days · P10 18.69 · P90 20.61 · risk 0.90 (HIGH) — close to the ≥21-day target, not yet at it.',
   },
   {
     title: 'Quality Engineer — genealogy & what-if',

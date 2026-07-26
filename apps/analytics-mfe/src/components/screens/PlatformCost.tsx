@@ -10,7 +10,7 @@ import { formatCurrency, formatNumber, formatTime, msOf } from '../../utils/form
 import type { KpiCardModel } from '../primitives/KpiCard'
 
 export function PlatformCost() {
-  const { locale } = useAnalytics()
+  const { emit, locale, site } = useAnalytics()
   const tokens = useTokens()
   const trend = useMemo(() => costTrend(), [])
 
@@ -18,10 +18,10 @@ export function PlatformCost() {
   const avgUtil = Math.round(trend.reduce((sum, point) => sum + point.utilizationPct, 0) / trend.length)
 
   const metrics: KpiCardModel[] = [
-    { id: 'spend', label: 'Spend to date', value: formatCurrency(spendToDate, locale), target: 'within budget cap', trend: 'flat' },
-    { id: 'rate', label: 'Cost / hour', value: formatCurrency(2.8, locale), target: 'F2 measured', trend: 'flat' },
-    { id: 'util', label: 'Utilization', value: String(avgUtil), unit: '%', trend: 'up', goodDirection: 'up', target: 'measurement only' },
-    { id: 'fresh', label: 'Freshness', value: '12', unit: 's', target: 'last telemetry', trend: 'flat' },
+    { id: 'spend', label: 'Spend to date', value: formatCurrency(spendToDate, locale), target: 'within budget cap', trend: 'flat', tooltip: 'Sum of the hourly figures in the cost trend below, over the 06:00–18:00 demo window. These are deterministic synthetic values, not an Azure invoice: the real number is region-, currency- and offer-specific and is deliberately not asserted here.', actionHint: 'the platform jobs log', onClick: () => emit('nav.intent', { route: `/${site}/platform-ops/jobs` }) },
+    { id: 'rate', label: 'Cost / hour', value: formatCurrency(2.8, locale), target: 'synthetic placeholder', trend: 'flat', tooltip: 'Illustrative hourly capacity cost used to make the FinOps surface legible. This is a synthetic placeholder, NOT a Fabric price quote — an honest €/hour figure is region-, currency- and offer-specific and only comes from measured pilot CU consumption. What the demo does prove is the shape of the control: pause overnight, resize on demand, cap the budget.' },
+    { id: 'util', label: 'Utilization', value: String(avgUtil), unit: '%', trend: 'up', goodDirection: 'up', target: 'synthetic placeholder', tooltip: 'Average capacity utilisation across the displayed window, from the same synthetic cost fixture. It illustrates why an idle non-production capacity is worth pausing at 01:00; it is not a measurement of the deployed capacity.', actionHint: 'the platform capacity view', onClick: () => emit('nav.intent', { route: `/${site}/platform-ops/capacity` }) },
+    { id: 'fresh', label: 'Freshness', value: '12', unit: 's', target: 'last telemetry', trend: 'flat', tooltip: 'Seconds since the last telemetry batch was received and processed. Under 30 s indicates a healthy pipeline; the number here is a fixed demo value rather than a live probe.' },
   ]
 
   const costSeries = trend.map((point) => ({ x: msOf(point.ts), y: point.costEur }))

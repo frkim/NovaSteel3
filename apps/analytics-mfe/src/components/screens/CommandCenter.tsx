@@ -10,7 +10,7 @@ import { SeverityPill } from '../primitives/SeverityPill'
 import { DataTable, type DataTableColumn } from '../primitives/DataTable'
 import { DonutChart } from '../charts/DonutChart'
 import { ChartContainer } from '../charts/ChartContainer'
-import { KpiBand, PanelCard, SectionStack, TwoColumn } from './common'
+import { KpiBand, PanelCard, SectionStack, TwoColumn, revealPanel } from './common'
 import { formatDateTime, formatInteger, formatNumber } from '../../utils/format'
 import type { KpiCardModel } from '../primitives/KpiCard'
 
@@ -46,6 +46,8 @@ export function CommandCenter() {
         target: 'target −14% energy/t',
         asOf,
         source,
+        tooltip: 'Total electrical energy consumed at this site in the current rolling window, in MWh. Sourced from meter aggregations and compared against the dispatch-savings target from energy optimisation.',
+        actionHint: 'the spot-price schedule',
         onClick: () => emit('nav.intent', { route: `/${site}/energy-optimization/spot-price-schedule` }),
       },
       {
@@ -59,6 +61,8 @@ export function CommandCenter() {
         target: 'target −22% CO₂',
         asOf,
         source,
+        tooltip: 'Scope 2 market-based CO₂-equivalent emissions for today in tonnes per day, covering grid electricity consumed on site. Derived from the energy meter feed and the regional grid emission factor.',
+        actionHint: 'the emissions ledger',
         onClick: () => emit('nav.intent', { route: `/${site}/sustainability-compliance/emissions-ledger` }),
       },
       {
@@ -69,9 +73,11 @@ export function CommandCenter() {
         trend: 'down',
         goodDirection: 'up',
         deltaLabel: 'HEARTH-07',
-        target: '21-day advance warning',
+        target: 'target ≥21-day advance warning',
         asOf,
         source,
+        tooltip: 'Median remaining useful life of the BF-07 hearth lining in days, from model lining-rul-piml:1.3.0-demo scored on real-time thermocouple and heat-flux sensor data. Lower values indicate increasing reline urgency.',
+        actionHint: 'the lining forecast',
         why: {
           modelVersion: 'lining-rul-piml/1.3.0-demo',
           scoredAt: asOf,
@@ -80,7 +86,7 @@ export function CommandCenter() {
             { name: 'sector_to_ring_temp_delta', contribution: 0.24 },
             { name: 'cooling_efficiency_residual', contribution: 0.18 },
           ],
-          confidenceText: 'P50 21.0 days · P10 16.8 · P90 27.5 (risk 0.87).',
+          confidenceText: 'P50 19.65 days · P10 18.69 · P90 20.61 (risk 0.90).',
         },
         onClick: () => emit('nav.intent', { route: `/${site}/furnace-health/lining-forecast` }),
       },
@@ -95,6 +101,8 @@ export function CommandCenter() {
         target: 'target +8% yield',
         asOf,
         source,
+        tooltip: 'Predicted first-pass high-grade yield percentage for the current shift, output by the quality prediction model and aggregated over all coils scored in the last 8 hours.',
+        actionHint: 'quality batches',
         onClick: () => emit('nav.intent', { route: `/${site}/quality/batches` }),
       },
       {
@@ -108,6 +116,9 @@ export function CommandCenter() {
         target: 'triage in Command Center',
         asOf: alertsState.asOf,
         source: alertsState.source,
+        tooltip: 'Count of currently open (non-closed) alerts across all severities for this site. Polled every 8 seconds from the alerting service; the critical count is shown separately.',
+        actionHint: 'the active alerts table',
+        onClick: () => revealPanel('cc-alerts'),
       },
     ]
   }, [summaryState.data, summaryState.asOf, summaryState.source, alertsState.asOf, alertsState.source, alerts.length, openCritical.length, locale, emit, site])
@@ -134,8 +145,8 @@ export function CommandCenter() {
       },
       {
         id: 'inspect',
-        title: 'Schedule BF2 hearth inspection (risk 0.87)',
-        detail: 'Predicted RUL P50 21 days · create synthetic work order and verify sensors.',
+        title: 'Schedule BF2 hearth inspection (risk 0.90)',
+        detail: 'Predicted RUL P50 19.65 days · create synthetic work order and verify sensors.',
         route: `/${site}/furnace-health/lining-forecast`,
       },
       {
@@ -179,7 +190,7 @@ export function CommandCenter() {
 
       <TwoColumn
         main={
-          <PanelCard title="Active alerts">
+          <PanelCard id="cc-alerts" title="Active alerts">
             <Box role="log" aria-live="polite" aria-relevant="additions">
               <span className="ns-visually-hidden" role="status">
                 {openCritical.length} critical alerts open

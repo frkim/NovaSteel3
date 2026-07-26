@@ -19,16 +19,16 @@ interface SiteRow {
 }
 
 export function ExecutiveOverview() {
-  const { locale } = useAnalytics()
+  const { emit, locale, site } = useAnalytics()
   const tokens = useTokens()
   const sites = useMemo<SiteRow[]>(() => executiveSites(), [])
 
   const metrics: KpiCardModel[] = [
-    { id: 'energy', label: 'Energy / t', value: '−14', unit: '%', trend: 'down', goodDirection: 'down', deltaLabel: 'on track', target: 'use-case target −14%' },
-    { id: 'co2', label: 'CO₂', value: '−22', unit: '%', trend: 'down', goodDirection: 'down', deltaLabel: 'on track', target: 'use-case target −22%' },
-    { id: 'yield', label: 'High-grade yield', value: '+8', unit: '%', trend: 'up', goodDirection: 'up', deltaLabel: 'on track', target: 'use-case target +8%' },
-    { id: 'warning', label: 'Advance warning', value: '21', unit: 'd', target: 'furnace safety cue', trend: 'flat' },
-    { id: 'failures', label: 'Failures prevented', value: '1', target: '€8M avoided (modeled)', trend: 'up', goodDirection: 'up' },
+    { id: 'energy', label: 'Energy / t', value: '−14', unit: '%', trend: 'down', goodDirection: 'down', deltaLabel: 'on track', target: 'use-case target −14%', tooltip: 'Fleet-wide use-case TARGET: 14% less electrical energy per tonne of crude steel versus the pre-AI baseline year, across all four sites. This is a pilot target, not a measurement; the demo scenario evidences the dispatch mechanics that would contribute to it.', actionHint: 'the spot-price schedule', onClick: () => emit('nav.intent', { route: `/${site}/energy-optimization/spot-price-schedule` }) },
+    { id: 'co2', label: 'CO₂', value: '−22', unit: '%', trend: 'down', goodDirection: 'down', deltaLabel: 'on track', target: 'use-case target −22%', tooltip: 'Fleet-wide use-case TARGET: 22% lower Scope 2 market-based CO₂-equivalent emissions versus the pre-AI baseline. This is a pilot target, not a measurement; the single-site 24-hour demo scenario measures a 3.29% whole-dispatch reduction.', actionHint: 'the emissions ledger', onClick: () => emit('nav.intent', { route: `/${site}/sustainability-compliance/emissions-ledger` }) },
+    { id: 'yield', label: 'High-grade yield', value: '+8', unit: '%', trend: 'up', goodDirection: 'up', deltaLabel: 'on track', target: 'use-case target +8%', tooltip: 'Fleet-wide use-case TARGET: 8 percentage points more first-pass high-grade yield versus the pre-AI baseline year. This is a pilot target requiring validation across many heats, not a demo measurement.', actionHint: 'quality batches', onClick: () => emit('nav.intent', { route: `/${site}/quality/batches` }) },
+    { id: 'warning', label: 'Advance warning', value: '21', unit: 'd', target: 'use-case target ≥21 d', trend: 'flat', tooltip: 'Fleet-wide use-case TARGET (KPI-FUR-01): at least 21 days of advance warning before hearth lining end-of-life, so a reline can be scheduled rather than forced. This is a pilot target, not a measurement — the demo scenario measures a P50 of 19.65 days from lining-rul-piml:1.3.0-demo.', actionHint: 'the lining forecast', onClick: () => emit('nav.intent', { route: `/${site}/furnace-health/lining-forecast` }) },
+    { id: 'failures', label: 'Failures prevented', value: '1', target: '€8M avoided (modeled)', trend: 'up', goodDirection: 'up', tooltip: 'Number of major equipment failures avoided since programme start, based on work orders raised from model alerts before the failure event. Avoided cost is a modeled estimate.' },
   ]
 
   const columns: DataTableColumn<SiteRow>[] = [
@@ -78,7 +78,7 @@ export function ExecutiveOverview() {
                 { label: 'Energy −14% target', value: 92, target: 100, color: tokens.palette[0] },
                 { label: 'CO₂ −22% target', value: 88, target: 100, color: tokens.palette[2] },
                 { label: 'Yield +8% target', value: 96, target: 100, color: tokens.palette[1] },
-                { label: '21-day warning', value: 100, target: 100, color: tokens.palette[4] },
+                { label: '≥21-day warning target', value: 100, target: 100, color: tokens.palette[4] },
               ]}
             />
           </PanelCard>

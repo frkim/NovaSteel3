@@ -227,8 +227,8 @@ export function alerts(): AlertRow[] {
       componentId: 'HEARTH-SECTOR-07',
       severity: 'CRITICAL',
       status: 'OPEN',
-      message: 'Predicted RUL P50 21.0 days (risk 0.87) for HEARTH-SECTOR-07.',
-      confidence: 0.8706,
+      message: 'Predicted RUL P50 19.65 days (risk 0.90) for HEARTH-SECTOR-07.',
+      confidence: 0.8995,
       createdAt: iso(17, 58),
       updatedAt: iso(17, 58),
       correlationId: 'run-demo-full-240725',
@@ -513,6 +513,7 @@ export function capacityStatus(): CapacityStatus {
     environment: 'demo',
     state: 'Running',
     sku: 'F2',
+    skuOptions: ['F2', 'F4', 'F8'],
     demoModeSimulated: true,
     stale: false,
   }
