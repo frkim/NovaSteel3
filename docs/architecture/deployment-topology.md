@@ -12,7 +12,7 @@
 | Primary EU region | **Sweden Central** for Fabric capacity, Event Hubs, application services, Foundry project, and Speech. |
 | Fabric core | RTI Eventstream → Eventhouse/KQL and OneLake landing Lakehouse → core Lakehouse → Direct Lake semantic model → Power BI. |
 | Environments | `dev`, `test`, `demo`, and `prod` are separate resource groups, identities, Fabric workspaces, data paths, and capacity assignments. |
-| Demo isolation | `NS-DEMO-*` only; F2 initially, F4 after measured need; no production capacity, source, identity, shortcut, or audio. |
+| Demo isolation | `NS-DEMO-*` only; F2 initially, F4 after measured need, F8 as the pre-approved demo-day burst tier; no production capacity, source, identity, shortcut, or audio. |
 | OT crossing | Per-plant industrial DMZ gateway → Event Hubs buffer; no cloud-initiated OT connection. |
 | Capacity lifecycle | Demo/non-production only: scheduled **01:00 Europe/Luxembourg** Logic App pause check; authorized GUI request for resume; production capacity is never automatically paused. |
 | AI placement | Sweden Central Foundry/Speech with Data Zone (EU) model deployment unless a single-region legal requirement selects a regional deployment. |
@@ -26,7 +26,7 @@
 |---|---|---|---|---|
 | `dev` | Isolated `NS-dev-*` workspaces/capacity assignment | Synthetic or approved masked test data only | Developer integration, contract tests | Pause when unused; no business demo dependency |
 | `test` | Isolated `NS-test-*` workspaces/capacity assignment | Synthetic and approved test fixtures | Security, integration, performance, release validation | Scheduled pause permitted after test drain |
-| `demo` | Isolated `NS-DEMO-*` RTI/DataCore/ML/Analytics workspaces | 100% `SYNTHETIC` / `DEMO-NONPERSONAL` | Repeatable 15-minute defense and rehearsal | F2 initial / F4 measurement fallback; 01:00 lifecycle check |
+| `demo` | Isolated `NS-DEMO-*` RTI/DataCore/ML/Analytics workspaces | 100% `SYNTHETIC` / `DEMO-NONPERSONAL` | Repeatable 15-minute defense and rehearsal | F2 initial / F4 measured fallback / F8 demo-day burst, requestable from the portal capacity dialog with a recorded reason; 01:00 lifecycle check |
 | `prod` | Isolated `NS-prod-*` Fabric workspaces and production application resources | Real EU operational/personal data only after gates | Pilot and production operations | No automated pause; capacity/SLO decision made after pilot measurement |
 
 No Fabric workspace, OneLake shortcut, Eventstream connection, application configuration, Key Vault secret, or managed identity may bridge `demo` and `prod`. The synthetic dataset rule that entities start with `NS-DEMO-` is enforced in schema validation and UI banners.
@@ -160,7 +160,7 @@ flowchart LR
 | Direct Lake/Power BI | Same demo capacity, all users Pro/PPU/trial below F64 | User licensing/capacity sizing based on audience and report workload |
 | Spark autoscale | Disabled by default | Opt-in only after workload/cost review |
 
-The Fabric workload table says all workspaces are a shared capacity pool. F2 is the smallest listed F SKU and is the cost-conscious starting point; F4 is a measurement fallback. The architecture neither guarantees F2 performance nor encodes an hourly price. Query the official pricing page and calculator for Sweden Central at purchase time.
+The Fabric workload table says all workspaces are a shared capacity pool. F2 is the smallest listed F SKU and is the cost-conscious starting point; F4 is a measured-contention fallback and F8 the pre-approved demo-day burst tier. Each step doubles the hourly rate, so the portal capacity dialog requires an explicit reason and writes the change to the append-only audit trail. The architecture neither guarantees F2 performance nor encodes an hourly price. Query the official pricing page and calculator for Sweden Central at purchase time.
 
 ### 4.2 Item deployment and promotion
 
@@ -252,7 +252,7 @@ A paused Fabric capacity prevents content assigned to it from being available. I
 
 | Cost driver | Architecture control | Decision gate |
 |---|---|---|
-| Fabric capacity CU consumption | F2 initial demo, bounded stream, schedule notebooks, pause non-production safely, Capacity Metrics review | F4 only on measured contention; production SKU after pilot load test |
+| Fabric capacity CU consumption | F2 initial demo, bounded stream, schedule notebooks, pause non-production safely, Capacity Metrics review | F4 on measured contention and F8 for a demo-day burst, both self-service through the audited portal dialog; any SKU above F8 needs a cost-owner sign-off and a policy allow-list change before the pilot load test |
 | Power BI licenses | Pro/PPU/trial for consumers below F64 | Do not buy F64 solely to avoid per-user licensing |
 | OneLake/KQL/Activator retained data | Explicit retention/cache settings; quarantine and raw telemetry lifecycle; storage budget | Review after rehearsal/pilot; paused capacity does not erase storage cost |
 | Spark/autoscale | Off initially; batch windows and measured notebook duration | Enable only with owner, budget, and workload evidence |

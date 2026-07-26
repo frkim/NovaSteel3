@@ -384,7 +384,7 @@ A role-gated UI exposes the **authoritative** non-production lifecycle defined i
 ### 11.1 Two surfaces
 
 1. **Top-bar status pill** (all users, read-only): state, SKU, freshness, and a “Simulated” marker when Demo Mode is active.
-2. **Platform Ops panel** (restricted support surface): `Platform.Capacity.Manage` users may request non-production start or pause through the BFF. SKU changes are a measured FinOps/platform change, not a dashboard action.
+2. **Platform Ops panel** (restricted support surface): `Platform.Capacity.Manage` users may request non-production start, pause, or a **resize between the audited demo SKUs (F2/F4/F8)** through the BFF. Resizing remains a measured FinOps/platform change: it is allow-list bounded, reason-bearing, audited, and never available in production.
 
 ### 11.2 State → UI mapping
 
@@ -393,16 +393,18 @@ A role-gated UI exposes the **authoritative** non-production lifecycle defined i
 | `Paused` | neutral “Paused” | **Request start** with reason, budget state, and readiness expectation |
 | `ResumeRequested` / `Resuming` | informational progress | Disable mutations; poll operation and show correlation ID |
 | `ReadinessCheck` | informational progress | Show checks for Fabric, Eventstream/KQL, Lakehouse/semantic model, APIs, budget, and paused simulator |
-| `Running` | healthy “Running” | **Request pause** only after drain checks; show F2/F4 measurement status and budget, not a price promise |
+| `Running` | healthy “Running” | **Request pause** only after drain checks; show the current SKU (F2/F4/F8) and budget state, not a price promise |
 | `DrainRequested` / `Draining` / `SuspendRequested` | warning progress | Disable mutations; show pending simulator, replay, pipeline, or refresh precondition |
 | `Failed` | error | Show correlation ID/log link and offer documented fallback; do not retry blindly |
 
 ### 11.3 Role checks and guardrails
 
-- **Authorization:** only `Platform.Capacity.Manage` may request start/pause. All others see a read-only state and an access-request explanation.
-- **BFF mediation:** the client calls only `GET /v1/platform/capacity`, `POST /v1/platform/capacity/start-requests`, and `POST /v1/platform/capacity/pause-requests`; it never calls ARM.
-- **Safety and cost:** the panel shows the non-production 01:00 Europe/Luxembourg lifecycle-check policy. It does not offer an idle timer, automatic resume, production selection, or browser-side SKU scaling.
-- **Concurrency and audit:** requests require a reason and idempotency key; an in-flight state disables duplicate mutations and shows actor, state, timestamp, correlation ID, and audit history.
+- **Authorization:** only `Platform.Capacity.Manage` may request start, pause, or a SKU change. All others see a read-only state and an access-request explanation.
+- **BFF mediation:** the client calls only `GET /v1/platform/capacity`, `POST /v1/platform/capacity/start-requests`, `POST /v1/platform/capacity/pause-requests`, and `POST /v1/platform/capacity/sku-requests`; it never calls ARM.
+- **Safety and cost:** the panel shows the non-production 01:00 Europe/Luxembourg lifecycle-check policy. It does not offer an idle timer, automatic resume, production selection, or any browser-side ARM call.
+- **SKU allow-list:** the selectable SKUs come from the BFF status payload (`skuOptions`), which is bounded by the same list the Azure Policy `restrict-fabric-capacity-sku` definition enforces, so the UI can never offer a SKU that ARM would deny. `tests/infra/test_capacity_sku_allow_list.py` pins the policy, `main.bicep`, the BFF and the shell fallback together. A rejected request surfaces the BFF's own message rather than failing silently.
+- **Resize is not a lifecycle transition:** a paused capacity stays paused and a running capacity stays running across a SKU change, so a burst tier can be staged before a rehearsal without resuming spend. Resizes are refused mid-transition and when the target SKU already matches.
+- **Concurrency and audit:** requests require a reason and a UUID idempotency key; an in-flight state disables duplicate mutations and shows actor, state, timestamp, correlation ID, and audit history.
 - **Demo Mode:** controls remain interactive but return only simulated transitions. The persistent **Simulated** badge is mandatory.
 
 ### 11.4 Control panel wireframe
@@ -413,6 +415,9 @@ A role-gated UI exposes the **authoritative** non-production lifecycle defined i
 | Policy: 01:00 Europe/Luxembourg lifecycle check · non-production only       |
 +-----------------------------------------------------------------------------+
 | [ Request pause ]  Reason [________________]   (role-gated; BFF mediated)  |
++-----------------------------------------------------------------------------+
+| Capacity size  [ F2 (baseline) ▾ ]  [ Apply SKU ]                          |
+| F4 ≈ 2× F2 and F8 ≈ 4× F2 per hour · resizing does not start or stop it     |
 +-----------------------------------------------------------------------------+
 | Recent transitions (TBL-STD: search / filter / sort / export)              |
 | Time            Actor             From → To        Reason / correlation     |
@@ -662,13 +667,36 @@ D3.js is the primary charting engine (custom, accessible, themeable via tokens).
 
 ```
 +---------------------------+
-| Label            (i) Why? |
-|  128.4  t/h   ▲ +3.2%     |
+| Label (i)                 |
+|  128.4  t/h   ▲ +3.2%   › |
 |  ▁▂▃▅▆▇  (sparkline)      |
 |  vs target 130 · as of 10:02 |
 +---------------------------+
 ```
 Elements: label, big value + unit, trend arrow + delta (icon+color+sign), sparkline (C-SPARK), target/context line, freshness badge, "Why?" popover for AI-derived values (confidence + drivers). Click → drill to owning screen.
+
+**`KPI-EXPLAIN` — every card explains itself.** Each card carries a `tooltip` written in plain
+language: what the number measures, where it comes from (fixture, model version, or optimiser),
+and how to read it. The tooltip is attached to an info icon next to the label that is reachable
+by keyboard (`tabIndex=0`), so the explanation is available on hover *and* on focus rather than
+hover-only. Because the four headline figures are pilot **targets** rather than measurements,
+their tooltips say so explicitly and name the measured demo value where one exists — the
+TARGET-vs-EVIDENCE discipline of the oral defense is enforced in the UI, not just the deck.
+
+**`KPI-DRILL` — every card that has somewhere to go, goes there.** A card with a drill-down
+renders a chevron affordance and becomes a single focusable button whose accessible name is
+composed as `"{label}: open {actionHint}"` (e.g. *"Advance warning: open the lining forecast"*),
+so a screen-reader user hears the destination before activating it. Two destinations exist:
+
+| Pattern | Used when | Mechanism |
+| --- | --- | --- |
+| Cross-screen | The detail lives on another tab/persona screen | `emit('nav.intent', { route })` — the shell owns navigation |
+| Same-screen reveal | The detail is a panel or chart already on this screen | `revealPanel(id)` — smooth-scrolls to the panel and focuses it |
+
+Cards that represent a constraint, a policy guarantee, or a live market price have no meaningful
+detail view; these stay deliberately inert (no chevron, no pointer cursor) rather than offering a
+dead click. All 67 cards across the 16 KPI-bearing screens carry a tooltip; drill-downs are
+present wherever a destination genuinely exists.
 
 ### 14.4 Power BI embedding (optional)
 
@@ -738,6 +766,7 @@ The UI binds to a **BFF (Backend-for-Frontend)** whose contracts are owned by `s
 | shell → MFE | `navigate` | `{ section, subView, params }` |
 | MFE → shell | `nav.intent` | `{ route }` (for shell router) |
 | MFE → shell | `capacity.request` | `{ action: start|pause }` (shell routes the request through the BFF) |
+| MFE → shell | `capacity.panel` | `{ open: true }` (a capacity tile asks the shell to surface its own control dialog; the MFE never owns that surface) |
 | MFE → shell | `telemetry` | `{ event, props }` |
 | MFE → shell | `toast` | `{ severity, message }` |
 
@@ -826,7 +855,8 @@ Global gates (in addition to per-persona AC in §12):
 - **AC-G3 Tables:** every table implements `TBL-STD` — sorting, column filtering, per-column header search, global text search, pagination/virtualization, export where marked, and column management — verified against §13.2.
 - **AC-G4 Charts:** D3 charts render from token palette, are color-blind safe, have "View as table" + text summary, and are keyboard-operable where interactive.
 - **AC-G5 States:** every data surface implements loading/empty/error/stale; no blank screens; no dead spinners > 10s; failed mutations reversible or clearly final.
-- **AC-G6 Fabric capacity control:** read-only pill for all; role-gated non-production start/pause requests through the BFF, visible authoritative lifecycle state, audit trail, 01:00-policy cue, and simulated behavior in Demo Mode. No scale, production, or browser-ARM action is present.
+- **AC-G6 Fabric capacity control:** read-only pill for all; role-gated non-production start/pause/resize requests through the BFF, visible authoritative lifecycle state, audit trail, 01:00-policy cue, and simulated behavior in Demo Mode. Resizing is bounded by the policy-enforced SKU allow-list, leaves lifecycle state unchanged, and is refused mid-transition; no production or browser-to-ARM action is present.
+- **AC-G6b KPI card affordances (`KPI-EXPLAIN` / `KPI-DRILL`):** every KPI card carries a plain-language tooltip reachable by hover *and* keyboard focus that names what the value measures and its source; every card with a genuine destination is a single focusable control with a chevron and an accessible name of the form `"{label}: open {destination}"`; target figures are labelled as targets, never as measurements. Verified by `KpiCard.test.tsx` and the per-screen tooltip audit.
 - **AC-G7 Accessibility:** WCAG 2.2 AA — axe-core clean in CI, full keyboard path, SR pass (NVDA/Narrator/VoiceOver) per persona; AA contrast in both themes; reduced-motion honored.
 - **AC-G8 Localization:** all UI strings externalized; EN/FR/DE/NL/ES selectable; numbers/dates/units/currency localized; +40% expansion tolerated; RTL-ready.
 - **AC-G9 Theming:** light/dark/system with no FOUC; tokens drive MUI, D3, and Power BI theme; forced-colors honored.

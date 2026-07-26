@@ -228,7 +228,7 @@ Request body requires a `reasonCode` from a closed enum (`FR-ENE-05` in `solutio
 
 ### 4.9 Platform capacity
 
-See §8 for the full capacity lifecycle contract (`GET /v1/platform/capacity`, `POST /v1/platform/capacity/start-requests`, `POST /v1/platform/capacity/pause-requests`).
+See §8 for the full capacity lifecycle contract (`GET /v1/platform/capacity`, `POST /v1/platform/capacity/start-requests`, `POST /v1/platform/capacity/pause-requests`, `POST /v1/platform/capacity/sku-requests`).
 
 ### 4.9.1 Additive operational projections
 
@@ -270,6 +270,7 @@ query semantics in §5; they are advisory/read-only and plant-scoped.
 | `/v1/platform/capacity` | GET | any authenticated | no | no |
 | `/v1/platform/capacity/start-requests` | POST | `Platform.Capacity.Manage` | yes | **yes** |
 | `/v1/platform/capacity/pause-requests` | POST | `Platform.Capacity.Manage` | yes | **yes** |
+| `/v1/platform/capacity/sku-requests` | POST | `Platform.Capacity.Manage` | yes | **yes** |
 | `/v1/workorders` | POST | `MaintenanceEngineer.Read`+ (create) | yes | **yes** |
 | `/v1/workorders/{id}` | GET | assigned plant reader | no | no |
 
@@ -393,6 +394,7 @@ Response `data`:
   "environment": "demo",
   "state": "Paused",
   "sku": "F2",
+  "skuOptions": ["F2", "F4", "F8"],
   "demoModeSimulated": true,
   "lastTransition": { "toState": "Paused", "at": "2026-07-25T01:00:12Z", "actor": "LogicApp:daily-0100" },
   "stale": false
@@ -422,7 +424,41 @@ Behavior (`deployment-topology.md` §5.4):
 
 Same shape as §8.2, targeting `suspend`. Additionally runs the drain-check precondition (simulator stopped, Event Hubs/relay drained or checkpointed, no protected rehearsal window active, no pipeline/notebook/refresh in a critical phase) before calling ARM; a failed precondition returns `409 CAPACITY_STATE_CONFLICT` with `message` naming the failing precondition, and the capacity is left running (`deployment-topology.md` §5.3 step 4).
 
-### 8.4 `GET /v1/platform/capacity/operations/{operationId}`
+### 8.4 `POST /v1/platform/capacity/sku-requests`
+
+`Platform.Capacity.Manage` only; requires `Idempotency-Key`. Resizes the non-production capacity between the pre-approved SKUs so a rehearsal can burst without a redeployment.
+
+Request:
+
+```json
+{ "capacityId": "cap-novasteel-demo-sc", "sku": "F4", "reason": "Rehearsal burst for 14:00 defense session" }
+```
+
+Behavior:
+
+1. Validate role, then the environment/capacity allow-list (`403 POLICY_DENIED`), then the SKU against the server-side allow-list (`422 VALIDATION_ERROR`, whose `message` names the permitted SKUs). This ordering means an unauthorized caller never learns which SKUs exist.
+2. Reject a request that would be a no-op or that races a lifecycle transition with `409 CAPACITY_STATE_CONFLICT`: the target SKU already matches, or the capacity is in `ResumeRequested | Resuming | ReadinessCheck | DrainRequested | Draining | SuspendRequested`.
+3. **Resizing is not a lifecycle transition.** The response echoes the capacity's *existing* `state` unchanged — a paused capacity stays `Paused` and a running one stays `Running` — so a burst tier can be staged ahead of a rehearsal without resuming spend.
+4. In Demo Mode return `{"status": "SIMULATED", ...}` with no ARM call, exactly as §8.2. Outside Demo Mode, call ARM via `mi-ns-capacity-demo` and report the operation.
+5. Append an audit record with `action = "capacity.scale"` and publish a `capacity.transition` event, so a resize is as traceable as a start or pause.
+
+Response `data`:
+
+```json
+{
+  "status": "SIMULATED",
+  "state": "Paused",
+  "sku": "F4",
+  "previousSku": "F2",
+  "operationId": "cap-local-00001",
+  "capacityId": "cap-novasteel-demo-sc",
+  "auditRef": "..."
+}
+```
+
+The allow-list is not a UI concern: it is enforced here, in the Azure Policy `restrict-fabric-capacity-sku` definition, and in `main.bicep`'s `@allowed` decorator, with `tests/infra/test_capacity_sku_allow_list.py` pinning all of them (plus the shell's offline fallback) to the same list. A SKU the portal can offer is therefore always a SKU ARM will accept.
+
+### 8.5 `GET /v1/platform/capacity/operations/{operationId}`
 
 Polls the underlying ARM long-running operation. Response:
 
@@ -432,13 +468,13 @@ Polls the underlying ARM long-running operation. Response:
 
 Terminal states are `Running`, `Paused`, or `Failed`. The client (and the internal readiness-check logic in `bff-api`) must not treat `202`/`InProgress` as success — only a terminal `Running` (after the readiness checklist in `deployment-topology.md` §5.4 step 5 passes) is reported as usable capacity.
 
-### 8.5 Daily 01:00 lifecycle check (system-triggered, no public route)
+### 8.6 Daily 01:00 lifecycle check (system-triggered, no public route)
 
 The Logic App does not call the public BFF routes above; it calls a dedicated internal operations endpoint, not exposed through the public API surface or documented for external clients:
 
 **`POST /internal/v1/platform/capacity/lifecycle-check`** (Logic-App-triggered, its own dedicated managed identity, network-restricted to the Logic App's outbound identity) — implements `deployment-topology.md` §5.3 steps 1–7 exactly: reads capacity state, verifies allow-list and time window, asks whether the simulator is stopped/Event Hubs drained/no protected rehearsal/no critical refresh, and either logs `SKIPPED_BUSY` (capacity left running) or submits the ARM suspend operation and polls to terminal state, persisting the full evidence record described there. This route is documented here only so implementers do not duplicate its logic inside the public `pause-requests` route — they are deliberately separate code paths with separate identities.
 
-### 8.6 Capacity state values
+### 8.7 Capacity state values
 
 `Paused | ResumeRequested | Resuming | ReadinessCheck | Running | DrainRequested | Draining | SuspendRequested | Failed` — exactly the state diagram in `deployment-topology.md` §5.1, no additional states invented at the API layer.
 

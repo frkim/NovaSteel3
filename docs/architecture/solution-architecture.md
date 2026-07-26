@@ -332,6 +332,7 @@ AI-derived values use a common shape:
 | `/v1/platform/capacity` | GET | Authenticated user | Read-only lifecycle state; cached safely and marked stale if unknown. |
 | `/v1/platform/capacity/start-requests` | POST | `Platform.Capacity.Manage` | Requests a demo-capacity resume outside Demo Mode; server-side policy and ARM polling only. |
 | `/v1/platform/capacity/pause-requests` | POST | `Platform.Capacity.Manage` | Requests a demo-capacity pause after drain checks; never accepts an alert-triggered request. |
+| `/v1/platform/capacity/sku-requests` | POST | `Platform.Capacity.Manage` | Resizes the non-production capacity within the policy-enforced SKU allow-list; leaves lifecycle state unchanged and is refused mid-transition. |
 
 Errors use `{ "code", "message", "correlationId", "retryable" }`. The BFF is the enforcement point; the frontend can hide an action but cannot authorize it.
 
