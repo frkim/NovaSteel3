@@ -27,6 +27,7 @@ tags:
   - name: WorkOrders
   - name: Telemetry
   - name: Sustainability
+  - name: Copilot
 paths:
   /health/live:
     get:
@@ -530,6 +531,126 @@ paths:
                 $ref: '#/components/schemas/DataEnvelope'
         default:
           $ref: '#/components/responses/ErrorResponse'
+  /v1/copilot/suggestions:
+    get:
+      tags: [Copilot]
+      operationId: getCopilotSuggestions
+      description: Predefined questions for the persona that owns the given screen.
+      parameters:
+        - name: section
+          in: query
+          description: Screen slug, e.g. `furnace-health`. Falls back to a generic set.
+          schema:
+            type: string
+        - $ref: '#/components/parameters/Locale'
+      responses:
+        '200':
+          description: Suggested questions in the requested language.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/copilot/glossary:
+    get:
+      tags: [Copilot]
+      operationId: searchCopilotGlossary
+      description: >-
+        Ranked glossary lookup over both the term and the wording of its
+        definition. Without a query the terms relevant to `section` are returned.
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: section
+          in: query
+          schema:
+            type: string
+        - $ref: '#/components/parameters/Locale'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 8
+      responses:
+        '200':
+          description: Matching glossary entries.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/copilot/conversations:
+    get:
+      tags: [Copilot]
+      operationId: listCopilotConversations
+      description: Saved conversations for the calling user. Temporary chats never appear here.
+      responses:
+        '200':
+          description: Conversation summaries, most recently updated first.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/copilot/conversations/{conversationId}:
+    get:
+      tags: [Copilot]
+      operationId: getCopilotConversation
+      parameters:
+        - $ref: '#/components/parameters/ConversationId'
+      responses:
+        '200':
+          description: Conversation with its full message history.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEnvelope'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    delete:
+      tags: [Copilot]
+      operationId: deleteCopilotConversation
+      parameters:
+        - $ref: '#/components/parameters/ConversationId'
+      responses:
+        '204':
+          description: Conversation deleted.
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/copilot/chat:
+    post:
+      tags: [Copilot]
+      operationId: askCopilot
+      description: >-
+        Answer a question grounded in the NovaSteel glossary and the screen the
+        user is looking at. Answers state whether online search was used and
+        which reasoning tier served them.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CopilotChatRequest'
+      responses:
+        '200':
+          description: Grounded answer with its sources.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
   /v1/search:
     get:
       tags: [Bootstrap]
@@ -748,6 +869,19 @@ components:
       required: true
       schema:
         type: string
+    ConversationId:
+      name: conversationId
+      in: path
+      required: true
+      schema:
+        type: string
+    Locale:
+      name: locale
+      in: query
+      description: Answer language. Defaults to the caller's locale.
+      schema:
+        type: string
+        enum: [en, fr, de, nl, es]
     IdempotencyKey:
       name: Idempotency-Key
       in: header
@@ -1178,6 +1312,51 @@ components:
           type: string
           minLength: 1
           maxLength: 500
+    CopilotChatRequest:
+      type: object
+      additionalProperties: false
+      required: [question]
+      properties:
+        question:
+          type: string
+          minLength: 1
+          maxLength: 1500
+        conversationId:
+          type: string
+          description: >-
+            Continues an existing conversation owned by the caller. An unknown or
+            foreign identifier is not an error: a new conversation is started and
+            its identifier is returned, so history is never enumerable. Ignored
+            for temporary chats.
+        locale:
+          type: string
+          enum: [en, fr, de, nl, es]
+        reasoning:
+          type: string
+          enum: [auto, default, high]
+          default: auto
+          description: >-
+            `auto` is resolved server-side and echoed back as
+            `resolvedReasoning`, so the tier that answered is never hidden.
+        onlineSearch:
+          type: boolean
+          default: false
+          description: Allows the assistant to cite the curated public-context corpus.
+        temporary:
+          type: boolean
+          default: false
+          description: Temporary chats are answered but never written to conversation history.
+        context:
+          type: object
+          additionalProperties: false
+          description: The screen the user is looking at, used to disambiguate the question.
+          properties:
+            section:
+              type: string
+            subView:
+              type: string
+            site:
+              type: string
     WorkOrderRequest:
       type: object
       additionalProperties: false

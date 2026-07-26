@@ -12,6 +12,7 @@ from .adapters.factory import create_audit_store, create_idempotency_store
 from .auth import Authenticator
 from .capacity import CapacityAdapter, LocalCapacityAdapter, UnconfiguredArmCapacityAdapter
 from .config import Settings
+from .copilot_adapter import CopilotAdapter
 from .events import AlertEventBuffer
 from .knowledge_adapter import KnowledgeAdapter
 from .repository import DemoRepository
@@ -43,6 +44,7 @@ class BffServices:
     events: AlertEventBuffer
     capacity: CapacityAdapter
     knowledge: KnowledgeAdapter
+    copilot: CopilotAdapter
     optimizer: EnergyDispatchOptimizer = field(default_factory=EnergyDispatchOptimizer)
     scorer: ScoringWorker = field(default_factory=ScoringWorker)
     recommendations: dict[str, dict[str, Any]] = field(default_factory=dict)
@@ -75,6 +77,7 @@ class BffServices:
             events=AlertEventBuffer(repository.alerts_rows()),
             capacity=capacity,
             knowledge=KnowledgeAdapter(demo_mode=settings.is_demo_mode),
+            copilot=CopilotAdapter(),
         )
 
     def lining_forecast(self, *, asset_id: str, correlation_id: str) -> dict[str, Any]:

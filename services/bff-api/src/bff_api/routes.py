@@ -827,6 +827,120 @@ def register_routes(app: FastAPI) -> None:
         require_site(user, str(result["site"]))
         return _envelope(request, result)
 
+    @app.get("/v1/copilot/suggestions", tags=["Copilot"])
+    async def copilot_suggestions(
+        request: Request,
+        section: str | None = None,
+        locale: str | None = None,
+        user: UserContext = Depends(current_user),
+    ) -> dict[str, Any]:
+        require_reader(user)
+        return _envelope(
+            request,
+            request.app.state.services.copilot.suggestions(
+                section=section, language=locale or user.locale
+            ),
+        )
+
+    @app.get("/v1/copilot/glossary", tags=["Copilot"])
+    async def copilot_glossary(
+        request: Request,
+        q: str | None = None,
+        section: str | None = None,
+        locale: str | None = None,
+        limit: int = Query(default=8, ge=1, le=50),
+        user: UserContext = Depends(current_user),
+    ) -> dict[str, Any]:
+        require_reader(user)
+        return _envelope(
+            request,
+            request.app.state.services.copilot.glossary(
+                query=q,
+                language=locale or user.locale,
+                section=section,
+                limit=limit,
+            ),
+        )
+
+    @app.get("/v1/copilot/conversations", tags=["Copilot"])
+    async def copilot_conversations(
+        request: Request, user: UserContext = Depends(current_user)
+    ) -> dict[str, Any]:
+        require_reader(user)
+        return _envelope(
+            request,
+            request.app.state.services.copilot.list_conversations(owner=user.user_id),
+        )
+
+    @app.get("/v1/copilot/conversations/{conversation_id}", tags=["Copilot"])
+    async def copilot_conversation(
+        conversation_id: str,
+        request: Request,
+        user: UserContext = Depends(current_user),
+    ) -> dict[str, Any]:
+        require_reader(user)
+        return _envelope(
+            request,
+            request.app.state.services.copilot.get_conversation(
+                owner=user.user_id, conversation_id=conversation_id
+            ),
+        )
+
+    @app.delete("/v1/copilot/conversations/{conversation_id}", tags=["Copilot"])
+    async def delete_copilot_conversation(
+        conversation_id: str,
+        request: Request,
+        user: UserContext = Depends(current_user),
+    ) -> JSONResponse:
+        require_reader(user)
+        request.app.state.services.copilot.delete_conversation(
+            owner=user.user_id, conversation_id=conversation_id
+        )
+        return JSONResponse(status_code=204, content=None)
+
+    @app.post("/v1/copilot/chat", tags=["Copilot"])
+    async def copilot_chat(
+        request: Request,
+        body: dict[str, Any] = Body(...),
+        user: UserContext = Depends(current_user),
+    ) -> dict[str, Any]:
+        require_reader(user)
+        _require_keys(
+            body,
+            {"question"},
+            {
+                "question",
+                "conversationId",
+                "locale",
+                "reasoning",
+                "onlineSearch",
+                "temporary",
+                "context",
+            },
+        )
+        context = body.get("context")
+        if context is not None and not isinstance(context, Mapping):
+            raise ApiError(400, ErrorCode.VALIDATION_ERROR, "context must be an object.")
+        for flag in ("onlineSearch", "temporary"):
+            if flag in body and not isinstance(body[flag], bool):
+                raise ApiError(
+                    400, ErrorCode.VALIDATION_ERROR, f"{flag} must be a boolean."
+                )
+        return _envelope(
+            request,
+            request.app.state.services.copilot.chat(
+                owner=user.user_id,
+                question=_required_string(body, "question"),
+                language=body.get("locale") or user.locale,
+                reasoning=body.get("reasoning"),
+                online_search=bool(body.get("onlineSearch", False)),
+                temporary=bool(body.get("temporary", False)),
+                conversation_id=body.get("conversationId"),
+                context=dict(context) if context else None,
+                correlation_id=_correlation_id(request),
+            ),
+        )
+
     @app.get("/v1/search", tags=["Bootstrap"])
     async def global_search(
         request: Request,
