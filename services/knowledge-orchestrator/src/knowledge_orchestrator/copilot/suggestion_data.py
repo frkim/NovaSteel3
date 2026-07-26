@@ -1,0 +1,387 @@
+"""Persona and screen scoped suggested questions for the Copilot chat assistant.
+
+Pure data module: selection logic lives in
+``knowledge_orchestrator.copilot.suggestions``.
+"""
+
+from __future__ import annotations
+
+from typing import Final
+
+LANGUAGES: Final[tuple[str, ...]] = ("en", "fr", "de", "nl", "es")
+
+# section-slug -> language -> ordered questions (most useful first)
+SUGGESTIONS_BY_SECTION: Final[dict[str, dict[str, tuple[str, ...]]]] = {
+    "command-center": {
+        "en": (
+            "Which alert needs my attention right now?",
+            "Summarize the next-best actions across furnace, energy, quality, and ETS.",
+            "What changed since the previous shift handover?",
+            "Search for today's steel, energy, or regulatory news that could affect our sites.",
+            "Which recommendation has the highest business impact if I approve it?",
+        ),
+        "fr": (
+            "Quelle alerte requiert mon attention maintenant ?",
+            "Résume les meilleures prochaines actions pour le four, l'énergie, la qualité et l'ETS.",
+            "Qu'est-ce qui a changé depuis le passage de consignes précédent ?",
+            "Recherche les nouvelles du jour sur l'acier, l'énergie ou la réglementation pouvant toucher nos sites.",
+            "Quelle recommandation aurait le plus fort impact business si je l'approuve ?",
+        ),
+        "de": (
+            "Welche Warnung braucht jetzt meine Aufmerksamkeit?",
+            "Fasse die nächsten besten Maßnahmen für Ofen, Energie, Qualität und ETS zusammen.",
+            "Was hat sich seit der letzten Schichtübergabe geändert?",
+            "Suche nach heutigen Stahl-, Energie- oder Regulierungsnachrichten, die unsere Standorte betreffen könnten.",
+            "Welche Empfehlung hätte bei meiner Freigabe den größten geschäftlichen Effekt?",
+        ),
+        "nl": (
+            "Welke waarschuwing vraagt nu mijn aandacht?",
+            "Vat de beste vervolgstappen samen voor oven, energie, kwaliteit en ETS.",
+            "Wat is er veranderd sinds de vorige ploegenoverdracht?",
+            "Zoek het nieuws van vandaag over staal, energie of regelgeving dat onze sites kan raken.",
+            "Welke aanbeveling heeft de grootste bedrijfsimpact als ik die goedkeur?",
+        ),
+        "es": (
+            "¿Qué alerta requiere mi atención ahora?",
+            "Resume las siguientes mejores acciones en horno, energía, calidad y ETS.",
+            "¿Qué cambió desde el relevo de turno anterior?",
+            "Busca noticias de hoy sobre acero, energía o regulación que puedan afectar a nuestros sitios.",
+            "¿Qué recomendación tendría mayor impacto de negocio si la apruebo?",
+        ),
+    },
+    "operations": {
+        "en": (
+            "Are we on production target right now?",
+            "Which line or asset is constraining throughput today?",
+            "Create a shift handover summary with open incidents and decisions.",
+            "Search for recent supply-chain or industrial action news affecting steel production.",
+            "Which current operations issue should be escalated to the plant manager?",
+        ),
+        "fr": (
+            "Sommes-nous actuellement dans l'objectif de production ?",
+            "Quelle ligne ou quel actif limite le débit aujourd'hui ?",
+            "Crée un résumé de passage de consignes avec les incidents et décisions ouverts.",
+            "Recherche les nouvelles récentes de chaîne d'approvisionnement ou mouvements sociaux affectant la production d'acier.",
+            "Quel problème opérationnel actuel faut-il escalader au responsable d'usine ?",
+        ),
+        "de": (
+            "Liegen wir aktuell im Produktionsziel?",
+            "Welche Linie oder Anlage begrenzt heute den Durchsatz?",
+            "Erstelle eine Schichtübergabe mit offenen Vorfällen und Entscheidungen.",
+            "Suche nach aktuellen Lieferketten- oder Arbeitskampfmeldungen, die die Stahlproduktion beeinflussen.",
+            "Welches aktuelle Betriebsproblem sollte an den Werksleiter eskaliert werden?",
+        ),
+        "nl": (
+            "Liggen we nu op productiedoel?",
+            "Welke lijn of installatie beperkt vandaag de doorvoer?",
+            "Maak een ploegenoverdracht met open incidenten en beslissingen.",
+            "Zoek recent nieuws over toeleveringsketens of stakingen dat staalproductie beïnvloedt.",
+            "Welk huidig operationeel probleem moet naar de plant manager worden geëscaleerd?",
+        ),
+        "es": (
+            "¿Estamos ahora en el objetivo de producción?",
+            "¿Qué línea o activo está limitando el rendimiento hoy?",
+            "Crea un resumen de relevo de turno con incidentes y decisiones abiertas.",
+            "Busca noticias recientes de cadena de suministro o conflictos laborales que afecten a la producción de acero.",
+            "¿Qué problema operativo actual debe escalarse al director de planta?",
+        ),
+    },
+    "furnace-health": {
+        "en": (
+            "Explain how the thermal signature works.",
+            "What is the current lining risk for LUX-BF-01?",
+            "Which drivers are pushing the RUL forecast down?",
+            "Search for recent refractory or blast-furnace maintenance guidance.",
+            "Draft the inspection work-order rationale for the maintenance planner.",
+        ),
+        "fr": (
+            "Explique le fonctionnement de la signature thermique.",
+            "Quel est le risque de garnissage actuel pour LUX-BF-01 ?",
+            "Quels facteurs font baisser la prévision de durée de vie restante ?",
+            "Recherche les recommandations récentes sur les réfractaires ou la maintenance des hauts-fourneaux.",
+            "Rédige la justification de l'ordre d'inspection pour le planificateur maintenance.",
+        ),
+        "de": (
+            "Erkläre, wie die thermische Signatur funktioniert.",
+            "Wie hoch ist das aktuelle Zustellungsrisiko für LUX-BF-01?",
+            "Welche Treiber drücken die RUL-Prognose nach unten?",
+            "Suche nach aktuellen Empfehlungen zu Feuerfestmaterialien oder Hochofenwartung.",
+            "Formuliere die Begründung für den Inspektionsauftrag an die Instandhaltungsplanung.",
+        ),
+        "nl": (
+            "Leg uit hoe het thermisch profiel werkt.",
+            "Wat is het huidige vuurvastrisico voor LUX-BF-01?",
+            "Welke drijvers verlagen de RUL-voorspelling?",
+            "Zoek recente richtlijnen over vuurvaste materialen of hoogovenonderhoud.",
+            "Stel de onderbouwing op voor de inspectiewerkorder aan de onderhoudsplanner.",
+        ),
+        "es": (
+            "Explica cómo funciona la firma térmica.",
+            "¿Cuál es el riesgo actual de revestimiento para LUX-BF-01?",
+            "¿Qué factores están reduciendo la previsión de vida útil restante?",
+            "Busca orientación reciente sobre refractarios o mantenimiento de altos hornos.",
+            "Redacta la justificación de la orden de inspección para planificación de mantenimiento.",
+        ),
+    },
+    "energy-optimization": {
+        "en": (
+            "What is the best load-shift recommendation right now?",
+            "Why is the spot-price peak driving today's schedule?",
+            "Show the constraints behind the optimized dispatch.",
+            "Search for latest day-ahead power market news in Luxembourg, Germany, Belgium, and Spain.",
+            "What CO₂ reduction is expected if I accept this schedule?",
+        ),
+        "fr": (
+            "Quelle est maintenant la meilleure recommandation de déplacement de charge ?",
+            "Pourquoi le pic de prix spot pilote-t-il le planning du jour ?",
+            "Montre les contraintes derrière le dispatch optimisé.",
+            "Recherche les dernières nouvelles du marché day-ahead de l'électricité au Luxembourg, en Allemagne, en Belgique et en Espagne.",
+            "Quelle réduction de CO₂ est attendue si j'accepte ce planning ?",
+        ),
+        "de": (
+            "Was ist jetzt die beste Empfehlung zur Lastverschiebung?",
+            "Warum bestimmt die Spotpreisspitze den heutigen Fahrplan?",
+            "Zeige die Restriktionen hinter dem optimierten Dispatch.",
+            "Suche nach den neuesten Day-Ahead-Strommarktnachrichten in Luxemburg, Deutschland, Belgien und Spanien.",
+            "Welche CO₂-Minderung wird erwartet, wenn ich diesen Plan freigebe?",
+        ),
+        "nl": (
+            "Wat is nu de beste aanbeveling voor lastverschuiving?",
+            "Waarom bepaalt de spotprijspiek de planning van vandaag?",
+            "Toon de beperkingen achter de geoptimaliseerde dispatch.",
+            "Zoek het laatste day-ahead elektriciteitsmarktnieuws in Luxemburg, Duitsland, België en Spanje.",
+            "Welke CO₂-reductie wordt verwacht als ik deze planning accepteer?",
+        ),
+        "es": (
+            "¿Cuál es ahora la mejor recomendación de desplazamiento de carga?",
+            "¿Por qué el pico de precio spot está guiando el programa de hoy?",
+            "Muestra las restricciones detrás del despacho optimizado.",
+            "Busca las últimas noticias del mercado eléctrico diario anticipado en Luxemburgo, Alemania, Bélgica y España.",
+            "¿Qué reducción de CO₂ se espera si acepto este programa?",
+        ),
+    },
+    "quality": {
+        "en": (
+            "Which active batch has the highest quality risk right now?",
+            "Explain the SPC signal on the defect chart.",
+            "What upstream genealogy factors are linked to this deviation?",
+            "Search for recent automotive steel quality or traceability requirements.",
+            "What process adjustment would improve first-pass yield without breaching constraints?",
+        ),
+        "fr": (
+            "Quel lot actif présente maintenant le plus fort risque qualité ?",
+            "Explique le signal SPC sur le graphique des défauts.",
+            "Quels facteurs de généalogie amont sont liés à cette dérive ?",
+            "Recherche les exigences récentes de qualité ou traçabilité pour l'acier automobile.",
+            "Quel ajustement de procédé améliorerait le rendement du premier passage sans dépasser les contraintes ?",
+        ),
+        "de": (
+            "Welche aktive Charge hat aktuell das höchste Qualitätsrisiko?",
+            "Erkläre das SPC-Signal im Fehlerdiagramm.",
+            "Welche vorgelagerten Genealogiefaktoren hängen mit dieser Abweichung zusammen?",
+            "Suche nach aktuellen Qualitäts- oder Rückverfolgbarkeitsanforderungen für Automobilstahl.",
+            "Welche Prozessanpassung würde die First-Pass-Ausbeute verbessern, ohne Restriktionen zu verletzen?",
+        ),
+        "nl": (
+            "Welke actieve batch heeft nu het hoogste kwaliteitsrisico?",
+            "Leg het SPC-signaal in de defectgrafiek uit.",
+            "Welke upstream genealogiefactoren hangen samen met deze afwijking?",
+            "Zoek recente kwaliteits- of traceerbaarheidseisen voor automotive staal.",
+            "Welke procesaanpassing verbetert de first-pass opbrengst zonder beperkingen te schenden?",
+        ),
+        "es": (
+            "¿Qué lote activo tiene ahora el mayor riesgo de calidad?",
+            "Explica la señal SPC en el gráfico de defectos.",
+            "¿Qué factores de genealogía aguas arriba están vinculados a esta desviación?",
+            "Busca requisitos recientes de calidad o trazabilidad para acero de automoción.",
+            "¿Qué ajuste de proceso mejoraría el rendimiento a la primera sin incumplir restricciones?",
+        ),
+    },
+    "sustainability-compliance": {
+        "en": (
+            "What is our current EU ETS exposure?",
+            "When are allowances projected to cross the guidance threshold?",
+            "Explain the difference between Scope 1 and Scope 2 in this ledger.",
+            "What are the latest EU ETS or CBAM announcements?",
+            "Which operational action would reduce emissions exposure fastest?",
+        ),
+        "fr": (
+            "Quelle est notre exposition actuelle au SEQE-UE ?",
+            "Quand les quotas devraient-ils franchir le seuil de vigilance ?",
+            "Explique la différence entre Scope 1 et Scope 2 dans ce registre.",
+            "Quelles sont les dernières annonces sur le SEQE-UE ou le MACF ?",
+            "Quelle action opérationnelle réduirait le plus vite l'exposition émissions ?",
+        ),
+        "de": (
+            "Wie hoch ist unsere aktuelle EU-ETS-Exposition?",
+            "Wann überschreiten die Zertifikate voraussichtlich den Warnschwellenwert?",
+            "Erkläre den Unterschied zwischen Scope 1 und Scope 2 in diesem Ledger.",
+            "Was sind die neuesten Ankündigungen zu EU ETS oder CBAM?",
+            "Welche operative Maßnahme würde die Emissionsexposition am schnellsten senken?",
+        ),
+        "nl": (
+            "Wat is onze huidige EU ETS-blootstelling?",
+            "Wanneer zullen emissierechten naar verwachting de waarschuwingsdrempel overschrijden?",
+            "Leg het verschil uit tussen Scope 1 en Scope 2 in dit register.",
+            "Wat zijn de laatste aankondigingen over EU ETS of CBAM?",
+            "Welke operationele actie verlaagt de emissieblootstelling het snelst?",
+        ),
+        "es": (
+            "¿Cuál es nuestra exposición actual al RCDE UE?",
+            "¿Cuándo se prevé que los derechos crucen el umbral de orientación?",
+            "Explica la diferencia entre alcance 1 y alcance 2 en este libro mayor.",
+            "¿Cuáles son los últimos anuncios sobre RCDE UE o CBAM?",
+            "¿Qué acción operativa reduciría más rápido la exposición a emisiones?",
+        ),
+    },
+    "knowledge-hub": {
+        "en": (
+            "Which approved procedure answers this operator question?",
+            "What knowledge gaps are open right now?",
+            "Summarize procedures waiting for expert approval.",
+            "Search for recent EU AI Act or GDPR guidance on operator interviews.",
+            "Draft interview questions for furnace hot-spot troubleshooting.",
+        ),
+        "fr": (
+            "Quelle procédure approuvée répond à cette question opérateur ?",
+            "Quelles lacunes de connaissances sont ouvertes maintenant ?",
+            "Résume les procédures en attente d'approbation expert.",
+            "Recherche les orientations récentes sur l'AI Act européen ou le RGPD pour les entretiens opérateurs.",
+            "Rédige des questions d'entretien sur le dépannage des points chauds de four.",
+        ),
+        "de": (
+            "Welche freigegebene Prozedur beantwortet diese Operatorfrage?",
+            "Welche Wissenslücken sind aktuell offen?",
+            "Fasse Prozeduren zusammen, die auf Expertenfreigabe warten.",
+            "Suche nach aktuellen Hinweisen zu EU AI Act oder DSGVO für Operator-Interviews.",
+            "Entwirf Interviewfragen zur Fehlersuche bei Ofen-Hot-Spots.",
+        ),
+        "nl": (
+            "Welke goedgekeurde procedure beantwoordt deze operatorvraag?",
+            "Welke kennislacunes staan nu open?",
+            "Vat procedures samen die wachten op goedkeuring door een expert.",
+            "Zoek recente richtlijnen over de EU AI Act of AVG voor operatorinterviews.",
+            "Stel interviewvragen op voor troubleshooting van hotspots in de oven.",
+        ),
+        "es": (
+            "¿Qué procedimiento aprobado responde a esta pregunta del operador?",
+            "¿Qué brechas de conocimiento están abiertas ahora?",
+            "Resume los procedimientos pendientes de aprobación de expertos.",
+            "Busca orientación reciente sobre la Ley de IA de la UE o RGPD para entrevistas a operadores.",
+            "Redacta preguntas de entrevista para diagnosticar puntos calientes del horno.",
+        ),
+    },
+    "executive-overview": {
+        "en": (
+            "How are we tracking against the four target outcomes right now?",
+            "Which site needs executive attention this week?",
+            "Summarize the board-level value story without claiming proven savings.",
+            "Search for current steel market, energy, and carbon-price developments.",
+            "What evidence is demo-proven versus a pilot target?",
+        ),
+        "fr": (
+            "Où en sommes-nous maintenant par rapport aux quatre résultats cibles ?",
+            "Quel site requiert l'attention de la direction cette semaine ?",
+            "Résume le récit de valeur pour le conseil sans prétendre à des économies prouvées.",
+            "Recherche les évolutions actuelles du marché de l'acier, de l'énergie et du prix carbone.",
+            "Quelles preuves sont démontrées en démo et lesquelles restent des cibles de pilote ?",
+        ),
+        "de": (
+            "Wie liegen wir aktuell gegenüber den vier Zielergebnissen?",
+            "Welcher Standort braucht diese Woche Aufmerksamkeit des Managements?",
+            "Fasse die Wertstory für den Vorstand zusammen, ohne bewiesene Einsparungen zu behaupten.",
+            "Suche nach aktuellen Entwicklungen bei Stahlmarkt, Energie und CO₂-Preisen.",
+            "Welche Nachweise sind demo-belegt und welche bleiben Pilotziele?",
+        ),
+        "nl": (
+            "Hoe staan we nu tegenover de vier doeluitkomsten?",
+            "Welke site vraagt deze week aandacht van de directie?",
+            "Vat het waardeverhaal voor de raad samen zonder bewezen besparingen te claimen.",
+            "Zoek actuele ontwikkelingen in staalmarkt, energie en koolstofprijzen.",
+            "Welk bewijs is in de demo aangetoond en wat blijft een pilotdoel?",
+        ),
+        "es": (
+            "¿Cómo vamos ahora frente a los cuatro resultados objetivo?",
+            "¿Qué sitio necesita atención ejecutiva esta semana?",
+            "Resume la historia de valor para el consejo sin afirmar ahorros probados.",
+            "Busca desarrollos actuales del mercado del acero, energía y precio del carbono.",
+            "¿Qué evidencia está demostrada en la demo y qué sigue siendo objetivo de piloto?",
+        ),
+    },
+    "platform-ops": {
+        "en": (
+            "What is the current Fabric capacity status?",
+            "Which jobs or pipelines failed in the latest run?",
+            "Explain today's CU consumption and cost telemetry.",
+            "Search for recent Microsoft Fabric capacity or service health announcements.",
+            "Is it safe to pause the non-production capacity now?",
+        ),
+        "fr": (
+            "Quel est l'état actuel de la capacité Fabric ?",
+            "Quels jobs ou pipelines ont échoué lors de la dernière exécution ?",
+            "Explique la consommation de CU et la télémétrie de coût du jour.",
+            "Recherche les annonces récentes sur la capacité Microsoft Fabric ou l'état de service.",
+            "Est-il sûr de mettre en pause la capacité hors production maintenant ?",
+        ),
+        "de": (
+            "Wie ist der aktuelle Status der Fabric-Kapazität?",
+            "Welche Jobs oder Pipelines sind im letzten Lauf fehlgeschlagen?",
+            "Erkläre den heutigen CU-Verbrauch und die Kostentelemetrie.",
+            "Suche nach aktuellen Ankündigungen zu Microsoft-Fabric-Kapazität oder Servicezustand.",
+            "Ist es jetzt sicher, die Nichtproduktionskapazität zu pausieren?",
+        ),
+        "nl": (
+            "Wat is de huidige status van de Fabric-capaciteit?",
+            "Welke jobs of pipelines zijn in de laatste run mislukt?",
+            "Leg het CU-verbruik en de kostentelemetrie van vandaag uit.",
+            "Zoek recente aankondigingen over Microsoft Fabric-capaciteit of servicestatus.",
+            "Is het nu veilig om de niet-productiecapaciteit te pauzeren?",
+        ),
+        "es": (
+            "¿Cuál es el estado actual de la capacidad de Fabric?",
+            "¿Qué trabajos o canalizaciones fallaron en la última ejecución?",
+            "Explica el consumo de CU y la telemetría de costes de hoy.",
+            "Busca anuncios recientes sobre capacidad de Microsoft Fabric o estado del servicio.",
+            "¿Es seguro pausar ahora la capacidad no productiva?",
+        ),
+    },
+}
+
+# Fallback used when the section is unknown.
+DEFAULT_SUGGESTIONS: Final[dict[str, tuple[str, ...]]] = {
+    "en": (
+        "What can you explain on this screen?",
+        "Summarize the current risks and recommended actions.",
+        "Which data is synthetic versus operational evidence?",
+        "Search for recent market or regulatory context relevant to NovaSteel.",
+        "Define a term from the glossary.",
+    ),
+    "fr": (
+        "Que peux-tu expliquer sur cet écran ?",
+        "Résume les risques actuels et les actions recommandées.",
+        "Quelles données sont synthétiques et lesquelles relèvent d'une preuve opérationnelle ?",
+        "Recherche le contexte récent de marché ou de réglementation pertinent pour NovaSteel.",
+        "Définis un terme du glossaire.",
+    ),
+    "de": (
+        "Was kannst du auf diesem Bildschirm erklären?",
+        "Fasse die aktuellen Risiken und empfohlenen Maßnahmen zusammen.",
+        "Welche Daten sind synthetisch und welche sind operative Nachweise?",
+        "Suche nach aktuellem Markt- oder Regulierungsumfeld, das für NovaSteel relevant ist.",
+        "Definiere einen Begriff aus dem Glossar.",
+    ),
+    "nl": (
+        "Wat kun je op dit scherm uitleggen?",
+        "Vat de huidige risico's en aanbevolen acties samen.",
+        "Welke data is synthetisch en welke is operationeel bewijs?",
+        "Zoek recente markt- of regelgevingscontext die relevant is voor NovaSteel.",
+        "Definieer een term uit de woordenlijst.",
+    ),
+    "es": (
+        "¿Qué puedes explicar en esta pantalla?",
+        "Resume los riesgos actuales y las acciones recomendadas.",
+        "¿Qué datos son sintéticos y cuáles son evidencia operativa?",
+        "Busca contexto reciente de mercado o regulación relevante para NovaSteel.",
+        "Define un término del glosario.",
+    ),
+}

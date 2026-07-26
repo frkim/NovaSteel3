@@ -1,0 +1,628 @@
+"""Multilingual glossary data for the NovaSteel Copilot chat assistant.
+
+Pure data module: no logic lives here. Lookup is implemented in
+``knowledge_orchestrator.copilot.glossary``.
+"""
+
+from __future__ import annotations
+
+from typing import Final
+
+# Supported UI languages. Every entry below MUST provide all five.
+LANGUAGES: Final[tuple[str, ...]] = ("en", "fr", "de", "nl", "es")
+
+# term_id -> {"term": {lang: str}, "definition": {lang: str}, "screens": (section-slug, ...)}
+GLOSSARY_DATA: Final[dict[str, dict[str, object]]] = {
+    "lining-risk": {
+        "term": {
+            "en": "Lining risk",
+            "fr": "Risque de garnissage",
+            "de": "Zustellungsrisiko",
+            "nl": "Vuurvastrisico",
+            "es": "Riesgo de revestimiento",
+        },
+        "definition": {
+            "en": "The modelled probability that a furnace refractory lining reaches its minimum safe thickness within the forecast horizon. It combines thermal measurements, wear trends, and uncertainty so maintenance teams can plan inspections before a safety margin is lost.",
+            "fr": "Probabilité modélisée que le garnissage réfractaire d'un four atteigne son épaisseur minimale sûre dans l'horizon de prévision. Elle combine mesures thermiques, tendances d'usure et incertitude afin de planifier les inspections avant la perte de marge de sécurité.",
+            "de": "Die modellierte Wahrscheinlichkeit, dass die feuerfeste Zustellung eines Ofens innerhalb des Prognosehorizonts die minimale sichere Dicke erreicht. Sie verbindet thermische Messwerte, Verschleißtrends und Unsicherheit, damit Inspektionen vor dem Verlust der Sicherheitsmarge geplant werden können.",
+            "nl": "De gemodelleerde kans dat de vuurvaste bekleding van een oven binnen de voorspelhorizon de minimale veilige dikte bereikt. Ze combineert thermische metingen, slijtagetrends en onzekerheid zodat inspecties gepland worden voordat de veiligheidsmarge verdwijnt.",
+            "es": "Probabilidad modelada de que el revestimiento refractario de un horno alcance su espesor mínimo seguro dentro del horizonte de previsión. Combina mediciones térmicas, tendencias de desgaste e incertidumbre para planificar inspecciones antes de perder el margen de seguridad.",
+        },
+        "screens": ("furnace-health", "operations"),
+    },
+    "remaining-useful-life": {
+        "term": {
+            "en": "Remaining useful life (RUL)",
+            "fr": "Durée de vie utile restante (RUL)",
+            "de": "Restnutzungsdauer (RUL)",
+            "nl": "Resterende nuttige levensduur (RUL)",
+            "es": "Vida útil restante (RUL)",
+        },
+        "definition": {
+            "en": "The estimated time before an asset or component can no longer be operated within its safe or specified limits. For furnace lining, RUL is usually expressed in days to a thickness or risk threshold, not as a guaranteed failure date.",
+            "fr": "Temps estimé avant qu'un actif ou composant ne puisse plus fonctionner dans ses limites sûres ou spécifiées. Pour un garnissage de four, la RUL s'exprime généralement en jours jusqu'à un seuil d'épaisseur ou de risque, et non comme une date de panne garantie.",
+            "de": "Die geschätzte Zeit, bis eine Anlage oder Komponente nicht mehr innerhalb sicherer oder spezifizierter Grenzen betrieben werden kann. Bei einer Ofenzustellung wird RUL meist in Tagen bis zu einem Dicken- oder Risikoschwellenwert angegeben, nicht als garantiertes Ausfalldatum.",
+            "nl": "De geschatte tijd voordat een installatie of component niet meer binnen veilige of gespecificeerde grenzen kan werken. Voor ovenbekleding wordt RUL meestal uitgedrukt in dagen tot een dikte- of risicodrempel, niet als gegarandeerde storingsdatum.",
+            "es": "Tiempo estimado antes de que un activo o componente deje de operar dentro de sus límites seguros o especificados. En el revestimiento de un horno, la RUL suele expresarse en días hasta un umbral de espesor o riesgo, no como una fecha garantizada de fallo.",
+        },
+        "screens": ("furnace-health", "executive-overview"),
+    },
+    "p10-p50-p90": {
+        "term": {
+            "en": "P10 / P50 / P90",
+            "fr": "P10 / P50 / P90",
+            "de": "P10 / P50 / P90",
+            "nl": "P10 / P50 / P90",
+            "es": "P10 / P50 / P90",
+        },
+        "definition": {
+            "en": "Percentile estimates that describe uncertainty: P50 is the central estimate, while P10 and P90 mark lower and upper bounds for a chosen confidence band. In NovaSteel screens they help users see whether a forecast is narrow enough for planning.",
+            "fr": "Estimations par percentiles qui décrivent l'incertitude : P50 est l'estimation centrale, tandis que P10 et P90 délimitent les bornes basse et haute d'un intervalle de confiance choisi. Dans NovaSteel, elles indiquent si une prévision est assez resserrée pour planifier.",
+            "de": "Perzentilschätzungen zur Beschreibung von Unsicherheit: P50 ist die zentrale Schätzung, P10 und P90 markieren untere und obere Grenzen eines gewählten Konfidenzbands. In NovaSteel zeigen sie, ob eine Prognose eng genug für die Planung ist.",
+            "nl": "Percentielschattingen die onzekerheid weergeven: P50 is de centrale schatting, terwijl P10 en P90 de onder- en bovengrens van een gekozen betrouwbaarheidsband aangeven. In NovaSteel tonen ze of een voorspelling smal genoeg is om mee te plannen.",
+            "es": "Estimaciones percentiles que describen la incertidumbre: P50 es la estimación central, mientras que P10 y P90 marcan los límites inferior y superior de una banda de confianza elegida. En NovaSteel ayudan a ver si una previsión es suficientemente estrecha para planificar.",
+        },
+        "screens": ("furnace-health", "quality", "executive-overview"),
+    },
+    "thermal-signature": {
+        "term": {
+            "en": "Thermal signature",
+            "fr": "Signature thermique",
+            "de": "Thermische Signatur",
+            "nl": "Thermisch profiel",
+            "es": "Firma térmica",
+        },
+        "definition": {
+            "en": "The pattern of temperatures, heat flux, cooling-water delta, and related signals that describes how heat moves through a furnace. Changes in this pattern can indicate lining wear, abnormal operation, or a developing hot spot.",
+            "fr": "Motif formé par les températures, le flux thermique, l'écart de température de l'eau de refroidissement et les signaux associés qui décrivent le transfert de chaleur dans un four. Ses évolutions peuvent signaler une usure du garnissage, un fonctionnement anormal ou un point chaud naissant.",
+            "de": "Das Muster aus Temperaturen, Wärmestrom, Kühlwasser-Temperaturdifferenz und verwandten Signalen, das den Wärmefluss durch einen Ofen beschreibt. Änderungen dieses Musters können auf Zustellungsverschleiß, ungewöhnlichen Betrieb oder einen entstehenden Hot Spot hinweisen.",
+            "nl": "Het patroon van temperaturen, warmtestroom, temperatuurverschil in koelwater en verwante signalen dat beschrijft hoe warmte door een oven beweegt. Veranderingen daarin kunnen wijzen op slijtage van de bekleding, afwijkende werking of een beginnende hot spot.",
+            "es": "Patrón de temperaturas, flujo de calor, diferencia térmica del agua de refrigeración y señales relacionadas que describe cómo se mueve el calor por un horno. Sus cambios pueden indicar desgaste del revestimiento, operación anómala o la aparición de un punto caliente.",
+        },
+        "screens": ("furnace-health",),
+    },
+    "hot-spot": {
+        "term": {
+            "en": "Hot spot",
+            "fr": "Point chaud",
+            "de": "Hot Spot",
+            "nl": "Hotspot",
+            "es": "Punto caliente",
+        },
+        "definition": {
+            "en": "A localized area where temperature or heat flux is higher than expected for the operating state. In steelmaking furnaces, a persistent hot spot can be an early warning of refractory thinning or cooling problems.",
+            "fr": "Zone localisée où la température ou le flux thermique est supérieur à ce qui est attendu pour l'état de marche. Dans les fours sidérurgiques, un point chaud persistant peut annoncer un amincissement du réfractaire ou un problème de refroidissement.",
+            "de": "Ein lokal begrenzter Bereich, in dem Temperatur oder Wärmestrom höher sind als für den Betriebszustand erwartet. In Stahlwerksöfen kann ein anhaltender Hot Spot ein Frühhinweis auf ausdünnende Feuerfestmaterialien oder Kühlprobleme sein.",
+            "nl": "Een lokale zone waar de temperatuur of warmtestroom hoger is dan verwacht voor de bedrijfsconditie. In staalovens kan een aanhoudende hotspot vroeg wijzen op dunner wordend vuurvast materiaal of koelproblemen.",
+            "es": "Zona localizada donde la temperatura o el flujo de calor son superiores a lo esperado para el estado operativo. En hornos siderúrgicos, un punto caliente persistente puede anticipar adelgazamiento del refractario o problemas de refrigeración.",
+        },
+        "screens": ("furnace-health", "operations"),
+    },
+    "refractory": {
+        "term": {
+            "en": "Refractory",
+            "fr": "Réfractaire",
+            "de": "Feuerfestmaterial",
+            "nl": "Vuurvast materiaal",
+            "es": "Refractario",
+        },
+        "definition": {
+            "en": "Heat-resistant material used to line furnaces, ladles, and other vessels exposed to molten metal or extreme temperatures. Its condition protects the steel shell, controls heat loss, and is critical to safe operation.",
+            "fr": "Matériau résistant à la chaleur utilisé pour garnir les fours, poches et autres récipients exposés au métal liquide ou à des températures extrêmes. Son état protège l'enveloppe métallique, limite les pertes thermiques et conditionne la sécurité d'exploitation.",
+            "de": "Hitzebeständiges Material zur Auskleidung von Öfen, Pfannen und anderen Behältern, die flüssigem Metall oder extremen Temperaturen ausgesetzt sind. Sein Zustand schützt den Stahlmantel, begrenzt Wärmeverluste und ist entscheidend für den sicheren Betrieb.",
+            "nl": "Hittebestendig materiaal waarmee ovens, gietpannen en andere vaten worden bekleed die aan vloeibaar metaal of extreme temperaturen blootstaan. De staat ervan beschermt de stalen mantel, beperkt warmteverlies en is essentieel voor veilige werking.",
+            "es": "Material resistente al calor usado para revestir hornos, cucharas y otros recipientes expuestos a metal líquido o temperaturas extremas. Su estado protege la carcasa de acero, controla las pérdidas térmicas y es crítico para operar con seguridad.",
+        },
+        "screens": ("furnace-health", "knowledge-hub"),
+    },
+    "tap-to-tap-time": {
+        "term": {
+            "en": "Tap-to-tap time",
+            "fr": "Temps de coulée à coulée",
+            "de": "Abstich-zu-Abstich-Zeit",
+            "nl": "Tap-tot-tap-tijd",
+            "es": "Tiempo de colada a colada",
+        },
+        "definition": {
+            "en": "The elapsed time from one furnace tap to the next, covering charging, melting or refining, tapping, and preparation. It is a practical measure of steelmaking cycle efficiency and affects throughput, energy demand, and scheduling.",
+            "fr": "Temps écoulé entre deux coulées successives d'un four, incluant chargement, fusion ou affinage, coulée et préparation. C'est une mesure opérationnelle de l'efficacité du cycle sidérurgique qui influence débit, demande énergétique et ordonnancement.",
+            "de": "Die verstrichene Zeit von einem Ofenabstich bis zum nächsten, einschließlich Chargieren, Schmelzen oder Frischen, Abstich und Vorbereitung. Sie ist ein praxisnahes Maß für die Zykluseffizienz und beeinflusst Durchsatz, Energiebedarf und Planung.",
+            "nl": "De verstreken tijd van de ene oventap tot de volgende, inclusief laden, smelten of raffineren, tappen en voorbereiding. Het is een praktische maat voor de efficiëntie van de staalmaakcyclus en beïnvloedt doorvoer, energievraag en planning.",
+            "es": "Tiempo transcurrido entre una colada del horno y la siguiente, incluyendo carga, fusión o afino, sangrado y preparación. Es una medida práctica de la eficiencia del ciclo siderúrgico y afecta al rendimiento, la demanda energética y la programación.",
+        },
+        "screens": ("operations", "energy-optimization", "executive-overview"),
+    },
+    "heat": {
+        "term": {
+            "en": "Heat",
+            "fr": "Coulée",
+            "de": "Schmelze",
+            "nl": "Smelt",
+            "es": "Colada",
+        },
+        "definition": {
+            "en": "A discrete batch of steel produced through a furnace and tracked with its chemistry, process history, and downstream quality results. Heat identity is a key link in genealogy and customer traceability.",
+            "fr": "Lot distinct d'acier élaboré dans un four et suivi avec sa chimie, son historique de procédé et ses résultats qualité en aval. L'identité de coulée est un maillon essentiel de la généalogie et de la traçabilité client.",
+            "de": "Eine abgegrenzte Stahlcharge aus einem Ofen, verfolgt mit Chemie, Prozesshistorie und nachgelagerten Qualitätsergebnissen. Die Schmelzennummer ist ein zentraler Baustein der Genealogie und Kundennachverfolgbarkeit.",
+            "nl": "Een afzonderlijke batch staal uit een oven, gevolgd met chemie, proceshistorie en latere kwaliteitsresultaten. De smeltidentiteit is een belangrijke schakel in genealogie en klanttraceerbaarheid.",
+            "es": "Lote discreto de acero producido en un horno y seguido con su química, historial de proceso y resultados de calidad posteriores. La identidad de la colada es un vínculo clave en la genealogía y la trazabilidad para clientes.",
+        },
+        "screens": ("operations", "quality"),
+    },
+    "ladle": {
+        "term": {
+            "en": "Ladle",
+            "fr": "Poche de coulée",
+            "de": "Pfanne",
+            "nl": "Gietpan",
+            "es": "Cuchara de colada",
+        },
+        "definition": {
+            "en": "A refractory-lined vessel used to transport, treat, or pour molten steel between process steps. Ladle condition, temperature loss, and treatment history influence both quality and schedule reliability.",
+            "fr": "Récipient garni de réfractaire utilisé pour transporter, traiter ou verser l'acier liquide entre les étapes du procédé. Son état, les pertes de température et l'historique de traitement influencent la qualité et la fiabilité du planning.",
+            "de": "Ein feuerfest ausgekleidetes Gefäß zum Transportieren, Behandeln oder Vergießen von flüssigem Stahl zwischen Prozessschritten. Pfannenzustand, Temperaturverlust und Behandlungshistorie beeinflussen Qualität und Termintreue.",
+            "nl": "Een vuurvast bekleed vat om vloeibaar staal tussen processtappen te vervoeren, behandelen of gieten. De staat van de gietpan, temperatuurverlies en behandelhistorie beïnvloeden kwaliteit en planningszekerheid.",
+            "es": "Recipiente revestido de refractario usado para transportar, tratar o verter acero líquido entre etapas del proceso. Su estado, la pérdida de temperatura y el historial de tratamiento influyen en la calidad y la fiabilidad del programa.",
+        },
+        "screens": ("operations", "quality", "furnace-health"),
+    },
+    "slab": {
+        "term": {
+            "en": "Slab",
+            "fr": "Brame",
+            "de": "Bramme",
+            "nl": "Plak",
+            "es": "Planchón",
+        },
+        "definition": {
+            "en": "A semi-finished rectangular steel product cast from liquid steel and later rolled into plate or strip. Slab genealogy connects upstream heat conditions to downstream coil quality.",
+            "fr": "Demi-produit sidérurgique rectangulaire coulé à partir d'acier liquide puis laminé en tôle forte ou en bande. La généalogie de la brame relie les conditions de coulée aux qualités des bobines en aval.",
+            "de": "Ein rechteckiges Stahlhalbzeug, das aus Flüssigstahl gegossen und später zu Blech oder Band gewalzt wird. Die Brammengenealogie verbindet vorgelagerte Schmelzbedingungen mit der Qualität nachgelagerter Coils.",
+            "nl": "Een rechthoekig halffabricaat van staal, gegoten uit vloeibaar staal en later gewalst tot plaat of band. De genealogie van de plak verbindt upstream smeltcondities met de kwaliteit van downstream coils.",
+            "es": "Producto semielaborado rectangular de acero colado a partir de acero líquido y laminado después en chapa o banda. La genealogía del planchón conecta las condiciones de la colada con la calidad de las bobinas posteriores.",
+        },
+        "screens": ("operations", "quality"),
+    },
+    "coil": {
+        "term": {
+            "en": "Coil",
+            "fr": "Bobine",
+            "de": "Coil",
+            "nl": "Coil",
+            "es": "Bobina",
+        },
+        "definition": {
+            "en": "Rolled steel strip wound into a coil for storage, shipment, or further finishing. Coil-level measurements and tests are often the evidence customers use for automotive-grade acceptance.",
+            "fr": "Bande d'acier laminée enroulée en bobine pour le stockage, l'expédition ou une finition ultérieure. Les mesures et essais au niveau bobine constituent souvent la preuve utilisée par les clients pour accepter une qualité automobile.",
+            "de": "Gewalztes Stahlband, das für Lagerung, Versand oder weitere Veredelung zu einem Coil aufgewickelt wird. Messungen und Prüfungen auf Coil-Ebene sind häufig der Nachweis für die Abnahme von Automobilgüten.",
+            "nl": "Gewalste staalband die tot een coil wordt opgerold voor opslag, verzending of verdere afwerking. Metingen en proeven op coilniveau vormen vaak het bewijs waarmee klanten automotive kwaliteit accepteren.",
+            "es": "Banda de acero laminada y enrollada para almacenamiento, envío o acabado posterior. Las mediciones y ensayos a nivel de bobina suelen ser la evidencia usada por los clientes para aceptar calidades de automoción.",
+        },
+        "screens": ("quality", "operations"),
+    },
+    "eaf": {
+        "term": {
+            "en": "Electric arc furnace (EAF)",
+            "fr": "Four à arc électrique (EAF)",
+            "de": "Elektrolichtbogenofen (EAF)",
+            "nl": "Vlamboogoven (EAF)",
+            "es": "Horno de arco eléctrico (EAF)",
+        },
+        "definition": {
+            "en": "A steelmaking furnace that melts scrap or direct-reduced iron using electric arcs. Because an EAF is energy-intensive and can be scheduled in batches, it is a major candidate for spot-price-aware dispatch.",
+            "fr": "Four sidérurgique qui fond de la ferraille ou du fer préréduit au moyen d'arcs électriques. Comme il consomme beaucoup d'électricité et fonctionne par lots, il se prête particulièrement à un ordonnancement tenant compte des prix spot.",
+            "de": "Ein Stahlwerksofen, der Schrott oder direktreduziertes Eisen mit elektrischen Lichtbögen schmilzt. Da ein EAF sehr stromintensiv ist und chargenweise betrieben wird, eignet er sich besonders für eine spotpreisbewusste Einsatzplanung.",
+            "nl": "Een staaloven die schroot of direct gereduceerd ijzer smelt met elektrische bogen. Omdat een EAF veel elektriciteit vraagt en batchgewijs draait, is hij een belangrijke kandidaat voor planning op basis van spotprijzen.",
+            "es": "Horno siderúrgico que funde chatarra o hierro reducido directo mediante arcos eléctricos. Al ser muy intensivo en electricidad y operar por lotes, es un candidato clave para programar la producción según precios spot.",
+        },
+        "screens": ("energy-optimization", "operations"),
+    },
+    "spot-price": {
+        "term": {
+            "en": "Spot price",
+            "fr": "Prix spot",
+            "de": "Spotpreis",
+            "nl": "Spotprijs",
+            "es": "Precio spot",
+        },
+        "definition": {
+            "en": "The market price for electricity in a short delivery interval, commonly day-ahead or intraday. Energy optimization uses it to compare when flexible loads are cheapest or most expensive to run.",
+            "fr": "Prix de marché de l'électricité pour un court intervalle de livraison, généralement en day-ahead ou intrajournalier. L'optimisation énergétique l'utilise pour déterminer quand les charges flexibles sont les moins ou les plus coûteuses à faire fonctionner.",
+            "de": "Der Marktpreis für Strom in einem kurzen Lieferintervall, üblicherweise Day-Ahead oder Intraday. Die Energieoptimierung nutzt ihn, um zu vergleichen, wann flexible Lasten am günstigsten oder teuersten laufen.",
+            "nl": "De marktprijs voor elektriciteit in een kort leveringsinterval, meestal day-ahead of intraday. Energieoptimalisatie gebruikt hem om te bepalen wanneer flexibele lasten het goedkoopst of duurst draaien.",
+            "es": "Precio de mercado de la electricidad para un intervalo corto de entrega, normalmente diario anticipado o intradiario. La optimización energética lo usa para comparar cuándo las cargas flexibles son más baratas o más caras de operar.",
+        },
+        "screens": ("energy-optimization", "sustainability-compliance"),
+    },
+    "load-shifting": {
+        "term": {
+            "en": "Load shifting",
+            "fr": "Déplacement de charge",
+            "de": "Lastverschiebung",
+            "nl": "Lastverschuiving",
+            "es": "Desplazamiento de carga",
+        },
+        "definition": {
+            "en": "Moving flexible electrical demand from one time window to another while respecting production, safety, and delivery constraints. In NovaSteel it is used to reduce exposure to price peaks and high-carbon periods without changing the product requirement.",
+            "fr": "Déplacement d'une demande électrique flexible d'une fenêtre horaire à une autre tout en respectant les contraintes de production, de sécurité et de livraison. Dans NovaSteel, il sert à réduire l'exposition aux pics de prix et aux périodes plus carbonées sans changer l'exigence produit.",
+            "de": "Das Verschieben flexibler Stromnachfrage von einem Zeitfenster in ein anderes unter Einhaltung von Produktions-, Sicherheits- und Lieferrestriktionen. In NovaSteel senkt es die Exposition gegenüber Preisspitzen und CO₂-intensiven Zeiträumen, ohne die Produktanforderung zu ändern.",
+            "nl": "Het verplaatsen van flexibele elektriciteitsvraag van het ene tijdvenster naar het andere, met respect voor productie-, veiligheids- en leveringsbeperkingen. In NovaSteel vermindert dit blootstelling aan prijspieken en koolstofintensieve perioden zonder de producteis te wijzigen.",
+            "es": "Traslado de demanda eléctrica flexible de una ventana temporal a otra respetando restricciones de producción, seguridad y entrega. En NovaSteel reduce la exposición a picos de precio y periodos de alta intensidad de carbono sin cambiar el requisito del producto.",
+        },
+        "screens": ("energy-optimization", "operations"),
+    },
+    "peak-demand": {
+        "term": {
+            "en": "Peak demand",
+            "fr": "Demande de pointe",
+            "de": "Spitzenlast",
+            "nl": "Piekvraag",
+            "es": "Demanda punta",
+        },
+        "definition": {
+            "en": "The highest electrical load observed or forecast over a defined period. Reducing peak demand can lower energy cost, network charges, and stress on site electrical infrastructure.",
+            "fr": "Charge électrique la plus élevée observée ou prévue sur une période donnée. Réduire la demande de pointe peut diminuer les coûts d'énergie, les frais réseau et la sollicitation de l'infrastructure électrique du site.",
+            "de": "Die höchste gemessene oder prognostizierte elektrische Last in einem definierten Zeitraum. Eine Verringerung der Spitzenlast kann Energiekosten, Netzentgelte und die Belastung der elektrischen Infrastruktur am Standort senken.",
+            "nl": "De hoogste gemeten of voorspelde elektrische belasting in een bepaalde periode. Verlaging van de piekvraag kan energiekosten, netkosten en belasting van de elektrische infrastructuur op de site verminderen.",
+            "es": "La mayor carga eléctrica observada o prevista en un periodo definido. Reducir la demanda punta puede disminuir costes de energía, cargos de red y tensión sobre la infraestructura eléctrica del sitio.",
+        },
+        "screens": ("energy-optimization", "platform-ops", "executive-overview"),
+    },
+    "energy-intensity-gj-per-tonne": {
+        "term": {
+            "en": "Energy intensity (GJ/t)",
+            "fr": "Intensité énergétique (GJ/t)",
+            "de": "Energieintensität (GJ/t)",
+            "nl": "Energie-intensiteit (GJ/t)",
+            "es": "Intensidad energética (GJ/t)",
+        },
+        "definition": {
+            "en": "Energy consumed per tonne of steel output, expressed in gigajoules per tonne. It normalizes consumption by production volume so plants and periods can be compared more fairly.",
+            "fr": "Énergie consommée par tonne d'acier produite, exprimée en gigajoules par tonne. Elle normalise la consommation par le volume produit afin de comparer plus équitablement les sites et les périodes.",
+            "de": "Der Energieverbrauch je Tonne Stahlausbringung, ausgedrückt in Gigajoule pro Tonne. Er normalisiert den Verbrauch auf das Produktionsvolumen, sodass Werke und Zeiträume fairer verglichen werden können.",
+            "nl": "De verbruikte energie per ton staalproductie, uitgedrukt in gigajoule per ton. Deze maat normaliseert verbruik naar productievolume zodat sites en perioden eerlijker kunnen worden vergeleken.",
+            "es": "Energía consumida por tonelada de acero producida, expresada en gigajulios por tonelada. Normaliza el consumo por volumen producido para comparar plantas y periodos de forma más justa.",
+        },
+        "screens": ("energy-optimization", "sustainability-compliance", "executive-overview"),
+    },
+    "carbon-intensity": {
+        "term": {
+            "en": "Carbon intensity",
+            "fr": "Intensité carbone",
+            "de": "CO₂-Intensität",
+            "nl": "Koolstofintensiteit",
+            "es": "Intensidad de carbono",
+        },
+        "definition": {
+            "en": "Greenhouse-gas emissions per unit of activity, such as grams of CO₂ per kWh of electricity or tonnes of CO₂ per tonne of steel. It helps compare operating choices that have different energy mixes or production volumes.",
+            "fr": "Émissions de gaz à effet de serre par unité d'activité, par exemple grammes de CO₂ par kWh d'électricité ou tonnes de CO₂ par tonne d'acier. Elle permet de comparer des choix d'exploitation ayant des mix énergétiques ou volumes différents.",
+            "de": "Treibhausgasemissionen je Aktivitätseinheit, etwa Gramm CO₂ pro kWh Strom oder Tonnen CO₂ pro Tonne Stahl. Sie hilft, Betriebsoptionen mit unterschiedlichem Energiemix oder Produktionsvolumen zu vergleichen.",
+            "nl": "Broeikasgasemissies per activiteitseenheid, zoals gram CO₂ per kWh elektriciteit of ton CO₂ per ton staal. Ze helpt bedrijfskeuzes met verschillende energiemixen of productievolumes te vergelijken.",
+            "es": "Emisiones de gases de efecto invernadero por unidad de actividad, como gramos de CO₂ por kWh de electricidad o toneladas de CO₂ por tonelada de acero. Ayuda a comparar decisiones operativas con mezclas energéticas o volúmenes distintos.",
+        },
+        "screens": ("energy-optimization", "sustainability-compliance", "executive-overview"),
+    },
+    "scope-1-2-emissions": {
+        "term": {
+            "en": "Scope 1 / Scope 2 emissions",
+            "fr": "Émissions de Scope 1 / Scope 2",
+            "de": "Scope-1- / Scope-2-Emissionen",
+            "nl": "Scope 1- / Scope 2-emissies",
+            "es": "Emisiones de alcance 1 / alcance 2",
+        },
+        "definition": {
+            "en": "Scope 1 covers direct emissions from sources NovaSteel operates, such as furnaces and fuel combustion; Scope 2 covers indirect emissions from purchased electricity, steam, heat, or cooling. Separating them clarifies whether reductions come from process changes or cleaner purchased energy.",
+            "fr": "Le Scope 1 couvre les émissions directes des sources exploitées par NovaSteel, comme les fours et la combustion de combustibles ; le Scope 2 couvre les émissions indirectes liées à l'électricité, la vapeur, la chaleur ou le froid achetés. Les distinguer montre si les réductions viennent du procédé ou d'une énergie achetée plus propre.",
+            "de": "Scope 1 umfasst direkte Emissionen aus von NovaSteel betriebenen Quellen, etwa Öfen und Brennstoffverbrennung; Scope 2 umfasst indirekte Emissionen aus zugekauftem Strom, Dampf, Wärme oder Kälte. Die Trennung zeigt, ob Minderungen aus Prozessänderungen oder sauberer eingekaufter Energie stammen.",
+            "nl": "Scope 1 omvat directe emissies uit bronnen die NovaSteel zelf beheert, zoals ovens en brandstofverbranding; Scope 2 omvat indirecte emissies uit ingekochte elektriciteit, stoom, warmte of koeling. Het onderscheid maakt duidelijk of reducties uit proceswijzigingen of schonere ingekochte energie komen.",
+            "es": "El alcance 1 cubre emisiones directas de fuentes que opera NovaSteel, como hornos y combustión de combustibles; el alcance 2 cubre emisiones indirectas de electricidad, vapor, calor o frío comprados. Separarlas aclara si las reducciones vienen de cambios de proceso o de energía comprada más limpia.",
+        },
+        "screens": ("sustainability-compliance", "executive-overview"),
+    },
+    "eu-ets": {
+        "term": {
+            "en": "EU ETS",
+            "fr": "SEQE-UE",
+            "de": "EU-Emissionshandelssystem",
+            "nl": "EU ETS",
+            "es": "RCDE UE",
+        },
+        "definition": {
+            "en": "The European Union Emissions Trading System, a cap-and-trade scheme where covered installations must surrender allowances for verified greenhouse-gas emissions. For steel producers it turns emissions performance and allowance exposure into financial and compliance risks.",
+            "fr": "Système d'échange de quotas d'émission de l'Union européenne, dans lequel les installations couvertes doivent restituer des quotas pour leurs émissions vérifiées de gaz à effet de serre. Pour les sidérurgistes, il transforme la performance carbone et l'exposition aux quotas en risques financiers et réglementaires.",
+            "de": "Das Emissionshandelssystem der Europäischen Union, ein Cap-and-Trade-System, in dem erfasste Anlagen Zertifikate für geprüfte Treibhausgasemissionen abgeben müssen. Für Stahlhersteller werden Emissionsleistung und Zertifikatsbedarf dadurch zu Finanz- und Compliance-Risiken.",
+            "nl": "Het emissiehandelssysteem van de Europese Unie, een cap-and-trade-regeling waarbij deelnemende installaties rechten moeten inleveren voor geverifieerde broeikasgasemissies. Voor staalproducenten worden emissieprestaties en rechtenblootstelling zo financiële en nalevingsrisico's.",
+            "es": "Régimen de comercio de derechos de emisión de la Unión Europea, un sistema de límites máximos y comercio en el que las instalaciones cubiertas deben entregar derechos por sus emisiones verificadas de gases de efecto invernadero. Para los productores de acero convierte el desempeño de emisiones y la exposición a derechos en riesgos financieros y de cumplimiento.",
+        },
+        "screens": ("sustainability-compliance", "executive-overview"),
+    },
+    "ets-allowance-eua": {
+        "term": {
+            "en": "ETS allowance (EUA)",
+            "fr": "Quota ETS (EUA)",
+            "de": "ETS-Zertifikat (EUA)",
+            "nl": "ETS-emissierecht (EUA)",
+            "es": "Derecho ETS (EUA)",
+        },
+        "definition": {
+            "en": "A tradable allowance that permits the emission of one tonne of CO₂ equivalent under the EU ETS. Allowance price and the forecast deficit or surplus determine the monetary exposure shown in compliance dashboards.",
+            "fr": "Quota négociable autorisant l'émission d'une tonne d'équivalent CO₂ dans le SEQE-UE. Le prix du quota et le déficit ou surplus prévu déterminent l'exposition financière affichée dans les tableaux de conformité.",
+            "de": "Ein handelbares Zertifikat, das im EU-Emissionshandel die Emission einer Tonne CO₂-Äquivalent erlaubt. Zertifikatspreis sowie prognostizierter Fehl- oder Überschuss bestimmen die finanzielle Exposition in Compliance-Dashboards.",
+            "nl": "Een verhandelbaar emissierecht dat binnen het EU ETS de uitstoot van één ton CO₂-equivalent toestaat. De rechtenprijs en het voorspelde tekort of overschot bepalen de financiële blootstelling in compliance-dashboards.",
+            "es": "Derecho negociable que permite emitir una tonelada de CO₂ equivalente bajo el RCDE UE. El precio del derecho y el déficit o superávit previsto determinan la exposición monetaria mostrada en los paneles de cumplimiento.",
+        },
+        "screens": ("sustainability-compliance", "executive-overview"),
+    },
+    "cbam": {
+        "term": {
+            "en": "CBAM",
+            "fr": "MACF / CBAM",
+            "de": "CBAM",
+            "nl": "CBAM",
+            "es": "MAFC / CBAM",
+        },
+        "definition": {
+            "en": "The EU Carbon Border Adjustment Mechanism, which applies a carbon price to certain imported goods so they face costs comparable to EU producers under ETS rules. It matters for steel because carbon reporting and embedded-emissions evidence affect cross-border competitiveness.",
+            "fr": "Mécanisme d'ajustement carbone aux frontières de l'UE, qui applique un prix du carbone à certains biens importés afin qu'ils supportent des coûts comparables à ceux des producteurs européens soumis au SEQE. Pour l'acier, le reporting carbone et la preuve des émissions incorporées influencent la compétitivité transfrontalière.",
+            "de": "Der CO₂-Grenzausgleichsmechanismus der EU, der auf bestimmte importierte Waren einen CO₂-Preis anwendet, damit sie vergleichbaren Kosten wie EU-Produzenten unter ETS-Regeln unterliegen. Für Stahl sind CO₂-Berichterstattung und Nachweise eingebetteter Emissionen wettbewerbsrelevant.",
+            "nl": "Het Europese mechanisme voor koolstofgrenscorrectie, dat voor bepaalde ingevoerde goederen een koolstofprijs toepast zodat ze vergelijkbare kosten dragen als EU-producenten onder ETS-regels. Voor staal zijn koolstofrapportage en bewijs van ingebedde emissies belangrijk voor concurrentiekracht.",
+            "es": "Mecanismo de Ajuste en Frontera por Carbono de la UE, que aplica un precio del carbono a ciertos bienes importados para que afronten costes comparables a los productores europeos bajo las normas ETS. En el acero importan el reporte de carbono y la prueba de emisiones incorporadas para la competitividad transfronteriza.",
+        },
+        "screens": ("sustainability-compliance", "executive-overview"),
+    },
+    "free-allocation": {
+        "term": {
+            "en": "Free allocation",
+            "fr": "Allocation gratuite",
+            "de": "Kostenlose Zuteilung",
+            "nl": "Gratis toewijzing",
+            "es": "Asignación gratuita",
+        },
+        "definition": {
+            "en": "EU ETS allowances granted without auctioning to eligible sectors or installations, usually to manage carbon-leakage risk. A plant's free allocation affects how quickly actual emissions create a compliance deficit or surplus.",
+            "fr": "Quotas du SEQE-UE attribués sans enchères à des secteurs ou installations éligibles, généralement pour gérer le risque de fuite de carbone. L'allocation gratuite d'un site détermine à quelle vitesse les émissions réelles créent un déficit ou un surplus de conformité.",
+            "de": "EU-ETS-Zertifikate, die berechtigten Sektoren oder Anlagen ohne Versteigerung zugeteilt werden, meist zur Begrenzung von Carbon-Leakage-Risiken. Die kostenlose Zuteilung eines Werks beeinflusst, wie schnell tatsächliche Emissionen zu einem Compliance-Defizit oder -Überschuss führen.",
+            "nl": "EU ETS-rechten die zonder veiling aan in aanmerking komende sectoren of installaties worden toegekend, meestal om koolstoflekkage te beperken. De gratis toewijzing van een site bepaalt hoe snel werkelijke emissies een nalevingstekort of -overschot veroorzaken.",
+            "es": "Derechos del RCDE UE concedidos sin subasta a sectores o instalaciones elegibles, normalmente para gestionar el riesgo de fuga de carbono. La asignación gratuita de una planta afecta a la rapidez con la que las emisiones reales generan déficit o superávit de cumplimiento.",
+        },
+        "screens": ("sustainability-compliance",),
+    },
+    "macc": {
+        "term": {
+            "en": "MACC",
+            "fr": "Courbe de coût marginal d'abattement",
+            "de": "Grenzvermeidungskostenkurve",
+            "nl": "Marginale reductiekostencurve",
+            "es": "Curva de coste marginal de abatimiento",
+        },
+        "definition": {
+            "en": "A marginal abatement cost curve ranks emissions-reduction options by cost per tonne of CO₂ avoided and by potential volume. It helps executives compare process, energy, and procurement actions without assuming every tonne costs the same to abate.",
+            "fr": "Une courbe de coût marginal d'abattement classe les options de réduction des émissions selon leur coût par tonne de CO₂ évitée et leur volume potentiel. Elle aide les dirigeants à comparer actions procédé, énergie et achats sans supposer que chaque tonne coûte pareil à réduire.",
+            "de": "Eine Grenzvermeidungskostenkurve ordnet Emissionsminderungsoptionen nach Kosten je vermiedener Tonne CO₂ und nach möglichem Volumen. Sie hilft Führungskräften, Prozess-, Energie- und Beschaffungsmaßnahmen zu vergleichen, ohne gleiche Vermeidungskosten für jede Tonne zu unterstellen.",
+            "nl": "Een marginale reductiekostencurve rangschikt emissiereductieopties op kosten per vermeden ton CO₂ en op potentieel volume. Ze helpt bestuurders proces-, energie- en inkoopacties te vergelijken zonder aan te nemen dat elke ton even duur is om te reduceren.",
+            "es": "Una curva de coste marginal de abatimiento ordena las opciones de reducción de emisiones por coste por tonelada de CO₂ evitada y por volumen potencial. Ayuda a directivos a comparar acciones de proceso, energía y compras sin asumir que abatir cada tonelada cuesta lo mismo.",
+        },
+        "screens": ("sustainability-compliance", "executive-overview"),
+    },
+    "spc": {
+        "term": {
+            "en": "SPC",
+            "fr": "Maîtrise statistique des procédés",
+            "de": "Statistische Prozessregelung",
+            "nl": "Statistische procesbeheersing",
+            "es": "Control estadístico de procesos",
+        },
+        "definition": {
+            "en": "Statistical process control uses measured variation to distinguish normal process noise from signals that need investigation. In steel quality, SPC supports earlier detection of drifting chemistry, dimensions, or defect rates.",
+            "fr": "La maîtrise statistique des procédés utilise la variation mesurée pour distinguer le bruit normal du procédé des signaux qui nécessitent une investigation. En qualité sidérurgique, elle aide à détecter plus tôt les dérives de chimie, de dimensions ou de taux de défauts.",
+            "de": "Statistische Prozessregelung nutzt gemessene Streuung, um normales Prozessrauschen von untersuchungswürdigen Signalen zu unterscheiden. In der Stahlqualität unterstützt SPC die frühere Erkennung von Drift bei Chemie, Abmessungen oder Fehlerquoten.",
+            "nl": "Statistische procesbeheersing gebruikt gemeten variatie om normale procesruis te onderscheiden van signalen die onderzoek vragen. In staalkwaliteit ondersteunt SPC vroegere detectie van afwijkende chemie, afmetingen of defectpercentages.",
+            "es": "El control estadístico de procesos usa la variación medida para distinguir el ruido normal del proceso de señales que requieren investigación. En calidad del acero ayuda a detectar antes derivas de química, dimensiones o tasas de defectos.",
+        },
+        "screens": ("quality", "operations"),
+    },
+    "control-chart": {
+        "term": {
+            "en": "Control chart",
+            "fr": "Carte de contrôle",
+            "de": "Regelkarte",
+            "nl": "Regelkaart",
+            "es": "Gráfico de control",
+        },
+        "definition": {
+            "en": "A time-ordered chart with a center line and statistically derived control limits. Points or patterns outside the limits suggest a special cause that quality teams should investigate.",
+            "fr": "Graphique chronologique avec une ligne centrale et des limites de contrôle calculées statistiquement. Des points ou motifs hors limites suggèrent une cause spéciale que les équipes qualité doivent analyser.",
+            "de": "Ein zeitlich geordnetes Diagramm mit Mittellinie und statistisch abgeleiteten Eingriffsgrenzen. Punkte oder Muster außerhalb der Grenzen deuten auf eine besondere Ursache hin, die Qualitätsteams untersuchen sollten.",
+            "nl": "Een tijdgeordende grafiek met een middenlijn en statistisch afgeleide regelgrenzen. Punten of patronen buiten de grenzen wijzen op een bijzondere oorzaak die kwaliteitsteams moeten onderzoeken.",
+            "es": "Gráfico ordenado en el tiempo con una línea central y límites de control derivados estadísticamente. Puntos o patrones fuera de los límites sugieren una causa especial que los equipos de calidad deben investigar.",
+        },
+        "screens": ("quality",),
+    },
+    "cpk": {
+        "term": {
+            "en": "Cpk",
+            "fr": "Cpk",
+            "de": "Cpk",
+            "nl": "Cpk",
+            "es": "Cpk",
+        },
+        "definition": {
+            "en": "A process capability index that compares process spread and centering with specification limits. Higher Cpk means the process is more likely to produce material inside customer tolerances, but it depends on stable measurement and valid specifications.",
+            "fr": "Indice de capabilité qui compare la dispersion et le centrage du procédé aux limites de spécification. Un Cpk plus élevé signifie que le procédé a plus de chances de produire dans les tolérances client, à condition que la mesure soit stable et les spécifications valides.",
+            "de": "Ein Prozessfähigkeitsindex, der Prozessstreuung und Zentrierung mit Spezifikationsgrenzen vergleicht. Ein höherer Cpk bedeutet, dass der Prozess eher Material innerhalb der Kundentoleranzen erzeugt, setzt aber stabile Messungen und gültige Spezifikationen voraus.",
+            "nl": "Een procesbekwaamheidsindex die spreiding en centrering van het proces vergelijkt met specificatiegrenzen. Een hogere Cpk betekent dat het proces waarschijnlijker materiaal binnen klanttoleranties produceert, mits metingen stabiel zijn en specificaties geldig.",
+            "es": "Índice de capacidad de proceso que compara la dispersión y el centrado del proceso con los límites de especificación. Un Cpk más alto indica mayor probabilidad de producir dentro de tolerancias de cliente, siempre que la medición sea estable y las especificaciones válidas.",
+        },
+        "screens": ("quality", "executive-overview"),
+    },
+    "yield": {
+        "term": {
+            "en": "Yield",
+            "fr": "Rendement",
+            "de": "Ausbeute",
+            "nl": "Opbrengst",
+            "es": "Rendimiento",
+        },
+        "definition": {
+            "en": "The share of input material or produced batches that become saleable product meeting the intended specification. In quality dashboards, yield helps quantify losses from downgrades, scrap, rework, or customer rejection.",
+            "fr": "Part de la matière entrante ou des lots produits qui devient un produit vendable conforme à la spécification visée. Dans les tableaux qualité, le rendement quantifie les pertes dues aux déclassements, rebuts, reprises ou refus client.",
+            "de": "Der Anteil des Einsatzmaterials oder der produzierten Chargen, der zu verkaufsfähigem Produkt gemäß Zielvorgabe wird. In Qualitätsdashboards macht Ausbeute Verluste durch Herabstufung, Schrott, Nacharbeit oder Kundenreklamation sichtbar.",
+            "nl": "Het aandeel inputmateriaal of geproduceerde batches dat verkoopbaar product wordt volgens de beoogde specificatie. In kwaliteitsdashboards maakt opbrengst verliezen door downgrades, schroot, herstelwerk of klantafkeur inzichtelijk.",
+            "es": "Proporción del material de entrada o de los lotes producidos que se convierte en producto vendible conforme a la especificación prevista. En paneles de calidad cuantifica pérdidas por degradación, chatarra, reproceso o rechazo del cliente.",
+        },
+        "screens": ("quality", "executive-overview", "operations"),
+    },
+    "batch-genealogy": {
+        "term": {
+            "en": "Batch genealogy",
+            "fr": "Généalogie de lot",
+            "de": "Chargengenealogie",
+            "nl": "Batchgenealogie",
+            "es": "Genealogía de lote",
+        },
+        "definition": {
+            "en": "The traceable chain from raw materials through heat, ladle, slab, coil, tests, and shipment. It lets engineers connect a quality issue to upstream conditions and provide evidence for customer audits.",
+            "fr": "Chaîne traçable depuis les matières premières jusqu'à l'expédition, en passant par coulée, poche, brame, bobine et essais. Elle permet aux ingénieurs de relier un problème qualité aux conditions amont et de fournir des preuves lors des audits client.",
+            "de": "Die nachvollziehbare Kette von Rohstoffen über Schmelze, Pfanne, Bramme, Coil, Prüfungen und Versand. Sie ermöglicht Ingenieuren, ein Qualitätsproblem mit vorgelagerten Bedingungen zu verbinden und Nachweise für Kundenaudits zu liefern.",
+            "nl": "De traceerbare keten van grondstoffen via smelt, gietpan, plak, coil, testen en verzending. Hiermee kunnen ingenieurs een kwaliteitsprobleem koppelen aan upstream condities en bewijs leveren voor klantaudits.",
+            "es": "Cadena trazable desde materias primas hasta envío, pasando por colada, cuchara, planchón, bobina y ensayos. Permite a los ingenieros vincular un problema de calidad con condiciones aguas arriba y aportar evidencia en auditorías de clientes.",
+        },
+        "screens": ("quality", "knowledge-hub", "operations"),
+    },
+    "work-order": {
+        "term": {
+            "en": "Work order",
+            "fr": "Ordre de travail",
+            "de": "Arbeitsauftrag",
+            "nl": "Werkorder",
+            "es": "Orden de trabajo",
+        },
+        "definition": {
+            "en": "A maintenance record that describes the asset, task, priority, timing, and required actions for technicians. In NovaSteel, AI recommendations may create or link to synthetic work orders for planning, not directly command plant equipment.",
+            "fr": "Enregistrement de maintenance décrivant l'actif, la tâche, la priorité, le calendrier et les actions requises pour les techniciens. Dans NovaSteel, les recommandations IA peuvent créer ou lier des ordres de travail synthétiques pour la planification, sans commander directement les équipements d'usine.",
+            "de": "Ein Instandhaltungsdatensatz mit Anlage, Aufgabe, Priorität, Terminierung und erforderlichen Maßnahmen für Techniker. In NovaSteel können KI-Empfehlungen synthetische Arbeitsaufträge zur Planung anlegen oder verknüpfen, steuern aber keine Werksausrüstung direkt.",
+            "nl": "Een onderhoudsrecord dat installatie, taak, prioriteit, timing en vereiste acties voor technici beschrijft. In NovaSteel kunnen AI-aanbevelingen synthetische werkorders voor planning maken of koppelen, maar geen fabrieksapparatuur direct aansturen.",
+            "es": "Registro de mantenimiento que describe el activo, la tarea, la prioridad, el calendario y las acciones requeridas para técnicos. En NovaSteel, las recomendaciones de IA pueden crear o vincular órdenes sintéticas para planificar, no mandar directamente equipos de planta.",
+        },
+        "screens": ("furnace-health", "operations", "knowledge-hub"),
+    },
+    "rca": {
+        "term": {
+            "en": "RCA",
+            "fr": "Analyse des causes racines",
+            "de": "Ursachenanalyse",
+            "nl": "Oorzaakanalyse",
+            "es": "Análisis de causa raíz",
+        },
+        "definition": {
+            "en": "Root-cause analysis is a structured investigation of why a deviation, defect, or incident occurred. It links symptoms to process, equipment, material, and human factors so corrective actions target causes rather than symptoms.",
+            "fr": "L'analyse des causes racines est une investigation structurée visant à comprendre pourquoi une dérive, un défaut ou un incident s'est produit. Elle relie les symptômes aux facteurs procédé, équipement, matière et humains afin de traiter les causes plutôt que les symptômes.",
+            "de": "Die Ursachenanalyse ist eine strukturierte Untersuchung, warum eine Abweichung, ein Fehler oder ein Vorfall aufgetreten ist. Sie verbindet Symptome mit Prozess-, Anlagen-, Material- und menschlichen Faktoren, damit Maßnahmen Ursachen statt Symptome adressieren.",
+            "nl": "Oorzaakanalyse is een gestructureerd onderzoek naar waarom een afwijking, defect of incident is ontstaan. Ze koppelt symptomen aan proces-, apparatuur-, materiaal- en menselijke factoren zodat corrigerende acties oorzaken aanpakken in plaats van symptomen.",
+            "es": "El análisis de causa raíz es una investigación estructurada de por qué ocurrió una desviación, defecto o incidente. Vincula síntomas con factores de proceso, equipo, material y humanos para que las acciones correctivas ataquen causas y no síntomas.",
+        },
+        "screens": ("quality", "operations", "knowledge-hub"),
+    },
+    "oee": {
+        "term": {
+            "en": "OEE",
+            "fr": "TRS / OEE",
+            "de": "Gesamtanlageneffektivität (OEE)",
+            "nl": "Overall Equipment Effectiveness (OEE)",
+            "es": "Efectividad global de los equipos (OEE)",
+        },
+        "definition": {
+            "en": "Overall Equipment Effectiveness combines availability, performance, and quality to show how effectively equipment is producing good output when it is needed. It is useful for executives and plant managers because it separates downtime, slow running, and quality losses.",
+            "fr": "Le taux de rendement synthétique combine disponibilité, performance et qualité pour montrer dans quelle mesure un équipement produit correctement quand il est requis. Il aide dirigeants et responsables d'usine à distinguer arrêts, ralentissements et pertes qualité.",
+            "de": "Die Gesamtanlageneffektivität kombiniert Verfügbarkeit, Leistung und Qualität, um zu zeigen, wie wirksam Anlagen bei Bedarf Gutteile produzieren. Für Führungskräfte und Werksleiter trennt sie Stillstände, langsamen Lauf und Qualitätsverluste.",
+            "nl": "Overall Equipment Effectiveness combineert beschikbaarheid, prestatie en kwaliteit om te tonen hoe effectief apparatuur goede output produceert wanneer die nodig is. Voor directie en plant managers scheidt het stilstand, trager draaien en kwaliteitsverlies.",
+            "es": "La efectividad global de los equipos combina disponibilidad, rendimiento y calidad para mostrar cuán eficazmente un equipo produce salida buena cuando se necesita. Ayuda a directivos y responsables de planta a separar paradas, marcha lenta y pérdidas de calidad.",
+        },
+        "screens": ("operations", "executive-overview"),
+    },
+    "fabric-capacity-unit": {
+        "term": {
+            "en": "Fabric capacity unit (CU)",
+            "fr": "Unité de capacité Fabric (CU)",
+            "de": "Fabric-Kapazitätseinheit (CU)",
+            "nl": "Fabric-capaciteitseenheid (CU)",
+            "es": "Unidad de capacidad de Fabric (CU)",
+        },
+        "definition": {
+            "en": "A Microsoft Fabric measure of compute capacity consumed by workloads such as pipelines, notebooks, semantic models, and real-time analytics. Monitoring CU usage helps platform teams size non-production capacity and avoid surprise contention or cost.",
+            "fr": "Mesure Microsoft Fabric de la capacité de calcul consommée par les charges comme pipelines, notebooks, modèles sémantiques et analytique temps réel. Le suivi des CU aide les équipes plateforme à dimensionner la capacité hors production et à éviter contention ou coûts imprévus.",
+            "de": "Eine Microsoft-Fabric-Maßeinheit für Rechenkapazität, die von Workloads wie Pipelines, Notebooks, semantischen Modellen und Echtzeitanalysen verbraucht wird. CU-Überwachung hilft Plattformteams, Nichtproduktionskapazität zu dimensionieren und unerwartete Engpässe oder Kosten zu vermeiden.",
+            "nl": "Een Microsoft Fabric-maat voor rekencapaciteit die wordt verbruikt door workloads zoals pipelines, notebooks, semantische modellen en realtime analytics. CU-monitoring helpt platformteams niet-productiecapaciteit te dimensioneren en onverwachte congestie of kosten te vermijden.",
+            "es": "Medida de Microsoft Fabric de la capacidad de cómputo consumida por cargas como canalizaciones, notebooks, modelos semánticos y analítica en tiempo real. Vigilar CU ayuda a los equipos de plataforma a dimensionar capacidad no productiva y evitar contención o costes inesperados.",
+        },
+        "screens": ("platform-ops", "executive-overview"),
+    },
+    "medallion-architecture": {
+        "term": {
+            "en": "Medallion architecture",
+            "fr": "Architecture en médailles",
+            "de": "Medaillon-Architektur",
+            "nl": "Medaillonarchitectuur",
+            "es": "Arquitectura medallón",
+        },
+        "definition": {
+            "en": "A layered data design that progressively refines raw bronze data into validated silver data and business-ready gold data. It supports lineage, auditability, and one governed definition of KPIs across analytics and AI.",
+            "fr": "Conception de données en couches qui affine progressivement les données brutes bronze en données validées silver puis en données gold prêtes métier. Elle soutient la traçabilité, l'auditabilité et une définition gouvernée unique des KPI pour l'analytique et l'IA.",
+            "de": "Ein geschichtetes Datendesign, das rohe Bronze-Daten schrittweise zu validierten Silver-Daten und geschäftsfertigen Gold-Daten veredelt. Es unterstützt Lineage, Auditierbarkeit und eine einheitlich gesteuerte KPI-Definition für Analytics und KI.",
+            "nl": "Een gelaagd dataontwerp dat ruwe bronze-data stapsgewijs verfijnt tot gevalideerde silver-data en bedrijfsrijpe gold-data. Het ondersteunt lineage, auditbaarheid en één beheerde KPI-definitie voor analytics en AI.",
+            "es": "Diseño de datos por capas que refina progresivamente datos bronze sin procesar en datos silver validados y datos gold listos para negocio. Soporta linaje, auditabilidad y una definición gobernada única de KPI para analítica e IA.",
+        },
+        "screens": ("platform-ops", "knowledge-hub", "executive-overview"),
+    },
+    "digital-twin": {
+        "term": {
+            "en": "Digital twin",
+            "fr": "Jumeau numérique",
+            "de": "Digitaler Zwilling",
+            "nl": "Digitale tweeling",
+            "es": "Gemelo digital",
+        },
+        "definition": {
+            "en": "A data-backed virtual representation of a physical asset, process, or site that mirrors relevant state and behavior. In NovaSteel, digital-twin concepts support what-if simulations and explanations without letting the assistant control physical equipment.",
+            "fr": "Représentation virtuelle, alimentée par les données, d'un actif, procédé ou site physique qui reflète son état et son comportement pertinents. Dans NovaSteel, les principes de jumeau numérique soutiennent les simulations et explications sans permettre à l'assistant de piloter les équipements physiques.",
+            "de": "Eine datenbasierte virtuelle Darstellung einer physischen Anlage, eines Prozesses oder Standorts, die relevanten Zustand und Verhalten spiegelt. In NovaSteel unterstützen Digital-Twin-Konzepte Simulationen und Erklärungen, ohne dass der Assistent physische Ausrüstung steuert.",
+            "nl": "Een door data gevoede virtuele weergave van een fysieke installatie, proces of site die relevante toestand en gedrag weerspiegelt. In NovaSteel ondersteunen digitale-tweelingconcepten simulaties en uitleg zonder dat de assistent fysieke apparatuur aanstuurt.",
+            "es": "Representación virtual respaldada por datos de un activo, proceso o sitio físico que refleja su estado y comportamiento relevantes. En NovaSteel, los conceptos de gemelo digital apoyan simulaciones y explicaciones sin permitir que el asistente controle equipos físicos.",
+        },
+        "screens": ("operations", "furnace-health", "energy-optimization", "platform-ops"),
+    },
+    "approved-procedure": {
+        "term": {
+            "en": "Approved procedure",
+            "fr": "Procédure approuvée",
+            "de": "Freigegebene Prozedur",
+            "nl": "Goedgekeurde procedure",
+            "es": "Procedimiento aprobado",
+        },
+        "definition": {
+            "en": "A captured operational procedure that has passed human review and is approved for reuse. Operators are shown vetted guidance rather than raw model output; drafts remain unpublished until a reviewer approves them.",
+            "fr": "Procédure opérationnelle capturée qui a passé une revue humaine et dont la réutilisation est approuvée. Les opérateurs voient des consignes vérifiées plutôt qu'une sortie brute du modèle ; les brouillons restent non publiés tant qu'un réviseur ne les approuve pas.",
+            "de": "Eine erfasste betriebliche Prozedur, die eine menschliche Prüfung bestanden hat und zur Wiederverwendung freigegeben ist. Operatoren sehen geprüfte Anleitungen statt roher Modellausgaben; Entwürfe bleiben unveröffentlicht, bis ein Prüfer sie freigibt.",
+            "nl": "Een vastgelegde operationele procedure die menselijke review heeft doorlopen en is goedgekeurd voor hergebruik. Operators krijgen gevalideerde richtlijnen te zien in plaats van ruwe modeluitvoer; concepten blijven ongepubliceerd totdat een reviewer ze goedkeurt.",
+            "es": "Procedimiento operativo capturado que ha superado una revisión humana y queda aprobado para su reutilización. Los operadores ven orientación validada en lugar de salida bruta del modelo; los borradores permanecen sin publicar hasta que un revisor los aprueba.",
+        },
+        "screens": ("knowledge-hub", "operations", "furnace-health"),
+    },
+    "capture-consent": {
+        "term": {
+            "en": "Capture consent",
+            "fr": "Consentement à la capture",
+            "de": "Erfassungseinwilligung",
+            "nl": "Toestemming voor vastlegging",
+            "es": "Consentimiento de captura",
+        },
+        "definition": {
+            "en": "The explicit, recorded permission an operator gives before voice or interview content is captured and processed, including the retention period. Capture cannot start without it, and withdrawal stops processing and removes the recording.",
+            "fr": "Autorisation explicite et enregistrée qu'un opérateur donne avant la capture et le traitement de sa voix ou du contenu d'un entretien, avec la durée de conservation. La capture ne peut pas commencer sans ce consentement, et son retrait arrête le traitement et supprime l'enregistrement.",
+            "de": "Die ausdrückliche, dokumentierte Einwilligung eines Operators, bevor Sprach- oder Interviewinhalte erfasst und verarbeitet werden, einschließlich der Aufbewahrungsdauer. Ohne sie darf die Erfassung nicht beginnen; ein Widerruf stoppt die Verarbeitung und entfernt die Aufzeichnung.",
+            "nl": "De expliciete, vastgelegde toestemming die een operator geeft voordat stem- of interviewinhoud wordt vastgelegd en verwerkt, inclusief de bewaartermijn. Zonder die toestemming mag vastlegging niet starten; intrekking stopt de verwerking en verwijdert de opname.",
+            "es": "Permiso explícito y registrado que da un operador antes de capturar y procesar su voz o el contenido de una entrevista, junto con el periodo de conservación. La captura no puede comenzar sin él; retirarlo detiene el tratamiento y elimina la grabación.",
+        },
+        "screens": ("knowledge-hub",),
+    },
+}
