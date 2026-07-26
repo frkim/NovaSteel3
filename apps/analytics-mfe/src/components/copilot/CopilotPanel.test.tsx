@@ -134,7 +134,7 @@ describe('CopilotPanel', () => {
 
   it('offers persona suggestions and sends the screen context when one is used', async () => {
     const stub = stubClient()
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     renderPanel(stub)
 
     const suggestion = await screen.findByText('Explain how thermal signature works')
@@ -153,7 +153,7 @@ describe('CopilotPanel', () => {
 
   it('renders answer sources, linking online results to their public page', async () => {
     const stub = stubClient()
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     renderPanel(stub)
 
     await user.click(await screen.findByText('What is the risk?'))
@@ -168,7 +168,7 @@ describe('CopilotPanel', () => {
 
   it('passes the online search and high reasoning choices to the backend', async () => {
     const stub = stubClient()
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     renderPanel(stub)
 
     await screen.findByText('What is the risk?')
@@ -187,7 +187,7 @@ describe('CopilotPanel', () => {
 
   it('keeps temporary chats out of the saved history', async () => {
     const stub = stubClient()
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     renderPanel(stub)
 
     await screen.findByText('What is the risk?')
@@ -202,7 +202,7 @@ describe('CopilotPanel', () => {
 
   it('restores and deletes stored conversations', async () => {
     const stub = stubClient()
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     renderPanel(stub)
 
     const list = await screen.findByTestId('copilot-conversations')
@@ -229,7 +229,7 @@ describe('CopilotPanel', () => {
 
   it('translates the whole panel when the chat language changes', async () => {
     const stub = stubClient()
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     renderPanel(stub)
 
     await screen.findByText('What is the risk?')
@@ -244,7 +244,7 @@ describe('CopilotPanel', () => {
 
   it('surfaces a retry-able error instead of inventing an answer', async () => {
     const stub = stubClient({ chat: vi.fn(async () => Promise.reject(new Error('boom'))) })
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     renderPanel(stub)
 
     await screen.findByText('What is the risk?')

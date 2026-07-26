@@ -44,7 +44,7 @@ describe('DataTable (TBL-STD)', () => {
   })
 
   it('re-sorts when a column header is clicked', async () => {
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     renderWithProviders(
       <DataTable
         caption="Furnace units"
