@@ -1,12 +1,23 @@
 # NovaSteel — final local demonstration handoff
 
-> **Delivery status:** runnable, deterministic local demonstration; source, tests, Bicep IaC, Fabric definitions, CI gates, and defense assets are present.  
-> **Cloud status:** **not deployed**. Azure, Fabric, Foundry, Speech, and tenant integrations remain gated production work.
+> **Delivery status:** runnable demonstration; source, tests, Bicep IaC, Fabric definitions, CI gates, and defense assets are present.  
+> **Cloud status:** **deployed** to Azure Sweden Central (`rg-novasteelv3-demo-sc`). Fabric, Foundry Agent Service, Speech, and OT/tenant integrations remain gated production work.
+
+**Live demonstration endpoints**
+
+| Surface | URL |
+|---|---|
+| Portal (front end) | <https://novasteelv3-portal.calmbeach-dbad72b1.swedencentral.azurecontainerapps.io> |
+| Command centre (deep link) | <https://novasteelv3-portal.calmbeach-dbad72b1.swedencentral.azurecontainerapps.io/NS-DEMO-LUX-01/command-center/overview> |
+| BFF API | <https://novasteelv3-bff.calmbeach-dbad72b1.swedencentral.azurecontainerapps.io> |
 
 NovaSteel is an EU-oriented, Fabric-centered decision-support platform for a
-four-country steel estate. The implemented local slice uses a Blazor WebAssembly
-shell, React/MUI/D3 analytics microfrontend, FastAPI BFF, deterministic Python
-scoring/optimization/knowledge workflows, and synthetic simulator fixtures.
+four-country steel estate. It uses a Blazor WebAssembly shell, a React/MUI/D3
+analytics microfrontend, a FastAPI BFF, Python advisory services (a PuLP/CBC
+MILP energy optimiser, a physics-informed RUL regressor, and a knowledge
+orchestrator with a critic loop and agent handoff), and synthetic simulator
+fixtures. Every service runs fully offline against deterministic fixtures as a
+demonstration fallback.
 
 ## Architecture and safety boundary
 
@@ -14,8 +25,11 @@ scoring/optimization/knowledge workflows, and synthetic simulator fixtures.
 Eventstream → Eventhouse/KQL + OneLake/Lakehouse → Python advisory services →
 FastAPI BFF → Blazor shell + React dashboard`
 
-- Fabric is the intended governed analytics core; local mode replaces cloud
-  adapters with deterministic fixtures only.
+- Fabric is the intended governed analytics core. Adapters are selected at
+  runtime: Azure implementations activate when their configuration is present
+  (`FOUNDRY_ENDPOINT`, `NOVASTEEL_TABLE_ENDPOINT`,
+  `APPLICATIONINSIGHTS_CONNECTION_STRING`), and deterministic local fixtures are
+  used otherwise, so the demonstration never depends on tenant availability.
 - The platform is **decision support**, never PLC, interlock, furnace, recipe,
   setpoint, schedule-commit, or CMMS control.
 - Local mode accepts only `NS-DEMO-*` scope, binds the BFF to `127.0.0.1`, and
@@ -146,8 +160,11 @@ to `artifacts\demo-validation\http\`.
 
 ### 5. Reset, optional simulator generation, and stop
 
-Restarting the BFF resets in-memory alert, work-order, recommendation, and
-interview state to `READY`. Stop its listener, then rerun `npm run run:bff`:
+Restarting the BFF resets alert, work-order, recommendation, and interview state
+to `READY` when it runs on the in-memory adapters. When `NOVASTEEL_TABLE_ENDPOINT`
+is configured, the audit hash-chain and idempotency records persist in Azure
+Table Storage and survive the restart. Stop its listener, then rerun
+`npm run run:bff`:
 
 ```powershell
 $listenerIds = @(
@@ -192,19 +209,27 @@ deck (20 primary slides including the demo handoff, plus six FAQ backups). Use
 in `artifacts\demo-validation\rehearsal-report.md`; final handoff is
 `artifacts\final-handoff.md`.
 
-## Validated local proof
+## Validated proof
 
-- 66/66 live BFF checks passed against the local deterministic scenario.
-- RUL: P10/P50/P90 = 16.8/21.0/27.5 days, risk 0.87 HIGH.
-- Energy: 960 = 960 tonnes, zero hard-constraint violations, 9.94% modeled
-  cost reduction at a 280 EUR/MWh peak.
+- 66/66 live BFF checks passed against the deterministic scenario; 365 automated
+  tests and all 19 repository validation gates pass.
+- RUL: P10/P50/P90 = 18.69/19.65/20.61 days, risk 0.8995 HIGH, confidence 0.7846.
+  Regressed wear slope −3.21 mm/day at r² = 0.88 — the forecast moves when the
+  thermal input moves.
+- Energy: 960 = 960 tonnes conserved, zero hard-constraint violations, and on a
+  whole-dispatch basis 7.25% cost, 3.29% CO₂ and 7.89% peak reduction
+  (56.0 → 51.58 MW) at a 280 EUR/MWh scarcity peak. The movable-reheat-load-only
+  view (21.74% cost, 31.71% CO₂) is exposed separately as `rawFlexibleCostPct` /
+  `rawFlexibleCo2Pct` and is deliberately not used as a headline.
 - Quality: bounded synthetic what-if 88% → 95%, with no operational write.
 - Fallback/no-network: 12/12 checks passed; local BFF uses loopback only.
 - PowerPoint package: 26 slides, no placeholders, aligned to the demo.
 
 These are reproducible synthetic-scenario results, **not** realized production
 outcomes. The 14% energy, 22% CO₂, 21-day warning, and 8% yield figures remain
-pilot targets.
+pilot targets. The measured figures above are smaller because they cover one
+24-hour scenario at a single site rather than an annualised four-country pilot;
+the difference is scope, not a shortfall against the model.
 
 ## Repository map
 
@@ -222,10 +247,10 @@ pilot targets.
 | `docs` | Architecture, operations, runbook, presentation, and research |
 | `artifacts` | Local validation, rehearsal, fallback, and final-handoff evidence |
 
-## Gated cloud deployment (not performed)
+## Cloud deployment
 
-Do not treat local validation as a cloud deployment. After tenant, security, and
-governance approval, use a dedicated `demo` environment:
+The `demo` environment is deployed to Azure Sweden Central. Reproduce or refresh
+it with:
 
 ```powershell
 az login
@@ -243,21 +268,28 @@ pwsh -File .\fabric\scripts\Test-FabricDeployment.ps1 `
     -Deep
 ```
 
-Before production, clear all of these gates: target-tenant Fabric capacity/SKU
-and quota; Eventstream Custom Endpoint managed-identity/network proof; Entra and
-Fabric item-level authorization; Foundry Agent Service/model/Speech/private
-network validation; container images promoted by OIDC pipeline; DPO/Legal/DPIA
-and EU AI Act decisions; OT vendor/DMZ approval; market-data licensing; DR,
-performance, accessibility, and live-cloud fallback rehearsal. Production
-capacity is never auto-paused and no cloud action may introduce an OT control
-write.
+The Fabric asset steps above require a target-tenant capacity and are still
+gated; see **Known limitations** below for the full production gate list. No
+cloud action may introduce an OT control write.
 
 ## Known limitations
 
-- No Azure, Fabric, Foundry, Speech, Eventstream, or Power BI tenant resource
-  has been deployed from this repository.
-- Local adapter responses and capacity actions are deterministic/simulated.
-- Full browser click-through automation is not installed; local evidence covers
-  served assets, CORS, component tests, and live BFF HTTP assertions.
-- The target cloud IaC uses placeholder Container Apps images until approved
-  immutable service images are promoted through `cd-services.yml`.
+- Fabric, Foundry Agent Service, Speech, Eventstream, and Power BI tenant
+  resources are **not** provisioned; the deployed slice covers Container Apps,
+  storage, networking, Key Vault, Event Hubs, and monitoring. Fabric access from
+  a guest account is still unresolved.
+- The knowledge agent calls GPT-4o only when the container environment sets
+  `KNOWLEDGE_AGENT_MODE=azure` and `FOUNDRY_ENDPOINT`; images ship offline-safe
+  and fall back to fixtures otherwise.
+- Capacity actions remain simulated; no OT control write exists on any path.
+- Full browser click-through automation is not installed; evidence covers served
+  assets, CORS, component tests, and live BFF HTTP assertions.
+- The Fabric scoring notebook still derives its P10/P90 band from fixed ×0.80 /
+  ×1.30 multipliers, whereas the Python service derives the band from fit
+  residuals. The two paths will disagree until the notebook is aligned.
+- Production gates still outstanding: target-tenant Fabric capacity/SKU and
+  quota; Eventstream Custom Endpoint managed-identity/network proof; Entra and
+  Fabric item-level authorization; Foundry Agent Service and Speech private
+  network validation; DPO/Legal/DPIA and EU AI Act decisions; OT vendor/DMZ
+  approval; market-data licensing; DR, performance, accessibility, and
+  live-cloud fallback rehearsal. Production capacity is never auto-paused.

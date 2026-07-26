@@ -25,22 +25,46 @@ services/knowledge-orchestrator/
 │   ├── procedure_workflow.py  # draft→review→approved (Knowledge.Publisher, optimistic concurrency)
 │   ├── audit.py               # append-only, hash-chained decision audit
 │   ├── orchestrator.py        # KnowledgeOrchestrator (BFF-facing methods)
+│   ├── critic.py              # reflection/critic loop (APPROVE/REVISE per iteration)
+│   ├── handoff.py             # dispatch↔RUL negotiation ports (RULScoringPort, DispatchReplanPort)
+│   ├── state_graph.py         # introspectable workflow graph + Mermaid generator
+│   ├── adapter_factory.py     # selects Azure vs local agent from environment
+│   ├── telemetry.py           # OpenTelemetry setup, critic/handoff spans, JSON logging
 │   ├── evaluation.py          # offline evaluation scorecard
 │   ├── app.py                 # OPTIONAL FastAPI wiring (import-guarded)
 │   ├── adapters/
 │   │   ├── base.py            # SpeechTranscriptionAdapter / FoundryAgentAdapter ports
 │   │   ├── azure_speech.py    # Fast Transcription via managed identity (no keys)
-│   │   ├── azure_foundry.py   # Foundry agent via managed identity (no keys)
+│   │   ├── azure_foundry.py   # live GPT-4o via managed identity, citation-enforced
 │   │   ├── local_speech.py    # deterministic offline STT fake
 │   │   └── local_foundry.py   # deterministic offline knowledge agent
 │   └── contracts/knowledge-ai-openapi.yaml   # AI-specific contract (non-conflicting subfolder)
+├── docs/workflow-state-graph.mmd  # generated Mermaid diagram of the workflow
 ├── fixtures/                  # transcript, injected transcript, safe prompts, attacks, approved corpus
 ├── demo_local.py              # fully offline end-to-end demo (no cloud, no keys)
+├── Dockerfile                 # production image, protected feed only, non-root
+├── requirements.txt           # pinned dependencies
 ├── pyproject.toml
 └── pip.conf                   # approved feed only
 
 tests/knowledge/              # focused pytest suite (offline, uses local fakes)
 ```
+
+## Agent selection
+
+`adapter_factory.create_agent()` returns the Azure GPT-4o adapter when
+`FOUNDRY_ENDPOINT` is set and the Azure SDK is importable, and the local
+fixture agent otherwise. An explicit `KNOWLEDGE_AGENT_MODE=local` forces
+fixture mode and is checked **before** the endpoint, so the shipped image
+defaults to offline-safe and a deployed environment must opt in with
+`KNOWLEDGE_AGENT_MODE=azure`. The Azure adapter enforces `[S<n>]` citations and
+declines on `INSUFFICIENT_CONTEXT` or missing citations rather than answering
+ungrounded.
+
+The critic loop writes `reflection.critic.iter<n>` audit records and the
+handoff writes `handoff.rul_check` → `handoff.replan`, so both multi-agent
+behaviours are visible in the append-only audit and as spans in Application
+Insights.
 
 ## BFF route mapping (api-contracts.md §4.7, §10)
 

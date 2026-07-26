@@ -24,19 +24,21 @@ systems, CMMS, or production schedules.
 
 ## Current delivery state
 
-| Area | Implemented and locally evidenced | Not yet deployed/proven |
+| Area | Implemented and evidenced | Not yet deployed/proven |
 |---|---|---|
-| Application | Portal shell, analytics MFE, BFF routes, authorization stubs, audit, simulated capacity control | Entra production validation, cloud query adapters, workload hosting |
-| Data/demo | Deterministic simulator, committed fixture, scoring/optimizer, six persona moments, offline fallback | OT ingestion and non-synthetic data |
+| Application | Portal shell, analytics MFE, BFF routes, authorization stubs, audit hash-chain (durable via Table Storage), simulated capacity control | Entra production validation, cloud query adapters |
+| Data/demo | Deterministic simulator, committed fixture, PuLP/CBC MILP optimizer, physics-informed RUL regressor, six persona moments, offline fallback | OT ingestion and non-synthetic data |
 | Fabric | Source-controlled item/catalog/KQL/Lakehouse/notebook/pipeline/semantic/RTI assets; local structural validator | Fabric tenant workspace, capacity, item deployment, RLS/query behavior |
-| Azure IaC | Bicep, policy, OIDC deployment scripts and local static validation | Azure resource deployment, private networking, managed-identity path |
-| AI/knowledge | Consent, draft/review, grounding, restricted tools, local STT/Foundry fakes | Tenant Foundry Agent Service, model/quota, live Speech, private-network proof |
-| Defense | 26-slide PowerPoint, runbook, FAQ, scripted local rehearsal, response/fallback evidence | Live-cloud rehearsal and presenter-browser screenshots |
+| Azure IaC | Bicep, policy, OIDC deployment scripts, alert rules, static validation — **deployed to Sweden Central** | Private-network hardening proof, DR rehearsal |
+| Observability | OpenTelemetry traces, JSON logs with correlation_id, four business KPI metrics | Production dashboards and alert tuning |
+| AI/knowledge | Consent, draft/review, grounding, restricted tools, critic loop, agent handoff, live GPT-4o adapter with local fallback | Tenant Foundry Agent Service, model/quota, live Speech, private-network proof |
+| Defense | 26-slide PowerPoint, runbook, FAQ, scripted rehearsal, response/fallback evidence | Live-cloud rehearsal and presenter-browser screenshots |
 
-The local rehearsal passed 66/66 BFF checks and 12/12 offline-fallback checks.
+The rehearsal passed 66/66 BFF checks and 12/12 offline-fallback checks; 365
+automated tests and all 19 validation gates pass.
 See [the rehearsal report](../artifacts/demo-validation/rehearsal-report.md),
 [final handoff](../artifacts/final-handoff.md), and the root
-[`README.md`](../README.md) for exact commands.
+[`README.md`](../README.md) for exact commands and the live endpoint URLs.
 
 ## Architecture at a glance
 
@@ -46,10 +48,14 @@ See [the rehearsal report](../artifacts/demo-validation/rehearsal-report.md),
 3. Fabric is the target analytics core: Eventhouse/KQL for hot operations,
    OneLake/Lakehouse bronze-silver-gold for governed data, and Direct Lake/Power
    BI for semantic reporting.
-4. Python services calculate RUL, quality, and dispatch results; Foundry agents
-   can only explain/retrieve/propose through restricted tools.
-5. The local implementation replaces cloud adapters with deterministic,
-   checksummed synthetic fixtures while retaining the API/contract boundaries.
+4. Python services calculate RUL, quality, and dispatch results. Dispatch is a
+   PuLP/CBC mixed-integer program and RUL is an OLS regression over thermal
+   features, so both respond to their inputs rather than restating constants.
+   Foundry agents can only explain/retrieve/propose through restricted tools,
+   with a critic loop and a dispatch↔RUL handoff between them.
+5. Adapters select their Azure implementation when configuration is present and
+   fall back to deterministic, checksummed synthetic fixtures otherwise, so the
+   API and contract boundaries are identical in both modes.
 
 ## Reading paths
 

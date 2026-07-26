@@ -43,3 +43,19 @@ points to an organization-provided JWKS/signature-validating
 audience, expiry, and not-before before returning claims. The ARM capacity
 adapter is likewise an interface boundary; local capacity actions are always
 simulated.
+
+## Adapters and configuration
+
+Persistence and AI adapters are chosen at startup by a factory, so the same
+code path serves both the offline demo and the deployed environment:
+
+| Env var | Effect when set | Default when unset |
+|---|---|---|
+| `NOVASTEEL_TABLE_ENDPOINT` + `NOVASTEEL_STORAGE_ACCOUNT_NAME` | Audit hash-chain and idempotency records persist in Azure Table Storage via `DefaultAzureCredential` | In-memory stores, reset on restart |
+| `FOUNDRY_ENDPOINT` (+ `KNOWLEDGE_AGENT_MODE=azure`) | Knowledge extraction calls GPT-4o | Local deterministic fixture agent |
+| `APPLICATIONINSIGHTS_CONNECTION_STRING` | OpenTelemetry traces and business KPI metrics export to Azure Monitor | Instrumentation is a silent no-op |
+| `NOVASTEEL_LOG_FORMAT=json` | Structured JSON logs to stdout with `correlation_id` as a field | Human-readable console output |
+
+Instrumentation never blocks startup: a missing, unimportable or misconfigured
+exporter degrades to a no-op rather than raising. The SHA-256 audit hash chain
+is preserved identically by both the local and Azure Table adapters.

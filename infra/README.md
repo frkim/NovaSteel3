@@ -15,13 +15,17 @@ presentation asset.
   the Fabric REST API/portal/Git integration (`docs/implementation/implementation-guide.md` §9.2),
   never to this folder. `infra/policy/definitions/deny-unsupported-fabric-items.json` enforces
   this as a policy guardrail.
-- **No Foundry Agent Service project/agent is provisioned.** Only the base Cognitive
-  Services/Foundry and Speech resource accounts are created
-  (`infra/bicep/modules/foundry-speech.bicep`). Enabling Agent Service is a manual, quota-gated
-  step — see "Deployment blockers" below.
-- **Container Apps/Jobs are placeholders.** They use a public sample image
-  (`mcr.microsoft.com/k8se/quickstart`) until `services/*` publishes real images through
-  `cd-services.yml`.
+- **No Foundry Agent Service project/agent is provisioned.** The base Cognitive
+  Services/Foundry (`AIServices`) and Speech resource accounts are created, together with the
+  GPT-4o and text-embedding model **deployments** the knowledge orchestrator calls
+  (`infra/bicep/modules/foundry-speech.bicep`). Enabling the hosted Agent Service on top of that
+  is a manual, quota-gated step — see "Deployment blockers" below. Data-plane access is granted
+  as `Cognitive Services OpenAI User` (not `Cognitive Services User`), which is the role the
+  inference API requires; `disableLocalAuth: true` means there is no key fallback if it is wrong.
+- **Container Apps/Jobs take their images from the `serviceImages` parameter.** When a service
+  has no entry, the app falls back to a public sample image
+  (`mcr.microsoft.com/k8se/quickstart`). `.github/workflows/ci-build-services.yml` builds the
+  real images from each `services/*/Dockerfile`.
 
 ## Repository layout
 
@@ -39,12 +43,13 @@ infra/
 │       ├── network.bicep                 # Hub+spoke VNet, subnets, NSGs, private DNS zones
 │       ├── identity.bicep                # Per-service managed identities + GitHub OIDC federation
 │       ├── keyvault.bicep                # RBAC-only, private-endpoint-only Key Vault (reusable)
-│       ├── storage.bicep                 # Audio/fallback-artifact storage account (reusable)
+│       ├── storage.bicep                 # Audio/fallback-artifact storage account + Tables (reusable)
 │       ├── eventhubs.bicep               # Per-plant Event Hubs + scoped data-plane RBAC
 │       ├── fabric-capacity.bicep         # Microsoft.Fabric/capacities (the only Fabric ARM type)
 │       ├── containerapps.bicep           # Container Apps environment + placeholder apps/jobs
 │       ├── foundry-speech.bicep          # Foundry/Speech resource accounts (no Agent Service)
 │       ├── monitoring.bicep              # Log Analytics + App Insights + Sentinel onboarding
+│       ├── alerts.bicep                  # Metric/log alert rules + action group
 │       ├── logicapp-capacity-lifecycle.bicep  # 01:00 Europe/Luxembourg pause workflow (non-prod)
 │       ├── policy-assignments.bicep      # Custom + built-in policy assignments (subscription)
 │       └── budget.bicep                  # Per-environment cost budget/alerts
