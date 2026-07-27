@@ -261,6 +261,17 @@ public sealed class ShellState
         PublishToast("success", $"Cloud mode: connected to {descriptor}. {dataNote}");
     }
 
+    public void SetThemeMode(ThemeMode mode)
+    {
+        if (ThemeMode == mode)
+        {
+            return;
+        }
+
+        ThemeMode = mode;
+        Notify();
+    }
+
     public void CycleTheme()
     {
         ThemeMode = ThemeMode switch

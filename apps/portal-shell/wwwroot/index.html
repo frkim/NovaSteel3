@@ -13,6 +13,22 @@
     <link rel="icon" type="image/png" href="favicon.png" />
     <link href="PortalShell.styles.css" rel="stylesheet" />
     <script type="importmap"></script>
+    <script>
+        // Paint in the stored theme before the WebAssembly runtime boots, so a
+        // returning dark-mode visitor never sees a flash of the light shell.
+        // The Blazor shell is authoritative once it starts; this only avoids
+        // the gap. Keep the cookie name in sync with wwwroot/js/shellPreferences.js.
+        (function () {
+            var match = document.cookie.match(/(?:^|;\s*)ns\.theme=([^;]*)/);
+            var stored = match ? decodeURIComponent(match[1]).toLowerCase() : 'system';
+            if (stored === 'system') {
+                stored = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+                    ? 'dark'
+                    : 'light';
+            }
+            document.documentElement.dataset.theme = stored;
+        })();
+    </script>
 </head>
 
 <body>

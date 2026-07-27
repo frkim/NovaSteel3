@@ -122,11 +122,7 @@
         if (e.Key == "Escape") await Close();
     }
 
-    private void SetTheme(ThemeMode mode)
-    {
-        while (Shell.ThemeMode != mode)
-            Shell.CycleTheme();
-    }
+    private void SetTheme(ThemeMode mode) => Shell.SetThemeMode(mode);
 
     private void OnLocaleChanged(string locale)
     {

@@ -45,3 +45,22 @@ application values only through deployment configuration; the committed
 Run the root `npm run build:analytics` before serving this project so the React
 library exists under `wwwroot/analytics-mfe`, then `dotnet build` (packages are
 restored only from the Microsoft-protected feed in `NuGet.Config`).
+
+## Stored preferences
+
+Three settings survive a reload, in first-party cookies written by
+`Services/ShellPreferenceStore.cs` through `wwwroot/js/shellPreferences.js`:
+
+| Cookie | Setting | Values |
+|---|---|---|
+| `ns.theme` | Appearance | `Light`, `Dark`, `System` |
+| `ns.locale` | Display language | `en-LU`, `fr-LU`, `de-DE`, `nl-BE`, `es-ES` |
+| `ns.helpBilingual` | Help Assistant: English + French | `True`, `False` |
+
+They are functional preference cookies: no personal data, no identifier, no
+tracking, `SameSite=Lax`, one-year lifetime, and `Secure` whenever the page is
+served over HTTPS. `ShellState` stays a synchronous in-memory state machine —
+the store subscribes to its change notification and writes through only when
+one of the three values actually changes. A boot script in `index.html` reads
+`ns.theme` before the WebAssembly runtime starts, so a returning dark-mode
+visitor never sees a flash of the light shell.

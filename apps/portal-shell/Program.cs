@@ -17,6 +17,7 @@ builder.Services.AddScoped<CapacityService>();
 builder.Services.AddScoped<BffHealthService>();
 builder.Services.AddScoped<CapacityState>();
 builder.Services.AddScoped<ShellState>();
+builder.Services.AddScoped<ShellPreferenceStore>();
 
 var clientId = builder.Configuration["AzureAd:ClientId"];
 if (string.IsNullOrWhiteSpace(clientId))

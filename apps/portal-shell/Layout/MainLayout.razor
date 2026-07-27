@@ -1,6 +1,7 @@
 @inherits LayoutComponentBase
 @implements IDisposable
 @inject ShellState Shell
+@inject ShellPreferenceStore Preferences
 @inject CapacityState Capacity
 @inject NavigationManager Navigation
 
@@ -181,6 +182,9 @@
     {
         Shell.Changed += OnShellStateChanged;
         Capacity.Changed += OnShellStateChanged;
+        // Stored preferences are applied before the first capacity call so the
+        // panel is fetched in the language the visitor last chose.
+        await Preferences.InitializeAsync();
         await Capacity.RefreshAsync(Shell.Locale);
     }
 
