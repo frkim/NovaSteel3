@@ -511,9 +511,19 @@ A settings toggle (`context.helpBilingual`), off by default, shows English and F
 
 **Merging rules:**
 
-- Titles join with ` / ` (e.g. "Energy intensity / Intensité énergétique").
-- Body fields (`what`, `steel`, `useIt`) stack with a blank line (`\n\n`) between the two languages.
+- Titles stack with a blank line (`BILINGUAL_SEPARATOR`, exported from `helpCatalogs.ts`), the same separator used for body fields.
+- Body fields (`what`, `steel`, `useIt`) stack with the same blank line between the two languages.
 - Optional fields remain optional: if `steel` is absent in English, it stays absent in the merged catalog.
+
+**Rendering rules:**
+
+MUI `Typography` renders with `white-space: normal`, so a `\n\n` inside one string collapses and both languages run together on one line. `BilingualText` therefore splits every merged field on `BILINGUAL_SEPARATOR` and renders **one paragraph element per language**:
+
+- The French paragraph is rendered in `info.main` (blue) so the reader can tell the two languages apart at a glance; the other language keeps the caller's colour.
+- Each paragraph carries `lang="fr"` / `lang="en"` for screen readers and a `data-bilingual-segment` attribute for tests.
+- Which segment is French is locale-dependent, so it cannot be inferred from the string. `isFrenchFirst(locale)` (exported from `helpCatalogs.ts`) is the single source of truth and is passed to `BilingualText` as `frenchFirst`.
+- The popup heading normally comes from the page itself (a KPI label, a chart caption) and is therefore single-language; it is only split when no page label was found and the catalog title is used instead.
+- Splitting happens only when bilingual mode is on, so a monolingual topic containing a blank line is never split.
 
 The merged bilingual catalogs (`BILINGUAL_EN_FR`, `BILINGUAL_FR_EN`) are precomputed at module load, not merged per render.
 
@@ -1009,6 +1019,29 @@ Zoom is available on all chart types including gauges and donuts. Controls are l
 and the percentage readout carries an accessible name so a screen-reader user hears "Zoom level
 200 %" rather than a bare number.
 
+**`CHART-SELECT-ZOOM` — drag a range to zoom the data.** Magnification (`CHART-ZOOM`) makes the
+same data bigger; select-zoom narrows *which* data is drawn. Pressing the pointer inside the plot
+area and dragging horizontally paints a translucent selection band; releasing re-scales the chart's
+**x domain** to the selected range.
+
+- Implemented once in `useBrushZoom` + `BrushOverlay`, not per chart type. Charts supply their plot
+  bounds and convert the returned pixel range to a domain with `selectedLinearDomain` (continuous
+  axes) or `selectedBandDomain` (ordinal axes).
+- **Applied to** `LineChart`, `AreaChart`, `BarChart`, `ControlChart`, `ParetoChart`,
+  `PriceLoadChart` and `GanttChart` — every chart with a meaningful x range.
+- **Not applied to** `DonutChart`, `GaugeChart`, `ProgressBullet`, `Sparkline` (no x range to
+  select) or `Heatmap` (a 2-D categorical grid, where an x-only band would mislead).
+- A drag shorter than 8 px is treated as a click and committed nothing, so tooltips, point selection
+  and navigation on top of a chart keep working.
+- **Escape** during a drag cancels the selection without zooming.
+- Charts register their zoom state with `ChartZoomContext`, so `ChartContainer` shows **one**
+  coherent zoom cluster: the reset control clears both the CSS magnification and the data window
+  (`chart.selectZoomReset`).
+- `zoomable={false}` opts a consumer out of both mechanisms at once. `SensorChartPanel` keeps its
+  own index-window zoom and passes `zoomable={false}` so the two never compete.
+- The "View as table" fallback always exposes the full underlying series, so a keyboard-only or
+  screen-reader user is never dependent on a drag gesture to read the data.
+
 ### 14.3 KPI card anatomy
 
 ```
@@ -1044,29 +1077,24 @@ detail view; these stay deliberately inert (no chevron, no pointer cursor) rathe
 dead click. All 67 cards across the 16 KPI-bearing screens carry a tooltip; drill-downs are
 present wherever a destination genuinely exists.
 
-**`KPI-TINT` — each card carries its own pastel background.** A KPI band of eight identical white
-cards is hard to scan and harder to point at during a live demo ("the third one from the left" is a
-bad sentence in a defense). Each card therefore gets a soft tinted background drawn from an
-eight-colour pastel ramp, selected by a **stable hash of `metric.id`**, so a given KPI keeps the
-same colour on every render, on every screen, and between sessions — the colour becomes a
-recognisable landmark rather than decoration that shuffles.
+**`KPI-TINT` — each card carries a semantic status signal.** KPI colour is never decorative and is
+never assigned by hashing `metric.id`. A card may provide `status` explicitly when the screen owns
+a real threshold; otherwise the primitive derives it from trend semantics: moving in
+`goodDirection` is `ok`, moving against it is `warning`, `flat` is `neutral`, and missing
+trend/direction is `neutral`.
 
-| # | Light | Dark |
-|---|---|---|
-| 0 | `#E3F2FD` blue | `#1A2733` |
-| 1 | `#E8F5E9` green | `#1A2B1E` |
-| 2 | `#FFF3E0` orange | `#2B2317` |
-| 3 | `#F3E5F5` purple | `#261A2B` |
-| 4 | `#E0F7FA` cyan | `#17292B` |
-| 5 | `#FBE9E7` red-orange | `#2B1D1A` |
-| 6 | `#F1F8E9` lime | `#222B1A` |
-| 7 | `#EDE7F6` deep purple | `#201A2B` |
+| Status | Meaning | Light wash / accent | Dark wash / accent |
+|---|---|---|---|
+| `ok` | Healthy or on target | `#E5F6E5` / `#0F7B0F` | `#19311C` / `#5BD75B` |
+| `warning` | At risk, needs attention | `#FFF3D6` / `#B26A00` | `#332814` / `#FFB84D` |
+| `critical` | Alert or breached threshold | `#FDE7E4` / `#C42B1C` | `#351C1A` / `#FF6B5E` |
+| `neutral` | N/A, flat, or informational | `#E7F0FF` / `#0B5FFF` | `#18263D` / `#4C8DFF` |
 
-The dark-mode ramp is a separate set of desaturated tints, not the light values dimmed, so tinting
-never fights the dark theme. **The tint is never the only carrier of meaning** — status is still
-encoded by the trend arrow, sign and label, per §14.2 and §17. Worst-case measured text contrast
-across all pairings is **4.97:1** (secondary text on the two purple tints in light mode), above the
-WCAG 2.2 AA 4.5:1 floor.
+The saturated accent is used for the left border and status glyph; the card background is only a
+low-strength wash of the same hue, so text remains primary. Measured `text.primary` contrast ranges
+from **14.30:1 to 15.36:1** in light mode and **12.71:1 to 14.29:1** in dark mode. **The colour is
+not the only carrier of meaning**: every card also renders a status icon shape and extends its
+accessible name with localized text such as `status: At risk`, satisfying WCAG 1.4.1.
 
 ### 14.4 Power BI embedding (optional)
 
@@ -1221,7 +1249,9 @@ The UI binds to a **BFF (Backend-for-Frontend)** whose contracts are owned by `s
 - **Timezones:** display in site timezone with explicit label; UTC in exports/audit.
 - **Layout:** all strings externalized; layouts tolerate +40% text expansion; **RTL-ready** (logical CSS properties) even though initial locales are LTR.
 - **Content:** AI-generated knowledge/procedures store source language and show a translation affordance; regulatory report labels localized.
-- **Persistence:** locale from `/me`, overridable in Settings and via top-bar 🌐 switch; persisted per user and reflected in URL where relevant.
+- **Persistence:** locale from `/me`, overridable in Settings and via the top-bar locale switch; persisted per user and reflected in URL where relevant.
+- **Locale switcher affordance:** the top-bar and Settings locale controls are a shared accessible listbox (`LocaleListbox.razor`), not a native `<select>`, because `<option>` cannot contain markup and the control shows an **inline SVG flag** beside each locale. Unicode regional-indicator flag emoji are deliberately **not** used: Windows does not render them, so `🇫🇷` would degrade to the letters "FR" on the presentation machine. The Copilot chat language selector (`CopilotPanel.tsx`) uses the same flags through a React `LocaleFlag`.
+- **Flag mapping:** `en-LU` → UK, `fr-LU` → France, `de-DE` → Germany, `nl-BE` → **Belgium** (this locale is Belgian Dutch, not Netherlands Dutch), `es-ES` → Spain. Flags are `aria-hidden`; the adjacent text label carries the accessible name.
 
 ---
 
@@ -1232,6 +1262,21 @@ The UI binds to a **BFF (Backend-for-Frontend)** whose contracts are owned by `s
 - No flash on load: theme resolved before first paint (shell sets a `data-theme` attribute; MFE reads it via interop context).
 - High-contrast: honor Windows High Contrast / forced-colors mode (use `forced-colors` media query; don't suppress system colors).
 - Preference persisted per user (`/me`) and per device fallback (localStorage).
+
+---
+
+## 19a. Settings Dialog
+
+The settings dialog (`SettingsDialog.razor`, opened from the top-bar hamburger menu) groups Appearance, Language, Data, Help Assistant and Persona.
+
+**Dismissal and focus (`SETTINGS-MODAL`):**
+
+- `role="dialog"` + `aria-modal="true"`, with `tabindex="-1"` so the container itself is focusable.
+- Focus moves into the dialog when it opens — without this the `@onkeydown` handler never fires, which is exactly why an earlier Escape handler existed in the code but did nothing.
+- **Escape** closes the dialog, from the container or from any child control (Blazor keyboard events bubble to the container handler).
+- Tab is trapped inside the dialog while open (`wwwroot/js/settingsFocusTrap.js`, imported as an ES module on first open).
+- On close, focus returns to the hamburger button that opened it.
+- Clicking the backdrop also closes.
 
 ---
 
@@ -1247,7 +1292,20 @@ Purpose: run persuasive, safe demos and offline walkthroughs without live plant 
 | Behavior | All interactions work (filters, drills, exports); mutations (schedule apply, alert ack) are simulated and reset on reload. |
 | Fabric capacity | Capacity control (§11) is fully interactive but **simulated** — a "Simulated" badge shows and no real API call fires; lifecycle transitions are timed to look realistic. |
 | Guided tour | Optional step-through overlay highlighting each persona's headline value (energy −14%, CO₂ −22%, yield +8%, 21-day warning). |
-| Exit | One click returns to live mode; a confirmation prevents accidental switch during a live session. |
+| Exit | One click leaves Demo Mode and enters Cloud Mode (below). |
+
+### 20.1 Cloud Mode
+
+Cloud Mode is the counterpart of Demo Mode in the top bar (`CLOUD` badge) and the settings dialog. It used to be a purely cosmetic shell flag whose only feedback was an apology that live integration was not configured; that was stale — the micro-frontend calls the deployed BFF in both modes.
+
+| Aspect | Spec |
+| --- | --- |
+| Meaning | Demo scaffolding (synthetic-data banners, seed/reset affordances) is hidden and the shell asserts which backend it is talking to. It does **not** mean the data stops being synthetic — the whole platform is synthetic by design. |
+| Probe | Switching to Cloud Mode calls the unauthenticated bootstrap route `GET /v1/meta` through `BffHealthService`, with an 8-second timeout. |
+| Success | A success toast names what answered: service, API version, environment and auth mode, e.g. *"Cloud mode: connected to novasteel-bff-api · API v1 · env demo · auth demo."* When the BFF reports `demoMode: true` the toast also states that the data set stays synthetic by design. |
+| Failure | The shell **reverts to Demo Mode** and warns with the base URL and the reason (HTTP status, `timed out`, or the transport error). A `CLOUD` badge is never shown without a backend behind it. |
+| In flight | `ShellState.BffProbeInFlight` is true while the probe runs; the last result is kept in `ShellState.BffProbe`. |
+| Caller contract | `ToggleDemoMode()` stays synchronous for existing Blazor event handlers and starts `ToggleDemoModeAsync()` in the background; the UI re-renders when the probe lands. |
 
 ---
 

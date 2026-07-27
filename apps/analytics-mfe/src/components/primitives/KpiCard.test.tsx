@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../test/renderWithProviders'
-import { KpiCard, kpiBackgroundColor, type KpiCardModel } from './KpiCard'
-import { KPI_PASTEL_LIGHT } from '../../designTokens'
+import { KpiCard, deriveKpiStatus, type KpiCardModel } from './KpiCard'
+import { kpiSemanticPalette } from '../../designTokens'
 
 const metric: KpiCardModel = {
   id: 'furnace',
@@ -80,23 +80,55 @@ describe('KpiCard', () => {
     ).not.toBeInTheDocument()
   })
 
-  describe('pastel background', () => {
-    it('assigns the same colour for the same id deterministically', () => {
-      const color1 = kpiBackgroundColor('furnace', KPI_PASTEL_LIGHT)
-      const color2 = kpiBackgroundColor('furnace', KPI_PASTEL_LIGHT)
-      expect(color1).toBe(color2)
+  describe('semantic status', () => {
+    it('derives OK when the metric moves in the good direction', () => {
+      expect(deriveKpiStatus({ trend: 'up', goodDirection: 'up' })).toBe('ok')
     })
 
-    it('assigns different colours for different ids in a typical band', () => {
-      const ids = ['furnace', 'energy', 'defects', 'throughput', 'scrap', 'uptime']
-      const colors = ids.map((id) => kpiBackgroundColor(id, KPI_PASTEL_LIGHT))
-      const unique = new Set(colors)
-      expect(unique.size).toBeGreaterThanOrEqual(4)
+    it('derives warning when the metric moves in the bad direction', () => {
+      expect(deriveKpiStatus({ trend: 'down', goodDirection: 'up' })).toBe('warning')
     })
 
-    it('returns a value from the palette', () => {
-      const color = kpiBackgroundColor('anything', KPI_PASTEL_LIGHT)
-      expect(KPI_PASTEL_LIGHT).toContain(color)
+    it('derives neutral for flat, missing trend, or missing good direction', () => {
+      expect(deriveKpiStatus({ trend: 'flat', goodDirection: 'up' })).toBe('neutral')
+      expect(deriveKpiStatus({ goodDirection: 'up' })).toBe('neutral')
+      expect(deriveKpiStatus({ trend: 'up' })).toBe('neutral')
+    })
+
+    it('lets an explicit status override the derived status on the tile', () => {
+      renderWithProviders(<KpiCard metric={{ ...metric, status: 'critical', trend: 'up', goodDirection: 'up' }} />)
+
+      expect(screen.getByRole('article', { name: 'Furnace lining RUL; status: Alert' })).toBeInTheDocument()
+    })
+
+    it('adds the non-colour status cue to the accessible name', () => {
+      renderWithProviders(<KpiCard metric={metric} />)
+
+      expect(screen.getByRole('article', { name: 'Furnace lining RUL; status: At risk' })).toBeInTheDocument()
+    })
+  })
+
+  describe('semantic background', () => {
+    it('maps statuses to distinct semantic accents', () => {
+      const palette = kpiSemanticPalette('light')
+      const accents = new Set(Object.values(palette).map((entry) => entry.accent))
+
+      expect(accents.size).toBe(4)
+      expect(palette.ok.accent).toBe('#0F7B0F')
+      expect(palette.warning.accent).toBe('#B26A00')
+      expect(palette.critical.accent).toBe('#C42B1C')
+      expect(palette.neutral.accent).toBe('#0B5FFF')
+    })
+
+    it('keeps light and dark washes available for every semantic status', () => {
+      const light = kpiSemanticPalette('light')
+      const dark = kpiSemanticPalette('dark')
+
+      for (const status of ['ok', 'warning', 'critical', 'neutral'] as const) {
+        expect(light[status].background).toMatch(/^#[0-9A-F]{6}$/)
+        expect(dark[status].background).toMatch(/^#[0-9A-F]{6}$/)
+        expect(light[status].background).not.toBe(dark[status].background)
+      }
     })
   })
 })

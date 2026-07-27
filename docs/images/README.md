@@ -17,7 +17,20 @@ about 24 MB to the repository permanently. Only the optimised renditions are
 tracked — six WebP files totalling about **1.4 MB** in
 `apps/portal-shell/wwwroot/media/`.
 
-Keep the sources in this folder locally; `.gitignore` excludes `docs/images/*.png`.
+Keep the sources in this folder locally; `.gitignore` excludes `docs/images/*.png`,
+`*.jpg` and `*.jpeg` under the same policy. Photographic sources
+(`steel-plant-with-blast-furnace.jpg`, `rolling_mils_*`, `blast_furnace-schema*`)
+are held here as raw material for future website work and are not yet referenced
+by any page.
+
+### What *is* tracked here
+
+`docs/images/logo/` holds the NovaSteel wordmark and mark sources (Paint.NET
+`.pdn` plus exported PNGs, ~1.3 MB total). These are committed, matching the
+AxelorMetal logo sources in `docs/AxelorMetal-web/logo/`, because they are small
+and are the provenance for the tracked shell assets in
+`apps/portal-shell/wwwroot/brand/` (`novasteel-mark.png`,
+`novasteel-mark-dark.png`, `axelormetal-*.png`).
 
 ## Regenerating the web renditions
 

@@ -53,6 +53,7 @@ export function PlatformCapacity() {
       label: 'Capacity state',
       value: status?.state ?? '—',
       deltaLabel: status?.demoModeSimulated ? 'Simulated' : undefined,
+      status: status ? (status.state === 'Running' ? 'ok' : status.state === 'Failed' ? 'critical' : 'warning') : 'neutral',
       target: `SKU ${status?.sku ?? '—'}`,
       asOf: capacityState.asOf,
       source: capacityState.source,

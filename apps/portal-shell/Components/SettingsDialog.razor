@@ -1,10 +1,12 @@
 @inject ShellState Shell
+@inject IJSRuntime JS
+@implements IAsyncDisposable
 
 @if (Open)
 {
     <div class="settings-backdrop" @onclick="Close"></div>
     <div class="settings-dialog" role="dialog" aria-modal="true" aria-labelledby="settings-title"
-         @onkeydown="OnKeyDown">
+         tabindex="-1" @ref="_dialogElement" @onkeydown="OnKeyDown">
         <header class="settings-header">
             <h2 id="settings-title">Settings</h2>
             <button class="settings-close" type="button" @onclick="Close" aria-label="Close settings">
@@ -40,15 +42,11 @@
 
             <section class="settings-section">
                 <h3>Language</h3>
-                <label class="settings-label">
-                    Locale
-                    <select value="@Shell.Locale" @onchange="OnLocaleChanged" class="settings-select">
-                        @foreach (var locale in ShellState.Locales)
-                        {
-                            <option value="@locale">@locale</option>
-                        }
-                    </select>
-                </label>
+                <div class="settings-label">
+                    <span id="settings-locale-label">Locale</span>
+                    <LocaleListbox Locales="ShellState.Locales" Value="@Shell.Locale" ValueChanged="OnLocaleChanged"
+                                   AriaLabelledBy="settings-locale-label" />
+                </div>
             </section>
 
             <section class="settings-section">
@@ -96,11 +94,44 @@
     [Parameter]
     public EventCallback<bool> OpenChanged { get; set; }
 
-    private void Close() => OpenChanged.InvokeAsync(false);
+    private ElementReference _dialogElement;
+    private IJSObjectReference? _focusTrapModule;
+    private bool _focusDialogAfterRender;
+    private bool _trapActive;
+    private bool _wasOpen;
 
-    private void OnKeyDown(KeyboardEventArgs e)
+    protected override void OnParametersSet()
     {
-        if (e.Key == "Escape") Close();
+        if (Open && !_wasOpen)
+        {
+            _focusDialogAfterRender = true;
+        }
+        else if (!Open)
+        {
+            _wasOpen = false;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_focusDialogAfterRender)
+        {
+            _focusDialogAfterRender = false;
+            _wasOpen = true;
+            await _dialogElement.FocusAsync();
+            await ActivateFocusTrapAsync();
+        }
+    }
+
+    private async Task Close()
+    {
+        await DeactivateFocusTrapAsync();
+        await OpenChanged.InvokeAsync(false);
+    }
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape") await Close();
     }
 
     private void SetTheme(ThemeMode mode)
@@ -109,9 +140,9 @@
             Shell.CycleTheme();
     }
 
-    private void OnLocaleChanged(ChangeEventArgs args)
+    private void OnLocaleChanged(string locale)
     {
-        Shell.SetLocale(args.Value?.ToString() ?? Shell.Locale);
+        Shell.SetLocale(locale);
     }
 
     private void OnDemoToggle(ChangeEventArgs args)
@@ -130,6 +161,31 @@
         Shell.SetPrimaryPersona(persona);
     }
 
+    private async Task ActivateFocusTrapAsync()
+    {
+        _focusTrapModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/settingsFocusTrap.js");
+        await _focusTrapModule.InvokeVoidAsync("activateFocusTrap", _dialogElement);
+        _trapActive = true;
+    }
+
+    private async Task DeactivateFocusTrapAsync()
+    {
+        if (_trapActive && _focusTrapModule is not null)
+        {
+            await _focusTrapModule.InvokeVoidAsync("deactivateFocusTrap", _dialogElement);
+            _trapActive = false;
+        }
+    }
+
     private static string FormatPersona(string persona) =>
         System.Text.RegularExpressions.Regex.Replace(persona, "([a-z])([A-Z])", "$1 $2");
+
+    public async ValueTask DisposeAsync()
+    {
+        await DeactivateFocusTrapAsync();
+        if (_focusTrapModule is not null)
+        {
+            await _focusTrapModule.DisposeAsync();
+        }
+    }
 }

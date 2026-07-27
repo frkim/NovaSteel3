@@ -6,12 +6,18 @@ public sealed class ShellState
 {
     private readonly ITokenReferenceBroker _tokenReferenceBroker;
     private readonly ShellOptions _options;
+    private readonly BffHealthService _bffHealth;
 
-    public ShellState(AuthDemoContext auth, ITokenReferenceBroker tokenReferenceBroker, ShellOptions options)
+    public ShellState(
+        AuthDemoContext auth,
+        ITokenReferenceBroker tokenReferenceBroker,
+        ShellOptions options,
+        BffHealthService bffHealth)
     {
         Auth = auth;
         _tokenReferenceBroker = tokenReferenceBroker;
         _options = options;
+        _bffHealth = bffHealth;
     }
 
     public static IReadOnlyList<string> Sites { get; } = ["lu", "de", "be", "es", "all"];
@@ -92,14 +98,72 @@ public sealed class ShellState
         }
     }
 
-    public void ToggleDemoMode()
+    /// <summary>
+    /// True while a cloud-mode switch is waiting for the BFF to identify itself.
+    /// </summary>
+    public bool BffProbeInFlight { get; private set; }
+
+    /// <summary>
+    /// What the BFF last told us about itself, or <c>null</c> before the first probe.
+    /// </summary>
+    public BffProbeResult? BffProbe { get; private set; }
+
+    /// <summary>
+    /// Flips between the demo data set and cloud mode. Existing callers are
+    /// synchronous event handlers, so the probe is started here and completed in
+    /// the background; the UI updates again when it lands.
+    /// </summary>
+    public void ToggleDemoMode() => _ = ToggleDemoModeAsync();
+
+    /// <summary>
+    /// Switching back to demo is instant. Switching to cloud mode asks the BFF
+    /// who it is first: if nothing answers, the shell stays in demo mode rather
+    /// than showing a CLOUD badge with no backend behind it.
+    /// </summary>
+    public async Task ToggleDemoModeAsync(CancellationToken cancellationToken = default)
     {
-        DemoMode = !DemoMode;
-        PublishToast(
-            DemoMode ? "info" : "warning",
-            DemoMode
-                ? "Demo mode is active; all data is synthetic."
-                : "Live mode remains a shell state until authenticated BFF integration is configured.");
+        if (!DemoMode)
+        {
+            DemoMode = true;
+            BffProbeInFlight = false;
+            PublishToast("info", "Demo mode is active: synthetic data set, demo controls visible.");
+            return;
+        }
+
+        DemoMode = false;
+        BffProbeInFlight = true;
+        PublishToast("info", $"Cloud mode: contacting the NovaSteel BFF at {BffBaseUrl}\u2026");
+
+        var probe = await _bffHealth.ProbeAsync(cancellationToken);
+        BffProbe = probe;
+        BffProbeInFlight = false;
+
+        if (!probe.Reachable)
+        {
+            DemoMode = true;
+            PublishToast(
+                "warning",
+                $"Cloud mode unavailable: {BffBaseUrl} did not answer ({probe.Detail}). Staying in demo mode.");
+            return;
+        }
+
+        var descriptor = string.Join(
+            " \u00b7 ",
+            new[]
+            {
+                probe.Service,
+                probe.ApiVersion is null ? null : $"API {probe.ApiVersion}",
+                probe.Environment is null ? null : $"env {probe.Environment}",
+                probe.AuthMode is null ? null : $"auth {probe.AuthMode}",
+            }.Where(part => !string.IsNullOrWhiteSpace(part)));
+
+        // The data set is synthetic in both modes by design; cloud mode is about
+        // where the data comes from, not whether it describes a real plant.
+        var dataNote = probe.DemoData
+            ? "Every screen is now served by that backend. The data set stays synthetic by design."
+            : "Every screen is now served by that backend.";
+
+        PublishToast("success", $"Cloud mode: connected to {descriptor}. {dataNote}");
     }
 
     public void CycleTheme()

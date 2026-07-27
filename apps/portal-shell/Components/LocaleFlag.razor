@@ -1,0 +1,50 @@
+<svg class="@CssClass" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 16">
+    @switch (FlagKey)
+    {
+        case "fr":
+            <rect width="8" height="16" fill="#0055A4" />
+            <rect x="8" width="8" height="16" fill="#FFFFFF" />
+            <rect x="16" width="8" height="16" fill="#EF4135" />
+            break;
+        case "de":
+            <rect width="24" height="5.33" fill="#000000" />
+            <rect y="5.33" width="24" height="5.34" fill="#DD0000" />
+            <rect y="10.67" width="24" height="5.33" fill="#FFCE00" />
+            break;
+        case "be":
+            <rect width="8" height="16" fill="#000000" />
+            <rect x="8" width="8" height="16" fill="#FAE042" />
+            <rect x="16" width="8" height="16" fill="#ED2939" />
+            break;
+        case "es":
+            <rect width="24" height="16" fill="#AA151B" />
+            <rect y="4" width="24" height="8" fill="#F1BF00" />
+            break;
+        default:
+            <rect width="24" height="16" fill="#012169" />
+            <path d="M0 0 L24 16 M24 0 L0 16" stroke="#FFFFFF" stroke-width="4" />
+            <path d="M0 0 L24 16 M24 0 L0 16" stroke="#C8102E" stroke-width="2" />
+            <path d="M12 0 V16 M0 8 H24" stroke="#FFFFFF" stroke-width="6" />
+            <path d="M12 0 V16 M0 8 H24" stroke="#C8102E" stroke-width="3.5" />
+            break;
+    }
+</svg>
+
+@code {
+    [Parameter]
+    public string Locale { get; set; } = "en-LU";
+
+    [Parameter]
+    public string? Class { get; set; }
+
+    private string CssClass => string.IsNullOrWhiteSpace(Class) ? "locale-flag" : $"locale-flag {Class}";
+
+    private string FlagKey => Locale[..Math.Min(Locale.Length, 2)].ToLowerInvariant() switch
+    {
+        "fr" => "fr",
+        "de" => "de",
+        "nl" => "be",
+        "es" => "es",
+        _ => "gb"
+    };
+}

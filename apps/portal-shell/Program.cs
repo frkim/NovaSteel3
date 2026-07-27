@@ -14,6 +14,7 @@ builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri(bffBaseUr
 builder.Services.AddScoped<AuthDemoContext>();
 builder.Services.AddScoped<ITokenReferenceBroker, DemoTokenReferenceBroker>();
 builder.Services.AddScoped<CapacityService>();
+builder.Services.AddScoped<BffHealthService>();
 builder.Services.AddScoped<CapacityState>();
 builder.Services.AddScoped<ShellState>();
 

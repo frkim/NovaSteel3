@@ -36,12 +36,13 @@ import type {
   ReasoningTier,
 } from '../../api/copilotClient'
 import { SUPPORTED_LANGUAGES, createTranslator, languageOf } from '../../i18n/messages'
+import { LocaleFlag } from '../primitives/LocaleFlag'
 import { ConversationList } from './ConversationList'
 import { GlossaryBox } from './GlossaryBox'
 import { useDictation } from './useDictation'
 
 const LANGUAGE_LABELS: Record<string, string> = {
-  en: 'EN/US',
+  en: 'EN/GB',
   fr: 'FR',
   de: 'DE',
   nl: 'NL',
@@ -422,11 +423,14 @@ export function CopilotPanel({
             onChange={(event) => setLanguage(event.target.value)}
             data-testid="copilot-language"
             slotProps={{ htmlInput: { 'aria-label': t('copilot.language') } }}
-            sx={{ width: 92, '& .MuiInputBase-input': { py: 0.5, fontSize: '0.78rem' } }}
+            sx={{ width: 104, '& .MuiInputBase-input': { py: 0.5, fontSize: '0.78rem' } }}
           >
             {SUPPORTED_LANGUAGES.map((code) => (
               <MenuItem key={code} value={code}>
-                {LANGUAGE_LABELS[code]}
+                <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75 }}>
+                  <LocaleFlag code={code} />
+                  <Box component="span">{LANGUAGE_LABELS[code]}</Box>
+                </Box>
               </MenuItem>
             ))}
           </TextField>

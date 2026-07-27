@@ -52,17 +52,8 @@
             @((MarkupString)ThemeIcon)
         </button>
 
-        <label class="topbar-field locale-field">
-            <svg class="locale-globe" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10A15.3 15.3 0 0 1 12 2z"/>
-            </svg>
-            <select value="@Shell.Locale" @onchange="OnLocaleChanged" aria-label="Selected locale">
-                @foreach (var locale in ShellState.Locales)
-                {
-                    <option value="@locale">@locale</option>
-                }
-            </select>
-        </label>
+        <LocaleListbox Locales="ShellState.Locales" Value="@Shell.Locale" ValueChanged="OnLocaleChanged"
+                       AriaLabel="Selected locale" Compact="true" Class="locale-field" />
 
         <button class="demo-button" type="button" @onclick="Shell.ToggleDemoMode" aria-pressed="@Shell.DemoMode">
             @(Shell.DemoMode ? "DEMO" : "CLOUD")
@@ -89,7 +80,7 @@
         </details>
 
         <div class="hamburger-wrapper">
-            <button class="hamburger-button" type="button"
+            <button class="hamburger-button" type="button" @ref="_hamburgerButton"
                     @onclick="ToggleHamburger" @onkeydown="OnHamburgerKeyDown"
                     aria-haspopup="menu" aria-expanded="@_hamburgerOpen"
                     aria-label="Main menu">
@@ -167,13 +158,15 @@
 </div>
 
 <CapacityPanel />
-<SettingsDialog @bind-Open="_settingsOpen" />
+<SettingsDialog Open="_settingsOpen" OpenChanged="OnSettingsOpenChanged" />
 
 @code {
     private string _searchQuery = string.Empty;
     private readonly int _openAlerts = 3;
     private bool _hamburgerOpen;
     private bool _settingsOpen;
+    private bool _focusHamburgerAfterSettingsClose;
+    private ElementReference _hamburgerButton;
 
     protected override async Task OnInitializedAsync()
     {
@@ -183,6 +176,15 @@
     }
 
     private void OnShellStateChanged() => _ = InvokeAsync(StateHasChanged);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_focusHamburgerAfterSettingsClose)
+        {
+            _focusHamburgerAfterSettingsClose = false;
+            await _hamburgerButton.FocusAsync();
+        }
+    }
 
     private void OnSiteChanged(ChangeEventArgs args)
     {
@@ -197,9 +199,9 @@
         Navigation.NavigateTo(Shell.RouteForPersona(persona));
     }
 
-    private void OnLocaleChanged(ChangeEventArgs args)
+    private void OnLocaleChanged(string locale)
     {
-        Shell.SetLocale(args.Value?.ToString() ?? Shell.Locale);
+        Shell.SetLocale(locale);
     }
 
     private void OnSearchSubmit()
@@ -249,6 +251,17 @@
     {
         CloseHamburger();
         _settingsOpen = true;
+    }
+
+    private Task OnSettingsOpenChanged(bool open)
+    {
+        if (_settingsOpen && !open)
+        {
+            _focusHamburgerAfterSettingsClose = true;
+        }
+
+        _settingsOpen = open;
+        return Task.CompletedTask;
     }
 
     private void ResetWorkspace()

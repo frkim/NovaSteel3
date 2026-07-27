@@ -3,7 +3,8 @@ import { Box, GlobalStyles, IconButton, Paper, Stack, Typography } from '@mui/ma
 import CloseIcon from '@mui/icons-material/Close'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutlined'
 import type { TranslateFn } from '../../i18n/messages'
-import { resolveHelpCatalog } from '../../i18n/helpCatalogs'
+import { resolveHelpCatalog, isFrenchFirst } from '../../i18n/helpCatalogs'
+import { BilingualText } from './BilingualText'
 import { pickHelpKey, resolveHelpTarget } from './resolveHelpTarget'
 import type { HelpTarget, HelpTopic } from './helpTypes'
 
@@ -156,6 +157,9 @@ export function HelpAssistant({ active, onExit, scope, locale, bilingual = false
 
   const topic = selection?.topic
   const heading = selection?.target.label ?? topic?.title ?? t('help.fallback.title')
+  // The label is read straight off the page, so it is only ever one language.
+  const headingIsBilingual = bilingual && !selection?.target.label
+  const frenchFirst = isFrenchFirst(locale)
   const position = selection ? placePopup(selection.point, popupHeight) : null
 
   return (
@@ -245,23 +249,40 @@ export function HelpAssistant({ active, onExit, scope, locale, bilingual = false
           }}
         >
           <Stack direction="row" spacing={1} sx={{ alignItems: 'flex-start', mb: 1 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, flex: 1 }}>
-              {heading}
-            </Typography>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <BilingualText
+                text={heading}
+                bilingual={headingIsBilingual}
+                frenchFirst={frenchFirst}
+                variant="subtitle1"
+                component="h2"
+                sx={{ fontWeight: 700, m: 0 }}
+              />
+            </Box>
             <IconButton size="small" aria-label={t('help.popup.close')} data-testid="help-popup-close" onClick={clear}>
               <CloseIcon fontSize="small" />
             </IconButton>
           </Stack>
 
           {topic && selection.target.label && topic.title !== selection.target.label && (
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-              {topic.title}
-            </Typography>
+            <Box sx={{ mb: 1 }}>
+              <BilingualText
+                text={topic.title}
+                bilingual={bilingual}
+                frenchFirst={frenchFirst}
+                variant="caption"
+                color="text.secondary"
+              />
+            </Box>
           )}
 
-          <Typography variant="body2" sx={{ mb: topic?.steel || topic?.useIt ? 1.5 : 0 }}>
-            {topic?.what ?? t('help.fallback.what')}
-          </Typography>
+          <Box sx={{ mb: topic?.steel || topic?.useIt ? 1.5 : 0 }}>
+            <BilingualText
+              text={topic?.what ?? t('help.fallback.what')}
+              bilingual={bilingual && Boolean(topic?.what)}
+              frenchFirst={frenchFirst}
+            />
+          </Box>
 
           {selection.target.detail && (
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5, fontStyle: 'italic' }}>
@@ -274,9 +295,9 @@ export function HelpAssistant({ active, onExit, scope, locale, bilingual = false
               <Typography variant="overline" color="primary.main" sx={{ display: 'block', lineHeight: 1.6 }}>
                 {t('help.section.steel')}
               </Typography>
-              <Typography variant="body2" sx={{ mb: 1.5 }}>
-                {topic.steel}
-              </Typography>
+              <Box sx={{ mb: 1.5 }}>
+                <BilingualText text={topic.steel} bilingual={bilingual} frenchFirst={frenchFirst} />
+              </Box>
             </>
           )}
 
@@ -285,7 +306,7 @@ export function HelpAssistant({ active, onExit, scope, locale, bilingual = false
               <Typography variant="overline" color="primary.main" sx={{ display: 'block', lineHeight: 1.6 }}>
                 {t('help.section.useIt')}
               </Typography>
-              <Typography variant="body2">{topic.useIt}</Typography>
+              <BilingualText text={topic.useIt} bilingual={bilingual} frenchFirst={frenchFirst} />
             </>
           )}
 

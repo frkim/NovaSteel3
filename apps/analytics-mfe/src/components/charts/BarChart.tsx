@@ -1,8 +1,10 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import * as d3 from 'd3'
 import { Box } from '@mui/material'
 import { useChartDimensions } from './useChartDimensions'
 import { CHART_MARGIN } from './chartUtils'
+import { BrushOverlay } from './BrushOverlay'
+import { selectedBandDomain, useBrushZoom } from './useBrushZoom'
 
 export interface BarSeries {
   id: string
@@ -20,11 +22,62 @@ export interface BarChartProps {
   series: BarSeries[]
   height?: number
   yFormat: (value: number) => string
+  brushZoomable?: boolean
 }
 
-export function BarChart({ groups, series, height = 260, yFormat }: BarChartProps) {
+export function BarChart({ groups, series, height = 260, yFormat, brushZoomable = true }: BarChartProps) {
   const { ref, dimensions } = useChartDimensions(height)
   const svgRef = useRef<SVGSVGElement>(null)
+  const [zoomLabels, setZoomLabels] = useState<string[] | null>(null)
+  const labels = useMemo(() => groups.map((group) => group.label), [groups])
+  const labelsKey = labels.join('\u0000')
+  const visibleGroups = useMemo(
+    () => (zoomLabels ? groups.filter((group) => zoomLabels.includes(group.label)) : groups),
+    [groups, zoomLabels],
+  )
+  const x0 = useMemo(
+    () =>
+      d3
+        .scaleBand<string>()
+        .domain(visibleGroups.map((group) => group.label))
+        .range([CHART_MARGIN.left, dimensions.width - CHART_MARGIN.right])
+        .paddingInner(0.2),
+    [dimensions.width, visibleGroups],
+  )
+
+  useEffect(() => {
+    setZoomLabels(null)
+  }, [labelsKey])
+
+  const handleBrushEnd = useCallback(
+    (range: [number, number]) => {
+      const selected = selectedBandDomain(
+        x0,
+        visibleGroups.map((group) => group.label),
+        range,
+      )
+      if (selected.length > 0 && selected.length < visibleGroups.length) {
+        setZoomLabels(selected)
+      }
+    },
+    [visibleGroups, x0],
+  )
+
+  const brush = useBrushZoom({
+    targetRef: svgRef,
+    width: dimensions.width,
+    height,
+    bounds: {
+      x: CHART_MARGIN.left,
+      y: CHART_MARGIN.top,
+      width: Math.max(0, dimensions.width - CHART_MARGIN.left - CHART_MARGIN.right),
+      height: Math.max(0, height - CHART_MARGIN.top - CHART_MARGIN.bottom),
+    },
+    enabled: brushZoomable && visibleGroups.length > 1,
+    isZoomed: Boolean(zoomLabels),
+    onBrushEnd: handleBrushEnd,
+    onReset: () => setZoomLabels(null),
+  })
 
   useEffect(() => {
     const node = svgRef.current
@@ -32,11 +85,6 @@ export function BarChart({ groups, series, height = 260, yFormat }: BarChartProp
       return
     }
     const width = dimensions.width
-    const x0 = d3
-      .scaleBand()
-      .domain(groups.map((group) => group.label))
-      .range([CHART_MARGIN.left, width - CHART_MARGIN.right])
-      .paddingInner(0.2)
     const x1 = d3
       .scaleBand()
       .domain(series.map((entry) => entry.id))
@@ -70,7 +118,7 @@ export function BarChart({ groups, series, height = 260, yFormat }: BarChartProp
     const groupNode = svg
       .append('g')
       .selectAll('g')
-      .data(groups)
+      .data(visibleGroups)
       .join('g')
       .attr('transform', (group) => `translate(${x0(group.label) ?? 0},0)`)
 
@@ -86,11 +134,12 @@ export function BarChart({ groups, series, height = 260, yFormat }: BarChartProp
       .attr('fill', (item) => item.entry.color)
       .append('title')
       .text((item) => `${item.entry.label}: ${yFormat(item.value)}`)
-  }, [dimensions.width, height, groups, series, yFormat])
+  }, [dimensions.width, height, groups, visibleGroups, series, yFormat, x0])
 
   return (
-    <Box ref={ref} sx={{ width: '100%' }}>
+    <Box ref={ref} sx={{ position: 'relative', width: '100%' }}>
       <svg ref={svgRef} style={{ width: '100%', height }} />
+      <BrushOverlay width={dimensions.width} height={height} selection={brush.selection} />
     </Box>
   )
 }

@@ -269,6 +269,16 @@ describe('CopilotPanel', () => {
     ).toBeInTheDocument()
   })
 
+  it('renders an aria-hidden flag for the selected chat language', async () => {
+    renderPanel(stubClient())
+
+    const languageField = await screen.findByTestId('copilot-language')
+    const flag = within(languageField).getByTestId('locale-flag-en')
+
+    expect(flag).toBeInTheDocument()
+    expect(flag).toHaveAttribute('aria-hidden', 'true')
+  })
+
   it('surfaces a retry-able error instead of inventing an answer', async () => {
     const stub = stubClient({ chat: vi.fn(async () => Promise.reject(new Error('boom'))) })
     const user = userEvent.setup({ delay: null })

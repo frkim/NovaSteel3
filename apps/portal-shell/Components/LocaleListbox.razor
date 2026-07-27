@@ -1,0 +1,259 @@
+@using Microsoft.AspNetCore.Components.Web
+
+<div class="@RootClass">
+    <button class="locale-listbox-trigger" type="button" @ref="_triggerElement"
+            @onclick="ToggleAsync" @onkeydown="OnTriggerKeyDown"
+            aria-haspopup="listbox" aria-expanded="@_open" aria-controls="@ListboxId"
+            aria-label="@(string.IsNullOrWhiteSpace(AriaLabelledBy) ? AriaLabel : null)"
+            aria-labelledby="@AriaLabelledBy">
+        <LocaleFlag Locale="@SelectedLocale" />
+        <span class="locale-listbox-value">@SelectedLocale</span>
+        <span class="locale-listbox-chevron" aria-hidden="true">▾</span>
+    </button>
+
+    @if (_open)
+    {
+        <div class="locale-listbox-backdrop" @onclick="() => CloseAsync(true)"></div>
+        <div class="locale-listbox-options" id="@ListboxId" role="listbox" tabindex="-1"
+             @ref="_listboxElement" @onkeydown="OnListboxKeyDown" @onkeydown:stopPropagation="true"
+             aria-label="@(string.IsNullOrWhiteSpace(AriaLabelledBy) ? AriaLabel : null)"
+             aria-labelledby="@AriaLabelledBy"
+             aria-activedescendant="@ActiveDescendantId">
+            @for (var index = 0; index < LocaleItems.Count; index++)
+            {
+                var optionIndex = index;
+                var locale = LocaleItems[optionIndex];
+                <div id="@OptionId(optionIndex)" role="option" aria-selected="@(locale == SelectedLocale ? "true" : "false")"
+                     class="@OptionClass(locale, optionIndex)" @key="locale"
+                     @onclick="() => SelectLocaleAsync(locale)" @onmousemove="() => SetActiveIndex(optionIndex)">
+                    <LocaleFlag Locale="@locale" />
+                    <span>@locale</span>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private readonly string _componentId = $"locale-listbox-{Guid.NewGuid():N}";
+    private ElementReference _triggerElement;
+    private ElementReference _listboxElement;
+    private bool _open;
+    private int _activeIndex;
+    private bool _focusListboxAfterRender;
+    private bool _focusTriggerAfterRender;
+
+    [Parameter]
+    public IEnumerable<string> Locales { get; set; } = Array.Empty<string>();
+
+    [Parameter]
+    public string? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    [Parameter]
+    public string? AriaLabel { get; set; }
+
+    [Parameter]
+    public string? AriaLabelledBy { get; set; }
+
+    [Parameter]
+    public bool Compact { get; set; }
+
+    [Parameter]
+    public string? Class { get; set; }
+
+    private IReadOnlyList<string> LocaleItems => Locales as IReadOnlyList<string> ?? Locales.ToArray();
+    private string SelectedLocale => Value ?? LocaleItems.FirstOrDefault() ?? string.Empty;
+    private string ListboxId => $"{_componentId}-listbox";
+    private string? ActiveDescendantId => _open && _activeIndex >= 0 ? OptionId(_activeIndex) : null;
+
+    private string RootClass
+    {
+        get
+        {
+            var classes = Compact ? "locale-listbox locale-listbox-compact" : "locale-listbox";
+            return string.IsNullOrWhiteSpace(Class) ? classes : $"{classes} {Class}";
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_focusListboxAfterRender)
+        {
+            _focusListboxAfterRender = false;
+            await _listboxElement.FocusAsync();
+        }
+        else if (_focusTriggerAfterRender)
+        {
+            _focusTriggerAfterRender = false;
+            await _triggerElement.FocusAsync();
+        }
+    }
+
+    private async Task ToggleAsync()
+    {
+        if (_open)
+        {
+            await CloseAsync(true);
+        }
+        else
+        {
+            await OpenAsync(SelectedIndex());
+        }
+    }
+
+    private async Task OnTriggerKeyDown(KeyboardEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case "ArrowDown":
+            case "Down":
+                await OpenAsync(Math.Min(SelectedIndex() + 1, LocaleItems.Count - 1));
+                break;
+            case "ArrowUp":
+            case "Up":
+                await OpenAsync(Math.Max(SelectedIndex() - 1, 0));
+                break;
+            case "Home":
+                await OpenAsync(0);
+                break;
+            case "End":
+                await OpenAsync(LocaleItems.Count - 1);
+                break;
+            case "Escape":
+                await CloseAsync(true);
+                break;
+        }
+    }
+
+    private async Task OnListboxKeyDown(KeyboardEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case "ArrowDown":
+            case "Down":
+                MoveActive(1);
+                break;
+            case "ArrowUp":
+            case "Up":
+                MoveActive(-1);
+                break;
+            case "Home":
+                SetActiveIndex(0);
+                break;
+            case "End":
+                SetActiveIndex(LocaleItems.Count - 1);
+                break;
+            case "Enter":
+                await SelectActiveAsync();
+                break;
+            case " ":
+            case "Spacebar":
+                await SelectActiveAsync();
+                break;
+            case "Escape":
+                await CloseAsync(true);
+                break;
+        }
+    }
+
+    private async Task OpenAsync(int activeIndex)
+    {
+        if (LocaleItems.Count == 0)
+        {
+            return;
+        }
+
+        _activeIndex = ClampIndex(activeIndex);
+        _open = true;
+        _focusListboxAfterRender = true;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task CloseAsync(bool returnFocus)
+    {
+        if (!_open)
+        {
+            return;
+        }
+
+        _open = false;
+        _focusTriggerAfterRender = returnFocus;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task SelectActiveAsync()
+    {
+        if (_activeIndex >= 0 && _activeIndex < LocaleItems.Count)
+        {
+            await SelectLocaleAsync(LocaleItems[_activeIndex]);
+        }
+    }
+
+    private async Task SelectLocaleAsync(string locale)
+    {
+        if (locale != Value)
+        {
+            await ValueChanged.InvokeAsync(locale);
+        }
+
+        await CloseAsync(true);
+    }
+
+    private void MoveActive(int delta) => SetActiveIndex(_activeIndex + delta);
+
+    private void SetActiveIndex(int index)
+    {
+        if (LocaleItems.Count == 0)
+        {
+            _activeIndex = -1;
+            return;
+        }
+
+        _activeIndex = ClampIndex(index);
+    }
+
+    private int SelectedIndex()
+    {
+        var selected = SelectedLocale;
+        for (var index = 0; index < LocaleItems.Count; index++)
+        {
+            if (LocaleItems[index] == selected)
+            {
+                return index;
+            }
+        }
+
+        return 0;
+    }
+
+    private int ClampIndex(int index)
+    {
+        if (LocaleItems.Count == 0)
+        {
+            return -1;
+        }
+
+        return Math.Clamp(index, 0, LocaleItems.Count - 1);
+    }
+
+    private string OptionId(int index) => $"{_componentId}-option-{index}";
+
+    private string OptionClass(string locale, int index)
+    {
+        var classes = "locale-listbox-option";
+        if (locale == SelectedLocale)
+        {
+            classes += " selected";
+        }
+
+        if (index == _activeIndex)
+        {
+            classes += " active";
+        }
+
+        return classes;
+    }
+}

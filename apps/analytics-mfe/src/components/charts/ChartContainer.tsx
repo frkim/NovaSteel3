@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useId, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
 import {
   Box,
+  Button,
   Card,
   CardContent,
   IconButton,
@@ -21,6 +22,7 @@ import RemoveIcon from '@mui/icons-material/Remove'
 import { useAnalytics } from '../../context/analytics'
 import { useDocked } from '../dock/dockContext'
 import { prefersReducedMotion } from '../../designTokens'
+import { ChartZoomContext, type ChartDataZoomRegistration } from './ChartZoomContext'
 
 export interface ChartTableColumn {
   key: string
@@ -75,6 +77,8 @@ export function ChartContainer({
   const { t } = useAnalytics()
   const [asTable, setAsTable] = useState(false)
   const [zoom, setZoom] = useState(100)
+  const dataZoomRegistrations = useRef(new Map<symbol, ChartDataZoomRegistration>())
+  const [dataZoomActive, setDataZoomActive] = useState(false)
   const summaryId = useId()
   const canToggle = Boolean(tableColumns && tableRows)
   const docked = useDocked()
@@ -96,7 +100,30 @@ export function ChartContainer({
     })
   }, [])
 
-  const zoomReset = useCallback(() => setZoom(100), [])
+  const updateDataZoomActive = useCallback(() => {
+    const nextActive = [...dataZoomRegistrations.current.values()].some((registration) => registration.isZoomed)
+    setDataZoomActive((current) => (current === nextActive ? current : nextActive))
+  }, [])
+
+  const registerDataZoom = useCallback(
+    (registration: ChartDataZoomRegistration) => {
+      const key = Symbol('chart-data-zoom')
+      dataZoomRegistrations.current.set(key, registration)
+      updateDataZoomActive()
+      return () => {
+        dataZoomRegistrations.current.delete(key)
+        updateDataZoomActive()
+      }
+    },
+    [updateDataZoomActive],
+  )
+
+  const zoomReset = useCallback(() => {
+    setZoom(100)
+    for (const registration of dataZoomRegistrations.current.values()) {
+      registration.reset()
+    }
+  }, [])
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
@@ -122,8 +149,12 @@ export function ChartContainer({
   }, [asTable])
 
   const showZoom = zoomable && !asTable
-  const isZoomed = zoom !== 100
+  const isZoomed = zoom !== 100 || dataZoomActive
   const reducedMotion = useMemo(() => prefersReducedMotion(), [])
+  const chartZoomContext = useMemo(
+    () => ({ brushZoomEnabled: showZoom, registerDataZoom }),
+    [registerDataZoom, showZoom],
+  )
 
   const zoomControls = showZoom ? (
     <Stack direction="row" spacing={0.25} sx={{ alignItems: 'center' }}>
@@ -164,6 +195,11 @@ export function ChartContainer({
       >
         <AddIcon fontSize="small" />
       </IconButton>
+      {dataZoomActive && (
+        <Button size="small" variant="text" onClick={zoomReset} sx={{ ml: 0.5, minWidth: 0 }}>
+          {t('chart.selectZoomReset')}
+        </Button>
+      )}
     </Stack>
   ) : null
 
@@ -180,8 +216,8 @@ export function ChartContainer({
     >
       <Box
         sx={{
-          width: isZoomed ? `${zoom}%` : '100%',
-          height: isZoomed ? height * (zoom / 100) : undefined,
+          width: zoom !== 100 ? `${zoom}%` : '100%',
+          height: zoom !== 100 ? height * (zoom / 100) : undefined,
           transition: reducedMotion ? 'none' : 'width 0.15s ease, height 0.15s ease',
         }}
       >
@@ -260,7 +296,7 @@ export function ChartContainer({
         sx={{ m: 0, minWidth: 0 }}
         {...containerProps}
       >
-        {body}
+        <ChartZoomContext.Provider value={chartZoomContext}>{body}</ChartZoomContext.Provider>
       </Box>
     )
   }
@@ -274,7 +310,9 @@ export function ChartContainer({
       sx={{ m: 0 }}
       {...containerProps}
     >
-      <CardContent>{body}</CardContent>
+      <CardContent>
+        <ChartZoomContext.Provider value={chartZoomContext}>{body}</ChartZoomContext.Provider>
+      </CardContent>
     </Card>
   )
 }

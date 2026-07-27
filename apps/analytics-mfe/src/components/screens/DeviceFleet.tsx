@@ -68,6 +68,7 @@ export function DeviceFleet() {
       value: String(healthyCount),
       trend: 'up',
       goodDirection: 'up',
+      status: totalDevices > 0 && healthyCount === totalDevices ? 'ok' : 'neutral',
       tooltip: t('device.kpi.healthyCount.tooltip'),
       onClick: () => {
         setStatusFilter(statusFilter === 'healthy' ? null : 'healthy')
@@ -81,6 +82,7 @@ export function DeviceFleet() {
       value: String(degradedCount),
       trend: degradedCount > 0 ? 'up' : 'flat',
       goodDirection: 'down',
+      status: degradedCount > 0 ? 'warning' : 'ok',
       tooltip: t('device.kpi.degradedCount.tooltip'),
       onClick: () => {
         setStatusFilter(statusFilter === 'degraded' ? null : 'degraded')
@@ -94,6 +96,7 @@ export function DeviceFleet() {
       value: String(faultCount),
       trend: faultCount > 0 ? 'up' : 'flat',
       goodDirection: 'down',
+      status: faultCount > 0 ? 'critical' : 'ok',
       tooltip: t('device.kpi.faultCount.tooltip'),
       onClick: () => {
         setStatusFilter(statusFilter === 'fault' ? null : 'fault')
@@ -120,6 +123,7 @@ export function DeviceFleet() {
       value: String(totalActiveIncidents),
       trend: totalActiveIncidents > 0 ? 'up' : 'flat',
       goodDirection: 'down',
+      status: totalActiveIncidents > 0 ? 'warning' : 'ok',
       tooltip: t('device.kpi.activeIncidents.tooltip'),
       onClick: () => revealPanel(FLEET_TABLE_ID),
       actionHint: 'the device table',

@@ -31,7 +31,11 @@ tests/simulator/.tmp/*
 /artifacts/
 /.validation-venv/
 
-# Source artwork for the corporate-website process diagrams (~8 MB each).
+# Source artwork for the corporate-website process diagrams and photography.
 # Only the optimised web renditions under apps/portal-shell/wwwroot/media are
 # committed. See docs/images/README.md to regenerate them.
+# The logo sources in docs/images/logo/ are small and ARE tracked, matching
+# docs/AxelorMetal-web/logo/.
 /docs/images/*.png
+/docs/images/*.jpg
+/docs/images/*.jpeg

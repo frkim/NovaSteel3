@@ -22,10 +22,22 @@ export const HELP_CATALOGS: Record<string, HelpCatalog> = {
   es: ES,
 }
 
+/**
+ * Joins the two halves of a bilingual string. The renderer splits on this and
+ * gives each language its own paragraph, so it must stay a blank line rather
+ * than any visible punctuation.
+ */
+export const BILINGUAL_SEPARATOR = '\n\n'
+
 function mergeField(primary?: string, secondary?: string): string | undefined {
   if (!primary) return secondary
   if (!secondary || secondary === primary) return primary
-  return `${primary}\n\n${secondary}`
+  return `${primary}${BILINGUAL_SEPARATOR}${secondary}`
+}
+
+/** True when the French half of a bilingual string comes first. */
+export function isFrenchFirst(locale: string): boolean {
+  return languageOf(locale) === 'fr'
 }
 
 /**
@@ -42,7 +54,10 @@ function bilingual(base: HelpCatalog, other: HelpCatalog): HelpCatalog {
       continue
     }
     const next: HelpTopic = {
-      title: twin.title && twin.title !== topic.title ? `${topic.title} / ${twin.title}` : topic.title,
+      title:
+        twin.title && twin.title !== topic.title
+          ? `${topic.title}${BILINGUAL_SEPARATOR}${twin.title}`
+          : topic.title,
       what: mergeField(topic.what, twin.what) ?? topic.what,
     }
     const steel = mergeField(topic.steel, twin.steel)

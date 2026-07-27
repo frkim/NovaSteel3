@@ -197,6 +197,34 @@ describe('HelpAssistant', () => {
     expect(popup).toHaveTextContent(HELP_FR['kpi:energy'].what)
   })
 
+  it('gives each language its own paragraph so the line break survives', () => {
+    renderWithProviders(<Harness bilingual />)
+    fireEvent.click(screen.getByTestId('kpi-value'))
+
+    const popup = screen.getByTestId('help-popup')
+    const segments = Array.from(popup.querySelectorAll('[data-bilingual-segment]'))
+    const english = segments.find((node) => node.textContent === HELP_EN['kpi:energy'].what)
+    const french = segments.find((node) => node.textContent === HELP_FR['kpi:energy'].what)
+
+    // Separate elements, not one string with a collapsed newline in it.
+    expect(english).toBeDefined()
+    expect(french).toBeDefined()
+    expect(english).not.toBe(french)
+    expect(french?.getAttribute('data-bilingual-segment')).toBe('fr')
+    expect(french?.getAttribute('lang')).toBe('fr')
+    expect(english?.getAttribute('lang')).toBe('en')
+  })
+
+  it('leaves the text unsplit when bilingual mode is off', () => {
+    renderWithProviders(<Harness />)
+    fireEvent.click(screen.getByTestId('kpi-value'))
+
+    const popup = screen.getByTestId('help-popup')
+    expect(popup.querySelector('[data-bilingual-segment]')).toBeNull()
+    expect(popup).toHaveTextContent(HELP_EN['kpi:energy'].what)
+    expect(popup).not.toHaveTextContent(HELP_FR['kpi:energy'].what)
+  })
+
   it('renders nothing at all when inactive', () => {
     const onExit = vi.fn()
     renderWithProviders(

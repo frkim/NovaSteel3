@@ -1,0 +1,93 @@
+.locale-listbox {
+    display: inline-flex;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.locale-listbox-trigger {
+    align-items: center;
+    background: var(--ns-color-surface-alt);
+    border: 1px solid transparent;
+    border-radius: var(--ns-radius-s);
+    color: var(--ns-color-text-primary);
+    cursor: pointer;
+    display: inline-flex;
+    font: inherit;
+    gap: 5px;
+    justify-content: space-between;
+    min-height: 32px;
+    padding: 0 8px;
+}
+
+.locale-listbox-compact .locale-listbox-trigger {
+    font-size: 0.8125rem;
+    height: 28px;
+    min-height: 28px;
+    padding: 0 6px;
+}
+
+.locale-listbox-trigger:hover,
+.locale-listbox-trigger[aria-expanded="true"] {
+    border-color: var(--ns-color-text-secondary);
+}
+
+.locale-listbox-value {
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.locale-listbox-chevron {
+    color: var(--ns-color-text-secondary);
+    font-size: 0.625rem;
+    line-height: 1;
+}
+
+.locale-listbox-backdrop {
+    inset: 0;
+    position: fixed;
+    z-index: 1102;
+}
+
+.locale-listbox-options {
+    background: var(--ns-color-surface);
+    border: 1px solid var(--ns-color-surface-alt);
+    border-radius: var(--ns-radius-m);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    color: var(--ns-color-text-primary);
+    left: 0;
+    max-height: 240px;
+    min-width: 100%;
+    overflow-y: auto;
+    padding: var(--ns-space-xs);
+    position: absolute;
+    top: calc(100% + 4px);
+    z-index: 1103;
+}
+
+.locale-listbox-option {
+    align-items: center;
+    background: transparent;
+    border-radius: var(--ns-radius-s);
+    cursor: pointer;
+    display: flex;
+    font-size: 0.875rem;
+    gap: 6px;
+    min-height: 30px;
+    padding: 6px 8px;
+    white-space: nowrap;
+}
+
+.locale-listbox-option:hover,
+.locale-listbox-option.active {
+    background: var(--ns-color-surface-alt);
+}
+
+.locale-listbox-option.selected {
+    font-weight: 700;
+}
+
+.locale-listbox-option.selected::after {
+    color: var(--ns-color-brand-primary);
+    content: "✓";
+    margin-left: auto;
+}

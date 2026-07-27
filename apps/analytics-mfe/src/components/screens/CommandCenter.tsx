@@ -113,6 +113,7 @@ export function CommandCenter() {
         deltaLabel: `${openCritical.length} critical`,
         trend: openCritical.length > 0 ? 'up' : 'flat',
         goodDirection: 'down',
+        status: openCritical.length > 0 ? 'critical' : 'ok',
         target: 'triage in Command Center',
         asOf: alertsState.asOf,
         source: alertsState.source,

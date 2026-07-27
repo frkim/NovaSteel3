@@ -26,10 +26,11 @@ export function QualityBatches() {
     return rows.map((row, index) => ({ x: index, y: Math.round((100 - row.riskScore * 20) * 10) / 10 }))
   }, [batchesState.data])
 
+  const openNcrCount = (batchesState.data ?? []).filter((row) => row.resultStatus !== 'PASS').length
   const metrics: KpiCardModel[] = [
     { id: 'yield', label: 'High-grade yield', value: '94.8', unit: '%', trend: 'up', goodDirection: 'up', deltaLabel: '+1.2 pts', target: 'target 95%', asOf: batchesState.asOf, source: batchesState.source, sparkline: yieldTrend.map((point) => point.y), tooltip: 'Rolling percentage of production classified as high-grade, derived by inverting the per-batch process risk score; target is 95% per the annual quality agreement.', onClick: () => revealPanel('quality-batches-table'), actionHint: 'the batch table' },
     { id: 'firstpass', label: 'First-pass yield', value: '97.1', unit: '%', trend: 'up', goodDirection: 'up', deltaLabel: '+0.6 pts', target: 'target 97%', tooltip: 'Percentage of batches that pass the quality inspection on the first attempt without rework, calculated from LIMS records over the rolling production cycle.', onClick: () => revealPanel('quality-batches-table'), actionHint: 'the batch table' },
-    { id: 'ncr', label: 'Open NCRs', value: String((batchesState.data ?? []).filter((row) => row.resultStatus !== 'PASS').length), trend: 'down', goodDirection: 'down', target: 'under review', tooltip: 'Count of open non-conformance records: batches with status REVIEW or FAIL that require corrective action before shipment release.', onClick: () => revealPanel('quality-batches-table'), actionHint: 'the batch table' },
+    { id: 'ncr', label: 'Open NCRs', value: String(openNcrCount), trend: 'down', goodDirection: 'down', status: openNcrCount > 0 ? 'warning' : 'ok', target: 'under review', tooltip: 'Count of open non-conformance records: batches with status REVIEW or FAIL that require corrective action before shipment release.', onClick: () => revealPanel('quality-batches-table'), actionHint: 'the batch table' },
     { id: 'defect', label: 'Defect rate', value: '182', unit: 'ppm', trend: 'down', goodDirection: 'down', deltaLabel: '−12%', target: 'target 170', tooltip: 'Rolling 30-day defect rate in parts per million across all inspected batches and grades; target is 170 ppm per the customer quality plan.', onClick: () => emit('nav.intent', { route: `/${site}/quality/spc` }), actionHint: 'the SPC control chart' },
   ]
 

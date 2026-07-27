@@ -2,16 +2,22 @@ import type { MouseEvent } from 'react'
 import { Box, Card, CardActionArea, CardContent, Stack, Tooltip, Typography } from '@mui/material'
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutlineOutlined'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import RemoveIcon from '@mui/icons-material/Remove'
+import WarningAmberIcon from '@mui/icons-material/WarningAmber'
 import type { DataSource } from '../../api/domain'
 import type { Driver } from '../../api/envelope'
+import { useAnalytics } from '../../context/analytics'
 import { useTokens } from '../../hooks/useTokens'
-import { kpiPastelPalette, stableStringHash } from '../../designTokens'
+import { kpiSemanticPalette, type KpiSemanticStatus } from '../../designTokens'
 import { Sparkline } from '../charts/Sparkline'
 import { FreshnessBadge } from './FreshnessBadge'
 import { WhyPopover } from './WhyPopover'
+
+export type KpiCardStatus = KpiSemanticStatus
 
 export interface KpiWhy {
   modelVersion: string
@@ -33,6 +39,8 @@ export interface KpiCardModel {
   asOf?: string | null
   source?: DataSource | null
   why?: KpiWhy
+  /** Semantic tile status: ok = healthy/on target, warning = at risk, critical = alert, neutral = N/A or informational. */
+  status?: KpiCardStatus
   /** Plain-language explanation of what the metric means and how it is derived. */
   tooltip?: string
   /** What clicking the tile opens, e.g. "the spot-price schedule". */
@@ -44,20 +52,44 @@ export interface KpiCardProps {
   metric: KpiCardModel
 }
 
-export function kpiBackgroundColor(id: string, palette: string[]): string {
-  return palette[stableStringHash(id) % palette.length]
+const KPI_STATUS_LABEL_KEYS: Record<KpiCardStatus, string> = {
+  ok: 'kpi.status.ok',
+  warning: 'kpi.status.warning',
+  critical: 'kpi.status.critical',
+  neutral: 'kpi.status.neutral',
+}
+
+const KPI_STATUS_ICONS = {
+  ok: CheckCircleOutlineIcon,
+  warning: WarningAmberIcon,
+  critical: ErrorOutlineIcon,
+  neutral: InfoOutlinedIcon,
+} as const
+
+export function deriveKpiStatus(metric: Pick<KpiCardModel, 'status' | 'trend' | 'goodDirection'>): KpiCardStatus {
+  if (metric.status) {
+    return metric.status
+  }
+  if (!metric.trend || metric.trend === 'flat' || !metric.goodDirection) {
+    return 'neutral'
+  }
+  return metric.trend === metric.goodDirection ? 'ok' : 'warning'
 }
 
 export function KpiCard({ metric }: KpiCardProps) {
+  const { t } = useAnalytics()
   const tokens = useTokens()
-  const pastelPalette = kpiPastelPalette(tokens.mode)
-  const bgColor = kpiBackgroundColor(metric.id, pastelPalette)
+  const status = deriveKpiStatus(metric)
+  const statusColors = kpiSemanticPalette(tokens.mode)[status]
+  const StatusIcon = KPI_STATUS_ICONS[status]
+  const statusLabel = t(KPI_STATUS_LABEL_KEYS[status])
+  const statusAria = t('kpi.status.aria', { status: statusLabel })
 
   const trendColor =
     metric.trend && metric.trend !== 'flat' && metric.goodDirection
       ? metric.trend === metric.goodDirection
         ? tokens.status.success
-        : tokens.status.critical
+        : tokens.status.warning
       : 'text.secondary'
   const TrendIcon =
     metric.trend === 'up' ? ArrowUpwardIcon : metric.trend === 'down' ? ArrowDownwardIcon : RemoveIcon
@@ -84,7 +116,7 @@ export function KpiCard({ metric }: KpiCardProps) {
         {metric.onClick && (
           <ChevronRightIcon
             aria-hidden
-            sx={{ color: 'primary.main', fontSize: '1.1rem', ml: 'auto', opacity: 0.85 }}
+            sx={{ color: statusColors.accent, fontSize: '1.1rem', ml: 'auto', opacity: 0.85 }}
           />
         )}
       </Stack>
@@ -155,19 +187,27 @@ export function KpiCard({ metric }: KpiCardProps) {
   return (
     <Card
       component="article"
-      aria-label={metric.label}
+      aria-label={`${metric.label}; ${statusAria}`}
       data-help={`kpi:${metric.id}`}
       data-help-detail={metric.tooltip}
       sx={{
         height: '100%',
-        backgroundColor: bgColor,
-        borderLeft: `3px solid ${tokens.mode === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)'}`,
+        backgroundColor: statusColors.background,
+        borderLeft: `4px solid ${statusColors.accent}`,
       }}
     >
       <CardContent sx={{ height: '100%' }}>
+        <span className="ns-visually-hidden">{statusAria}</span>
         <Stack sx={{ height: '100%' }} spacing={0.5}>
           <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-            {label}
+            <Stack component="span" direction="row" spacing={0.5} sx={{ alignItems: 'center', minWidth: 0 }}>
+              <Tooltip title={statusLabel} placement="top" enterDelay={200}>
+                <Box component="span" aria-hidden sx={{ display: 'inline-flex', flexShrink: 0 }}>
+                  <StatusIcon sx={{ color: statusColors.accent, fontSize: '1rem' }} />
+                </Box>
+              </Tooltip>
+              {label}
+            </Stack>
             {metric.why && (
               <WhyPopover
                 modelVersion={metric.why.modelVersion}
