@@ -122,7 +122,7 @@ function chevron(slide, x, y, w, h, color) {
   });
 }
 
-function badge(slide, x, y, label, kind = "context") {
+function badge(slide, x, y, label, kind = "context", minWidth = 0) {
   const styles = {
     target: { fill: C.amber, text: C.carbon, line: C.amber },
     evidence: { fill: C.teal, text: C.white, line: C.teal },
@@ -131,7 +131,7 @@ function badge(slide, x, y, label, kind = "context") {
     backup: { fill: C.oxide, text: C.white, line: C.oxide },
   };
   const style = styles[kind];
-  const width = Math.max(0.9, label.length * 0.066 + 0.32);
+  const width = Math.max(0.9, minWidth, label.length * 0.066 + 0.32);
   roundRect(slide, x, y, width, 0.27, style.fill, style.line, { lineWidth: 0.4 });
   tx(slide, label.toUpperCase(), x + 0.13, y + 0.055, width - 0.26, 0.13, {
     fontSize: 7.2, color: style.text, bold: true, charSpacing: 1.1,
@@ -182,7 +182,7 @@ function addFooter(slide, index, dark = false) {
   tx(slide, "PHASE 0  |  SYNTHETIC DEMONSTRATION  |  NOT FOR OPERATIONAL CONTROL", 0.56, 7.205, 3.6, 0.08, {
     fontSize: 6.25, color: footerText, bold: true, charSpacing: 0.65,
   });
-  tx(slide, index <= 20 ? `ORAL DEFENSE  •  ${String(index).padStart(2, "0")} / 20` : `FAQ & VALIDATION BACKUP  •  ${String(index - 20).padStart(2, "0")} / 06`, 9.55, 7.205, 3.3, 0.08, {
+  tx(slide, index <= 20 ? `ORAL DEFENSE  •  ${String(index).padStart(2, "0")} / 20` : `FAQ & VALIDATION BACKUP  •  ${String(index - 20).padStart(2, "0")} / 07`, 9.55, 7.205, 3.3, 0.08, {
     fontSize: 6.5, color: footerText, bold: true, align: "right", charSpacing: 0.5,
   });
 }
@@ -1142,6 +1142,96 @@ function addThermalLegend(slide, x, y) {
     "The honest limitations are visible: all data is synthetic, pilot RUL scoring is daily, the Custom Endpoint Contributor scope is mitigated by isolation rather than solved, and Sweden Central has no automatic BCDR promise.\nProduction needs tenant feature proof, Custom Endpoint and query-adapter identity validation, DPO and legal decisions, OT approval, market-data licensing, capacity and DR testing, and all security acceptance gates.",
     "FAQ M | faq.md Q54–Q57  •  validation-report.md §Remaining production gates",
     true,
+  );
+}
+
+// 27 — backup: the advisory boundary
+{
+  const slide = newSlide(27, "FAQ backup", "Why we do not write to the furnace", "", { backup: true });
+  badge(slide, 0.5, 1.3, "Scope defense", "guardrail", 1.45);
+  tx(slide, "The advisory boundary is a designed acceptance criterion (O1, C-04, AI-05) — not a missing feature.", 2.08, 1.335, 7.4, 0.18, {
+    fontSize: 8.4, color: C.muted, bold: true,
+  });
+
+  label(slide, 0.5, 1.78, "ISA-95 / Purdue placement", C.muted, 3.4);
+
+  card(slide, 0.5, 1.99, 6.15, 0.86, { fill: C.white, border: C.teal, bar: C.teal });
+  tx(slide, "L4 / L3 — BUSINESS, MES, HISTORIAN", 0.72, 2.14, 4.3, 0.12, {
+    fontSize: 7.4, color: C.teal, bold: true, charSpacing: 0.9,
+  });
+  roundRect(slide, 5.42, 2.09, 1.02, 0.24, C.paleTeal, C.teal, { lineWidth: 0.5 });
+  tx(slide, "WE LIVE HERE", 5.47, 2.175, 0.92, 0.09, { fontSize: 6.2, color: C.teal, bold: true, align: "center" });
+  tx(slide, "NovaSteel: Fabric core, four AI capabilities, persona apps, human approval", 0.72, 2.46, 5.55, 0.28, {
+    fontSize: 9.4, color: C.ink, bold: true, valign: "top",
+  });
+
+  roundRect(slide, 0.5, 2.98, 6.15, 0.72, C.coal, C.rust, { lineWidth: 1.3 });
+  tx(slide, "OT / IT BOUNDARY  —  IEC 62443 ZONE CONDUIT", 0.72, 3.10, 5.7, 0.1, {
+    fontSize: 7, color: C.amber, bold: true, charSpacing: 1.1,
+  });
+  slide.addShape(S.upArrow, { x: 0.74, y: 3.32, w: 0.19, h: 0.28, fill: { color: C.teal }, line: { color: C.teal, width: 0.5 } });
+  tx(slide, "TELEMETRY UP  ·  read-only historian / OPC UA tags", 1.03, 3.395, 2.5, 0.1, {
+    fontSize: 7.2, color: C.mist, bold: true,
+  });
+  slide.addShape(S.downArrow, { x: 3.66, y: 3.32, w: 0.19, h: 0.28, fill: { color: C.rust }, line: { color: C.rust, width: 0.5 } });
+  tx(slide, "NO COMMAND DOWN  ·  no setpoint, no PLC write", 3.95, 3.395, 2.5, 0.1, {
+    fontSize: 7.2, color: C.paleRust, bold: true,
+  });
+
+  card(slide, 0.5, 3.80, 6.15, 1.88, { fill: C.paleSteel, border: C.steel, bar: C.graphite });
+  const otLevels = [
+    ["L2", "Supervisory control — SCADA / HMI", "operator authority stays on the floor"],
+    ["L1", "Regulatory control — PLC / DCS setpoints", "vendor-certified control logic"],
+    ["L0", "Sensors, actuators, SIS interlocks", "IEC 61511 safety-instrumented functions"],
+  ];
+  otLevels.forEach((lvl, i) => {
+    const y = 3.92 + i * 0.56;
+    roundRect(slide, 0.72, y, 5.71, 0.5, C.white, C.mist, { lineWidth: 0.5 });
+    roundRect(slide, 0.85, y + 0.13, 0.42, 0.24, C.graphite, C.graphite, { lineWidth: 0.4 });
+    tx(slide, lvl[0], 0.9, y + 0.215, 0.32, 0.09, { fontSize: 7, color: C.white, bold: true, align: "center" });
+    tx(slide, lvl[1], 1.4, y + 0.115, 3.65, 0.12, { fontSize: 8.7, color: C.ink, bold: true });
+    tx(slide, lvl[2], 1.4, y + 0.31, 3.65, 0.1, { fontSize: 6.8, color: C.muted });
+    roundRect(slide, 5.22, y + 0.14, 1.06, 0.22, C.paleRust, C.rust, { lineWidth: 0.5 });
+    tx(slide, "NO WRITE", 5.27, y + 0.222, 0.96, 0.08, { fontSize: 6.3, color: C.oxide, bold: true, align: "center" });
+  });
+
+  label(slide, 7.05, 1.78, "Not read-only — the platform writes decisions", C.muted, 5.4);
+  const writes = [
+    ["Energy dispatch decision", "POST /v1/energy/recommendations/{id}:approve", C.teal],
+    ["Maintenance work order", "POST /v1/workorders  —  from a lining-wear alert", C.amber],
+    ["Procedure publication", "POST /v1/knowledge/procedures/{id}:approve", C.green],
+    ["Immutable decision record", "GET /v1/audit/decisions  —  hash-chained trail", C.rust],
+  ];
+  writes.forEach((wr, i) => {
+    const y = 1.99 + i * 0.79;
+    card(slide, 7.05, y, 5.78, 0.68, { fill: C.white, border: C.mist, bar: wr[2] });
+    circle(slide, 7.28, y + 0.21, 0.26, wr[2], wr[2]);
+    tx(slide, "✓", 7.28, y + 0.305, 0.26, 0.08, { fontSize: 7.4, color: C.white, bold: true, align: "center" });
+    tx(slide, wr[0], 7.68, y + 0.13, 4.9, 0.13, { fontSize: 9.2, color: C.ink, bold: true });
+    tx(slide, wr[1], 7.68, y + 0.4, 4.9, 0.11, { fontSize: 7.1, color: C.muted, fontFace: F.mono });
+  });
+
+  card(slide, 7.05, 5.16, 5.78, 0.62, { fill: C.paleAmber, border: C.amber, bar: C.amber });
+  tx(slide, "PHASE 2 — guarded write-back to CMMS / MES only: human-approved, threshold-bounded, reversible. Never a direct control action.", 7.32, 5.28, 5.32, 0.38, {
+    fontSize: 7.8, color: C.ink, bold: true, valign: "top",
+  });
+
+  const reasons = [
+    ["IEC 61511 / SIS", "Safety-instrumented functions are not arbitrated by a cloud model.", C.rust],
+    ["IEC 62443 zones", "The conduit is outbound-only; no inbound session reaches the cell.", C.amber],
+    ["EU AI Act", "Actuation would assume high-risk duties we cannot yet evidence.", C.teal],
+    ["Reversibility", "Rejected advice costs a click; a wrong setpoint can cost €8M.", C.graphite],
+  ];
+  reasons.forEach((r, i) => {
+    const x = 0.5 + i * 3.1225;
+    card(slide, x, 5.92, 2.9625, 0.74, { fill: C.white, border: C.mist, bar: r[2] });
+    tx(slide, r[0].toUpperCase(), x + 0.2, 6.045, 2.6, 0.11, { fontSize: 8, color: r[2], bold: true, charSpacing: 0.7 });
+    tx(slide, r[1], x + 0.2, 6.27, 2.56, 0.28, { fontSize: 7, color: C.muted, valign: "top" });
+  });
+
+  finish(slide, 27,
+    "This is the question I want. Not writing to the furnace is a decision, not a gap. Setpoints, interlocks, and control logic live at Purdue levels zero to two, under IEC 61511 safety-instrumented functions and vendor certification, and our conduit across that boundary is outbound-only by design.\nBut the platform is not a read-only dashboard. It writes decisions: an approved energy dispatch, a maintenance work order, a published procedure, and an append-only record of who decided what against which model version. That is a decision system of record.\nActuation is a Phase 2 conversation and it starts with guarded write-back to CMMS and MES under human approval and thresholds, never a direct control action. Advice that is wrong costs a rejection; a setpoint that is wrong can cost an eight-million-euro event.",
+    "Source cue | FAQ H — faq.md Q39b  •  solution-requirements.md O1, C-04, AI-05, §18 phasing  •  solution-architecture.md §1.1, ADR-007/008",
   );
 }
 

@@ -163,6 +163,9 @@ Furnace thermal (hearth shell temperature, cooling-water in/out and flow, local 
 **Q39. How would this connect to real OT without compromising plant safety?**
 Via a per-plant gateway at Purdue Level 3.5 in an industrial DMZ that terminates OPC-UA/MQTT/historian-export and emits only allow-listed, schema-validated telemetry outbound over TLS to an Event Hubs buffer, with disk-backed store-and-forward preserving event time. No cloud-originated session ever reaches the OT network. The OT/ICS owner signs off the DMZ design before any real site onboards.
 
+**Q39b. Isn't a platform that never writes a setpoint just a dashboard? Why not close the loop on the furnace?** *(backup slide 7 — "Why we do not write to the furnace")*
+Two answers, and the second is the one that matters. **First, not writing is designed, not missing.** Setpoints, interlocks and control logic live at Purdue L0–L2 under IEC 61511 safety-instrumented functions and vendor-certified logic; our conduit across the IEC 62443 zone boundary is outbound-only by construction. Actuation would also assume EU AI Act high-risk duties that Phase 0 cannot evidence. It is recorded as an acceptance boundary — O1, C-04, AI-05 — not an unfinished feature. **Second, the platform is not read-only.** It writes decisions: `POST /v1/energy/recommendations/{id}:approve` (role-gated), `POST /v1/workorders` from a lining-wear alert, `POST /v1/knowledge/procedures/{id}:approve`, and an append-only hash-chained trail at `/v1/audit/decisions` linking input features, model version, confidence, human decision and reason code. That is a decision system of record, not a viewer. Closing the loop starts in Phase 2 as *guarded write-back to CMMS/MES* — human-approved, threshold-bounded and reversible — never a direct control action. Rejected advice costs a click; a wrong setpoint can cost an €8M event.
+
 ---
 
 ## I. Synthetic data & reproducibility

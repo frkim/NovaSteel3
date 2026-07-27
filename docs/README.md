@@ -137,7 +137,7 @@ See [the rehearsal report](../artifacts/demo-validation/rehearsal-report.md),
 | 30:00–45:00 | Six-moment deterministic persona demo | [Runbook](demo/demo-runbook.md) and `..\artifacts\demo-validation\drive_demo.py` |
 | 45:00–60:00 | Moderated FAQ / validation-gate discussion | [FAQ](presentation/faq.md), [proof of execution](presentation/proof_of_execution.md) and [technical analysis](tech/technical-analysis.md) |
 
-The PowerPoint has 26 slides: 20 primary narrative/demo-handoff slides and six
+The PowerPoint has 27 slides: 20 primary narrative/demo-handoff slides and seven
 FAQ backup slides. The package validator found no placeholders and confirms
 alignment to the demo transitions.
 

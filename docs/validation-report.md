@@ -20,7 +20,7 @@
 | UI and portal | **PASS** | Frontend lint, component tests, build, protected Blazor restore/build, served-asset probes, and portal-origin CORS preflight pass. |
 | IaC and Fabric assets | **PASS (local/static)** | Bicep/policy tests and static validation pass; Fabric asset validator parses definitions, contracts, KQL, notebooks, pipelines, semantic metadata, and lifecycle deny rules. |
 | Offline fallback | **PASS** | 12/12 checks prove fixture, cached, and built-in fallback levels plus no non-loopback network activity. |
-| Presentation | **PASS** | `NovaSteel-Oral-Defense.pptx` contains 26 slides with no placeholders and matches the six demo transitions. |
+| Presentation | **PASS** | `NovaSteel-Oral-Defense.pptx` contains 27 slides with no placeholders and matches the six demo transitions. |
 | Security/SBOM | **PASS** | Repository security checks, Python dependency integrity, protected-feed scan, and CycloneDX SBOM generation pass. |
 
 The current machine-readable result and per-suite logs are under
@@ -47,7 +47,7 @@ under [`artifacts\demo-validation`](../artifacts/demo-validation/):
 | Knowledge | Consent, transcript confidence/speaker data, draft-only agent output, human approval, approved-search result |
 | Determinism | Two independent generations and BFF re-runs matched; fixture checksum/tamper protection passed |
 | Fallback | 12/12 checks; local/cached/built-in data levels work with non-loopback sockets blocked |
-| Defense deck | 26 slides, 714 text runs, zero placeholder/TODO findings |
+| Defense deck | 27 slides, 763 text runs, zero placeholder/TODO findings |
 
 These are **synthetic demonstration results**, not realized production savings,
 model accuracy, OT integration, or cloud-service evidence. The 14% energy, 22%

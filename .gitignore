@@ -39,3 +39,8 @@ tests/simulator/.tmp/*
 /docs/images/*.png
 /docs/images/*.jpg
 /docs/images/*.jpeg
+
+# Office lock files
+~$*.pptx
+~$*.docx
+~$*.xlsx

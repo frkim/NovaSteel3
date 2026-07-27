@@ -1459,15 +1459,15 @@ Clear, concise, and thorough presentation with audience adaptation.
 
 #### How NovaSteel satisfies it
 
-**Structured presentation.** A 26-slide deck follows a deliberate narrative arc:
+**Structured presentation.** A 27-slide deck follows a deliberate narrative arc:
 business pain → measurable ambition → governed platform → Fabric centrality →
 data trust → AI specifics → safety/legal/honesty → live demo → defend. Every
 slide has a single idea, timing target (29:45 total speech + 15s buffer to
 30:00), and fallback instruction. Evidence vs. target labelling is colour-coded
 throughout (amber chip for TARGET, blue chip for EVIDENCE).
 
-The slide plan includes six FAQ backup slides for panel questions, bringing the
-total to 26 slides. Design principles are explicit: "one idea per slide",
+The slide plan includes seven FAQ backup slides for panel questions, bringing the
+total to 27 slides. Design principles are explicit: "one idea per slide",
 "Fabric is the spine, not a logo", "targets vs. evidence are color-coded",
 "every AI output shows uncertainty and human approver", "the demo is the payoff,
 not a tangent".
