@@ -1,5 +1,5 @@
 import type { ShellContext } from '../types'
-import { DEMO_PLANT, demoHeaders, fixturesOnly, resolveBffBaseUrl } from '../config'
+import { DEMO_PLANT, demoHeaders, fixturesOnly, resolveBffBaseUrl, siteToPlant } from '../config'
 import type {
   AlertEvent,
   AlertRow,
@@ -103,13 +103,20 @@ export function energySimulationBody(constraints: Record<string, number>) {
 export class DataClient {
   private readonly http: HttpClient | null
   private readonly fixturesOnly: boolean
+  private readonly context: ShellContext
 
   constructor(context: ShellContext) {
+    this.context = context
     const baseUrl = resolveBffBaseUrl(context)
     this.fixturesOnly = fixturesOnly()
     this.http = this.fixturesOnly
       ? null
       : new HttpClient({ baseUrl, headers: demoHeaders(context) })
+  }
+
+  /** Resolved BFF plant id for the currently selected site. */
+  private get activePlant(): string {
+    return siteToPlant(this.context.site)
   }
 
   /** True when the client is configured to never contact a live BFF. */
@@ -145,16 +152,16 @@ export class DataClient {
     return this.single<Identity | null>('/v1/me', () => null)
   }
 
-  getCommandSummary(site = 'all'): Promise<Loaded<CommandSummary>> {
+  getCommandSummary(site?: string): Promise<Loaded<CommandSummary>> {
     return this.single<CommandSummary>(
-      `/v1/command-center/summary${buildTableQuery({ site })}`,
+      `/v1/command-center/summary${buildTableQuery({ site: site ?? this.activePlant })}`,
       fixtures.commandSummary,
     )
   }
 
   getFurnaces(): Promise<Loaded<FurnaceRow[]>> {
     return this.table<FurnaceRow>(
-      `/v1/furnaces${buildTableQuery({ site: 'all', size: FULL_PAGE })}`,
+      `/v1/furnaces${buildTableQuery({ site: this.activePlant, size: FULL_PAGE })}`,
       fixtures.furnaces,
     )
   }
@@ -168,14 +175,14 @@ export class DataClient {
 
   getTelemetry(): Promise<Loaded<TelemetryRow[]>> {
     return this.table<TelemetryRow>(
-      `/v1/telemetry${buildTableQuery({ site: 'all', size: FULL_PAGE })}`,
+      `/v1/telemetry${buildTableQuery({ site: this.activePlant, size: FULL_PAGE })}`,
       fixtures.telemetry,
     )
   }
 
   getEnergyIntervals(): Promise<Loaded<EnergyIntervalRow[]>> {
     return this.table<EnergyIntervalRow>(
-      `/v1/energy/intervals${buildTableQuery({ site: 'all', size: FULL_PAGE, sort: ['intervalStart:asc'] })}`,
+      `/v1/energy/intervals${buildTableQuery({ site: this.activePlant, size: FULL_PAGE, sort: ['intervalStart:asc'] })}`,
       fixtures.energyIntervals,
     )
   }
@@ -197,7 +204,7 @@ export class DataClient {
 
   getQualityBatches(): Promise<Loaded<QualityBatchRow[]>> {
     return this.table<QualityBatchRow>(
-      `/v1/quality/batches${buildTableQuery({ site: 'all', size: FULL_PAGE })}`,
+      `/v1/quality/batches${buildTableQuery({ site: this.activePlant, size: FULL_PAGE })}`,
       fixtures.qualityBatches,
     )
   }
@@ -229,14 +236,14 @@ export class DataClient {
 
   getEmissions(): Promise<Loaded<EmissionRow[]>> {
     return this.table<EmissionRow>(
-      `/v1/sustainability/emissions${buildTableQuery({ site: 'all', size: FULL_PAGE, sort: ['eventTs:asc'] })}`,
+      `/v1/sustainability/emissions${buildTableQuery({ site: this.activePlant, size: FULL_PAGE, sort: ['eventTs:asc'] })}`,
       fixtures.emissions,
     )
   }
 
   getSustainabilitySummary(): Promise<Loaded<SustainabilitySummary>> {
     return this.single<SustainabilitySummary>(
-      `/v1/sustainability/summary${buildTableQuery({ site: 'all' })}`,
+      `/v1/sustainability/summary${buildTableQuery({ site: this.activePlant })}`,
       fixtures.sustainabilitySummary,
     )
   }

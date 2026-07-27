@@ -656,6 +656,112 @@ def register_routes(app: FastAPI) -> None:
         )
         return JSONResponse(response)
 
+    @app.post("/v1/knowledge/procedures/{procedure_id}:submit", tags=["Knowledge"])
+    async def submit_knowledge_procedure(
+        procedure_id: str,
+        request: Request,
+        user: UserContext = Depends(current_user),
+    ) -> JSONResponse:
+        require_any_role(user, "Knowledge.Publisher")
+        result = request.app.state.services.knowledge.submit_for_review(
+            procedure_id=procedure_id,
+            actor=user.user_id,
+            correlation_id=_correlation_id(request),
+        )
+        record = request.app.state.services.audit.append(
+            domain="knowledge",
+            entity_id=procedure_id,
+            correlation_id=_correlation_id(request),
+            action="knowledge.procedure.submit",
+            actor=user.user_id,
+            input_snapshot_ref=f"procedure:{procedure_id}",
+            output={"status": result["status"], "version": result["version"]},
+        )
+        result["auditRef"] = record.audit_id
+        return JSONResponse(_envelope(request, result))
+
+    @app.post("/v1/knowledge/procedures/{procedure_id}:reject", tags=["Knowledge"])
+    async def reject_knowledge_procedure(
+        procedure_id: str,
+        request: Request,
+        body: dict[str, Any] = Body(...),
+        user: UserContext = Depends(current_user),
+    ) -> JSONResponse:
+        require_any_role(user, "Knowledge.Publisher")
+        _require_keys(body, {"reason"}, {"reason"})
+        reason = _required_string(body, "reason")
+        result = request.app.state.services.knowledge.reject(
+            procedure_id=procedure_id,
+            actor=user.user_id,
+            roles=set(user.roles),
+            reason=reason,
+            correlation_id=_correlation_id(request),
+        )
+        record = request.app.state.services.audit.append(
+            domain="knowledge",
+            entity_id=procedure_id,
+            correlation_id=_correlation_id(request),
+            action="knowledge.procedure.reject",
+            actor=user.user_id,
+            input_snapshot_ref=f"procedure:{procedure_id}",
+            output={"status": result["status"]},
+            human_action={"decision": "REJECTED", "reason": reason},
+        )
+        result["auditRef"] = record.audit_id
+        return JSONResponse(_envelope(request, result))
+
+    @app.get("/v1/knowledge/procedures/{procedure_id}", tags=["Knowledge"])
+    async def get_knowledge_procedure(
+        procedure_id: str,
+        request: Request,
+        user: UserContext = Depends(current_user),
+    ) -> dict[str, Any]:
+        require_reader(user)
+        result = request.app.state.services.knowledge.get_procedure(procedure_id)
+        return _envelope(request, result)
+
+    @app.post("/v1/knowledge/demo/seed", tags=["Knowledge"])
+    async def seed_knowledge_demo(
+        request: Request,
+        user: UserContext = Depends(current_user),
+    ) -> JSONResponse:
+        require_any_role(user, "Knowledge.Publisher")
+        result = request.app.state.services.knowledge.seed_demo_batch()
+        record = request.app.state.services.audit.append(
+            domain="knowledge",
+            entity_id="demo-seed",
+            correlation_id=_correlation_id(request),
+            action="knowledge.demo.seed",
+            actor=user.user_id,
+            input_snapshot_ref="demo:seed-batch",
+            output={"seeded": result["seeded"]},
+        )
+        result["auditRef"] = record.audit_id
+        return JSONResponse(_envelope(request, result), status_code=201)
+
+    @app.post("/v1/knowledge/demo/reset", tags=["Knowledge"])
+    async def reset_knowledge_demo(
+        request: Request,
+        user: UserContext = Depends(current_user),
+    ) -> JSONResponse:
+        require_any_role(user, "Knowledge.Publisher")
+        result = request.app.state.services.knowledge.reset_demo()
+        return JSONResponse(_envelope(request, result))
+
+    @app.get("/v1/knowledge/audit", tags=["Knowledge"])
+    async def knowledge_audit_log(
+        request: Request,
+        user: UserContext = Depends(current_user),
+    ) -> dict[str, Any]:
+        require_any_role(user, "Knowledge.Publisher")
+        records = request.app.state.services.knowledge.audit_records()
+        return {
+            "items": records,
+            "total": len(records),
+            "asOf": _as_of(),
+            "correlationId": _correlation_id(request),
+        }
+
     @app.get("/v1/knowledge/search", tags=["Knowledge"])
     async def search_knowledge(
         request: Request,

@@ -1,5 +1,11 @@
+import { useState } from 'react'
 import {
   Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
   IconButton,
   List,
   ListItemButton,
@@ -9,6 +15,7 @@ import {
   Typography,
 } from '@mui/material'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
+import DeleteSweepIcon from '@mui/icons-material/DeleteSweep'
 import HistoryIcon from '@mui/icons-material/History'
 import type { CopilotConversationSummary } from '../../api/copilotClient'
 import type { TranslateFn } from '../../i18n/messages'
@@ -18,6 +25,7 @@ interface ConversationListProps {
   activeId: string | null
   onOpen: (conversationId: string) => void
   onDelete: (conversationId: string) => void
+  onDeleteAll?: () => void
   t: TranslateFn
 }
 
@@ -26,13 +34,29 @@ export function ConversationList({
   activeId,
   onOpen,
   onDelete,
+  onDeleteAll,
   t,
 }: ConversationListProps) {
+  const [confirmOpen, setConfirmOpen] = useState(false)
+
   return (
     <Box data-testid="copilot-conversations">
       <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 0.5 }}>
         <HistoryIcon fontSize="small" color="action" />
         <Typography variant="subtitle2">{t('copilot.conversations')}</Typography>
+        <Box sx={{ flexGrow: 1 }} />
+        {onDeleteAll && conversations.length > 0 && (
+          <Tooltip title={t('copilot.conversations.deleteAll')}>
+            <IconButton
+              size="small"
+              aria-label={t('copilot.conversations.deleteAll')}
+              data-testid="copilot-delete-all"
+              onClick={() => setConfirmOpen(true)}
+            >
+              <DeleteSweepIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
       </Stack>
       {conversations.length === 0 ? (
         <Typography variant="caption" color="text.secondary">
@@ -79,6 +103,33 @@ export function ConversationList({
           ))}
         </List>
       )}
+      <Dialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        aria-labelledby="delete-all-title"
+      >
+        <DialogContent>
+          <DialogContentText id="delete-all-title">
+            {t('copilot.conversations.deleteAll.confirm')}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmOpen(false)} size="small">
+            {t('copilot.conversations.deleteAll.no')}
+          </Button>
+          <Button
+            onClick={() => {
+              setConfirmOpen(false)
+              onDeleteAll?.()
+            }}
+            color="error"
+            size="small"
+            data-testid="copilot-delete-all-confirm"
+          >
+            {t('copilot.conversations.deleteAll.yes')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }

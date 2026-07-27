@@ -30,6 +30,8 @@
     "warning": "#B26A00",
     "success": "#0F7B0F",
     "stale": "#8A6D3B",
+    "demo": "#6E56CF",
+    "demoSurface": "#F1EDFB",
     "focusRing": "#0B5FFF"
   },
   "dark": {
@@ -44,6 +46,8 @@
     "warning": "#FFB84D",
     "success": "#5BD75B",
     "stale": "#D6B77A",
+    "demo": "#9B8AE8",
+    "demoSurface": "#241F33",
     "focusRing": "#8FB6FF"
   },
   "chart": {

@@ -1,0 +1,73 @@
+import type { Catalog } from './messages'
+
+/**
+ * Chrome strings for the Help Assistant. The explanations themselves live in
+ * `helpMessages*.ts`, keyed by topic, because they are long-form prose.
+ */
+export const HELP_UI_CATALOGS: Record<string, Catalog> = {
+  en: {
+    'help.toggle': "What's this?",
+    'help.toggle.hint': 'Turn on explain mode, then click anything on screen to learn what it is.',
+    'help.mode.banner': 'Explain mode - click any element',
+    'help.mode.exit': 'Leave explain mode',
+    'help.popup.label': 'Explanation',
+    'help.popup.close': 'Close explanation',
+    'help.popup.hint': 'Click another element, or press Esc to leave explain mode.',
+    'help.section.steel': 'Why it matters in a steel plant',
+    'help.section.useIt': 'How to use it here',
+    'help.fallback.title': 'This element',
+    'help.fallback.what': 'No explanation has been written for this element yet.',
+  },
+  fr: {
+    'help.toggle': "Qu'est-ce que c'est ?",
+    'help.toggle.hint': "Activez le mode explication, puis cliquez sur un élément pour savoir ce qu'il est.",
+    'help.mode.banner': 'Mode explication - cliquez sur un élément',
+    'help.mode.exit': 'Quitter le mode explication',
+    'help.popup.label': 'Explication',
+    'help.popup.close': "Fermer l'explication",
+    'help.popup.hint': 'Cliquez sur un autre élément ou appuyez sur Échap pour quitter.',
+    'help.section.steel': 'Pourquoi cela compte dans une aciérie',
+    'help.section.useIt': 'Comment l\u2019utiliser ici',
+    'help.fallback.title': 'Cet élément',
+    'help.fallback.what': "Aucune explication n'a encore été rédigée pour cet élément.",
+  },
+  de: {
+    'help.toggle': 'Was ist das?',
+    'help.toggle.hint': 'Erklärmodus einschalten und dann auf ein beliebiges Element klicken.',
+    'help.mode.banner': 'Erklärmodus - auf ein Element klicken',
+    'help.mode.exit': 'Erklärmodus verlassen',
+    'help.popup.label': 'Erklärung',
+    'help.popup.close': 'Erklärung schließen',
+    'help.popup.hint': 'Klicken Sie auf ein anderes Element oder drücken Sie Esc zum Beenden.',
+    'help.section.steel': 'Warum das im Stahlwerk zählt',
+    'help.section.useIt': 'So nutzen Sie es hier',
+    'help.fallback.title': 'Dieses Element',
+    'help.fallback.what': 'Für dieses Element wurde noch keine Erklärung geschrieben.',
+  },
+  nl: {
+    'help.toggle': 'Wat is dit?',
+    'help.toggle.hint': 'Zet de uitlegmodus aan en klik daarna op een element om te zien wat het is.',
+    'help.mode.banner': 'Uitlegmodus - klik op een element',
+    'help.mode.exit': 'Uitlegmodus verlaten',
+    'help.popup.label': 'Uitleg',
+    'help.popup.close': 'Uitleg sluiten',
+    'help.popup.hint': 'Klik op een ander element of druk op Esc om te stoppen.',
+    'help.section.steel': 'Waarom dit telt in een staalfabriek',
+    'help.section.useIt': 'Zo gebruikt u het hier',
+    'help.fallback.title': 'Dit element',
+    'help.fallback.what': 'Voor dit element is nog geen uitleg geschreven.',
+  },
+  es: {
+    'help.toggle': '¿Qué es esto?',
+    'help.toggle.hint': 'Active el modo explicación y haga clic en cualquier elemento para saber qué es.',
+    'help.mode.banner': 'Modo explicación - haga clic en un elemento',
+    'help.mode.exit': 'Salir del modo explicación',
+    'help.popup.label': 'Explicación',
+    'help.popup.close': 'Cerrar la explicación',
+    'help.popup.hint': 'Haga clic en otro elemento o pulse Esc para salir.',
+    'help.section.steel': 'Por qué importa en una acería',
+    'help.section.useIt': 'Cómo usarlo aquí',
+    'help.fallback.title': 'Este elemento',
+    'help.fallback.what': 'Todavía no se ha redactado una explicación para este elemento.',
+  },
+}

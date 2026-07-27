@@ -47,6 +47,16 @@ export function statusPalette(mode: ResolvedMode): StatusPalette {
   }
 }
 
+export interface DemoPalette {
+  accent: string
+  surface: string
+}
+
+export function demoPalette(mode: ResolvedMode): DemoPalette {
+  const colors = colorTokens(mode)
+  return { accent: colors.demo, surface: colors.demoSurface }
+}
+
 export function prefersReducedMotion(): boolean {
   if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
     return false

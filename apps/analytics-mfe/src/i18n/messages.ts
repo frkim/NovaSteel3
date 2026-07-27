@@ -1,10 +1,12 @@
+import { CHART_CATALOGS } from './chartMessages'
 import { COPILOT_CATALOGS } from './copilotMessages'
 import { DEVICE_CATALOGS } from './deviceMessages'
+import { HELP_UI_CATALOGS } from './helpUiMessages'
 import { WEBSITE_CATALOGS } from './websiteMessages'
 
 export type TranslateFn = (key: string, params?: Record<string, string | number>) => string
 
-type Catalog = Record<string, string>
+export type Catalog = Record<string, string>
 
 /**
  * Minimal shared message catalog. Keys mirror the Blazor shell catalog so both
@@ -273,11 +275,11 @@ const ES: Catalog = {
 }
 
 const CATALOGS: Record<string, Catalog> = {
-  en: { ...EN, ...COPILOT_CATALOGS.en, ...DEVICE_CATALOGS.en, ...WEBSITE_CATALOGS.en },
-  fr: { ...FR, ...COPILOT_CATALOGS.fr, ...DEVICE_CATALOGS.fr, ...WEBSITE_CATALOGS.fr },
-  de: { ...DE, ...COPILOT_CATALOGS.de, ...DEVICE_CATALOGS.de, ...WEBSITE_CATALOGS.de },
-  nl: { ...NL, ...COPILOT_CATALOGS.nl, ...DEVICE_CATALOGS.nl, ...WEBSITE_CATALOGS.nl },
-  es: { ...ES, ...COPILOT_CATALOGS.es, ...DEVICE_CATALOGS.es, ...WEBSITE_CATALOGS.es },
+  en: { ...EN, ...COPILOT_CATALOGS.en, ...DEVICE_CATALOGS.en, ...WEBSITE_CATALOGS.en, ...HELP_UI_CATALOGS.en, ...CHART_CATALOGS.en },
+  fr: { ...FR, ...COPILOT_CATALOGS.fr, ...DEVICE_CATALOGS.fr, ...WEBSITE_CATALOGS.fr, ...HELP_UI_CATALOGS.fr, ...CHART_CATALOGS.fr },
+  de: { ...DE, ...COPILOT_CATALOGS.de, ...DEVICE_CATALOGS.de, ...WEBSITE_CATALOGS.de, ...HELP_UI_CATALOGS.de, ...CHART_CATALOGS.de },
+  nl: { ...NL, ...COPILOT_CATALOGS.nl, ...DEVICE_CATALOGS.nl, ...WEBSITE_CATALOGS.nl, ...HELP_UI_CATALOGS.nl, ...CHART_CATALOGS.nl },
+  es: { ...ES, ...COPILOT_CATALOGS.es, ...DEVICE_CATALOGS.es, ...WEBSITE_CATALOGS.es, ...HELP_UI_CATALOGS.es, ...CHART_CATALOGS.es },
 }
 
 export const SUPPORTED_LANGUAGES = ['en', 'fr', 'de', 'nl', 'es'] as const

@@ -113,6 +113,13 @@ const EN: Catalog = {
   'device.trend.rising': 'Rising',
   'device.trend.falling': 'Falling',
   'device.trend.flat': 'Flat',
+  'device.fleet.filter.site': 'Site',
+  'device.fleet.filter.type': 'Type',
+  'device.fleet.filter.status': 'Status',
+  'device.fleet.filter.area': 'Area',
+  'device.fleet.filter.all': 'All',
+  'device.fleet.filter.clearAll': 'Clear all filters',
+  'device.fleet.filter.showing': '{filtered} of {total} devices',
 }
 
 const FR: Catalog = {
@@ -222,6 +229,13 @@ const FR: Catalog = {
   'device.trend.rising': 'En hausse',
   'device.trend.falling': 'En baisse',
   'device.trend.flat': 'Stable',
+  'device.fleet.filter.site': 'Site',
+  'device.fleet.filter.type': 'Type',
+  'device.fleet.filter.status': 'Statut',
+  'device.fleet.filter.area': 'Zone',
+  'device.fleet.filter.all': 'Tous',
+  'device.fleet.filter.clearAll': 'Effacer tous les filtres',
+  'device.fleet.filter.showing': '{filtered} sur {total} équipements',
 }
 
 const DE: Catalog = {
@@ -330,6 +344,13 @@ const DE: Catalog = {
   'device.trend.rising': 'Steigend',
   'device.trend.falling': 'Fallend',
   'device.trend.flat': 'Gleichbleibend',
+  'device.fleet.filter.site': 'Standort',
+  'device.fleet.filter.type': 'Typ',
+  'device.fleet.filter.status': 'Status',
+  'device.fleet.filter.area': 'Bereich',
+  'device.fleet.filter.all': 'Alle',
+  'device.fleet.filter.clearAll': 'Alle Filter löschen',
+  'device.fleet.filter.showing': '{filtered} von {total} Geräten',
 }
 
 const NL: Catalog = {
@@ -439,6 +460,13 @@ const NL: Catalog = {
   'device.trend.rising': 'Stijgend',
   'device.trend.falling': 'Dalend',
   'device.trend.flat': 'Vlak',
+  'device.fleet.filter.site': 'Locatie',
+  'device.fleet.filter.type': 'Type',
+  'device.fleet.filter.status': 'Status',
+  'device.fleet.filter.area': 'Zone',
+  'device.fleet.filter.all': 'Alle',
+  'device.fleet.filter.clearAll': 'Alle filters wissen',
+  'device.fleet.filter.showing': '{filtered} van {total} apparaten',
 }
 
 const ES: Catalog = {
@@ -547,6 +575,13 @@ const ES: Catalog = {
   'device.trend.rising': 'Al alza',
   'device.trend.falling': 'A la baja',
   'device.trend.flat': 'Estable',
+  'device.fleet.filter.site': 'Planta',
+  'device.fleet.filter.type': 'Tipo',
+  'device.fleet.filter.status': 'Estado',
+  'device.fleet.filter.area': 'Área',
+  'device.fleet.filter.all': 'Todos',
+  'device.fleet.filter.clearAll': 'Borrar todos los filtros',
+  'device.fleet.filter.showing': '{filtered} de {total} dispositivos',
 }
 
 export const DEVICE_CATALOGS: Record<'en' | 'fr' | 'de' | 'nl' | 'es', Catalog> = {

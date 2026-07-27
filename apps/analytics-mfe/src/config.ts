@@ -19,6 +19,22 @@ export const DEMO_ROLES = [
 
 export const DEMO_PLANT = 'NS-DEMO-LUX-01'
 
+/** Maps shell site short codes to BFF plant IDs. */
+export const SITE_TO_PLANT: Record<string, string> = {
+  lu: 'NS-DEMO-LUX-01',
+  de: 'NS-DEMO-DE-01',
+  be: 'NS-DEMO-BE-01',
+  es: 'NS-DEMO-ES-01',
+}
+
+const ALL_PLANTS = Object.values(SITE_TO_PLANT).join(',')
+
+/** Resolve the shell short-code to a BFF plant id at call time. */
+export function siteToPlant(site: string | undefined): string {
+  if (!site || site === 'all') return 'all'
+  return SITE_TO_PLANT[site] ?? 'all'
+}
+
 declare global {
   interface Window {
     NOVASTEEL_ANALYTICS_CONFIG?: {
@@ -76,7 +92,7 @@ export function demoHeaders(context: ShellContext): Record<string, string> {
   return {
     'X-Demo-User': 'demo-portal-analytics',
     'X-Demo-Roles': DEMO_ROLES.join(','),
-    'X-Demo-Plants': DEMO_PLANT,
+    'X-Demo-Plants': ALL_PLANTS,
     'X-Demo-Display-Name': context.activePersona || 'NovaSteel Demo',
     'X-Demo-Locale': context.locale || 'en-LU',
   }

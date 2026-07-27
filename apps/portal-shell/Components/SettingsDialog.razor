@@ -1,0 +1,135 @@
+@inject ShellState Shell
+
+@if (Open)
+{
+    <div class="settings-backdrop" @onclick="Close"></div>
+    <div class="settings-dialog" role="dialog" aria-modal="true" aria-labelledby="settings-title"
+         @onkeydown="OnKeyDown">
+        <header class="settings-header">
+            <h2 id="settings-title">Settings</h2>
+            <button class="settings-close" type="button" @onclick="Close" aria-label="Close settings">
+                ✕
+            </button>
+        </header>
+
+        <div class="settings-body">
+            <section class="settings-section">
+                <h3>Appearance</h3>
+                <fieldset class="settings-fieldset">
+                    <legend class="sr-only">Theme mode</legend>
+                    <label class="settings-radio">
+                        <input type="radio" name="theme" value="Light"
+                               checked="@(Shell.ThemeMode == ThemeMode.Light)"
+                               @onchange="() => SetTheme(ThemeMode.Light)" />
+                        Light
+                    </label>
+                    <label class="settings-radio">
+                        <input type="radio" name="theme" value="Dark"
+                               checked="@(Shell.ThemeMode == ThemeMode.Dark)"
+                               @onchange="() => SetTheme(ThemeMode.Dark)" />
+                        Dark
+                    </label>
+                    <label class="settings-radio">
+                        <input type="radio" name="theme" value="System"
+                               checked="@(Shell.ThemeMode == ThemeMode.System)"
+                               @onchange="() => SetTheme(ThemeMode.System)" />
+                        System
+                    </label>
+                </fieldset>
+            </section>
+
+            <section class="settings-section">
+                <h3>Language</h3>
+                <label class="settings-label">
+                    Locale
+                    <select value="@Shell.Locale" @onchange="OnLocaleChanged" class="settings-select">
+                        @foreach (var locale in ShellState.Locales)
+                        {
+                            <option value="@locale">@locale</option>
+                        }
+                    </select>
+                </label>
+            </section>
+
+            <section class="settings-section">
+                <h3>Data</h3>
+                <label class="settings-label">
+                    <input type="checkbox" checked="@Shell.DemoMode" @onchange="OnDemoToggle" />
+                    Demo mode (synthetic data)
+                </label>
+                <p class="settings-readonly">
+                    BFF base URL: <code>@Shell.BffBaseUrl</code>
+                </p>
+            </section>
+
+            <section class="settings-section">
+                <h3>Help Assistant</h3>
+                <label class="settings-label">
+                    <input type="checkbox" checked="@Shell.HelpBilingual" @onchange="OnBilingualToggle" />
+                    Assistant explanations: English + French
+                </label>
+                <p class="settings-hint">
+                    When enabled, the Help Assistant shows every explanation in both English and French.
+                </p>
+            </section>
+
+            <section class="settings-section">
+                <h3>Persona</h3>
+                <label class="settings-label">
+                    Primary persona
+                    <select value="@Shell.PrimaryPersona" @onchange="OnPersonaChanged" class="settings-select">
+                        @foreach (var persona in Shell.Auth.CurrentUser.Personas)
+                        {
+                            <option value="@persona">@FormatPersona(persona)</option>
+                        }
+                    </select>
+                </label>
+            </section>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OpenChanged { get; set; }
+
+    private void Close() => OpenChanged.InvokeAsync(false);
+
+    private void OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape") Close();
+    }
+
+    private void SetTheme(ThemeMode mode)
+    {
+        while (Shell.ThemeMode != mode)
+            Shell.CycleTheme();
+    }
+
+    private void OnLocaleChanged(ChangeEventArgs args)
+    {
+        Shell.SetLocale(args.Value?.ToString() ?? Shell.Locale);
+    }
+
+    private void OnDemoToggle(ChangeEventArgs args)
+    {
+        Shell.ToggleDemoMode();
+    }
+
+    private void OnBilingualToggle(ChangeEventArgs args)
+    {
+        Shell.SetHelpBilingual(args.Value is bool b ? b : bool.Parse(args.Value?.ToString() ?? "false"));
+    }
+
+    private void OnPersonaChanged(ChangeEventArgs args)
+    {
+        var persona = args.Value?.ToString() ?? Shell.PrimaryPersona;
+        Shell.SetPrimaryPersona(persona);
+    }
+
+    private static string FormatPersona(string persona) =>
+        System.Text.RegularExpressions.Regex.Replace(persona, "([a-z])([A-Z])", "$1 $2");
+}

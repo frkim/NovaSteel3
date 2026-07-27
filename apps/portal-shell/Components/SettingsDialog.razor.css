@@ -1,0 +1,121 @@
+.settings-backdrop {
+    background: rgba(0, 0, 0, 0.4);
+    inset: 0;
+    position: fixed;
+    z-index: 1100;
+}
+
+.settings-dialog {
+    background: var(--ns-color-surface);
+    border: 1px solid var(--ns-color-surface-alt);
+    border-radius: var(--ns-radius-l);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.24);
+    display: flex;
+    flex-direction: column;
+    left: 50%;
+    max-height: 80vh;
+    max-width: 480px;
+    overflow-y: auto;
+    position: fixed;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 90vw;
+    z-index: 1101;
+}
+
+.settings-header {
+    align-items: center;
+    border-bottom: 1px solid var(--ns-color-surface-alt);
+    display: flex;
+    justify-content: space-between;
+    padding: var(--ns-space-m);
+}
+
+.settings-header h2 {
+    font-size: 1.125rem;
+    margin: 0;
+}
+
+.settings-close {
+    background: transparent;
+    border: none;
+    color: var(--ns-color-text-secondary);
+    cursor: pointer;
+    font-size: 1.25rem;
+    padding: 4px 8px;
+}
+
+.settings-body {
+    padding: var(--ns-space-m);
+}
+
+.settings-section {
+    margin-bottom: var(--ns-space-l);
+}
+
+.settings-section:last-child {
+    margin-bottom: 0;
+}
+
+.settings-section h3 {
+    color: var(--ns-color-text-secondary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    margin: 0 0 var(--ns-space-s);
+    text-transform: uppercase;
+}
+
+.settings-fieldset {
+    border: none;
+    display: flex;
+    gap: var(--ns-space-m);
+    margin: 0;
+    padding: 0;
+}
+
+.settings-radio {
+    align-items: center;
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 0.875rem;
+    gap: 4px;
+}
+
+.settings-label {
+    align-items: center;
+    display: flex;
+    font-size: 0.875rem;
+    gap: var(--ns-space-s);
+    margin-bottom: var(--ns-space-s);
+}
+
+.settings-select {
+    background: var(--ns-color-surface-alt);
+    border: 1px solid transparent;
+    border-radius: var(--ns-radius-s);
+    color: var(--ns-color-text-primary);
+    font: inherit;
+    min-height: 32px;
+    padding: 0 8px;
+}
+
+.settings-readonly {
+    color: var(--ns-color-text-secondary);
+    font-size: 0.8125rem;
+    margin: var(--ns-space-s) 0 0;
+}
+
+.settings-readonly code {
+    background: var(--ns-color-surface-alt);
+    border-radius: var(--ns-radius-s);
+    font-family: var(--ns-font-mono);
+    font-size: 0.75rem;
+    padding: 2px 6px;
+}
+
+.settings-hint {
+    color: var(--ns-color-text-secondary);
+    font-size: 0.75rem;
+    margin: 0;
+}

@@ -1,4 +1,4 @@
-import { useId, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useId, useMemo, useState, type ReactNode } from 'react'
 import {
   Box,
   Card,
@@ -16,13 +16,18 @@ import {
 } from '@mui/material'
 import TableRowsIcon from '@mui/icons-material/TableRows'
 import ShowChartIcon from '@mui/icons-material/ShowChart'
+import AddIcon from '@mui/icons-material/Add'
+import RemoveIcon from '@mui/icons-material/Remove'
 import { useAnalytics } from '../../context/analytics'
 import { useDocked } from '../dock/dockContext'
+import { prefersReducedMotion } from '../../designTokens'
 
 export interface ChartTableColumn {
   key: string
   label: string
 }
+
+const ZOOM_STEPS = [50, 75, 100, 125, 150, 200, 300]
 
 export interface ChartContainerProps {
   title: string
@@ -33,12 +38,19 @@ export interface ChartContainerProps {
   tableRows?: Array<Record<string, string | number>>
   actions?: ReactNode
   height?: number
+  /**
+   * Help Assistant topic, e.g. `chart.heatmap`. Defaults to the generic chart
+   * explanation so an unlabelled chart still explains itself.
+   */
+  helpTopic?: string
   /** Dock panel id; read by the panel collector, not by this component. */
   id?: string
   /** Makes the dock tab dismissible and clears the state that produced it. */
   onDockClose?: () => void
   dockWidth?: number
   dockHeight?: number
+  /** Whether zoom controls are shown. Defaults to true. */
+  zoomable?: boolean
 }
 
 /**
@@ -53,19 +65,130 @@ export function ChartContainer({
   tableRows,
   actions,
   height = 260,
+  helpTopic = 'generic.chart',
   id,
   onDockClose,
   dockWidth,
   dockHeight,
+  zoomable = true,
 }: ChartContainerProps) {
   const { t } = useAnalytics()
   const [asTable, setAsTable] = useState(false)
+  const [zoom, setZoom] = useState(100)
   const summaryId = useId()
   const canToggle = Boolean(tableColumns && tableRows)
   const docked = useDocked()
   void onDockClose
   void dockWidth
   void dockHeight
+
+  const zoomIn = useCallback(() => {
+    setZoom((current) => {
+      const idx = ZOOM_STEPS.indexOf(current)
+      return idx < ZOOM_STEPS.length - 1 ? ZOOM_STEPS[idx + 1] : current
+    })
+  }, [])
+
+  const zoomOut = useCallback(() => {
+    setZoom((current) => {
+      const idx = ZOOM_STEPS.indexOf(current)
+      return idx > 0 ? ZOOM_STEPS[idx - 1] : current
+    })
+  }, [])
+
+  const zoomReset = useCallback(() => setZoom(100), [])
+
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (!zoomable || asTable) return
+      const mod = event.ctrlKey || event.metaKey
+      if (!mod) return
+      if (event.key === '+' || event.key === '=') {
+        event.preventDefault()
+        zoomIn()
+      } else if (event.key === '-') {
+        event.preventDefault()
+        zoomOut()
+      } else if (event.key === '0') {
+        event.preventDefault()
+        zoomReset()
+      }
+    },
+    [zoomable, asTable, zoomIn, zoomOut, zoomReset],
+  )
+
+  useEffect(() => {
+    setZoom(100)
+  }, [asTable])
+
+  const showZoom = zoomable && !asTable
+  const isZoomed = zoom !== 100
+  const reducedMotion = useMemo(() => prefersReducedMotion(), [])
+
+  const zoomControls = showZoom ? (
+    <Stack direction="row" spacing={0.25} sx={{ alignItems: 'center' }}>
+      <IconButton
+        aria-label={t('chart.zoomOut')}
+        size="small"
+        onClick={zoomOut}
+        disabled={zoom === ZOOM_STEPS[0]}
+      >
+        <RemoveIcon fontSize="small" />
+      </IconButton>
+      <Tooltip title={t('chart.zoomReset')}>
+        <Typography
+          component="button"
+          variant="caption"
+          onClick={zoomReset}
+          aria-label={t('chart.zoomLevel', { level: zoom })}
+          sx={{
+            border: 'none',
+            background: 'none',
+            cursor: 'pointer',
+            fontWeight: 600,
+            px: 0.5,
+            minWidth: 36,
+            textAlign: 'center',
+            color: 'text.secondary',
+            '&:hover': { color: 'text.primary' },
+          }}
+        >
+          {zoom}%
+        </Typography>
+      </Tooltip>
+      <IconButton
+        aria-label={t('chart.zoomIn')}
+        size="small"
+        onClick={zoomIn}
+        disabled={zoom === ZOOM_STEPS[ZOOM_STEPS.length - 1]}
+      >
+        <AddIcon fontSize="small" />
+      </IconButton>
+    </Stack>
+  ) : null
+
+  const chartContent = (
+    <Box
+      role="img"
+      aria-label={`${title}. ${summary}`}
+      aria-describedby={summaryId}
+      sx={{
+        ...(isZoomed
+          ? { overflow: 'auto', maxHeight: height + 60, position: 'relative' }
+          : {}),
+      }}
+    >
+      <Box
+        sx={{
+          width: isZoomed ? `${zoom}%` : '100%',
+          height: isZoomed ? height * (zoom / 100) : undefined,
+          transition: reducedMotion ? 'none' : 'width 0.15s ease, height 0.15s ease',
+        }}
+      >
+        {children}
+      </Box>
+    </Box>
+  )
 
   const body = (
     <>
@@ -74,6 +197,7 @@ export function ChartContainer({
           {title}
         </Typography>
         <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
+          {zoomControls}
           {actions}
           {canToggle && (
             <Tooltip title={asTable ? t('table.viewAsChart') : t('table.viewAsTable')}>
@@ -112,9 +236,7 @@ export function ChartContainer({
           </Table>
         </TableContainer>
       ) : (
-        <Box role="img" aria-label={`${title}. ${summary}`} aria-describedby={summaryId}>
-          {children}
-        </Box>
+        chartContent
       )}
 
       <Typography id={summaryId} color="text.secondary" variant="caption" sx={{ display: 'block', mt: 1 }}>
@@ -123,18 +245,35 @@ export function ChartContainer({
     </>
   )
 
-  // Docked, the tab supplies the frame; the caption stays because a chart is
-  // only accessible with its own name and text summary next to it.
+  const containerProps = {
+    onKeyDown: handleKeyDown,
+    tabIndex: zoomable ? 0 : undefined,
+  }
+
   if (docked) {
     return (
-      <Box id={id} component="figure" sx={{ m: 0, minWidth: 0 }}>
+      <Box
+        id={id}
+        component="figure"
+        data-help={helpTopic}
+        data-help-detail={summary}
+        sx={{ m: 0, minWidth: 0 }}
+        {...containerProps}
+      >
         {body}
       </Box>
     )
   }
 
   return (
-    <Card id={id} component="figure" sx={{ m: 0 }}>
+    <Card
+      id={id}
+      component="figure"
+      data-help={helpTopic}
+      data-help-detail={summary}
+      sx={{ m: 0 }}
+      {...containerProps}
+    >
       <CardContent>{body}</CardContent>
     </Card>
   )

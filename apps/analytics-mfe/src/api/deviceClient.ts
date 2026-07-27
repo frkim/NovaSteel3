@@ -1,5 +1,5 @@
 import type { ShellContext } from '../types'
-import { DEMO_PLANT, demoHeaders, fixturesOnly, resolveBffBaseUrl } from '../config'
+import { demoHeaders, fixturesOnly, resolveBffBaseUrl, siteToPlant } from '../config'
 import { HttpClient } from './httpClient'
 import type { SingleEnvelope, TableEnvelope } from './envelope'
 import type { DataSource } from './domain'
@@ -34,14 +34,20 @@ function loaded<T>(value: T, source: DataSource, asOf: string): Loaded<T> {
  */
 export class DeviceClient {
   private readonly http: HttpClient | null
+  private readonly context: ShellContext
 
   constructor(context: ShellContext) {
+    this.context = context
     this.http = fixturesOnly()
       ? null
       : new HttpClient({
           baseUrl: resolveBffBaseUrl(context),
           headers: demoHeaders(context),
         })
+  }
+
+  private get activePlant(): string {
+    return siteToPlant(this.context.site)
   }
 
   get isOffline(): boolean {
@@ -74,7 +80,7 @@ export class DeviceClient {
 
   getDevices(): Promise<Loaded<DeviceRow[]>> {
     return this.table<DeviceRow>(
-      `/v1/devices?site=${encodeURIComponent(DEMO_PLANT)}&size=${FULL_PAGE}`,
+      `/v1/devices?site=${encodeURIComponent(this.activePlant)}&size=${FULL_PAGE}`,
       deviceFixtures.fixtureDevices,
     )
   }
@@ -86,7 +92,7 @@ export class DeviceClient {
   }
 
   getSensors(deviceId?: string): Promise<Loaded<SensorRow[]>> {
-    const params = new URLSearchParams({ site: DEMO_PLANT, size: String(FULL_PAGE) })
+    const params = new URLSearchParams({ site: this.activePlant, size: String(FULL_PAGE) })
     if (deviceId) {
       params.set('deviceId', deviceId)
     }

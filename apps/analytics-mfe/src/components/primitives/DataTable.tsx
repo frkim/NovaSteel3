@@ -345,6 +345,7 @@ export function DataTable<T>({
         <Table
           size={compact ? 'small' : 'medium'}
           stickyHeader
+          data-help="generic.table"
           aria-label={caption}
           aria-rowcount={processed.length}
         >

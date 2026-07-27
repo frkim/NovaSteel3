@@ -27,6 +27,11 @@ export interface ShellContext {
    * demo reader set.
    */
   permittedActions?: string[]
+  /**
+   * When true the Help Assistant renders every explanation in English and
+   * French together. Set from Settings in the shell; off by default.
+   */
+  helpBilingual?: boolean
 }
 
 export type MicrofrontendEmitter = (eventType: string, payload: unknown) => void

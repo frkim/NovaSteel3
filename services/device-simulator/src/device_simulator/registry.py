@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from .catalog import CATALOG_ASSETS, CATALOG_SIGNALS, SIGNALS_BY_ASSET, SITE_ID
+from .catalog import CATALOG_ASSETS, CATALOG_SIGNALS, SIGNALS_BY_ASSET
 
 
 def _display_name(signal_code: str) -> str:
@@ -53,9 +53,9 @@ def build_registry() -> tuple[dict[str, Device], dict[str, Sensor]]:
     ``sensorId`` format: ``"{deviceId}:{signalCode}"``.
     """
     sensors: dict[str, Sensor] = {}
-    for signal in CATALOG_SIGNALS.values():
+    for sensor_key, signal in CATALOG_SIGNALS.items():
         asset = CATALOG_ASSETS[signal.asset_id]
-        sensor_id = f"{signal.asset_id}:{signal.signal_code}"
+        sensor_id = sensor_key
         sensors[sensor_id] = Sensor(
             sensorId=sensor_id,
             deviceId=signal.asset_id,
@@ -74,7 +74,7 @@ def build_registry() -> tuple[dict[str, Device], dict[str, Sensor]]:
         sensor_ids = [f"{asset.asset_id}:{s.signal_code}" for s in asset_signals]
         devices[asset.asset_id] = Device(
             deviceId=asset.asset_id,
-            site=SITE_ID,
+            site=asset.plant_id,
             area=asset.area,
             description=asset.asset_type,
             sensorIds=sensor_ids,

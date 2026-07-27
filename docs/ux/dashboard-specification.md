@@ -895,6 +895,23 @@ D3.js is the primary charting engine (custom, accessible, themeable via tokens).
 - Responsive: charts resize via container observer; on `bp.xs` they simplify (fewer ticks, hide minor gridlines).
 - **Accessibility (§17):** each chart has (a) an accessible name + text summary, (b) a "View as table" toggle exposing the underlying `TBL-STD` data, (c) keyboard-focusable data points where interactive, (d) never color-only encoding (use shape/pattern/label too).
 
+**`CHART-ZOOM` — every chart scales.** `ChartContainer` renders a zoom group (`−` / percentage /
+`+` / reset) available on every chart, so the behaviour is implemented once rather than per chart
+type. Range is 50–300 % in steps, with 100 % as the reset target.
+
+The zoom is a **real re-render, not a bitmap scale.** The chart body sits in a scrollable viewport
+wrapping an inner box whose CSS width is set to the zoom percentage. Because every D3 chart sizes
+itself from a `ResizeObserver` (`useChartDimensions`), widening the inner box makes the observer
+fire and the chart redraws at the larger geometry — axes, tick density, labels and stroke widths are
+all drawn natively. Text stays crisp and a presenter can zoom into a dense 24-hour series on a
+projector without pixelation. At exactly 100 % the container sets `width: 100%` and no overflow, so
+the default rendering path is unchanged.
+
+Zoom is available on all chart types including gauges and donuts. Controls are localized
+(`chart.zoomIn`, `chart.zoomOut`, `chart.zoomReset`, `chart.zoomLevel` with a `{level}` placeholder)
+and the percentage readout carries an accessible name so a screen-reader user hears "Zoom level
+200 %" rather than a bare number.
+
 ### 14.3 KPI card anatomy
 
 ```
@@ -929,6 +946,30 @@ Cards that represent a constraint, a policy guarantee, or a live market price ha
 detail view; these stay deliberately inert (no chevron, no pointer cursor) rather than offering a
 dead click. All 67 cards across the 16 KPI-bearing screens carry a tooltip; drill-downs are
 present wherever a destination genuinely exists.
+
+**`KPI-TINT` — each card carries its own pastel background.** A KPI band of eight identical white
+cards is hard to scan and harder to point at during a live demo ("the third one from the left" is a
+bad sentence in a defense). Each card therefore gets a soft tinted background drawn from an
+eight-colour pastel ramp, selected by a **stable hash of `metric.id`**, so a given KPI keeps the
+same colour on every render, on every screen, and between sessions — the colour becomes a
+recognisable landmark rather than decoration that shuffles.
+
+| # | Light | Dark |
+|---|---|---|
+| 0 | `#E3F2FD` blue | `#1A2733` |
+| 1 | `#E8F5E9` green | `#1A2B1E` |
+| 2 | `#FFF3E0` orange | `#2B2317` |
+| 3 | `#F3E5F5` purple | `#261A2B` |
+| 4 | `#E0F7FA` cyan | `#17292B` |
+| 5 | `#FBE9E7` red-orange | `#2B1D1A` |
+| 6 | `#F1F8E9` lime | `#222B1A` |
+| 7 | `#EDE7F6` deep purple | `#201A2B` |
+
+The dark-mode ramp is a separate set of desaturated tints, not the light values dimmed, so tinting
+never fights the dark theme. **The tint is never the only carrier of meaning** — status is still
+encoded by the trend arrow, sign and label, per §14.2 and §17. Worst-case measured text contrast
+across all pairings is **4.97:1** (secondary text on the two purple tints in light mode), above the
+WCAG 2.2 AA 4.5:1 floor.
 
 ### 14.4 Power BI embedding (optional)
 

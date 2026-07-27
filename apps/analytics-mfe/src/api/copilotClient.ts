@@ -59,6 +59,22 @@ export interface GlossaryEntry {
   screens: string[]
 }
 
+export interface GlossaryOnlineResultItem {
+  sourceId: string
+  title: string
+  snippet: string
+  url: string
+  published: string
+}
+
+export interface GlossaryOnlineResult {
+  query: string
+  language: string
+  corpusLabel: string
+  retrievedAt: string
+  results: GlossaryOnlineResultItem[]
+}
+
 export interface CopilotSuggestions {
   section: string
   language: string
@@ -207,6 +223,24 @@ export class CopilotClient {
       return
     }
     await this.http.del(`/v1/copilot/conversations/${encodeURIComponent(conversationId)}`)
+  }
+
+  async deleteAllConversations(): Promise<void> {
+    if (!this.http) {
+      return
+    }
+    await this.http.del('/v1/copilot/conversations')
+  }
+
+  async glossaryOnline(query: string, locale: string): Promise<GlossaryOnlineResult> {
+    if (!this.http) {
+      return { query, language: locale.slice(0, 2), corpusLabel: '', retrievedAt: '', results: [] }
+    }
+    const params = new URLSearchParams({ q: query.trim(), locale })
+    const envelope = await this.http.getSingle<GlossaryOnlineResult>(
+      `/v1/copilot/glossary/online?${params.toString()}`,
+    )
+    return envelope.data
   }
 
   async chat(request: CopilotChatRequest, offlineNotice: string): Promise<CopilotAnswer> {

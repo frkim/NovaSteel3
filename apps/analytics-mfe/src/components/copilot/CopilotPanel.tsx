@@ -293,11 +293,38 @@ export function CopilotPanel({
   }
 
   const deleteConversation = async (id: string) => {
-    await client.deleteConversation(id).catch(() => undefined)
-    if (id === conversationId) {
+    const previousConversations = conversations
+    const previousConversationId = conversationId
+    const previousMessages = messages
+    const wasActive = id === conversationId
+
+    setConversations((current) => current.filter((c) => c.conversationId !== id))
+    if (wasActive) {
       startNewChat()
     }
-    refreshConversations()
+
+    try {
+      await client.deleteConversation(id)
+    } catch {
+      setConversations(previousConversations)
+      if (wasActive) {
+        setConversationId(previousConversationId)
+        setMessages(previousMessages)
+      }
+      setError(t('copilot.error'))
+    }
+  }
+
+  const deleteAllConversations = async () => {
+    const previousConversations = conversations
+    setConversations([])
+    startNewChat()
+    try {
+      await client.deleteAllConversations()
+    } catch {
+      setConversations(previousConversations)
+      setError(t('copilot.error'))
+    }
   }
 
   return (
@@ -583,6 +610,7 @@ export function CopilotPanel({
             activeId={conversationId}
             onOpen={(id) => void openConversation(id)}
             onDelete={(id) => void deleteConversation(id)}
+            onDeleteAll={() => void deleteAllConversations()}
             t={t}
           />
         </Box>

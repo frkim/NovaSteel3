@@ -3,7 +3,11 @@ import {
   Box,
   Button,
   Chip,
+  FormControl,
+  InputLabel,
   LinearProgress,
+  MenuItem,
+  Select,
   Stack,
   Typography,
 } from '@mui/material'
@@ -30,6 +34,9 @@ export function DeviceFleet() {
   const devicesState = useResource(() => deviceClient.getDevices(), [deviceClient])
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
+  const [siteFilter, setSiteFilter] = useState<string | null>(null)
+  const [typeFilter, setTypeFilter] = useState<string | null>(null)
+  const [areaFilter, setAreaFilter] = useState<string | null>(null)
 
   const devices = devicesState.data ?? []
 
@@ -128,10 +135,38 @@ export function DeviceFleet() {
   ]
 
   const displayedDevices = useMemo(() => {
-    if (!statusFilter) return devices
-    if (statusFilter === 'fault') return devices.filter((d) => d.status === 'fault' || d.status === 'offline')
-    return devices.filter((d) => d.status === statusFilter)
-  }, [devices, statusFilter])
+    let result = devices
+    if (statusFilter) {
+      result = statusFilter === 'fault'
+        ? result.filter((d) => d.status === 'fault' || d.status === 'offline')
+        : result.filter((d) => d.status === statusFilter)
+    }
+    if (siteFilter) {
+      result = result.filter((d) => d.site === siteFilter)
+    }
+    if (typeFilter) {
+      result = result.filter((d) => d.description === typeFilter)
+    }
+    if (areaFilter) {
+      result = result.filter((d) => d.area === areaFilter)
+    }
+    return result
+  }, [devices, statusFilter, siteFilter, typeFilter, areaFilter])
+
+  const filterOptions = useMemo(() => ({
+    sites: [...new Set(devices.map((d) => d.site))].sort(),
+    types: [...new Set(devices.map((d) => d.description))].sort(),
+    areas: [...new Set(devices.map((d) => d.area))].sort(),
+    statuses: [...new Set(devices.map((d) => d.status))].sort(),
+  }), [devices])
+
+  const hasActiveFilters = !!(statusFilter || siteFilter || typeFilter || areaFilter)
+  const clearAllFilters = () => {
+    setStatusFilter(null)
+    setSiteFilter(null)
+    setTypeFilter(null)
+    setAreaFilter(null)
+  }
 
   const selectedDevice = useMemo(
     () => devices.find((d) => d.deviceId === selectedDeviceId) ?? null,
@@ -210,16 +245,84 @@ export function DeviceFleet() {
     <SectionStack>
       <KpiBand metrics={metrics} />
 
-      {statusFilter && (
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-          <Typography variant="body2" color="text.secondary">
-            Filtered by status:
+      {/* Filter toolbar */}
+      <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', alignItems: 'center' }}>
+        <FormControl size="small" sx={{ minWidth: 120 }}>
+          <InputLabel>{t('device.fleet.filter.site')}</InputLabel>
+          <Select
+            label={t('device.fleet.filter.site')}
+            value={siteFilter ?? ''}
+            onChange={(e) => setSiteFilter(e.target.value || null)}
+          >
+            <MenuItem value="">{t('device.fleet.filter.all')}</MenuItem>
+            {filterOptions.sites.map((v) => (
+              <MenuItem key={v} value={v}>{v}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <FormControl size="small" sx={{ minWidth: 120 }}>
+          <InputLabel>{t('device.fleet.filter.type')}</InputLabel>
+          <Select
+            label={t('device.fleet.filter.type')}
+            value={typeFilter ?? ''}
+            onChange={(e) => setTypeFilter(e.target.value || null)}
+          >
+            <MenuItem value="">{t('device.fleet.filter.all')}</MenuItem>
+            {filterOptions.types.map((v) => (
+              <MenuItem key={v} value={v}>{v}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <FormControl size="small" sx={{ minWidth: 120 }}>
+          <InputLabel>{t('device.fleet.filter.status')}</InputLabel>
+          <Select
+            label={t('device.fleet.filter.status')}
+            value={statusFilter ?? ''}
+            onChange={(e) => setStatusFilter(e.target.value || null)}
+          >
+            <MenuItem value="">{t('device.fleet.filter.all')}</MenuItem>
+            {filterOptions.statuses.map((v) => (
+              <MenuItem key={v} value={v}>{v}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <FormControl size="small" sx={{ minWidth: 120 }}>
+          <InputLabel>{t('device.fleet.filter.area')}</InputLabel>
+          <Select
+            label={t('device.fleet.filter.area')}
+            value={areaFilter ?? ''}
+            onChange={(e) => setAreaFilter(e.target.value || null)}
+          >
+            <MenuItem value="">{t('device.fleet.filter.all')}</MenuItem>
+            {filterOptions.areas.map((v) => (
+              <MenuItem key={v} value={v}>{v}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Stack>
+
+      {hasActiveFilters && (
+        <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', alignItems: 'center' }}>
+          {siteFilter && (
+            <Chip size="small" label={`${t('device.fleet.filter.site')}: ${siteFilter}`} onDelete={() => setSiteFilter(null)} />
+          )}
+          {typeFilter && (
+            <Chip size="small" label={`${t('device.fleet.filter.type')}: ${typeFilter}`} onDelete={() => setTypeFilter(null)} />
+          )}
+          {statusFilter && (
+            <Chip size="small" label={`${t('device.fleet.filter.status')}: ${statusFilter}`} onDelete={() => setStatusFilter(null)} />
+          )}
+          {areaFilter && (
+            <Chip size="small" label={`${t('device.fleet.filter.area')}: ${areaFilter}`} onDelete={() => setAreaFilter(null)} />
+          )}
+          <Button size="small" onClick={clearAllFilters}>
+            {t('device.fleet.filter.clearAll')}
+          </Button>
+          <Typography variant="caption" color="text.secondary">
+            {t('device.fleet.filter.showing')
+              .replace('{filtered}', String(displayedDevices.length))
+              .replace('{total}', String(devices.length))}
           </Typography>
-          <Chip
-            size="small"
-            label={statusFilter}
-            onDelete={() => setStatusFilter(null)}
-          />
         </Stack>
       )}
 

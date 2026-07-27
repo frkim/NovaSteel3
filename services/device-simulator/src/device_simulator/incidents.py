@@ -103,7 +103,7 @@ INCIDENT_CATALOG: dict[str, IncidentCatalogEntry] = {
             ),
             severity="medium",
             defaultDurationMinutes=60,
-            targetDeviceIds=[],
+            targetDeviceIds=["LUX-BF-01", "DE-EAF-01", "BE-CRM-01", "ES-EAF-01"],
             affectedSignalCodes=[],
         ),
         IncidentCatalogEntry(
@@ -115,7 +115,7 @@ INCIDENT_CATALOG: dict[str, IncidentCatalogEntry] = {
             ),
             severity="medium",
             defaultDurationMinutes=10,
-            targetDeviceIds=[],
+            targetDeviceIds=["LUX-BF-01", "DE-EAF-01", "BE-CRM-01", "ES-EAF-01"],
             affectedSignalCodes=[],
         ),
         IncidentCatalogEntry(
@@ -157,7 +157,7 @@ INCIDENT_CATALOG: dict[str, IncidentCatalogEntry] = {
             ),
             severity="low",
             defaultDurationMinutes=20,
-            targetDeviceIds=[],
+            targetDeviceIds=["LUX-UTIL-01", "DE-UTIL-01", "BE-UTIL-01", "ES-UTIL-01"],
             affectedSignalCodes=[],
         ),
     ]

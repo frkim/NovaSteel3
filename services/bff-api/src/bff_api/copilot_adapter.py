@@ -9,11 +9,14 @@ free of orchestrator types.
 from __future__ import annotations
 
 import logging
+import os
 import sys
 from pathlib import Path
 from typing import Any
 
 from .contracts import ErrorCode
+from .copilot_online_corpus import CORPUS_LABEL, RETRIEVAL_DATE, search_offline_corpus
+from .copilot_steel_corpus import search_steel_corpus
 from .errors import ApiError
 
 logger = logging.getLogger(__name__)
@@ -85,6 +88,62 @@ class CopilotAdapter:
         except self._not_found as exc:
             raise ApiError(404, ErrorCode.NOT_FOUND, str(exc)) from exc
 
+    def delete_all_conversations(self, *, owner: str) -> int:
+        """Delete every conversation for *owner*. Returns the count removed."""
+        conversations = self._service.list_conversations(owner)
+        count = 0
+        for conv in conversations:
+            try:
+                self._service.delete_conversation(owner, conv.conversation_id)
+                count += 1
+            except self._not_found:
+                pass
+        return count
+
+    def glossary_online_fallback(
+        self,
+        *,
+        query: str,
+        language: str | None,
+    ) -> dict[str, Any]:
+        """Search for a glossary term using the online corpus (or offline fallback)."""
+        lang = (language or "en")[:2].lower()
+        live_endpoint = os.environ.get("COPILOT_SEARCH_ENDPOINT")
+        if live_endpoint:
+            # TODO: call the real search endpoint when available
+            pass
+        # Offline fallback: search both corpora
+        results = search_offline_corpus(query)
+        steel_results = search_steel_corpus(query)
+        items = []
+        for r in results:
+            items.append({
+                "title": r.title,
+                "snippet": r.snippet,
+                "url": r.url,
+                "publishedDate": r.published,
+                "retrievedAt": RETRIEVAL_DATE,
+                "kind": "online",
+                "offlineCorpus": True,
+            })
+        for r in steel_results:
+            items.append({
+                "title": r.title,
+                "snippet": r.content[:200],
+                "url": "",
+                "publishedDate": "",
+                "retrievedAt": "",
+                "kind": "knowledge",
+                "offlineCorpus": True,
+            })
+        return {
+            "query": query,
+            "language": lang,
+            "results": items,
+            "offlineCorpus": not bool(live_endpoint),
+            "corpusLabel": CORPUS_LABEL if not live_endpoint else None,
+        }
+
     @property
     def conversation_store(self) -> Any:
         """Exposes the store so the privacy adapter can erase subject chat history."""
@@ -133,4 +192,38 @@ class CopilotAdapter:
             screen.get("section") or "-",
             response.resolved_reasoning.value,
         )
-        return response.to_view()
+        view = response.to_view()
+
+        # Post-processing: inject supplementary online corpus sources
+        if online_search and not os.environ.get("COPILOT_SEARCH_ENDPOINT"):
+            extra = search_offline_corpus(question)
+            for item in extra:
+                view["answer"]["sources"].append({
+                    "sourceId": item.source_id,
+                    "title": item.title,
+                    "kind": "online",
+                    "snippet": item.snippet,
+                    "url": item.url,
+                    "publishedDate": item.published,
+                    "retrievedAt": RETRIEVAL_DATE,
+                    "offlineCorpus": True,
+                    "corpusLabel": CORPUS_LABEL,
+                })
+
+        # Post-processing: inject steel corpus when no screen context (general mode)
+        section_val = str(screen.get("section") or "")
+        if not section_val or section_val == "-":
+            extra_steel = search_steel_corpus(question)
+            for item in extra_steel:
+                view["answer"]["sources"].append({
+                    "sourceId": item.entry_id,
+                    "title": item.title,
+                    "kind": "knowledge",
+                    "snippet": item.content[:200],
+                    "url": "",
+                    "publishedDate": "",
+                    "retrievedAt": "",
+                    "offlineCorpus": True,
+                })
+
+        return view
