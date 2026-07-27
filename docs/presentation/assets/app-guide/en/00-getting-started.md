@@ -78,6 +78,8 @@ The app is persona-based. A persona is a named role used to decide which screen 
 | Rui Almeida — OT Systems Engineer | Checks simulated devices and sensor feeds. | Device Operations (`apps\analytics-mfe\src\personaRoutes.ts:110-121`) |
 | Nils Andersen — Platform Ops | Manages non-production capacity, jobs, and cost telemetry. | Platform Ops (`apps\analytics-mfe\src\personaRoutes.ts:154-164`) |
 
+Selecting a persona in the top-bar combo box does two things: it opens that persona's home screen, and it narrows the left menu to the sections that persona works in, hiding any section heading left with no entries (`apps\portal-shell\Services\ShellState.cs`, `SectionsByPersona` / `VisibleNavigationItems`). Marc Weber — Plant Manager is the cross-domain triage role and therefore keeps the full menu; the section currently open always stays listed, so a deep link can never strand you on a page with no menu entry.
+
 ## Architecture in one picture-in-words
 
 `Blazor WebAssembly shell → React analytics microfrontend → Python FastAPI BFF → deterministic workers and fixtures → target cloud shape in Microsoft Fabric.`
@@ -141,7 +143,7 @@ Optional uvicorn example for the standalone device simulator is documented separ
 | 09 Executive Overview | Portfolio targets, board report, and target-vs-actual roll-up. |
 | 10 Device Operations | Simulated device fleet, sensor explorer, and incident controls. |
 | 11 Dashboard Collections | Curated journeys that open related screens in order. |
-| 12 Proof of Execution | Requirement IDs and evidence trail. |
+| 12 Proof of Execution | Requirement IDs, evidence trail, and the technical rubric. |
 | 13 Platform Ops | Capacity, jobs, and platform cost telemetry. |
 | 14 Cross-cutting features | Dock panels, Copilot, Help, settings, localization, primitives. |
 | 15 Glossary | Beginner definitions for steel, industry, platform, and AI terms. |

@@ -14,7 +14,7 @@
             </picture>
         </NavLink>
 
-        <label class="topbar-field">
+        <label class="topbar-field topbar-field-site">
             <span class="sr-only">Site</span>
             <select value="@Shell.Site" @onchange="OnSiteChanged" aria-label="Selected site">
                 @foreach (var site in ShellState.Sites)
@@ -29,7 +29,7 @@
             <select value="@Shell.PrimaryPersona" @onchange="OnPersonaChanged" aria-label="Selected persona">
                 @foreach (var persona in Shell.Auth.CurrentUser.Personas)
                 {
-                    <option value="@persona">@FormatPersona(persona)</option>
+                    <option value="@persona">@ShellState.PersonaLabel(persona)</option>
                 }
             </select>
         </label>
@@ -126,7 +126,7 @@
         <aside class="shell-nav" aria-label="Persona navigation">
             <nav>
                 @{ string? lastGroup = null; }
-                @foreach (var item in Shell.NavigationItems)
+                @foreach (var item in Shell.VisibleNavigationItems)
                 {
                     @if (item.Group != lastGroup)
                     {
@@ -285,9 +285,6 @@
         Shell.PublishToast("info",
             $"NovaSteel v1.0 — Demo platform for AxelorMetal. All data is synthetic. Mode: {(Shell.DemoMode ? "DEMO" : "CLOUD")}.");
     }
-
-    private static string FormatPersona(string persona) =>
-        System.Text.RegularExpressions.Regex.Replace(persona, "([a-z])([A-Z])", "$1 $2");
 
     private bool IsActive(ShellNavItem item) =>
         string.Equals(item.Section, Shell.Section, StringComparison.OrdinalIgnoreCase);

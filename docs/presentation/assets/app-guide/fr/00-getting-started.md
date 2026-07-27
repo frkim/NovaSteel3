@@ -78,6 +78,8 @@ L'application est organisée par **persona**, c'est-à-dire un rôle nommé qui 
 | Rui Almeida — OT Systems Engineer | Vérifie appareils simulés et flux capteurs. | Device Operations (`apps\analytics-mfe\src\personaRoutes.ts:110-121`) |
 | Nils Andersen — Platform Ops | Gère capacité non-production, jobs et coûts. | Platform Ops (`apps\analytics-mfe\src\personaRoutes.ts:154-164`) |
 
+Choisir un persona dans la liste déroulante de la barre supérieure fait deux choses : ouvrir l'écran d'accueil de ce persona et réduire le menu de gauche aux sections où ce persona travaille, en masquant tout intitulé de groupe devenu vide (`apps\portal-shell\Services\ShellState.cs`, `SectionsByPersona` / `VisibleNavigationItems`). Marc Weber — Plant Manager est le rôle de triage transverse et conserve donc le menu complet ; la section actuellement ouverte reste toujours listée, afin qu'un lien profond ne puisse jamais vous laisser sur une page sans entrée de menu.
+
 ## L'architecture en une image avec des mots
 
 `Shell Blazor WebAssembly → microfrontend analytique React → BFF Python FastAPI → workers et fixtures déterministes → cible cloud Microsoft Fabric.`
@@ -141,7 +143,7 @@ L'exemple uvicorn du simulateur d'appareils autonome est optionnel; par défaut,
 | 09 Executive Overview | Cibles portefeuille et board report. |
 | 10 Device Operations | Flotte simulée, capteurs, incident. |
 | 11 Dashboard Collections | Parcours guidés entre écrans. |
-| 12 Proof of Execution | IDs d'exigence et preuves. |
+| 12 Proof of Execution | IDs d'exigence, preuves et grille technique. |
 | 13 Platform Ops | Capacité, jobs, coût plateforme. |
 | 14 Cross-cutting features | Dock, Copilot, aide, paramètres, localisation, composants. |
 | 15 Glossary | Définitions acier, industrie, plateforme et IA. |

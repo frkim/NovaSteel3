@@ -56,6 +56,16 @@
     flex: 1;
 }
 
+/*
+ * The site selector is the top-bar control that scopes everything rendered in
+ * the main panel, so it is offset to start where that panel starts rather than
+ * hugging the logo — the vertical alignment is what tells a viewer the two
+ * belong together.
+ */
+.topbar-field-site {
+    margin-left: 45px;
+}
+
 .topbar-field select,
 .icon-button,
 .demo-button {

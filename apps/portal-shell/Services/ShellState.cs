@@ -37,6 +37,62 @@ public sealed class ShellState
     public static IReadOnlyList<string> Locales { get; } =
         ["en-LU", "fr-LU", "de-DE", "nl-BE", "es-ES"];
 
+    /// <summary>
+    /// Human names for the demo personas, mirroring the persona registry the
+    /// analytics MFE ships (<c>apps/analytics-mfe/src/personas.ts</c>). A jury
+    /// remembers "Sofia Lindqvist" far better than "EnergyManager", and the
+    /// Copilot question catalog already prefixes its questions with the same
+    /// names, so the two surfaces must agree byte-for-byte.
+    /// </summary>
+    public static IReadOnlyDictionary<string, string> PersonaNames { get; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        ["PlantManager"] = "Marc Weber - Plant Manager",
+        ["FurnaceOperator"] = "Elena Duarte - Furnace Operator",
+        ["EnergyManager"] = "Sofia Lindqvist - Energy Manager",
+        ["QualityEngineer"] = "Jens Bakker - Quality Engineer",
+        ["SustainabilityOfficer"] = "Amina Haddad - Sustainability Officer",
+        ["KnowledgeEngineer"] = "Pieter Claes - Knowledge Engineer",
+        ["Executive"] = "Isabelle Moreau - Executive",
+        ["PlatformOps"] = "Nils Andersen - Platform Ops",
+    };
+
+    public static string PersonaLabel(string persona) =>
+        PersonaNames.TryGetValue(persona, out var label)
+            ? label
+            : System.Text.RegularExpressions.Regex.Replace(persona, "([a-z])([A-Z])", "$1 $2");
+
+    /// <summary>
+    /// The sections each persona actually works in.
+    /// </summary>
+    /// <remarks>
+    /// Every role but the plant manager gets a narrowed workspace: showing an
+    /// energy manager the device fleet or the quality engineer the capacity
+    /// controls is noise that a demo jury reads as an undifferentiated menu.
+    /// The plant manager is deliberately the cross-domain triage role, so the
+    /// full menu stays available there — that is also the safe default for any
+    /// persona this map does not cover.
+    /// </remarks>
+    private static readonly IReadOnlyDictionary<string, string[]> SectionsByPersona =
+        new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["FurnaceOperator"] = ["command-center", "operations", "furnace-health", "knowledge-hub"],
+            ["EnergyManager"] = ["command-center", "energy-optimization", "sustainability-compliance", "dashboards"],
+            ["QualityEngineer"] = ["command-center", "quality", "knowledge-hub", "dashboards"],
+            ["SustainabilityOfficer"] =
+                ["sustainability-compliance", "executive-overview", "dashboards", "proof-of-execution"],
+            ["KnowledgeEngineer"] = ["operations", "quality", "knowledge-hub", "dashboards"],
+            ["Executive"] =
+            [
+                "executive-overview",
+                "sustainability-compliance",
+                "dashboards",
+                "proof-of-execution",
+                "technical-requirements",
+                "company-website",
+            ],
+            ["PlatformOps"] = ["command-center", "device-operations", "platform-ops", "dashboards"],
+        };
+
     public IReadOnlyList<ShellNavItem> NavigationItems { get; } =
     [
         // Daily operations
@@ -59,6 +115,31 @@ public sealed class ShellState
     ];
 
     public event Action? Changed;
+
+    /// <summary>
+    /// The navigation the selected persona should see: their own sections plus
+    /// whatever section is currently open, so a deep link (a proof badge, for
+    /// example) can never strand the user on a page with no menu entry.
+    /// Group headings are not modelled here — the layout emits a heading only
+    /// when an item of that group survives the filter, so a group that empties
+    /// out disappears with its items.
+    /// </summary>
+    public IReadOnlyList<ShellNavItem> VisibleNavigationItems
+    {
+        get
+        {
+            if (!SectionsByPersona.TryGetValue(PrimaryPersona, out var sections))
+            {
+                return NavigationItems;
+            }
+
+            return NavigationItems
+                .Where(item =>
+                    sections.Contains(item.Section, StringComparer.OrdinalIgnoreCase)
+                    || string.Equals(item.Section, Section, StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+        }
+    }
 
     public AuthDemoContext Auth { get; }
 
