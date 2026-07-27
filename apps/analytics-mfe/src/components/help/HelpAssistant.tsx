@@ -8,7 +8,9 @@ import { BilingualText } from './BilingualText'
 import { pickHelpKey, resolveHelpTarget } from './resolveHelpTarget'
 import type { HelpTarget, HelpTopic } from './helpTypes'
 
-const POPUP_WIDTH = 340
+const POPUP_WIDTH = 420
+/** Two languages sit side by side, so the popup needs room for both columns. */
+const POPUP_WIDTH_BILINGUAL = 760
 const CURSOR_GAP = 18
 const VIEWPORT_MARGIN = 12
 const HELP_BODY_CLASS = 'novasteel-help-mode'
@@ -33,12 +35,12 @@ function rectOf(element: HTMLElement): Rect {
 }
 
 /** Keeps the popup inside the viewport, flipping to the other side when needed. */
-function placePopup(point: { x: number; y: number }, height: number) {
+function placePopup(point: { x: number; y: number }, height: number, width: number) {
   const viewportWidth = window.innerWidth
   const viewportHeight = window.innerHeight
   let left = point.x + CURSOR_GAP
-  if (left + POPUP_WIDTH + VIEWPORT_MARGIN > viewportWidth) {
-    left = Math.max(VIEWPORT_MARGIN, point.x - CURSOR_GAP - POPUP_WIDTH)
+  if (left + width + VIEWPORT_MARGIN > viewportWidth) {
+    left = Math.max(VIEWPORT_MARGIN, point.x - CURSOR_GAP - width)
   }
   let top = point.y + CURSOR_GAP
   if (top + height + VIEWPORT_MARGIN > viewportHeight) {
@@ -160,7 +162,8 @@ export function HelpAssistant({ active, onExit, scope, locale, bilingual = false
   // The label is read straight off the page, so it is only ever one language.
   const headingIsBilingual = bilingual && !selection?.target.label
   const frenchFirst = isFrenchFirst(locale)
-  const position = selection ? placePopup(selection.point, popupHeight) : null
+  const popupWidth = bilingual ? POPUP_WIDTH_BILINGUAL : POPUP_WIDTH
+  const position = selection ? placePopup(selection.point, popupHeight, popupWidth) : null
 
   return (
     <>
@@ -241,7 +244,8 @@ export function HelpAssistant({ active, onExit, scope, locale, bilingual = false
             position: 'fixed',
             top: position.top,
             left: position.left,
-            width: POPUP_WIDTH,
+            width: popupWidth,
+            maxWidth: `calc(100vw - ${VIEWPORT_MARGIN * 2}px)`,
             maxHeight: '70vh',
             overflowY: 'auto',
             p: 2,
