@@ -130,6 +130,21 @@ export const personaSections: PersonaSection[] = [
       { slug: 'cost-telemetry', label: 'Cost & Telemetry' },
     ],
   },
+  {
+    section: 'company-website',
+    title: 'AxelorMetal',
+    persona: 'Public site',
+    description:
+      'The public corporate site of AxelorMetal, the Luxembourg steel producer that runs the NovaSteel platform.',
+    defaultSubView: 'home',
+    tabs: [
+      { slug: 'home', label: 'Home' },
+      { slug: 'company', label: 'Company' },
+      { slug: 'products', label: 'Products & Markets' },
+      { slug: 'steel-knowledge', label: 'Steel Knowledge' },
+      { slug: 'contact', label: 'Contact' },
+    ],
+  },
 ]
 
 export function resolveSection(

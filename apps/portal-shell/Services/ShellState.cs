@@ -31,7 +31,8 @@ public sealed class ShellState
         new("Executive Overview", "executive-overview", null, "Executive", "▤"),
         new("Device Operations", "device-operations", "fleet", "PlatformOps", "◈"),
         new("Dashboards", "dashboards", "collections", "PlantManager", "▦"),
-        new("Platform Ops", "platform-ops", "capacity", "PlatformOps", "⚙")
+        new("Platform Ops", "platform-ops", "capacity", "PlatformOps", "⚙"),
+        new("AxelorMetal", "company-website", "home", "PlantManager", "◇")
     ];
 
     public event Action? Changed;

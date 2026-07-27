@@ -21,6 +21,11 @@ import { DeviceFleet } from './DeviceFleet'
 import { DeviceSensors } from './DeviceSensors'
 import { DeviceSimulator } from './DeviceSimulator'
 import { DashboardCollections } from './DashboardCollections'
+import { CompanyWebsiteHome } from './CompanyWebsiteHome'
+import { CompanyWebsiteCompany } from './CompanyWebsiteCompany'
+import { CompanyWebsiteProducts } from './CompanyWebsiteProducts'
+import { CompanyWebsiteSteelKnowledge } from './CompanyWebsiteSteelKnowledge'
+import { CompanyWebsiteContact } from './CompanyWebsiteContact'
 
 /** Maps `${section}/${subView}` to the screen component that renders it. */
 export const screenRegistry: Record<string, ComponentType> = {
@@ -47,6 +52,11 @@ export const screenRegistry: Record<string, ComponentType> = {
   'device-operations/sensors': DeviceSensors,
   'device-operations/simulator': DeviceSimulator,
   'dashboards/collections': DashboardCollections,
+  'company-website/home': CompanyWebsiteHome,
+  'company-website/company': CompanyWebsiteCompany,
+  'company-website/products': CompanyWebsiteProducts,
+  'company-website/steel-knowledge': CompanyWebsiteSteelKnowledge,
+  'company-website/contact': CompanyWebsiteContact,
 }
 
 export function resolveScreen(section: string, subView: string): ComponentType | null {
