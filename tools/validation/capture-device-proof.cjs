@@ -254,6 +254,85 @@ async function main() {
   check('Dashboard collections render entries', dash.lists > 0, `${dash.lists} list items`);
   await shot('35-dashboard-collections');
 
+  // ---------- Dockview workspace ----------
+  console.log('\n== Dockview workspace ==');
+  await goto(`${BASE}/NS-DEMO-LUX-01/command-center`);
+  const dock = await evaluate(`(() => {
+    const grid = document.querySelector('[data-testid="workspace-dock"]');
+    const tabs = Array.from(document.querySelectorAll('.dv-tab')).map((t) => t.innerText.trim());
+    return {
+      docked: Boolean(grid),
+      tabs,
+      // A close button on a structural tab would let an operator empty the screen.
+      closes: document.querySelectorAll('.dv-tab .dv-default-tab-action').length,
+      generic: tabs.filter((t) => t === 'Details' || t === 'Overview').length,
+      maximize: document.querySelectorAll('[aria-label="Maximize panel"]').length,
+      reset: /Reset layout/i.test(document.body.innerText),
+    };
+  })()`);
+  check('Command Center renders as a Dockview workspace', dock.docked);
+  check('Workspace exposes one tab per panel', dock.tabs.length >= 4, dock.tabs.join(' | '));
+  check('Structural panels cannot be closed', dock.closes === 0, `${dock.closes} close buttons`);
+  check('No tab falls back to a generic label', dock.generic === 0, `${dock.generic} generic tabs`);
+  check('Panels can be maximized', dock.maximize > 0, `${dock.maximize} maximize controls`);
+  check('Layout can be reset from the header', dock.reset);
+  await shot('36-dock-workspace');
+
+  // A closable tab is the exception, and it must delegate to screen state.
+  await goto(`${BASE}/NS-DEMO-LUX-01/device-operations/sensors`);
+  await clickSelector('table tbody tr td');
+  const closable = await evaluate(`(() => ({
+    closes: document.querySelectorAll('.dv-tab .dv-default-tab-action').length,
+    tabs: Array.from(document.querySelectorAll('.dv-tab')).map((t) => t.innerText.trim()),
+  }))()`);
+  check(
+    'A detail panel opened from a row is closable',
+    closable.closes === 1,
+    closable.tabs.join(' | '),
+  );
+  await shot('37-dock-closable-detail');
+
+  // ---------- AxelorMetal corporate website ----------
+  console.log('\n== AxelorMetal corporate website ==');
+  await goto(`${BASE}/NS-DEMO-LUX-01/company-website/home`);
+  const site = await evaluate(`(() => {
+    const tabs = Array.from(document.querySelectorAll('.dv-tab')).map((t) => t.innerText.trim());
+    return {
+      tabs,
+      closes: document.querySelectorAll('.dv-tab .dv-default-tab-action').length,
+      headline: /Engineering the future of steel/i.test(document.body.innerText),
+      company: (document.body.innerText.match(/AxelorMetal/g) || []).length,
+      platform: /NovaSteel/.test(document.body.innerText),
+      rawKeys: /\\bwebsite\\.\\w+/.test(document.body.innerText),
+    };
+  })()`);
+  check('Corporate home page renders its headline', site.headline);
+  check('Company is named AxelorMetal', site.company > 0, `${site.company} mentions`);
+  check('Platform is still named NovaSteel', site.platform);
+  check('Website resolves i18n keys', !site.rawKeys, 'no raw website.* keys rendered');
+  check('Website page is docked as one panel', site.tabs.length === 1, site.tabs.join(' | '));
+  check('Website page cannot be closed', site.closes === 0);
+  await shot('38-axelormetal-home');
+
+  await goto(`${BASE}/NS-DEMO-LUX-01/company-website/steel-knowledge`);
+  const glossary = await evaluate(`(() => {
+    // The page has several tables; the glossary is the one that is labelled.
+    const tables = Array.from(document.querySelectorAll('table'));
+    const table = tables.find((t) => /glossary/i.test(t.getAttribute('aria-label') || '')) || null;
+    return {
+      tables: tables.length,
+      rows: table ? table.querySelectorAll('tbody tr').length : 0,
+      heading: /Steel, iron, and other metals/i.test(document.body.innerText),
+    };
+  })()`);
+  check('Steel Knowledge page renders', glossary.heading);
+  check(
+    'Steel Knowledge glossary lists its terms',
+    glossary.rows >= 10,
+    `${glossary.rows} rows of ${glossary.tables} tables`,
+  );
+  await shot('39-axelormetal-steel-knowledge');
+
   const failed = results.filter((r) => !r.ok);
   const report = {
     base: BASE,
