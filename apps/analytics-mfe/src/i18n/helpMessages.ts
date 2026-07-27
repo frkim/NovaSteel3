@@ -15,7 +15,7 @@ export const HELP_EN: HelpCatalog = {
     what: 'A tile showing one measurement, its trend arrow and how it compares with the target.',
     steel:
       'A steel plant runs on a handful of numbers. Putting them side by side lets a shift manager see the state of the plant in a few seconds instead of reading reports.',
-    useIt: 'A tile with an arrow cursor can be clicked to open the detail behind the number.',
+    useIt: 'If a tile highlights when you hover over it, you can click it to open the detail behind the number.',
   },
   'generic.chart': {
     title: 'Chart',
@@ -320,7 +320,7 @@ export const HELP_EN: HelpCatalog = {
   'kpi:server': {
     title: 'Solver status',
     what: 'Whether the optimisation engine found a valid answer, and how good it is.',
-    steel: 'Being honest about whether the maths converged is what separates a decision-support tool from a black box.',
+    steel: 'Saying plainly whether the optimisation actually solved is what separates a decision-support tool from a black box.',
     useIt: 'An infeasible result means the constraints cannot all be met - relax one and rerun.',
   },
 

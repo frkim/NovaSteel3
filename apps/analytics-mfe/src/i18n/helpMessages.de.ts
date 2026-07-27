@@ -7,7 +7,7 @@ export const HELP_DE: HelpCatalog = {
     what: 'Eine Kachel zeigt eine Messgröße, ihren Trendpfeil und den Vergleich mit dem Zielwert.',
     steel:
       'Ein Stahlwerk wird mit wenigen Kennzahlen geführt. Nebeneinander angezeigt zeigen sie der Schichtleitung in Sekunden den Zustand des Werks, ohne Berichte lesen zu müssen.',
-    useIt: 'Eine Kachel mit Pfeilcursor kann angeklickt werden, um die Details hinter der Zahl zu öffnen.',
+    useIt: 'Hebt sich eine Kachel beim \u00dcberfahren mit der Maus hervor, k\u00f6nnen Sie sie anklicken, um die Details hinter der Zahl zu \u00f6ffnen.',
   },
   'generic.chart': {
     title: 'Diagramm',
@@ -312,7 +312,7 @@ export const HELP_DE: HelpCatalog = {
   'kpi:server': {
     title: 'Status des Lösers',
     what: 'Ob die Optimierungsmaschine eine gültige Antwort gefunden hat und wie gut sie ist.',
-    steel: 'Ehrlich zu zeigen, ob die Mathematik konvergiert ist, trennt ein Entscheidungsunterstützungswerkzeug von einer Blackbox.',
+    steel: 'Klar zu sagen, ob die Optimierung tats\u00e4chlich gel\u00f6st wurde, trennt ein Entscheidungsunterst\u00fctzungswerkzeug von einer Blackbox.',
     useIt: 'Ein unzulässiges Ergebnis bedeutet, dass nicht alle Zwänge gleichzeitig erfüllt werden können. Lockern Sie einen und führen Sie erneut aus.',
   },
 

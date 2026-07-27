@@ -7,7 +7,7 @@ export const HELP_FR: HelpCatalog = {
     what: 'Une tuile montre une mesure, sa flèche de tendance et son écart à la cible.',
     steel:
       'Une aciérie se pilote avec quelques chiffres. Les afficher côte à côte permet au chef de poste de comprendre l\u2019état de l\u2019usine en quelques secondes au lieu de lire des rapports.',
-    useIt: 'Une tuile avec un curseur en forme de flèche peut être cliquée pour ouvrir le détail derrière le chiffre.',
+    useIt: 'Si une tuile se met en surbrillance au survol, vous pouvez cliquer dessus pour ouvrir le d\u00e9tail derri\u00e8re le chiffre.',
   },
   'generic.chart': {
     title: 'Graphique',
@@ -312,7 +312,7 @@ export const HELP_FR: HelpCatalog = {
   'kpi:server': {
     title: 'État du solveur',
     what: 'Indique si le moteur d\u2019optimisation a trouvé une réponse valide, et sa qualité.',
-    steel: 'Dire clairement si le calcul mathématique a convergé distingue un outil d\u2019aide à la décision d\u2019une boîte noire.',
+    steel: 'Dire clairement si l\u2019optimisation a r\u00e9ellement abouti distingue un outil d\u2019aide \u00e0 la d\u00e9cision d\u2019une bo\u00eete noire.',
     useIt: 'Un résultat infaisable signifie que les contraintes ne peuvent pas toutes être satisfaites : relâchez-en une et relancez.',
   },
 

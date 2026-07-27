@@ -7,7 +7,7 @@ export const HELP_NL: HelpCatalog = {
     what: 'Een tegel toont één meting, de trendpijl en de vergelijking met het doel.',
     steel:
       'Een staalfabriek draait op een klein aantal cijfers. Door ze naast elkaar te zetten ziet een ploegleider in enkele seconden de toestand van de fabriek, zonder rapporten te lezen.',
-    useIt: 'Een tegel met een pijlcursor kan worden aangeklikt om de details achter het cijfer te openen.',
+    useIt: 'Licht een tegel op wanneer u er met de muis overheen gaat, dan kunt u erop klikken om de details achter het cijfer te openen.',
   },
   'generic.chart': {
     title: 'Grafiek',
@@ -312,7 +312,7 @@ export const HELP_NL: HelpCatalog = {
   'kpi:server': {
     title: 'Solverstatus',
     what: 'Of de optimalisatiemotor een geldig antwoord vond, en hoe goed dat is.',
-    steel: 'Eerlijk zijn over of de wiskunde convergeerde, onderscheidt een beslissingsondersteunend hulpmiddel van een black box.',
+    steel: 'Duidelijk zeggen of de optimalisatie werkelijk is opgelost, onderscheidt een beslissingsondersteunend hulpmiddel van een black box.',
     useIt: 'Een onhaalbaar resultaat betekent dat niet alle beperkingen tegelijk kunnen worden gehaald. Versoepel er één en voer opnieuw uit.',
   },
 

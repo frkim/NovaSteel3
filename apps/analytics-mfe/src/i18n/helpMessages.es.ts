@@ -7,7 +7,7 @@ export const HELP_ES: HelpCatalog = {
     what: 'Una tarjeta muestra una medición, su flecha de tendencia y cómo se compara con el objetivo.',
     steel:
       'Una planta siderúrgica se gestiona con unos pocos números. Verlos juntos permite al jefe de turno entender el estado de la planta en segundos, sin leer informes.',
-    useIt: 'Una tarjeta con cursor de flecha se puede pulsar para abrir el detalle detrás del número.',
+    useIt: 'Si una tarjeta se resalta al pasar el rat\u00f3n por encima, puede pulsarla para abrir el detalle detr\u00e1s del n\u00famero.',
   },
   'generic.chart': {
     title: 'Gráfico',
@@ -312,7 +312,7 @@ export const HELP_ES: HelpCatalog = {
   'kpi:server': {
     title: 'Estado del solucionador',
     what: 'Si el motor de optimización encontró una respuesta válida, y qué tan buena es.',
-    steel: 'Ser claro sobre si las matemáticas convergieron separa una herramienta de apoyo a la decisión de una caja negra.',
+    steel: 'Decir con claridad si la optimizaci\u00f3n realmente se resolvi\u00f3 separa una herramienta de apoyo a la decisi\u00f3n de una caja negra.',
     useIt: 'Un resultado inviable significa que no todas las restricciones pueden cumplirse. Relaje una y vuelva a ejecutar.',
   },
 
