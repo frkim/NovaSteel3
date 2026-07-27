@@ -1,12 +1,33 @@
 # NovaSteel documentation
 
-> **Documentation status:** v1.2 · **Implemented baseline:** local deterministic
+> **Documentation status:** v1.3 · **Implemented baseline:** local deterministic
 > demo, application source, tests/CI, Bicep IaC, and Fabric source assets are
 > present and locally validated.  
 > **Cloud status:** no Azure, Fabric, Foundry, Speech, Eventstream, or Power BI
 > tenant deployment has been performed.  
 > **Technical authority:** [solution architecture](architecture/solution-architecture.md)
-> and [deployment topology](architecture/deployment-topology.md) · **Freshness:** 2026-07-26
+> and [deployment topology](architecture/deployment-topology.md) · **Freshness:** 2026-07-27
+
+## Wave 4 summary
+
+Wave 4 (completed 2026-07-27) added the following front-end experience
+capabilities:
+
+- **Dockview workspace on every screen** — every analytics route now renders
+  through an inner Dockview workspace, with an outer Dockview host for Copilot
+  when chat is open. Panels are derived from each screen's JSX, structural panels
+  are non-closable, operator arrangements persist per screen, and the dashboard
+  header can reset the layout (§9.7 and §22, [dashboard-specification.md](ux/dashboard-specification.md);
+  §5.1.1 and ADR-014, [solution-architecture.md](architecture/solution-architecture.md)).
+- **AxelorMetal corporate website** — a new `company-website` section presents
+  the fictitious steel producer that operates the plant and uses NovaSteel. Its
+  Home, Company, Products & Markets, Steel Knowledge, and Contact pages are
+  localized in the five product locales and are docked as full-bleed,
+  non-closable panels (§12.11, [dashboard-specification.md](ux/dashboard-specification.md)).
+- **Front-end verification** — `dock.test.tsx` (13 tests) and
+  `CompanyWebsite.test.tsx` (9 tests) cover panel derivation, layout behavior,
+  tab labels, and the localized website route set. The wave-4 front-end suite is
+  120 tests across 14 files, with `npx tsc -b --force` clean.
 
 ## Wave 3 summary and closed analysis findings
 
@@ -40,8 +61,9 @@ All remaining `docs/_upgrade/` items addressed in wave 3 are noted in
 
 ## Executive summary
 
-NovaSteel is an EU-oriented decision-support platform for a four-country steel
-estate. The runnable local implementation combines a C# Blazor WebAssembly
+NovaSteel is an EU-oriented decision-support platform for AxelorMetal's
+four-country steel estate. The runnable local implementation combines a C#
+Blazor WebAssembly
 shell, React/TypeScript MUI/D3 dashboard, Python/FastAPI BFF, deterministic
 optimizer/scoring/knowledge workflows, and synthetic simulator fixtures. The
 target cloud architecture remains Fabric-centered: Eventstream/Eventhouse for
@@ -56,7 +78,7 @@ systems, CMMS, or production schedules.
 
 | Area | Implemented and evidenced | Not yet deployed/proven |
 |---|---|---|
-| Application | Portal shell, analytics MFE (including Device Fleet, Sensor Explorer, Device Simulator, and Dashboard Collections screens), Dockview Copilot chat, BFF routes, authorization stubs, audit hash-chain (durable via Table Storage), simulated capacity control | Entra production validation, cloud query adapters |
+| Application | Portal shell, analytics MFE (including Device Fleet, Sensor Explorer, Device Simulator, Dashboard Collections, Dockview workspace, and AxelorMetal corporate website screens), Dockview Copilot chat, BFF routes, authorization stubs, audit hash-chain (durable via Table Storage), simulated capacity control | Entra production validation, cloud query adapters |
 | Data/demo | Deterministic simulator, committed fixture, PuLP/CBC MILP optimizer, physics-informed RUL regressor, six persona moments, offline fallback | OT ingestion and non-synthetic data |
 | Fabric | Source-controlled item/catalog/KQL/Lakehouse/notebook/pipeline/semantic/RTI assets; local structural validator | Fabric tenant workspace, capacity, item deployment, RLS/query behavior |
 | Azure IaC | Bicep, policy, OIDC deployment scripts, alert rules, static validation — **deployed to Sweden Central** | Private-network hardening proof, DR rehearsal |
@@ -87,10 +109,13 @@ See [the rehearsal report](../artifacts/demo-validation/rehearsal-report.md),
 5. Adapters select their Azure implementation when configuration is present and
    fall back to deterministic, checksummed synthetic fixtures otherwise, so the
    API and contract boundaries are identical in both modes.
-6. A docked Copilot chat explains what is on screen. `knowledge-orchestrator`
-   assembles the grounding — screen profile, glossary, and an optional curated
-   public-context corpus — and the chat agents have no tools, so the assistant
-   answers about meaning while the dashboard remains the only source of values.
+6. The React MFE is a Dockview workspace. Screen panels are derived from the JSX
+   each route already declares, and a two-level dock keeps the Copilot chat
+   mounted while the current workspace changes. `knowledge-orchestrator`
+   assembles the chat grounding — screen profile, glossary, and an optional
+   curated public-context corpus — and the chat agents have no tools, so the
+   assistant answers about meaning while the dashboard remains the only source
+   of values.
 
 ## Reading paths
 
@@ -123,6 +148,7 @@ alignment to the demo transitions.
 | Architecture | [Solution architecture](architecture/solution-architecture.md), [deployment topology](architecture/deployment-topology.md), [editable diagrams](diagrams/README.md) |
 | Implementation | [Root quick start](../README.md), [implementation guide](implementation/implementation-guide.md), [API contracts](implementation/api-contracts.md) |
 | Data/Fabric | [Synthetic data](data/synthetic-data-and-simulators.md), [Fabric README](../fabric/README.md), [Fabric research](research/fabric-platform.md) |
+| Experience | [UX spec §9.7](ux/dashboard-specification.md#97-dockview-workspace-model-all-screens), [UX spec §12.11](ux/dashboard-specification.md#1211-axelormetal-corporate-website-company-website-s-24), [Solution architecture ADR-014](architecture/solution-architecture.md#adr-014--two-level-dockview-workspace-with-jsx-derived-panels) |
 | Device Operations | [Synthetic data §13](data/synthetic-data-and-simulators.md#13-device-simulator-estate), [UX spec §12.9–12.10](ux/dashboard-specification.md), [API contracts §4.12](implementation/api-contracts.md#412-device-operations), [Operations §12](operations/operations-and-cost.md) |
 | Security/operations | [Security governance](security/security-governance-and-threat-model.md), [operations](operations/operations-and-cost.md), [package-feed policy](tech/security_requirement.md) |
 | Validation | [Validation report](validation-report.md), [local evidence](../artifacts/validation/final/evidence-manifest.json), [rehearsal report](../artifacts/demo-validation/rehearsal-report.md) |

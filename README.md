@@ -11,9 +11,10 @@
 | Command centre (deep link) | <https://novasteelv3-portal.calmbeach-dbad72b1.swedencentral.azurecontainerapps.io/NS-DEMO-LUX-01/command-center/overview> |
 | BFF API | <https://novasteelv3-bff.calmbeach-dbad72b1.swedencentral.azurecontainerapps.io> |
 
-NovaSteel is an EU-oriented, Fabric-centered decision-support platform for a
-four-country steel estate. It uses a Blazor WebAssembly shell, a React/MUI/D3
-analytics microfrontend, a FastAPI BFF, Python advisory services (a PuLP/CBC
+NovaSteel is an EU-oriented, Fabric-centered decision-support platform for
+AxelorMetal's four-country steel estate. It uses a Blazor WebAssembly shell, a
+React/MUI/D3 analytics microfrontend with Dockview workspaces, a FastAPI BFF,
+Python advisory services (a PuLP/CBC
 MILP energy optimiser, a physics-informed RUL regressor, and a knowledge
 orchestrator with a critic loop and agent handoff), and synthetic simulator
 fixtures. Every service runs fully offline against deterministic fixtures as a
@@ -149,13 +150,16 @@ to `NS-DEMO-LUX-01`. Useful direct routes are:
 | Sensor Explorer (wave 3) | `http://localhost:5266/lu/device-operations/sensors` |
 | Device Simulator (wave 3) | `http://localhost:5266/lu/device-operations/simulator` |
 | Dashboard Collections (wave 3) | `http://localhost:5266/lu/dashboards/collections` |
+| AxelorMetal corporate website (wave 4) | `http://localhost:5266/lu/company-website/home` |
 
-The **Copilot** button in the dashboard header opens a docked chat panel on any
-of these routes. It answers from the active screen's grounding material — screen
-profile, glossary, and an optional curated public-context corpus — in EN/FR/DE/
-NL/ES, and reports the reasoning tier and the sources it used. It has no tools
-and no data-plane access, and conversations are held in the API process only.
-See [ADR-011 and ADR-012](docs/architecture/solution-architecture.md#10-architecture-decision-records).
+Every analytics route is a Dockview workspace: panels can be rearranged,
+maximized, persisted per screen, and reset from the dashboard header. The
+**Copilot** button opens an outer docked chat panel on any route. It answers from
+the active screen's grounding material — screen profile, glossary, and an
+optional curated public-context corpus — in EN/FR/DE/NL/ES, and reports the
+reasoning tier and the sources it used. It has no tools and no data-plane access,
+and conversations are held in the API process only. See [ADR-011, ADR-012, and
+ADR-014](docs/architecture/solution-architecture.md#10-architecture-decision-records).
 
 ### 4. Run the scripted API demonstration
 
@@ -264,7 +268,7 @@ the difference is scope, not a shortfall against the model.
 | Path | Purpose |
 |---|---|
 | `apps\portal-shell` | Blazor WASM host, routing, demo identity, capacity mediation |
-| `apps\analytics-mfe` | React/TypeScript MUI/D3 persona dashboard with the Dockview Copilot chat |
+| `apps\analytics-mfe` | React/TypeScript MUI/D3 persona dashboard with Dockview workspaces, docked Copilot chat, and the AxelorMetal corporate website |
 | `services` | FastAPI BFF, optimizer, scoring, ingest relay, knowledge orchestration and Copilot grounding |
 | `services\device-simulator` | Deterministic 6-device/34-sensor fleet simulator (runs in-process inside BFF; standalone FastAPI app also ships) |
 | `simulator` | Deterministic synthetic scenarios, validators, CLI |

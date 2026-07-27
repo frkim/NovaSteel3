@@ -389,7 +389,7 @@ This storyboard is the binding link between personas and the demo, matching `doc
 
 | # | Moment | Time | Lead persona (voice) | Narrative beat | What's shown |
 |---|---|---|---|---|---|
-| **DM-1** | Portfolio Command Center | 0:00–2:00 | Plant Manager (Executive sets context) | "Here's NovaSteel today — one view across energy, carbon, furnace health, and quality, for all four sites." | Site/portfolio cockpit; natural-language copilot answers a live question; four target outcomes shown as baseline→target→current. |
+| **DM-1** | Portfolio Command Center | 0:00–2:00 | Plant Manager (Executive sets context) | "Here's AxelorMetal today — and here is how NovaSteel gives one view across energy, carbon, furnace health, and quality for all four sites." | Site/portfolio cockpit; natural-language copilot answers a live question; four target outcomes shown as baseline→target→current. |
 | **DM-2** | Energy Dispatch Optimization | 2:00–4:30 | Energy Manager | "Electricity prices swing hourly — our agent turns that volatility into savings, safely." | Spot price/load forecast, AI-recommended schedule with € and CO₂ impact, simulated/shadow approval, savings-ledger update. |
 | **DM-3** | Furnace Lining RUL & Maintenance | 4:30–7:00 | Maintenance/Reliability Engineer (Furnace Operator cameo) | "A €8M failure, 21 days before it happens, not after." | RUL dashboard with confidence band and contributing features, alert-to-synthetic-work-order flow. |
 | **DM-4** | In-line Quality Prediction & Root Cause | 7:00–9:30 | Quality Engineer | "We catch the automotive-grade risk while the heat is still running, not after the customer complains." | Live risk score on an active heat, corrective-action recommendation, root-cause copilot tracing a past claim. |

@@ -2,19 +2,20 @@
 
 ## 1. Demo objective
 
-In 15 minutes, show how NovaSteel connects live plant signals to a Fabric data core, predicts furnace-lining risk 21 days ahead, optimizes energy against spot prices, improves quality, and captures retiring-operator knowledge. Every screen and spoken claim must identify the data as synthetic and distinguish predictions from measured outcomes.
+In 15 minutes, show how NovaSteel connects live plant signals to a Fabric data core, predicts furnace-lining risk 21 days ahead, optimizes energy against spot prices, improves quality, and captures retiring-operator knowledge. Open with the AxelorMetal public website to establish the fictitious company narrative before entering the NovaSteel platform. Every screen and spoken claim must identify the data as synthetic and distinguish predictions from measured outcomes.
 
 ## 2. Audience personas and tabs
 
 Keep these browser tabs open and ordered:
 
-1. **Plant Manager / Executive** — fleet KPIs, output, energy, CO₂, quality yield, ROI, and audit roll-up.
-2. **Reliability Engineer** — furnace thermal map, lining RUL, alert and work order.
-3. **Energy Manager** — spot price, baseline/optimized dispatch, constraints and savings.
-4. **Quality Engineer** — genealogy, process drift, predicted/measured quality.
-5. **Operator Knowledge** — interview, STT transcript, extracted procedure draft.
-6. **Fabric Core** — Eventstream, lakehouse/warehouse lineage, freshness, quarantine.
-7. **Demo Control** — scenario, accelerated clock, health, reset and fallback controls.
+1. **AxelorMetal public site** — home/company/products/steel knowledge/contact context.
+2. **Plant Manager / Executive** — fleet KPIs, output, energy, CO₂, quality yield, ROI, and audit roll-up.
+3. **Reliability Engineer** — furnace thermal map, lining RUL, alert and work order.
+4. **Energy Manager** — spot price, baseline/optimized dispatch, constraints and savings.
+5. **Quality Engineer** — genealogy, process drift, predicted/measured quality.
+6. **Operator Knowledge** — interview, STT transcript, extracted procedure draft.
+7. **Fabric Core** — Eventstream, lakehouse/warehouse lineage, freshness, quarantine.
+8. **Demo Control** — scenario, accelerated clock, health, reset and fallback controls.
 
 Use a separate browser profile with notifications disabled, zoom at 90-100%, no personal bookmarks, and no production tenant tabs.
 
@@ -64,20 +65,20 @@ Ideally, install nothing on demo day.
 
 - Set scenario `demo-full`, root seed `240725`, speed `60x`.
 - Confirm control status: `history=loaded`, `stream=paused`, `alert=armed`, `fallbacks=ready`.
-- Put Plant Manager tab on screen.
+- Put the AxelorMetal website home tab on screen; keep the Plant Manager route ready for the handoff.
 - Start a visible 15-minute presenter timer.
 - Have the reset operator and presenter agree on the hand signal for switching to fallback.
 
 ## 4. Minute-by-minute script
 
-This order is binding with the six demo moments in [solution requirements](../specs/solution-requirements.md) and [personas and journeys](../personas/personas-and-journeys.md): DM-1 (0:00–2:00), DM-2 (2:00–4:30), DM-3 (4:30–7:20, including the Copilot grounding beat), DM-4 (7:20–9:30), DM-5 (9:30–12:00), DM-6 (12:00–14:00), then a one-minute recap/buffer.
+This order is binding with the six demo moments in [solution requirements](../specs/solution-requirements.md) and [personas and journeys](../personas/personas-and-journeys.md): a short AxelorMetal public-site setup, DM-1 (0:00–2:00), DM-2 (2:00–4:30, including the Dockview workspace beat), DM-3 (4:30–7:20, including the Copilot grounding beat), DM-4 (7:20–9:30), DM-5 (9:30–12:00), DM-6 (12:00–14:00), then a one-minute recap/buffer.
 
 | Time | Persona/tab and action | Presenter narrative | Proof point / fallback |
 |---|---|---|---|
-| 00:00-01:00 | **Plant Manager**. Show four-country fleet and select Moselle Integrated Works. | “NovaSteel unifies production, energy, emissions, quality, maintenance, and operator knowledge. Everything shown is deterministic synthetic data.” Point out energy at 35% of modeled production cost and the four target outcomes. | If dashboard is slow, use cached fleet overview. Do not wait more than 10 seconds. |
+| 00:00-01:00 | **AxelorMetal public site**, then **Plant Manager**. Show `company-website/home`, name AxelorMetal as the fictitious steel producer, then enter the Command Center and select Moselle Integrated Works. | “AxelorMetal is the plant operator; NovaSteel is the decision-support platform we are defending. NovaSteel unifies production, energy, emissions, quality, maintenance, and operator knowledge. Everything shown is deterministic synthetic data.” Point out energy at 35% of modeled production cost and the four target outcomes. | If the website is slow, use cached home/company screenshots; if the dashboard is slow, use cached fleet overview. Do not wait more than 10 seconds. |
 | 01:00-02:00 | **Fabric Core**. Show live Eventstream input, bronze-to-silver-to-gold lineage, freshness, and contract status. | “Captors publish event-time data through the edge; Fabric retains the immutable envelope, deduplicates and normalizes units, and serves one governed semantic layer.” Point to synthetic labels, schema version, and quarantine count. | Use a pre-recorded 20-second Fabric clip or architecture screenshot; continue speaking while switching. |
 | 02:00-03:00 | **Demo Control**, then **Energy Manager**. Unpause at 60x and show day-ahead price with the baseline dispatch. | “We are accelerating time, not fabricating UI updates. Sequence, event time, lineage, and seed remain reproducible. The urgent automotive coil is fixed; only eligible reheat batches have flexibility.” | If stream is unavailable, start local replay; otherwise use the cached `evening-scarcity` price curve. |
-| 03:00-04:30 | **Energy Manager**. Run or reveal the optimized schedule and constraint report. | Compare baseline and optimized Gantt charts. "The optimizer preserves soak times, delivery commitments, equipment capacity, and planned tonnage. This is a simulated/shadow approval, not a production schedule write." Show 7.25% modeled cost reduction, 7.89% peak reduction (56.0→51.58 MW), and 3.29% CO₂ reduction (whole-dispatch basis). Tonnage conserved at 960 t. | Reveal cached feasible solution after 5 seconds; show the saved result and constraint table. |
+| 03:00-04:30 | **Energy Manager**. Run or reveal the optimized schedule and constraint report. Rearrange a supporting panel, maximize the schedule/chart group, then reset the layout from the header. | Compare baseline and optimized Gantt charts. "The optimizer preserves soak times, delivery commitments, equipment capacity, and planned tonnage. This is a simulated/shadow approval, not a production schedule write." Use the dock beat to show that the workspace adapts to the presenter/operator without changing the data. Show 7.25% modeled cost reduction, 7.89% peak reduction (56.0→51.58 MW), and 3.29% CO₂ reduction (whole-dispatch basis). Tonnage conserved at 960 t. | Reveal cached feasible solution after 5 seconds; show the saved result and constraint table. If the panel drag is awkward, use maximize + reset only. |
 | 04:30-05:30 | **Reliability Engineer**. Open `LUX-BF-01`, hearth sector 07 thermal map. | “A localized warm zone is developing. Neighboring thermocouples, cooling-water ΔT, and heat-flux residual agree, so this is unlike a single bad sensor.” | Static thermal-map sequence has healthy, emerging, and degraded frames. |
 | 05:30-06:20 | Continue the reliability trend and trigger the threshold. | Show 45-day thermal history compressed into seconds. Point to rising 6-hour slope and slower post-tap cooling; avoid claiming certainty. | Use cached animated chart; manually advance three frames if animation stalls. |
 | 06:20-06:50 | Open **Copilot Chat** from the header (docks right) and ask **“What is the risk?”** without naming the metric. | “I never said which risk. The assistant sees that I am on Furnace Health, so it answers on lining risk, defines it, and shows the sources it used — a glossary entry and this screen. It has no tools and no database access: it explains what you are looking at, it does not fetch new numbers.” Point at the green shield and say history is in-process, never written to Fabric. | If the chat errors, the question is restored in the composer — retype and resend once. If Foundry is unreachable it answers locally from the same grounding and the sources are identical; say so rather than hiding it. |
@@ -90,6 +91,17 @@ This order is binding with the six demo moments in [solution requirements](../sp
 | 12:00-13:00 | **Plant Manager / Sustainability view**. Show CO₂ trajectory, ETS exposure, and the energy-decision lineage. | “The carbon target and any financial claim remain targets. Here the semantic model rolls up synthetic emissions and connects a recommendation to its evidence.” | Use the cached sustainability/ETS report or the optional internal Power BI report tab. |
 | 13:00-14:00 | **Executive / audit view**. Show portfolio targets, ROI roll-up, and one append-only decision record. | “Every recommendation links inputs, model/version, confidence, human decision, and outcome. The 14/22/21/8 figures are targets; the screen is synthetic evidence of traceability.” | Use exported audit JSON/PDF and cached board-report view. |
 | 14:00-15:00 | **Plant Manager**, then briefly **Fabric Core**. | Recap: “One Fabric core connects streaming operations, governed history, models, decisions, and human knowledge.” End on lineage/freshness and the next-step invitation. | If any tab is unstable, finish on cached summary slide. Stop at 15:00 rather than debugging live. |
+
+### 4.1 Dockview workspace beat
+
+Use this as a 30–45 second insert during DM-2, or during Device Operations if the energy screen is already crowded:
+
+1. Drag a secondary panel beside or below the main chart and say the arrangement is per screen.
+2. Click the tab-bar maximize button on the chart or table group; restore it.
+3. Close a genuinely closable detail panel only if one is open; point out that structural KPI/table panels have no X.
+4. Click **Reset layout** in the dashboard header to return to the default arrangement.
+
+Do not imply the dock changes authorization or model outputs. It is a workspace affordance: panels stay mounted, layouts persist in browser `localStorage`, and reset is the recovery path.
 
 ## 5. Expected cue sheet
 
@@ -172,7 +184,7 @@ The extraction must retain source segment citations and separate `observation`, 
 | Browser crashes | Reopen direct URL or static summary | “The data and decisions are persisted; the presentation client is replaceable.” |
 | Incorrect cue/value | Stop stream and load expected manifest result | “The live run differs from the rehearsed seed, so I’m switching to the validated scenario.” |
 | Copilot returns an error | Resend once; if it fails again, skip the beat and continue | “The assistant deliberately refuses to invent an answer when it cannot reach its grounding, so it surfaces the error instead of guessing.” |
-| Copilot dock in the wrong position | Reset the layout by clearing `novasteel.copilot.dock.v1` in local storage, or drag the panel back to the right edge | “The layout is yours to arrange — it is remembered per browser.” |
+| Copilot/workspace dock in the wrong position | Use the header **Reset layout** button, or clear `novasteel.copilot.dock.v2` / `novasteel.dock.v1.<section>/<subView>` in local storage, or drag the panel back to the intended edge | “The layout is yours to arrange — it is remembered per browser and can be reset.” |
 | Network fully lost | Use fallback ladder levels 2-5 | “The edge buffers data and preserves event time; here is the offline path.” |
 
 Never expose stack traces, tokens, tenant details, or hidden production-like settings on the projector.

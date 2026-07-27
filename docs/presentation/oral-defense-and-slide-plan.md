@@ -72,7 +72,7 @@ Legend used throughout:
   - Automotive-grade quality inconsistency
   - Skilled operators retiring → tacit knowledge lost
   - Regulatory context: GDPR · EU AI Act · sector EU directives
-- **Speaker notes:** "NovaSteel runs blast furnaces and rolling mills across four EU countries. Four structural problems: energy is thirty-five percent of cost with no real-time lever; carbon is now a hard financial cost under the EU Emissions Trading System; a furnace-lining failure costs around eight million euros per event and today is effectively unpredictable; and the experts who *know* the furnace are retiring faster than we can capture what they know. This is a heavy-industry, safety-sensitive, EU-regulated context — which shapes every architectural choice that follows."
+- **Speaker notes:** "AxelorMetal runs blast furnaces and rolling mills across four EU countries. Four structural problems: energy is thirty-five percent of cost with no real-time lever; carbon is now a hard financial cost under the EU Emissions Trading System; a furnace-lining failure costs around eight million euros per event and today is effectively unpredictable; and the experts who *know* the furnace are retiring faster than we can capture what they know. This is a heavy-industry, safety-sensitive, EU-regulated context — which shapes every architectural choice that follows."
 - 🛈 **SOURCE CUE:** usecase.md (Business Challenge); personas-and-journeys.md (Energy Manager: "Energy is 35% of our cost base"; Reliability: "An €8M failure…").
 - ⛑ **FALLBACK:** none; static.
 

@@ -23,7 +23,7 @@ Each persona section (§12) follows the same template: **Purpose → Screen(s) �
 
 ## 2. Purpose & Goals
 
-NovaSteel operators, engineers, and leaders need a single, persona-aware GUI to monitor and optimize energy use, CO₂ emissions, furnace-lining health, and steel quality across four countries (LU, DE, BE, ES), while capturing retiring operators' expertise.
+AxelorMetal operators, engineers, and leaders need a single, persona-aware GUI to monitor and optimize energy use, CO₂ emissions, furnace-lining health, and steel quality across four countries (LU, DE, BE, ES), while capturing retiring operators' expertise.
 
 **UX goals**
 
@@ -32,6 +32,7 @@ NovaSteel operators, engineers, and leaders need a single, persona-aware GUI to 
 3. **Trust & transparency** — every AI-derived value (prediction, recommendation) is visibly labeled with confidence, freshness, and a "why" affordance (EU AI Act alignment).
 4. **Operable everywhere** — responsive from control-room 4K wall displays to a plant-floor tablet, keyboard- and screen-reader-complete (WCAG 2.2 AA).
 5. **Cost-aware platform control** — a first-class, role-gated GUI control to start/stop Microsoft Fabric capacity with a visible lifecycle state, so the demo/analytics backend is only paid for when needed.
+6. **Flexible workspace** — every screen is a Dockview workspace whose panels can be resized, rearranged, grouped, maximized, and reset without changing the advisory-only safety boundary.
 
 **Non-goals (out of UX scope):** choice of message bus, ML serving topology, data-lake schema, network design. Where the UI depends on these, it is expressed as an **API dependency** (§16) and a **binding contract**, not an implementation.
 
@@ -134,6 +135,7 @@ flowchart TB
 flowchart LR
   Root["NovaSteel App Shell"]
   Root --> CC["Command Center (default)"]
+  Root --> Web["AxelorMetal Corporate Website"]
   Root --> P1s["Operations"]
   Root --> P2s["Furnace Health"]
   Root --> P3s["Energy Optimization"]
@@ -157,6 +159,11 @@ flowchart LR
   P8s --> P8a["Fabric Capacity"]
   P8s --> P8b["Jobs & Pipelines"]
   P8s --> P8c["Cost & Telemetry"]
+  Web --> WebHome["Home"]
+  Web --> WebCompany["Company"]
+  Web --> WebProducts["Products & Markets"]
+  Web --> WebKnowledge["Steel Knowledge"]
+  Web --> WebContact["Contact"]
 ```
 
 ### 6.2 Navigation model
@@ -264,6 +271,7 @@ Tokens are the single source of truth; MUI theme and Blazor CSS variables both c
 | S-21 | Sensor Explorer | all (reader) | `/{site}/device-operations/sensors` | Device/status filters, sensor table, SensorChartPanel |
 | S-22 | Device Simulator | `Platform.Capacity.Manage` | `/{site}/device-operations/simulator` | KPI band, SimulatorControls, IncidentPanel |
 | S-23 | Dashboard Collections | all (reader) | `/{site}/dashboards/collections` | Collection card grid, role/tag filters, constituent-screen links |
+| S-24 | AxelorMetal Corporate Website | all | `/{site}/company-website/{home|company|products|steel-knowledge|contact}` | Full-bleed docked website page, localized article content, glossary table |
 
 Every screen also defines its four cross-cutting states (`STATE-LOAD`, `STATE-EMPTY`, `STATE-ERROR`, `STATE-STALE`) per §15.
 
@@ -301,6 +309,7 @@ Every screen also defines its four cross-cutting states (`STATE-LOAD`, `STATE-EM
 - Active item: 3px `color.brand.primary` inset bar + bold label + `aria-current="page"`.
 - Keyboard: `Tab` order top→bottom; `Enter`/`Space` activates; roving tabindex within group.
 - Persona-gated: items the user lacks permission for are hidden (not disabled) to avoid clutter; a "Request access" affordance lives in Settings.
+- The AxelorMetal corporate website is grouped as narrative/public context rather than an operational persona section; all five sub-views remain available in demo mode.
 
 ### 9.3 Command Center (S-00)
 
@@ -340,9 +349,9 @@ Purpose: cross-persona triage landing. Layout:
 - Results screen (S-18) groups by entity type with per-group filters and a global text filter.
 - Empty/no-match uses `STATE-EMPTY` with suggested scopes; errors use `STATE-ERROR`.
 
-### 9.6 Copilot Chat (global dock)
+### 9.6 Copilot Chat (outer dock)
 
-The analytics header includes a **Copilot** button next to the persona chip. Activating it opens the chat assistant in a Dockview grid (`dockview-react@7.0.2`) beside the current dashboard. While Copilot is closed, no dock grid or portal is rendered; the dashboard surface remains the same DOM structure and layout it uses without chat.
+The analytics header includes a **Copilot** button next to the persona chip. Activating it opens the chat assistant in an outer Dockview grid (`dockview-react@7.0.2`) beside the current workspace. While Copilot is closed, the inner workspace dock remains the only visible dock. While Copilot is open, the outer dock keeps the chat panel mounted across navigation so the transcript is preserved.
 
 ```text
 +--------------------------- DASHBOARD WORKSPACE ------------------+----------- COPILOT -----------+
@@ -357,11 +366,11 @@ The analytics header includes a **Copilot** button next to the persona chip. Act
 
 | Capability | Requirement |
 | --- | --- |
-| Entry/exit | Header **Copilot** button toggles the dock; close button inside the panel returns to the undocked dashboard. |
+| Entry/exit | Header **Copilot** button toggles the outer dock; close button inside the panel returns to the workspace-only view. |
 | Default position | Chat docks to the right of the dashboard at first open, with an initial width suitable for a chat transcript. |
 | Repositioning | The Copilot tab can be dragged to any edge of the Dockview grid. |
 | No floating | Floating groups are disabled. Copilot is always docked, never a free-floating window over the dashboard. |
-| Persistence | Dock layout persists in `localStorage` under `novasteel.copilot.dock.v1`; invalid or unavailable storage falls back to the default right-docked layout without breaking the page. |
+| Persistence | Dock layout persists in `localStorage` under `novasteel.copilot.dock.v2`; invalid or unavailable storage falls back to the default right-docked layout without breaking the page. |
 
 **Panel controls and content**
 
@@ -389,9 +398,50 @@ Answers use constrained markdown only: paragraphs separated by blank lines, `**b
 - The transcript is a polite live region so newly appended messages and "thinking" status are announced without stealing focus.
 - The panel is keyboard-operable end to end: tab order follows header → transcript → suggestions/composer → glossary/history; `Enter` sends from the composer and `Shift+Enter` inserts a newline.
 - Errors render as `STATE-ERROR` inside the transcript using `role="alert"`. The failed question is restored into the composer, the optimistic user bubble is removed, and no fallback answer is invented.
-- Source type is never color-only: each item is labelled as screen context, glossary, NovaSteel knowledge, or online result.
+- Source type is never color-only: each item is labelled as screen context, glossary, AxelorMetal knowledge, or online result.
 
-### 9.7 Theme, locale, demo-mode, capacity — top-bar controls
+### 9.7 Dockview workspace model (all screens)
+
+Every analytics screen is rendered through a Dockview workspace, not only the Copilot chat. This is a layout layer over the existing screen JSX; it does not change API access, model behavior, or the advisory-only safety boundary.
+
+**Two-level docking**
+
+| Level | Component | Purpose |
+| --- | --- | --- |
+| Outer dock | `CopilotDock` | Hosts the current workspace and, when open, the Copilot chat. It exists so the chat panel can stay mounted while the operator navigates between screens. |
+| Inner dock | `WorkspaceDock` | Hosts the current screen's panels. With Copilot closed — the default presentation path — this is the only visible dock. |
+
+**Panel derivation**
+
+Screens keep declaring ordinary JSX. `SectionStack` calls `collectDockPanels(children)`, which recognizes `KpiBand`, `PanelCard`, `TwoColumn`, and chart containers by a static `dockRole` marker (`kpi`, `panel`, `split`) rather than by import identity. This avoids an import cycle and prevents the dock tab metadata from drifting away from the screen layout. Opaque children whose `children` is a render function, such as state boundaries, can name their panel with `dockTitle` / `dockId` / `dockHeight` props or `data-dock-*` attributes; otherwise they fall back to positional labels.
+
+**Tabs, close behavior, and state**
+
+| Rule | UX requirement |
+| --- | --- |
+| Structural panels | KPI bands, primary tables, and full-page website panels are not closable. Their tabs show no X because closing them would leave the screen empty with no obvious recovery path. |
+| Closable panels | A tab shows an X only when the owning screen supplied `onDockClose`. The close action calls that screen callback, so React state remains the single source of truth and the panel disappears through normal reconciliation. |
+| Current closable panels | Device Fleet detail panel and Sensor Explorer chart panel. |
+| Background tabs | Panels use Dockview `renderer: 'always'` so in-flight fetches, chart state, and `document.getElementById` drill-downs survive while a tab is not visible. |
+| Reconciliation | A saved layout is restored once on mount. Afterwards panels are added or removed imperatively so the operator's arrangement survives row selections and late-loading KPI bands. A late panel is anchored above its declared successor to preserve declaration order. |
+
+**Persistence and reset**
+
+| Surface | Storage key |
+| --- | --- |
+| Inner workspace dock | `novasteel.dock.v1.<section>/<subView>` |
+| Outer Copilot dock | `novasteel.copilot.dock.v2` |
+
+The dashboard header exposes **Reset layout** only when a dock is mounted. Activating it clears the persisted layout and rebuilds the default arrangement. The implementation also exposes `window.NOVASTEEL_ANALYTICS_CONFIG.disableDock = true` as a host escape hatch that falls back to the previous vertical stack when a container cannot provide a bounded height.
+
+**Presentation and accessibility implications**
+
+- Each dock group has a tab-bar maximize/restore button (`OpenInFull` / `CloseFullscreen`) with an accessible label. This is the fastest presenter path to take one chart or table full screen and return to the workspace.
+- Dragging and resizing are convenience interactions, not the only way to recover: all content remains reachable through dock tabs, structural panels cannot be accidentally removed, and **Reset layout** restores a known-good order.
+- Panel content keeps the normal table/chart accessibility rules in §13–§17. Inside a dock, `DockedContext` removes duplicate card chrome because the tab already provides the frame and title.
+- KPI drill-downs call `revealPanel(id)`: inside a dock this activates the target tab; outside a dock it falls back to scrolling and focusing the target section.
+
+### 9.8 Theme, locale, demo-mode, capacity — top-bar controls
 
 Covered in §11 (capacity), §18 (locale), §19 (theme), §20 (demo mode).
 
@@ -413,15 +463,20 @@ flowchart TD
   TopBar --> AccountMenu
   TopBar --> CopilotToggle["Copilot button"]
   RouterOutlet --> AnalyticsMFE["AnalyticsMicrofrontend (React/MUI)"]
-  AnalyticsMFE --> CopilotDock["CopilotDock (Dockview grid)"]
+  AnalyticsMFE --> CopilotDock["CopilotDock (outer Dockview grid)"]
   CopilotDock --> CopilotPanel
+  CopilotDock --> WorkspaceDock["WorkspaceDock (inner Dockview grid)"]
   AnalyticsMFE --> PageLayout
   PageLayout --> Breadcrumb
   PageLayout --> SectionTabs
-  PageLayout --> KpiBand --> KpiCard
+  PageLayout --> SectionStack["SectionStack derives dock panels from JSX"]
+  SectionStack --> KpiBand --> KpiCard
+  SectionStack --> PanelCard
+  SectionStack --> TwoColumn
   PageLayout --> ChartRegion --> D3Chart["D3Chart (wrapper)"]
   PageLayout --> DetailPanel["DetailPanel / WhyPopover"]
   PageLayout --> DataTable["DataTable (TBL-STD)"]
+  PageLayout --> WebsitePage["WebsitePage (single full-bleed panel)"]
   DataTable --> TableToolbar["Toolbar: search/filter/export/columns"]
   DataTable --> ColumnHeader["ColumnHeader: sort + per-column search"]
   DataTable --> VirtualRows
@@ -736,6 +791,26 @@ The panel header shows the sensor display name, device ID, unit, and a close but
 
 **Acceptance:** AC-S23-1 all six predefined collections render; AC-S23-2 constituent-screen links deep-link correctly; AC-S23-3 role badges and time estimates are visible; AC-S23-4 tags are filterable.
 
+### 12.11 AxelorMetal Corporate Website (`company-website/*`, S-24)
+
+**Purpose:** provide an in-app public-company narrative for AxelorMetal before the operator enters the NovaSteel decision-support platform. It is a fictitious corporate website, not an operational cockpit.
+
+**Sub-views**
+
+| Sub-view | Route suffix | Content |
+|---|---|---|
+| Home | `home` | Hero, company positioning, featured products, sustainability and navigation cards. |
+| Company | `company` | AxelorMetal story, values, footprint, and corporate profile. |
+| Products & Markets | `products` | Product families and customer/market positioning. |
+| Steel Knowledge | `steel-knowledge` | Plain-language steelmaking primer plus a searchable 10-row glossary table. |
+| Contact | `contact` | Local contact and inquiry content for the fictitious company. |
+
+**Dock behavior:** each page is one full-bleed, non-closable dock panel titled `AxelorMetal · <page>`. `WebsiteBody` claims the whole article as one panel so the collector does not split marketing content into operational fragments. It resets `DockedContext` to `false`, allowing ordinary cards inside the article to keep their normal chrome, and uses `dockBleed` so the hero band reaches the panel edge.
+
+**Localization and assets:** content is localized in EN/FR/DE/NL/ES. Brand assets are the AxelorMetal mark and wordmark under the portal shell brand folder, with development copies in the analytics MFE public assets.
+
+**Acceptance:** AC-S24-1 all five sub-views route and render; AC-S24-2 tab titles are meaningful and page-specific; AC-S24-3 Steel Knowledge glossary supports text search; AC-S24-4 all website strings are localized in the five product locales; AC-S24-5 the dock treats each article as one full-bleed non-closable panel.
+
 ---
 
 ## 13. Table Specification Standard (`TBL-STD`)
@@ -1022,6 +1097,7 @@ Global gates (in addition to per-persona AC in §12):
 - **AC-G12 Shell reconciliation:** Blazor shell hosts React/MUI microfrontend per §4 with the typed interop contract (§16.5); if architecture overrides the host, only §4 changes and all other sections remain valid.
 - **AC-G13 Deep-linkability:** site, section, filters, and time range serialize to the URL; any view is shareable/bookmarkable.
 - **AC-G14 Performance (UX budgets):** KPI band first meaningful paint < 1.5s p95 (skeleton < 100ms); table interaction (sort/filter) < 200ms client-side; chart resize < 100ms; virtualized tables scroll at 60fps for 10k rows.
+- **AC-G15 Dockview workspace:** every routable screen with panels renders through `WorkspaceDock` unless the explicit host escape hatch disables it; tab titles are meaningful; structural panels have no close affordance; closable panels delegate to owner state; reset layout clears persisted workspace keys.
 
 ---
 

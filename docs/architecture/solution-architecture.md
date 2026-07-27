@@ -293,12 +293,12 @@ flowchart LR
   B["Browser"]
   S["Blazor WASM shell\nC#, MSAL, route/theme/locale"]
   R["React analytics MFE\nTypeScript, MUI, D3"]
-  D["Copilot dock\nDockview, docked only"]
+  D["Dockview layout layer\nouter CopilotDock + inner WorkspaceDock"]
   P["Power BI internal embed\noptional"]
   A["Python FastAPI BFF"]
   B --> S
   S <-->|typed same-page interop| R
-  R -->|hosts workspace + chat panels| D
+  R -->|derives workspace panels + hosts chat| D
   D -->|question + active screen context| A
   R --> P
   S -->|short-lived user access token| A
@@ -307,7 +307,13 @@ flowchart LR
 
 The shell is a host, not a second business backend. The React bundle is versioned with the shell for Phase 0 to avoid shell/MFE contract skew. The shell exposes only typed context/events: `themeMode`, `locale`, `activePersona`, `site`, `demoMode`, navigation intent, toast, capacity request, and telemetry. It does **not** hand a workload credential to React.
 
-The Copilot dock is a layout host inside the MFE, not a second application. Dockview manages a two-panel grid — the analytics workspace and the chat — with floating groups disabled, so the panel can be moved to any edge but never detaches into a free window. While the chat is closed no grid is mounted at all, which keeps the default dashboard render path unchanged. The layout is persisted per browser in `localStorage`; a stored layout that does not restore exactly the two known panels is discarded in favour of the default. The chat sends the active section, sub-view, and site with every question so an under-specified question such as "what is the risk" resolves against what the user is actually looking at.
+The Dockview layout layer is inside the MFE, not a second application. An outer `CopilotDock` hosts the current workspace and, when opened, the chat panel; floating groups are disabled, so Copilot can be moved to any edge but never detaches into a free window. The outer layout persists per browser in `localStorage` under `novasteel.copilot.dock.v2`; the chat sends the active section, sub-view, and site with every question so an under-specified question such as "what is the risk" resolves against what the user is actually looking at.
+
+#### 5.1.1 Front-end layout architecture
+
+Every analytics screen is also an inner Dockview workspace. `SectionStack` derives panel specifications from the JSX that each screen already declares by walking `KpiBand`, `PanelCard`, `TwoColumn`, chart containers, and self-described opaque children. The collector uses static `dockRole` markers instead of import identity, avoiding a `common.tsx -> WorkspaceDock -> dockPanels -> common.tsx` cycle and keeping the panel metadata from drifting away from the rendered layout.
+
+`WorkspaceDock` restores the saved layout once with `fromJSON`, then reconciles panel additions/removals imperatively so row selections, late KPI data, and detail panels do not rebuild the operator's arrangement. Panels use Dockview `renderer: 'always'` to preserve in-flight fetches, chart state, and DOM drill-down targets while a tab is in the background. Close buttons appear only when the owning screen supplied an `onDockClose` callback, and the close action delegates to that callback so React state stays the source of truth. Workspace layouts persist per screen under `novasteel.dock.v1.<section>/<subView>` and the dashboard header can reset them to defaults.
 
 ### 5.2 Python service responsibilities
 
@@ -598,7 +604,7 @@ Every flow propagates `correlation_id`; a decision audit record links it to even
 ### ADR-010 — Internal Power BI embedding is user-owned data
 
 **Status:** Accepted.  
-**Decision:** Internal NovaSteel personas use Entra-based Embed for your organization/direct Power BI access, with RLS/role scope preserved.  
+**Decision:** Internal AxelorMetal personas use Entra-based Embed for your organization/direct Power BI access, with RLS/role scope preserved.  
 **Consequences:** App-owns-data embedding is not an internal authorization workaround and needs a new external-sharing design if ever proposed.
 
 ### ADR-011 — The Copilot chat explains, it does not retrieve operational values
@@ -620,13 +626,20 @@ Every flow propagates `correlation_id`; a decision audit record links it to even
 **Context:** An additional Container App for the device simulator would cost approximately the same as the BFF itself, yet the simulator serves only the Device Operations screen and has no independently scalable load. In-process execution keeps the demo deployment to the same Container App count as the preceding wave.  
 **Consequences:** The BFF process memory grows by the ring buffer (34 sensors × 1440 samples × ~40 bytes ≈ ~2 MB). The simulator's deterministic clock advances on reads rather than via a background thread, which is safe in-process but means the simulated time tracks wall-clock drift only when the BFF is receiving requests. For any team that needs continuous clock advance independent of request load, the standalone FastAPI option is the recommended path. Any future decision to move the simulator to a separate Container App requires updating only `device_adapter.py` and the BFF environment configuration; no API contract change is required because the BFF routes remain the consumer surface.
 
+### ADR-014 — Two-level Dockview workspace with JSX-derived panels
+
+**Status:** Accepted.  
+**Decision:** Use Dockview for a two-level front-end layout: an outer `CopilotDock` preserves the chat/workspace relationship, and an inner `WorkspaceDock` hosts every screen's panels. Derive those panels from the screen's existing JSX via dock-role markers and self-described opaque children rather than requiring a second panel declaration.  
+**Alternatives considered:** declare panel manifests per screen; rewrite the 22 operational screens into explicit dock layouts; use one flat Dockview grid for both Copilot and every workspace panel.  
+**Consequences:** Screens keep one source of truth for layout and tab metadata, and existing screens can become dockable without a rewrite. The collector must remain conservative so opaque content is not dropped, and layout persistence/reconciliation must handle panels that appear late or disappear through React state. The outer/inner split adds one layout abstraction, but it prevents Copilot transcript loss during navigation and avoids mixing global chat state with per-screen workspace state.
+
 ## 11. Implemented repository topology
 
 ```text
 /
 ├── apps/
 │   ├── portal-shell/                 # Blazor WASM C# host, MSAL, typed host bridge
-│   └── analytics-mfe/                # React/TypeScript, MUI, D3, Power BI adapter
+│   └── analytics-mfe/                # React/TypeScript, MUI, D3, Dockview workspace, Power BI adapter
 ├── services/
 │   ├── bff-api/                      # FastAPI routes, authz, query adapters, SSE
 │   ├── optimizer-worker/             # Constraint solver and recommendation worker
@@ -708,6 +721,7 @@ Research links below are official-source research documents; direct Microsoft Le
 | Fabric medallion (bronze/silver/gold) pattern present | `fabric/notebooks/ns-bronze-to-silver.Notebook`, `ns-silver-to-gold.Notebook`, `ns-initialize-lakehouses.Notebook` — three-tier medallion is implemented; `docs/_upgrade` finding "medallion missing" is **closed**. |
 | Fabric Real-Time Intelligence assets present | `fabric/rti/activator-rules.template.json`, `fabric/rti/dashboard-spec.json`, `fabric/kql/dashboard-queries.kql` — RTI/KQL dashboard is implemented; `docs/_upgrade` finding "RTI missing" is **closed**. |
 | Wave 3 closed items | Device Operations subsystem (§5.4, ADR-013), GDPR Art. 17 erasure (§5.4.4), grounded RAG query pipeline (§5.4.5), Dashboard Collections, and PII/Content Safety pipeline are all implemented in source code and documented in this wave; remaining `docs/_upgrade` items not yet addressed are deferred to a future wave. |
+| Wave 4 front-end items | Dockview workspace across every screen (§5.1.1, ADR-014), two-level Copilot/workspace docking, JSX-derived panel metadata, and the docked AxelorMetal corporate website are implemented in the analytics MFE and documented in the UX specification. |
 
 ## 15. Open production-validation items
 

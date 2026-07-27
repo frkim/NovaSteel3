@@ -299,7 +299,7 @@ Screen context is part of the contract, not UI decoration. The orchestrator main
 
 The glossary contains 36 terms in five languages. Search is accent- and case-insensitive and ranks both the localized term and wording inside the localized definition, with a small current-screen bonus. Suggestions are five predefined questions per screen per language, with a five-question default set for unknown sections.
 
-"Online search" is deliberately not a live web search. The container has no outbound internet path for this feature; the toggle unlocks a curated offline corpus of eight durable public-context entries with official URLs. Answers and sources indicate whether that corpus was used (`onlineSearchUsed`, `source.kind = "online"`). With the toggle off, answers use only NovaSteel internal material and screen/glossary grounding.
+"Online search" is deliberately not a live web search. The container has no outbound internet path for this feature; the toggle unlocks a curated offline corpus of eight durable public-context entries with official URLs. Answers and sources indicate whether that corpus was used (`onlineSearchUsed`, `source.kind = "online"`). With the toggle off, answers use only AxelorMetal internal material and screen/glossary grounding.
 
 Conversations are in-process, owner-scoped, and bounded to 25 conversations per owner and 60 messages per conversation. They are deliberately not persisted to Fabric because free-text questions from named users would widen the data-protection surface for no demo value. A container restart clears history; this is intended behaviour. Temporary chats are represented in the response but never written to the store and never appear in `GET /v1/copilot/conversations`.
 
@@ -346,7 +346,7 @@ Content-Type: application/json
     "answer": {
       "messageId": "msg-7fd1db3df5a8",
       "role": "assistant",
-      "content": "You are on **Furnace Health** (Furnace Operator & Maintenance/Reliability Engineer), so I read this as a question about **Lining risk**.\n\n**Lining risk** — The modelled probability that a furnace refractory lining reaches its minimum safe thickness within the forecast horizon.\n\nOnline search is off, so this answer uses NovaSteel's internal material only.\n\n_All figures in this demo come from synthetic data._",
+      "content": "You are on **Furnace Health** (Furnace Operator & Maintenance/Reliability Engineer), so I read this as a question about **Lining risk**.\n\n**Lining risk** — The modelled probability that a furnace refractory lining reaches its minimum safe thickness within the forecast horizon.\n\nOnline search is off, so this answer uses AxelorMetal's internal material only.\n\n_All figures in this demo come from synthetic data._",
       "createdAt": "2026-07-26T16:15:37Z",
       "sources": [
         { "kind": "screen", "sourceId": "furnace-health", "title": "Furnace Health", "snippet": "Refractory lining wear forecasting, thermal signatures and the maintenance plan derived from remaining useful life." },

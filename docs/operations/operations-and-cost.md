@@ -294,7 +294,7 @@ Proceed only when: all displayed data is labeled synthetic; deterministic manife
 
 > ⚠️ **Honesty discipline.** Every figure in this subsection is 🎯 **TARGET / illustrative**.
 > These are modelled estimates drawn from the project's original business-case proposal, using
-> stated assumptions that must be validated with NovaSteel actuals and an Azure pricing-calculator
+> stated assumptions that must be validated with AxelorMetal actuals and an Azure pricing-calculator
 > assessment. They are **not measured outcomes** and they are **not a quote**.
 >
 > The **demo environment** currently runs on a Fabric **F2** capacity with a nightly auto-pause
@@ -318,7 +318,7 @@ Proceed only when: all displayed data is labeled synthetic; deterministic manife
 | A9 | High-grade yield uplift target (O4) | +8% on premium tonnage |
 | A10 | EU regions, consumption pricing | Sweden Central / West Europe |
 
-> Replace each value with NovaSteel's measured actuals during a design workshop.
+> Replace each value with AxelorMetal's measured actuals during a design workshop.
 > A4 and A6 percentages will be updated once the MILP optimizer and RUL model produce
 > physics-derived KPI outputs — see §8.5.6 below.
 
@@ -375,7 +375,7 @@ Proceed only when: all displayed data is labeled synthetic; deterministic manife
 
 Because annual benefits (energy alone ~€24.5M illustrative at 14%) vastly exceed build
 (~€0.6–1.1M) plus run (~€0.3–0.7M/yr), **payback is well under a year** even after
-large conservative discounts. NPV/IRR should be computed with NovaSteel's discount
+large conservative discounts. NPV/IRR should be computed with AxelorMetal's discount
 rate during a formal workshop.
 
 **Sensitivity — what could change the answer:**

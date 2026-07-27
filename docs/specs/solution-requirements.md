@@ -31,7 +31,7 @@ Requirement IDs use the pattern `FR-<AREA>-<NN>` (functional) and `NFR-<AREA>-<N
 
 ## 2. Problem Statement
 
-NovaSteel is a Luxembourg-headquartered integrated steel producer operating blast furnaces and rolling mills across four countries (Luxembourg, Germany, Belgium, Spain). The business is structurally exposed on five fronts:
+AxelorMetal is a Luxembourg-headquartered integrated steel producer operating blast furnaces and rolling mills across four countries (Luxembourg, Germany, Belgium, Spain). The business is structurally exposed on five fronts:
 
 1. **Energy cost exposure** — energy represents **35% of total production cost**, priced and consumed with no real-time optimization against volatile day-ahead/intraday electricity markets.
 2. **Carbon cost exposure** — CO₂ emissions are under mounting financial pressure from EU Emissions Trading System (ETS) allowance costs and penalties, with no predictive linkage between operational decisions and emissions/allowance impact.
@@ -39,7 +39,7 @@ NovaSteel is a Luxembourg-headquartered integrated steel producer operating blas
 4. **Quality inconsistency** — variability in high-grade steel (notably automotive-grade) causes downgrades, claims, and lost premium revenue with customers who apply strict specification and traceability requirements.
 5. **Disappearing operational expertise** — experienced furnace and process operators are retiring faster than their tacit knowledge (heuristics, "how we really run this furnace") can be captured, documented, or transferred.
 
-These are not independent problems: energy, quality, and asset‑health decisions are made by different roles, on different systems, with no shared real-time picture — and the people who best understand the trade-offs are leaving the workforce. NovaSteel needs a single AI-powered platform that senses, predicts, recommends, and explains across these four dimensions, with humans retaining control of safety- and cost-critical decisions.
+These are not independent problems: energy, quality, and asset‑health decisions are made by different roles, on different systems, with no shared real-time picture — and the people who best understand the trade-offs are leaving the workforce. AxelorMetal needs NovaSteel: a single AI-powered platform that senses, predicts, recommends, and explains across these four dimensions, with humans retaining control of safety- and cost-critical decisions.
 
 ---
 
@@ -67,7 +67,7 @@ These are not independent problems: energy, quality, and asset‑health decision
 
 ### 4.2 Illustrative Baseline Assumptions (for KPI modeling and synthetic demo data only)
 
-> These figures are **not** disclosed in the use case and are not real NovaSteel data. They are engineering-plausible baselines for an EU integrated BF-BOF route, provided so KPI formulas, dashboards, and synthetic datasets have concrete numbers to compute against. The `data-demo-spec` workstream owns final synthetic values; production values must be sourced from real historian/ERP data during discovery.
+> These figures are **not** disclosed in the use case and are not real AxelorMetal data. They are engineering-plausible baselines for an EU integrated BF-BOF route, provided so KPI formulas, dashboards, and synthetic datasets have concrete numbers to compute against. The `data-demo-spec` workstream owns final synthetic values; production values must be sourced from real historian/ERP data during discovery.
 
 | Metric | Baseline (assumed) | Target (per use case %) |
 |---|---|---|
@@ -234,7 +234,7 @@ Legend: **Primary user** = persona(s) most responsible for acting on the require
 | NFR-SCALE-01 | Scalability | The data layer shall support 4 sites/countries today with a clear path to additional sites/lines without architectural rework. |
 | NFR-SEC-01 | Security | All data in transit and at rest shall be encrypted; access shall be governed by RBAC and, for sensitive actions (e.g., accepting an energy dispatch recommendation with real financial impact), by an auditable approval step. |
 | NFR-SEC-02 | Security | Personal data collected for knowledge capture (operator voice/video/text) shall be processed under documented GDPR lawful basis, with data minimization, retention limits, and data-subject rights support. |
-| NFR-SEC-03 | Data residency | Data shall be stored and processed within the EU, consistent with GDPR and NovaSteel's EU-only footprint. |
+| NFR-SEC-03 | Data residency | Data shall be stored and processed within the EU, consistent with GDPR and AxelorMetal's EU-only footprint. |
 | NFR-COMP-01 | Compliance | AI systems in scope shall maintain the documentation and human-oversight controls needed to support an EU AI Act conformity determination (final control catalog owned by `security-spec`). |
 | NFR-USAB-01 | Usability | Each persona's primary cockpit shall be usable by a non-technical operator/manager without training beyond a short onboarding session (aligned to `ux-spec`). |
 | NFR-OBS-01 | Observability | All models shall emit monitoring telemetry (prediction volume, confidence distribution, drift indicators) reviewable by the Knowledge Engineer/Admin. |

@@ -265,7 +265,7 @@ IR Commander (Security Lead), Communications Lead, DPO (privacy/regulatory notif
 
 ## 11. Industrial / OT Segmentation
 
-NovaSteel's blast furnaces and rolling mills are treated as OT environments that must **never** be flatly bridged to the corporate/cloud IT network. The design follows the **Purdue Enterprise Reference Architecture**, which Microsoft's Defender for IoT guidance uses to define OT network levels/zones and appropriate controls at each level. [Defender for IoT and your network architecture — the Purdue model](https://learn.microsoft.com/azure/defender-for-iot/organizations/best-practices/understand-network-architecture#the-purdue-model-of-networking-architecture).
+AxelorMetal's blast furnaces and rolling mills are treated as OT environments that must **never** be flatly bridged to the corporate/cloud IT network. The design follows the **Purdue Enterprise Reference Architecture**, which Microsoft's Defender for IoT guidance uses to define OT network levels/zones and appropriate controls at each level. [Defender for IoT and your network architecture — the Purdue model](https://learn.microsoft.com/azure/defender-for-iot/organizations/best-practices/understand-network-architecture#the-purdue-model-of-networking-architecture).
 
 - **Level 0-1 (Process/Basic control — furnace sensors, PLCs)**: no direct internet or cloud connectivity; safety-instrumented systems are isolated even from the plant's own SCADA level where feasible.
 - **Level 2-3 (Supervisory/Site operations — SCADA, historian)**: OT sensors from Microsoft Defender for IoT are deployed to passively monitor this zone (via SPAN/TAP, not inline), consistent with recommended sensor placement, without introducing new attack surface into the control network. [Onboard OT sensors to Defender for IoT](https://learn.microsoft.com/azure/defender-for-iot/organizations/onboard-sensors#onboard-an-ot-sensor); [Defender for IoT and your network architecture — placing OT sensors](https://learn.microsoft.com/azure/defender-for-iot/organizations/best-practices/understand-network-architecture#placing-ot-sensors-in-your-network).
@@ -503,7 +503,7 @@ Any autonomous agent or automation (including the energy-dispatch and knowledge-
 
 ### 19.5 Exceptions
 
-Any team requiring access beyond the protected feed (e.g., a package not yet mirrored by Central Feed Services) must use the CISO organization's approved exception process referenced in `docs/tech/security_requirement.md` (Central Feed Service Policy and Feed Enforcement Exceptions guidance on EngHub); direct allow-listing of `pypi.org`/`nuget.org` is **not** a valid substitute and must not be implemented unilaterally by NovaSteel engineering.
+Any team requiring access beyond the protected feed (e.g., a package not yet mirrored by Central Feed Services) must use the CISO organization's approved exception process referenced in `docs/tech/security_requirement.md` (Central Feed Service Policy and Feed Enforcement Exceptions guidance on EngHub); direct allow-listing of `pypi.org`/`nuget.org` is **not** a valid substitute and must not be implemented unilaterally by AxelorMetal engineering.
 
 ---
 

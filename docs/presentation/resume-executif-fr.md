@@ -10,7 +10,7 @@
 
 ## Le défi industriel
 
-NovaSteel est un sidérurgiste intégré européen (siège au Luxembourg) exploitant des **hauts fourneaux** et des **laminoirs** sur quatre sites de l'UE. Quatre problèmes structurels menacent la compétitivité :
+AxelorMetal est un sidérurgiste intégré européen (siège au Luxembourg) exploitant des **hauts fourneaux** et des **laminoirs** sur quatre sites de l'UE. Quatre problèmes structurels menacent la compétitivité :
 
 1. **Énergie = 35 % du coût de production** sans levier d'optimisation en temps réel.
 2. **Émissions de CO₂** sous pression réglementaire croissante (EU ETS — marché des quotas).
@@ -21,7 +21,7 @@ NovaSteel est un sidérurgiste intégré européen (siège au Luxembourg) exploi
 
 ## La solution : une plateforme d'aide à la décision gouvernée
 
-NovaSteel construit une **plateforme unique d'optimisation de la production sidérurgique**, centrée sur **Microsoft Fabric** (jumeau numérique des données) et **Microsoft Foundry** (IA générative) :
+AxelorMetal déploie **NovaSteel**, une plateforme unique d'optimisation de la production sidérurgique centrée sur **Microsoft Fabric** (jumeau numérique des données) et **Microsoft Foundry** (IA générative) :
 
 | Capacité IA | Fonction | Modèle |
 |---|---|---|
@@ -76,7 +76,7 @@ NovaSteel construit une **plateforme unique d'optimisation de la production sid�
 | **Retour sur investissement** | **< 12 mois** (conservateur) ; < 9 mois (base) |
 
 > Hypothèses et table de sensibilité détaillées dans [`../operations/operations-and-cost.md`](../operations/operations-and-cost.md) §8.5.
-> Tous les chiffres sont 🎯 TARGET / illustratifs — à confirmer avec les données réelles NovaSteel.
+> Tous les chiffres sont 🎯 TARGET / illustratifs — à confirmer avec les données réelles AxelorMetal.
 
 ---
 
