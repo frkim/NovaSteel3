@@ -292,7 +292,7 @@ export function HelpAssistant({ active, onExit, scope, locale, bilingual = false
 
           {topic?.steel && (
             <>
-              <Typography variant="overline" color="primary.main" sx={{ display: 'block', lineHeight: 1.6 }}>
+              <Typography variant="overline" sx={{ display: 'block', lineHeight: 1.6, color: 'primary.main' }}>
                 {t('help.section.steel')}
               </Typography>
               <Box sx={{ mb: 1.5 }}>
@@ -303,7 +303,7 @@ export function HelpAssistant({ active, onExit, scope, locale, bilingual = false
 
           {topic?.useIt && (
             <>
-              <Typography variant="overline" color="primary.main" sx={{ display: 'block', lineHeight: 1.6 }}>
+              <Typography variant="overline" sx={{ display: 'block', lineHeight: 1.6, color: 'primary.main' }}>
                 {t('help.section.useIt')}
               </Typography>
               <BilingualText text={topic.useIt} bilingual={bilingual} frenchFirst={frenchFirst} />

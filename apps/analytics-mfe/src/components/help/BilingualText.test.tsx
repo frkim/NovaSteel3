@@ -32,11 +32,14 @@ describe('BilingualText', () => {
     expect(screen.getByText('English half')).toHaveAttribute('data-bilingual-segment', 'en')
   })
 
-  it('gives the French half a distinct style', () => {
+  it('paints the French half in the brand blue', () => {
     renderWithProviders(<BilingualText text={TEXT} bilingual />)
     const french = screen.getByText('Moiti\u00e9 fran\u00e7aise')
     const english = screen.getByText('English half')
-    // Emotion emits a different generated class when the colour differs.
+    // Guards a real regression: MUI v9 silently drops color="info.main" on
+    // Typography, so the colour has to come through sx.
+    expect(getComputedStyle(french).color).toBe('rgb(11, 95, 255)')
+    expect(getComputedStyle(english).color).not.toBe('rgb(11, 95, 255)')
     expect(french.className).not.toBe(english.className)
     expect(french).toHaveAttribute('lang', 'fr')
   })

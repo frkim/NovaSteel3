@@ -26,6 +26,10 @@ export interface BilingualTextProps {
  * Typography collapses whitespace, so both languages used to run together on
  * one line. Splitting them into separate paragraphs restores the break, and
  * colouring the French half makes it obvious which language you are reading.
+ *
+ * The French colour goes through `sx` rather than the `color` prop: MUI v9's
+ * Typography `color` prop does not resolve `info.main` (it silently falls back
+ * to the inherited text colour), whereas `sx` resolves palette paths reliably.
  */
 export function BilingualText({
   text,
@@ -51,12 +55,13 @@ export function BilingualText({
             variant={variant}
             component={component ?? 'p'}
             lang={frenchIndex === -1 ? undefined : isFrench ? 'fr' : 'en'}
-            color={isFrench ? 'info.main' : color}
+            color={isFrench ? undefined : color}
             data-bilingual-segment={frenchIndex === -1 ? undefined : isFrench ? 'fr' : 'en'}
             sx={[
               { display: 'block' },
               ...(Array.isArray(sx) ? sx : [sx]),
               index > 0 ? { mt: 1 } : {},
+              isFrench ? { color: 'info.main' } : {},
               ...(isLast && trailingSx ? (Array.isArray(trailingSx) ? trailingSx : [trailingSx]) : []),
             ]}
           >
