@@ -1,5 +1,6 @@
 import { COPILOT_CATALOGS } from './copilotMessages'
 import { DEVICE_CATALOGS } from './deviceMessages'
+import { WEBSITE_CATALOGS } from './websiteMessages'
 
 export type TranslateFn = (key: string, params?: Record<string, string | number>) => string
 
@@ -48,6 +49,8 @@ const EN: Catalog = {
   'demo.tour.next': 'Next',
   'demo.tour.prev': 'Back',
   'demo.tour.auto': 'Auto-advance',
+  'dock.reset': 'Reset layout',
+  'dock.reset.hint': 'Restore the default panel arrangement for this screen',
   'dashboards.title': "Dashboard collections",
   'dashboards.intro': "Each collection is an ordered set of screens that answers one question end to end. Open the whole path, or jump straight to a single panel.",
   'dashboards.search': "Search collections",
@@ -98,6 +101,8 @@ const FR: Catalog = {
   'demo.tour.next': 'Suivant',
   'demo.tour.prev': 'Retour',
   'demo.tour.auto': 'Avance automatique',
+  'dock.reset': 'Réinitialiser la disposition',
+  'dock.reset.hint': 'Rétablir la disposition par défaut des panneaux de cet écran',
   'dashboards.title': "Collections de tableaux de bord",
   'dashboards.intro': "Chaque collection est une suite ordonnée d’écrans qui répond à une question de bout en bout. Ouvrez tout le parcours ou accédez directement à un panneau.",
   'dashboards.search': "Rechercher une collection",
@@ -148,6 +153,8 @@ const DE: Catalog = {
   'demo.tour.next': 'Weiter',
   'demo.tour.prev': 'Zurück',
   'demo.tour.auto': 'Automatisch weiter',
+  'dock.reset': 'Layout zurücksetzen',
+  'dock.reset.hint': 'Die Standardanordnung der Panels dieses Bildschirms wiederherstellen',
   'dashboards.title': "Dashboard-Sammlungen",
   'dashboards.intro': "Jede Sammlung ist eine geordnete Folge von Ansichten, die eine Frage vollständig beantwortet. Öffnen Sie den gesamten Pfad oder springen Sie direkt zu einem Panel.",
   'dashboards.search': "Sammlungen durchsuchen",
@@ -198,6 +205,8 @@ const NL: Catalog = {
   'demo.tour.next': 'Volgende',
   'demo.tour.prev': 'Terug',
   'demo.tour.auto': 'Automatisch verdergaan',
+  'dock.reset': 'Indeling herstellen',
+  'dock.reset.hint': 'De standaardindeling van de panelen op dit scherm herstellen',
   'dashboards.title': "Dashboardcollecties",
   'dashboards.intro': "Elke collectie is een geordende reeks schermen die één vraag volledig beantwoordt. Open het hele traject of ga direct naar één paneel.",
   'dashboards.search': "Collecties zoeken",
@@ -248,6 +257,8 @@ const ES: Catalog = {
   'demo.tour.next': 'Siguiente',
   'demo.tour.prev': 'Atrás',
   'demo.tour.auto': 'Avance automático',
+  'dock.reset': 'Restablecer diseño',
+  'dock.reset.hint': 'Restaurar la disposición de paneles predeterminada de esta pantalla',
   'dashboards.title': "Colecciones de paneles",
   'dashboards.intro': "Cada colección es un conjunto ordenado de pantallas que responde a una pregunta de principio a fin. Abra todo el recorrido o vaya directamente a un panel.",
   'dashboards.search': "Buscar colecciones",
@@ -262,11 +273,11 @@ const ES: Catalog = {
 }
 
 const CATALOGS: Record<string, Catalog> = {
-  en: { ...EN, ...COPILOT_CATALOGS.en, ...DEVICE_CATALOGS.en },
-  fr: { ...FR, ...COPILOT_CATALOGS.fr, ...DEVICE_CATALOGS.fr },
-  de: { ...DE, ...COPILOT_CATALOGS.de, ...DEVICE_CATALOGS.de },
-  nl: { ...NL, ...COPILOT_CATALOGS.nl, ...DEVICE_CATALOGS.nl },
-  es: { ...ES, ...COPILOT_CATALOGS.es, ...DEVICE_CATALOGS.es },
+  en: { ...EN, ...COPILOT_CATALOGS.en, ...DEVICE_CATALOGS.en, ...WEBSITE_CATALOGS.en },
+  fr: { ...FR, ...COPILOT_CATALOGS.fr, ...DEVICE_CATALOGS.fr, ...WEBSITE_CATALOGS.fr },
+  de: { ...DE, ...COPILOT_CATALOGS.de, ...DEVICE_CATALOGS.de, ...WEBSITE_CATALOGS.de },
+  nl: { ...NL, ...COPILOT_CATALOGS.nl, ...DEVICE_CATALOGS.nl, ...WEBSITE_CATALOGS.nl },
+  es: { ...ES, ...COPILOT_CATALOGS.es, ...DEVICE_CATALOGS.es, ...WEBSITE_CATALOGS.es },
 }
 
 export const SUPPORTED_LANGUAGES = ['en', 'fr', 'de', 'nl', 'es'] as const

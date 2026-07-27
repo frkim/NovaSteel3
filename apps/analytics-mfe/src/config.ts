@@ -24,6 +24,8 @@ declare global {
     NOVASTEEL_ANALYTICS_CONFIG?: {
       bffBaseUrl?: string
       fixturesOnly?: boolean
+      /** Escape hatch: render screens as a plain stack instead of a dock grid. */
+      disableDock?: boolean
     }
   }
 }

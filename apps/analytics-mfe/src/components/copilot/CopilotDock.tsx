@@ -1,22 +1,27 @@
 import { createContext, useContext, useEffect, useRef, type ReactNode } from 'react'
 import { Box } from '@mui/material'
 import {
+  DockviewDefaultTab,
   DockviewReact,
   themeLight,
   themeDark,
   type DockviewApi,
   type DockviewReadyEvent,
+  type IDockviewPanelHeaderProps,
   type IDockviewPanelProps,
 } from 'dockview-react'
 import 'dockview-react/dist/styles/dockview.css'
 
 const WORKSPACE_PANEL = 'workspace'
 const COPILOT_PANEL = 'copilot'
-const LAYOUT_KEY = 'novasteel.copilot.dock.v1'
+const WORKSPACE_TAB = 'workspace-tab'
+const COPILOT_TAB = 'copilot-tab'
+const LAYOUT_KEY = 'novasteel.copilot.dock.v2'
 
 interface DockSlots {
   workspace: ReactNode
   copilot: ReactNode
+  onCloseCopilot: () => void
 }
 
 /**
@@ -26,7 +31,11 @@ interface DockSlots {
  * `params`) keeps them live: a panel is constructed once, but its content must
  * re-render whenever the dashboard state changes.
  */
-const DockSlotContext = createContext<DockSlots>({ workspace: null, copilot: null })
+const DockSlotContext = createContext<DockSlots>({
+  workspace: null,
+  copilot: null,
+  onCloseCopilot: () => {},
+})
 
 function WorkspacePanel(_props: IDockviewPanelProps) {
   const slots = useContext(DockSlotContext)
@@ -45,6 +54,34 @@ function CopilotPanelHost(_props: IDockviewPanelProps) {
 const COMPONENTS = {
   [WORKSPACE_PANEL]: WorkspacePanel,
   [COPILOT_PANEL]: CopilotPanelHost,
+}
+
+/**
+ * The dashboard is the reason the application exists: closing its tab would
+ * leave an empty grid with no way back, so it carries no close affordance.
+ */
+function WorkspaceTab(props: IDockviewPanelHeaderProps) {
+  return <DockviewDefaultTab {...props} hideClose data-testid="dock-tab-workspace" />
+}
+
+/**
+ * Closing the Copilot tab must go through the dashboard's own toggle, otherwise
+ * the toolbar button would still read "open" after the panel disappeared.
+ */
+function CopilotTab(props: IDockviewPanelHeaderProps) {
+  const slots = useContext(DockSlotContext)
+  return (
+    <DockviewDefaultTab
+      {...props}
+      closeActionOverride={slots.onCloseCopilot}
+      data-testid="dock-tab-copilot"
+    />
+  )
+}
+
+const TAB_COMPONENTS = {
+  [WORKSPACE_TAB]: WorkspaceTab,
+  [COPILOT_TAB]: CopilotTab,
 }
 
 function readLayout(): object | null {
@@ -71,6 +108,8 @@ export interface CopilotDockProps {
   themeMode: 'light' | 'dark'
   /** Height of the dock surface; the grid needs a bounded container. */
   height?: number | string
+  /** Invoked when the operator closes the Copilot tab from its tab bar. */
+  onCloseCopilot?: () => void
 }
 
 /**
@@ -82,7 +121,14 @@ export interface CopilotDockProps {
  * to any edge. Floating groups are disabled on purpose: the requirement is a
  * docked panel, never a free-floating window.
  */
-export function CopilotDock({ open, workspace, copilot, themeMode, height }: CopilotDockProps) {
+export function CopilotDock({
+  open,
+  workspace,
+  copilot,
+  themeMode,
+  height,
+  onCloseCopilot,
+}: CopilotDockProps) {
   const apiRef = useRef<DockviewApi | null>(null)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const disposableRef = useRef<{ dispose(): void } | null>(null)
@@ -131,11 +177,13 @@ export function CopilotDock({ open, workspace, copilot, themeMode, height }: Cop
     event.api.addPanel({
       id: WORKSPACE_PANEL,
       component: WORKSPACE_PANEL,
+      tabComponent: WORKSPACE_TAB,
       title: 'Dashboard',
     })
     event.api.addPanel({
       id: COPILOT_PANEL,
       component: COPILOT_PANEL,
+      tabComponent: COPILOT_TAB,
       title: 'Copilot',
       position: { referencePanel: WORKSPACE_PANEL, direction: 'right' },
       initialWidth: 420,
@@ -146,7 +194,9 @@ export function CopilotDock({ open, workspace, copilot, themeMode, height }: Cop
     <Box
       data-testid="copilot-dock"
       sx={{
-        height: height ?? 'clamp(520px, calc(100vh - 260px), 1200px)',
+        // Always a little taller than the workspace dock nested inside it, so
+        // the two grids never produce a double scrollbar.
+        height: height ?? 'clamp(620px, calc(100vh - 210px), 1460px)',
         minHeight: 0,
         borderRadius: 1,
         overflow: 'hidden',
@@ -154,9 +204,12 @@ export function CopilotDock({ open, workspace, copilot, themeMode, height }: Cop
         borderColor: 'divider',
       }}
     >
-      <DockSlotContext.Provider value={{ workspace, copilot }}>
+      <DockSlotContext.Provider
+        value={{ workspace, copilot, onCloseCopilot: onCloseCopilot ?? (() => {}) }}
+      >
         <DockviewReact
           components={COMPONENTS}
+          tabComponents={TAB_COMPONENTS}
           onReady={onReady}
           disableFloatingGroups
           theme={themeMode === 'dark' ? themeDark : themeLight}

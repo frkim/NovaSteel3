@@ -13,6 +13,14 @@ export interface StateBoundaryProps<T> {
   onReset?: () => void
   skeleton?: ReactNode
   skeletonRows?: number
+  /**
+   * Tab label when this boundary becomes a dock panel. A render-function child
+   * cannot be inspected statically, so a boundary that wraps its screen's
+   * panels is opaque to the panel collector and needs to name itself.
+   */
+  dockTitle?: string
+  /** Dock panel id, when the boundary itself is the panel. */
+  dockId?: string
 }
 
 export function StateBoundary<T>({
@@ -23,8 +31,12 @@ export function StateBoundary<T>({
   onReset,
   skeleton,
   skeletonRows = 4,
+  dockTitle,
+  dockId,
 }: StateBoundaryProps<T>) {
   const { t } = useAnalytics()
+  void dockTitle
+  void dockId
 
   if (state.status === 'loading' && state.data === null) {
     return (

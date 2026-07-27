@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 import {
   Alert,
   Box,
@@ -16,6 +16,7 @@ import {
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayArrow'
 import StopCircleIcon from '@mui/icons-material/Stop'
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
+import GridViewIcon from '@mui/icons-material/GridView'
 import { createNovaSteelTheme, resolveThemeMode } from '../designTokens'
 import { DataClient } from '../api/dataClient'
 import { CopilotClient } from '../api/copilotClient'
@@ -29,6 +30,7 @@ import { ErrorBoundary } from './ErrorBoundary'
 import { DemoTour } from './DemoTour'
 import { CopilotDock } from './copilot/CopilotDock'
 import { CopilotPanel } from './copilot/CopilotPanel'
+import { hasDockLayouts, resetDockLayouts, subscribeDockPresence } from './dock/dockCommands'
 
 interface AnalyticsDashboardProps {
   context: ShellContext
@@ -39,6 +41,7 @@ export function AnalyticsDashboard({ context, emit }: AnalyticsDashboardProps) {
   const theme = useMemo(() => createNovaSteelTheme(context.themeMode), [context.themeMode])
   const [tourOpen, setTourOpen] = useState(false)
   const [copilotOpen, setCopilotOpen] = useState(false)
+  const dockPresent = useSyncExternalStore(subscribeDockPresence, hasDockLayouts, () => false)
 
   const client = useMemo(
     () => new DataClient(context),
@@ -130,6 +133,18 @@ export function AnalyticsDashboard({ context, emit }: AnalyticsDashboardProps) {
           </Box>
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
             <Chip variant="outlined" size="small" label={section.persona} />
+            {dockPresent && (
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<GridViewIcon />}
+                data-testid="dock-reset"
+                title={translator('dock.reset.hint')}
+                onClick={() => resetDockLayouts()}
+              >
+                {translator('dock.reset')}
+              </Button>
+            )}
             <Button
               size="small"
               variant={copilotOpen ? 'contained' : 'outlined'}
@@ -173,6 +188,7 @@ export function AnalyticsDashboard({ context, emit }: AnalyticsDashboardProps) {
           <CopilotDock
             open={copilotOpen}
             themeMode={resolveThemeMode(context.themeMode)}
+            onCloseCopilot={() => setCopilotOpen(false)}
             workspace={
               <ErrorBoundary key={`${section.section}/${tab.slug}`}>
                 <Box component="main">
