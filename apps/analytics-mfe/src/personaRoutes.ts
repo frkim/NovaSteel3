@@ -7,6 +7,7 @@ export interface PersonaSection {
   section: string
   title: string
   persona: string
+  personaIds: string[]
   description: string
   defaultSubView: string
   tabs: PersonaTab[]
@@ -16,7 +17,8 @@ export const personaSections: PersonaSection[] = [
   {
     section: 'command-center',
     title: 'Command Center',
-    persona: 'Plant Manager',
+    persona: 'Marc Weber - Plant Manager',
+    personaIds: ['plant-manager'],
     description: 'Cross-persona triage with the highest-severity signals and next-best actions.',
     defaultSubView: 'overview',
     tabs: [{ slug: 'overview', label: 'Overview' }],
@@ -24,7 +26,8 @@ export const personaSections: PersonaSection[] = [
   {
     section: 'operations',
     title: 'Operations',
-    persona: 'Plant Manager',
+    persona: 'Marc Weber - Plant Manager',
+    personaIds: ['plant-manager'],
     description: 'Live production health, throughput versus target, and incident triage.',
     defaultSubView: 'overview',
     tabs: [{ slug: 'overview', label: 'Overview' }],
@@ -32,7 +35,8 @@ export const personaSections: PersonaSection[] = [
   {
     section: 'furnace-health',
     title: 'Furnace Health',
-    persona: 'Furnace Operator & Maintenance/Reliability Engineer',
+    persona: 'Elena Duarte & Tomás Rossi - Furnace / Maintenance',
+    personaIds: ['furnace-operator', 'maintenance-engineer'],
     description: 'Lining wear forecasting, thermal signatures, and maintenance planning.',
     defaultSubView: 'lining-forecast',
     tabs: [
@@ -44,7 +48,8 @@ export const personaSections: PersonaSection[] = [
   {
     section: 'energy-optimization',
     title: 'Energy Optimization',
-    persona: 'Energy Manager',
+    persona: 'Sofia Lindqvist - Energy Manager',
+    personaIds: ['energy-manager'],
     description: 'Constrained dispatch proposals against spot prices and carbon intensity.',
     defaultSubView: 'spot-price-schedule',
     tabs: [
@@ -55,7 +60,8 @@ export const personaSections: PersonaSection[] = [
   {
     section: 'quality',
     title: 'Quality',
-    persona: 'Quality Engineer',
+    persona: 'Jens Bakker - Quality Engineer',
+    personaIds: ['quality-engineer'],
     description: 'Batch quality, genealogy, bounded what-if, and SPC.',
     defaultSubView: 'batches',
     tabs: [
@@ -66,7 +72,8 @@ export const personaSections: PersonaSection[] = [
   {
     section: 'sustainability-compliance',
     title: 'Sustainability & Compliance',
-    persona: 'Sustainability Officer',
+    persona: 'Amina Haddad - Sustainability Officer',
+    personaIds: ['sustainability-officer'],
     description: 'Emissions ledger, ETS exposure, and auditable decision evidence.',
     defaultSubView: 'emissions-ledger',
     tabs: [
@@ -78,7 +85,8 @@ export const personaSections: PersonaSection[] = [
   {
     section: 'knowledge-hub',
     title: 'Knowledge Hub',
-    persona: 'Knowledge Engineer/Admin',
+    persona: 'Pieter Claes - Knowledge Engineer',
+    personaIds: ['knowledge-engineer'],
     description: 'Search approved procedures and govern consent-bound capture and review.',
     defaultSubView: 'procedures',
     tabs: [
@@ -89,7 +97,8 @@ export const personaSections: PersonaSection[] = [
   {
     section: 'executive-overview',
     title: 'Executive Overview',
-    persona: 'Executive',
+    persona: 'Isabelle Moreau - Executive',
+    personaIds: ['executive'],
     description: 'Cross-site KPIs, targets versus actuals, and an optional board report.',
     defaultSubView: 'overview',
     tabs: [
@@ -100,7 +109,8 @@ export const personaSections: PersonaSection[] = [
   {
     section: 'device-operations',
     title: 'Device Operations',
-    persona: 'OT Systems Engineer',
+    persona: 'Rui Almeida - OT Systems Engineer',
+    personaIds: ['ot-systems-engineer'],
     description:
       'Fleet health for every simulated device, a searchable sensor explorer, and the incident simulator that drives the demo.',
     defaultSubView: 'fleet',
@@ -114,6 +124,11 @@ export const personaSections: PersonaSection[] = [
     section: 'dashboards',
     title: 'Dashboard Collections',
     persona: 'All personas',
+    personaIds: [
+      'plant-manager', 'furnace-operator', 'maintenance-engineer', 'energy-manager',
+      'quality-engineer', 'sustainability-officer', 'knowledge-engineer', 'executive',
+      'ot-systems-engineer', 'platform-ops',
+    ],
     description: 'Curated, ready-to-open dashboard sets grouped by the question each one answers.',
     defaultSubView: 'collections',
     tabs: [{ slug: 'collections', label: 'Collections' }],
@@ -121,7 +136,8 @@ export const personaSections: PersonaSection[] = [
   {
     section: 'platform-ops',
     title: 'Platform Ops',
-    persona: 'Platform Ops',
+    persona: 'Nils Andersen - Platform Ops',
+    personaIds: ['platform-ops'],
     description: 'Restricted non-production capacity lifecycle, jobs, and cost telemetry.',
     defaultSubView: 'capacity',
     tabs: [
@@ -134,6 +150,7 @@ export const personaSections: PersonaSection[] = [
     section: 'company-website',
     title: 'AxelorMetal',
     persona: 'Public site',
+    personaIds: [],
     description:
       'The public corporate site of AxelorMetal, the Luxembourg steel producer that runs the NovaSteel platform.',
     defaultSubView: 'home',

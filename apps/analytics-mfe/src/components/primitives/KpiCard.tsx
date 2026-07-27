@@ -8,6 +8,7 @@ import RemoveIcon from '@mui/icons-material/Remove'
 import type { DataSource } from '../../api/domain'
 import type { Driver } from '../../api/envelope'
 import { useTokens } from '../../hooks/useTokens'
+import { kpiPastelPalette, stableStringHash } from '../../designTokens'
 import { Sparkline } from '../charts/Sparkline'
 import { FreshnessBadge } from './FreshnessBadge'
 import { WhyPopover } from './WhyPopover'
@@ -43,8 +44,14 @@ export interface KpiCardProps {
   metric: KpiCardModel
 }
 
+export function kpiBackgroundColor(id: string, palette: string[]): string {
+  return palette[stableStringHash(id) % palette.length]
+}
+
 export function KpiCard({ metric }: KpiCardProps) {
   const tokens = useTokens()
+  const pastelPalette = kpiPastelPalette(tokens.mode)
+  const bgColor = kpiBackgroundColor(metric.id, pastelPalette)
 
   const trendColor =
     metric.trend && metric.trend !== 'flat' && metric.goodDirection
@@ -146,7 +153,17 @@ export function KpiCard({ metric }: KpiCardProps) {
   )
 
   return (
-    <Card component="article" aria-label={metric.label} sx={{ height: '100%' }}>
+    <Card
+      component="article"
+      aria-label={metric.label}
+      data-help={`kpi:${metric.id}`}
+      data-help-detail={metric.tooltip}
+      sx={{
+        height: '100%',
+        backgroundColor: bgColor,
+        borderLeft: `3px solid ${tokens.mode === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)'}`,
+      }}
+    >
       <CardContent sx={{ height: '100%' }}>
         <Stack sx={{ height: '100%' }} spacing={0.5}>
           <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>

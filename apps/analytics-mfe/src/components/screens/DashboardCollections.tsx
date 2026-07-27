@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type ComponentType } from 'react'
 import {
   Box,
   Button,
@@ -19,6 +19,13 @@ import {
 import SearchIcon from '@mui/icons-material/Search'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import ScheduleIcon from '@mui/icons-material/Schedule'
+import WbTwilightOutlinedIcon from '@mui/icons-material/WbTwilightOutlined'
+import WhatshotOutlinedIcon from '@mui/icons-material/WhatshotOutlined'
+import BoltOutlinedIcon from '@mui/icons-material/BoltOutlined'
+import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined'
+import VerifiedUserOutlinedIcon from '@mui/icons-material/VerifiedUserOutlined'
+import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined'
+import type { SvgIconProps } from '@mui/material'
 import { useAnalytics } from '../../context/analytics'
 import { PanelCard, SectionStack, TwoColumn, revealPanel } from './common'
 import {
@@ -63,6 +70,25 @@ export function DashboardCollections() {
 
   const selected: DashboardCollection =
     visible.find((collection) => collection.id === selectedId) ?? visible[0] ?? dashboardCollections[0]
+
+  const collectionIcon = (id: string): { Icon: ComponentType<SvgIconProps>; color: string } => {
+    switch (id) {
+      case 'morning-shift-handover':
+        return { Icon: WbTwilightOutlinedIcon, color: '#E69F00' }
+      case 'furnace-risk-investigation':
+        return { Icon: WhatshotOutlinedIcon, color: '#D55E00' }
+      case 'energy-cost-review':
+        return { Icon: BoltOutlinedIcon, color: '#0072B2' }
+      case 'quality-escape-review':
+        return { Icon: ScienceOutlinedIcon, color: '#009E73' }
+      case 'compliance-evidence-pack':
+        return { Icon: VerifiedUserOutlinedIcon, color: '#CC79A7' }
+      case 'platform-health-review':
+        return { Icon: StorageOutlinedIcon, color: '#56B4E9' }
+      default:
+        return { Icon: WbTwilightOutlinedIcon, color: '#5A6470' }
+    }
+  }
 
   const open = (section: string, subView: string) => {
     emit('nav.intent', { route: `/${site}/${section}/${subView}` })
@@ -158,7 +184,13 @@ export function DashboardCollections() {
                 >
                   <CardContent>
                     <Stack spacing={0.75} sx={{ height: '100%' }}>
-                      <Typography variant="h3">{collection.title}</Typography>
+                      <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                        {(() => {
+                          const { Icon, color } = collectionIcon(collection.id)
+                          return <Icon aria-hidden sx={{ color, fontSize: 22 }} />
+                        })()}
+                        <Typography variant="h3">{collection.title}</Typography>
+                      </Stack>
                       <Typography variant="body2" color="text.secondary">
                         {collection.question}
                       </Typography>

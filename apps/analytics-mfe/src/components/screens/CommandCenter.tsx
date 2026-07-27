@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Box, Button, Card, CardContent, Stack, Typography } from '@mui/material'
+import { Box, Button, Card, CardActionArea, CardContent, Stack, Typography } from '@mui/material'
 import { useAnalytics } from '../../context/analytics'
 import { useResource } from '../../hooks/useResource'
 import { usePolling } from '../../hooks/usePolling'
@@ -182,9 +182,44 @@ export function CommandCenter() {
     { key: 'status', label: 'Status', type: 'enum' },
   ]
 
+  const sites = useMemo(() => [
+    { code: 'lu', label: 'LU', name: 'Moselle Integrated Works', health: 'WARNING' as const, alerts: openCritical.length },
+    { code: 'de', label: 'DE', name: 'Saarbrücken Steelworks', health: 'INFO' as const, alerts: 0 },
+    { code: 'be', label: 'BE', name: 'Liège Rolling Mill', health: 'INFO' as const, alerts: 0 },
+    { code: 'es', label: 'ES', name: 'Asturias Long Products', health: 'INFO' as const, alerts: 0 },
+  ], [openCritical.length])
+
   return (
     <SectionStack>
-      <StateBoundary state={summaryState} skeletonRows={2}>
+      <PanelCard title="Site status">
+        <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
+          {sites.map((entry) => (
+            <Card key={entry.code} variant="outlined">
+              <CardActionArea
+                aria-label={`${entry.label} — ${entry.name}`}
+                onClick={() => emit('nav.intent', { route: `/${entry.code}/command-center/overview` })}
+              >
+                <CardContent>
+                  <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Typography variant="h5">{entry.label}</Typography>
+                    <SeverityPill severity={entry.health} label={entry.health === 'WARNING' ? 'Attention' : 'Healthy'} />
+                  </Stack>
+                  <Typography variant="caption" color="text.secondary">
+                    {entry.name}
+                  </Typography>
+                  {entry.alerts > 0 && (
+                    <Typography variant="caption" color="error">
+                      {entry.alerts} active alert{entry.alerts !== 1 ? 's' : ''}
+                    </Typography>
+                  )}
+                </CardContent>
+              </CardActionArea>
+            </Card>
+          ))}
+        </Box>
+      </PanelCard>
+
+      <StateBoundary state={summaryState} skeletonRows={2} dockId="cc-kpis" dockTitle="Key metrics">
         {() => <KpiBand metrics={metrics} />}
       </StateBoundary>
 
@@ -259,24 +294,6 @@ export function CommandCenter() {
           </Stack>
         }
       />
-
-      <PanelCard title="Site status">
-        <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
-          {['LU', 'DE', 'BE', 'ES'].map((code, index) => (
-            <Card key={code} variant="outlined">
-              <CardContent>
-                <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Typography variant="h5">{code}</Typography>
-                  <SeverityPill severity={index === 0 ? 'WARNING' : 'INFO'} label={index === 0 ? 'Attention' : 'Healthy'} />
-                </Stack>
-                <Typography variant="caption" color="text.secondary">
-                  {index === 0 ? 'Moselle Integrated Works' : 'Synthetic roll-up'}
-                </Typography>
-              </CardContent>
-            </Card>
-          ))}
-        </Box>
-      </PanelCard>
     </SectionStack>
   )
 }

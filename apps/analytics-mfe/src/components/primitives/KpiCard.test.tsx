@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../test/renderWithProviders'
-import { KpiCard, type KpiCardModel } from './KpiCard'
+import { KpiCard, kpiBackgroundColor, type KpiCardModel } from './KpiCard'
+import { KPI_PASTEL_LIGHT } from '../../designTokens'
 
 const metric: KpiCardModel = {
   id: 'furnace',
@@ -77,5 +78,25 @@ describe('KpiCard', () => {
     expect(
       screen.queryByRole('button', { name: /Furnace lining RUL: open/ }),
     ).not.toBeInTheDocument()
+  })
+
+  describe('pastel background', () => {
+    it('assigns the same colour for the same id deterministically', () => {
+      const color1 = kpiBackgroundColor('furnace', KPI_PASTEL_LIGHT)
+      const color2 = kpiBackgroundColor('furnace', KPI_PASTEL_LIGHT)
+      expect(color1).toBe(color2)
+    })
+
+    it('assigns different colours for different ids in a typical band', () => {
+      const ids = ['furnace', 'energy', 'defects', 'throughput', 'scrap', 'uptime']
+      const colors = ids.map((id) => kpiBackgroundColor(id, KPI_PASTEL_LIGHT))
+      const unique = new Set(colors)
+      expect(unique.size).toBeGreaterThanOrEqual(4)
+    })
+
+    it('returns a value from the palette', () => {
+      const color = kpiBackgroundColor('anything', KPI_PASTEL_LIGHT)
+      expect(KPI_PASTEL_LIGHT).toContain(color)
+    })
   })
 })

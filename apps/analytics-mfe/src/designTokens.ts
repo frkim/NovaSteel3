@@ -64,6 +64,40 @@ export function prefersReducedMotion(): boolean {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
+export const KPI_PASTEL_LIGHT: string[] = [
+  '#E3F2FD',
+  '#E8F5E9',
+  '#FFF3E0',
+  '#F3E5F5',
+  '#E0F7FA',
+  '#FBE9E7',
+  '#F1F8E9',
+  '#EDE7F6',
+]
+
+export const KPI_PASTEL_DARK: string[] = [
+  '#1A2733',
+  '#1A2B1E',
+  '#2B2317',
+  '#261A2B',
+  '#17292B',
+  '#2B1D1A',
+  '#222B1A',
+  '#201A2B',
+]
+
+export function kpiPastelPalette(mode: ResolvedMode): string[] {
+  return mode === 'dark' ? KPI_PASTEL_DARK : KPI_PASTEL_LIGHT
+}
+
+export function stableStringHash(str: string): number {
+  let hash = 5381
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) + hash + str.charCodeAt(i)) | 0
+  }
+  return Math.abs(hash)
+}
+
 export function createNovaSteelTheme(themeMode: ThemeMode): Theme {
   const mode = resolveThemeMode(themeMode)
   const colors = colorTokens(mode)

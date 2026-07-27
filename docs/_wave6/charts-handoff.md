@@ -2,12 +2,18 @@
 
 ## Translation strings
 
-`apps/analytics-mfe/src/i18n/chartMessages.ts` was NOT created because no
-translated strings were needed. The zoom controls use hard-coded English
-aria-labels ("Scale up", "Scale down", "Reset scale") which are accessible
-without i18n. To localise them later, add chart zoom keys to `messages.ts`
-or create the `chartMessages.ts` file.
+Zoom controls now use `t('chart.zoomIn')`, `t('chart.zoomOut')`,
+`t('chart.zoomReset')`, and `t('chart.zoomLevel', { level })` — all
+resolved from `chartMessages.ts` (wired by the owner into `CATALOGS`).
 
-## Wiring required
+## SensorChartPanel collision (action required)
 
-No wiring required in `messages.ts` at this time.
+`SensorChartPanel.tsx` renders its own data-range zoom buttons
+(`t('device.chart.zoomIn')` → "Zoom in") in a `ButtonGroup` **above**
+`ChartContainer`, which now also renders visual-zoom buttons with
+`t('chart.zoomIn')` → "Zoom in". The identical English labels cause
+`SensorChartPanel.test.tsx` to fail on `getByRole('button', { name: 'Zoom in' })`.
+
+**Fix:** pass `zoomable={false}` to the `<ChartContainer>` in
+`SensorChartPanel.tsx` (line ~392). The panel already owns its own
+data-range zoom so the container's visual zoom is redundant there.
