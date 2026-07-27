@@ -12,6 +12,7 @@ import { DonutChart } from '../charts/DonutChart'
 import { ChartContainer } from '../charts/ChartContainer'
 import { KpiBand, PanelCard, SectionStack, TwoColumn, revealPanel } from './common'
 import { formatDateTime, formatInteger, formatNumber } from '../../utils/format'
+import { siteToPlant } from '../../config'
 import type { KpiCardModel } from '../primitives/KpiCard'
 
 const SEVERITY_RANK: Record<string, number> = { CRITICAL: 0, WARNING: 1, INFO: 2 }
@@ -20,11 +21,21 @@ export function CommandCenter() {
   const { client, emit, locale, site } = useAnalytics()
   const tokens = useTokens()
 
-  const summaryState = useResource(() => client.getCommandSummary('all'), [client])
-  const alertsState = useResource(() => client.getAlerts(), [client])
+  const summaryState = useResource(() => client.getCommandSummary(), [client, site])
+  const alertsState = useResource(() => client.getAlerts(), [client, site])
   usePolling(alertsState.reload, 8000)
 
-  const alerts = useMemo(() => alertsState.data ?? [], [alertsState.data])
+  const activePlant = siteToPlant(site)
+  const allAlerts = useMemo(() => alertsState.data ?? [], [alertsState.data])
+  // The poll buffer spans every plant the user may read; the triage panels are
+  // scoped to the selected site while the site-status strip keeps the fleet view.
+  const alerts = useMemo(
+    () =>
+      activePlant === 'all'
+        ? allAlerts
+        : allAlerts.filter((alert) => alert.site === activePlant),
+    [allAlerts, activePlant],
+  )
   const openCritical = useMemo(
     () => alerts.filter((alert) => alert.severity === 'CRITICAL' && alert.status !== 'CLOSED'),
     [alerts],
@@ -183,12 +194,28 @@ export function CommandCenter() {
     { key: 'status', label: 'Status', type: 'enum' },
   ]
 
-  const sites = useMemo(() => [
-    { code: 'lu', label: 'LU', name: 'Moselle Integrated Works', health: 'WARNING' as const, alerts: openCritical.length },
-    { code: 'de', label: 'DE', name: 'Saarbrücken Steelworks', health: 'INFO' as const, alerts: 0 },
-    { code: 'be', label: 'BE', name: 'Liège Rolling Mill', health: 'INFO' as const, alerts: 0 },
-    { code: 'es', label: 'ES', name: 'Asturias Long Products', health: 'INFO' as const, alerts: 0 },
-  ], [openCritical.length])
+  const sites = useMemo(() => {
+    const definitions = [
+      { code: 'lu', label: 'LU', name: 'Moselle Integrated Works' },
+      { code: 'de', label: 'DE', name: 'Saarbrücken Steelworks' },
+      { code: 'be', label: 'BE', name: 'Liège Rolling Mill' },
+      { code: 'es', label: 'ES', name: 'Asturias Long Products' },
+    ]
+    return definitions.map((entry) => {
+      const plant = siteToPlant(entry.code)
+      const open = allAlerts.filter(
+        (alert) => alert.site === plant && alert.status !== 'CLOSED',
+      )
+      const critical = open.filter((alert) => alert.severity === 'CRITICAL').length
+      const warning = open.filter((alert) => alert.severity === 'WARNING').length
+      return {
+        ...entry,
+        health: critical > 0 ? ('CRITICAL' as const) : warning > 0 ? ('WARNING' as const) : ('INFO' as const),
+        alerts: open.length,
+        critical,
+      }
+    })
+  }, [allAlerts])
 
   return (
     <SectionStack>
@@ -203,14 +230,30 @@ export function CommandCenter() {
                 <CardContent>
                   <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
                     <Typography variant="h5">{entry.label}</Typography>
-                    <SeverityPill severity={entry.health} label={entry.health === 'WARNING' ? 'Attention' : 'Healthy'} />
+                    <SeverityPill
+                      severity={entry.health}
+                      label={
+                        entry.health === 'CRITICAL'
+                          ? 'Critical'
+                          : entry.health === 'WARNING'
+                            ? 'Attention'
+                            : 'Healthy'
+                      }
+                    />
                   </Stack>
                   <Typography variant="caption" color="text.secondary">
                     {entry.name}
                   </Typography>
                   {entry.alerts > 0 && (
-                    <Typography variant="caption" color="error">
-                      {entry.alerts} active alert{entry.alerts !== 1 ? 's' : ''}
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        display: 'block',
+                        color: entry.critical > 0 ? 'error.main' : 'warning.main',
+                      }}
+                    >
+                      {entry.alerts} open alert{entry.alerts !== 1 ? 's' : ''}
+                      {entry.critical > 0 ? ` · ${entry.critical} critical` : ''}
                     </Typography>
                   )}
                 </CardContent>
@@ -233,13 +276,13 @@ export function CommandCenter() {
               </span>
               <StateBoundary
                 state={alertsState}
-                isEmpty={(rows) => rows.length === 0}
-                emptyMessage="No active alerts."
+                isEmpty={() => alerts.length === 0}
+                emptyMessage="No active alerts for this site."
               >
-                {(rows) => (
+                {() => (
                   <DataTable
                     caption="Active alerts and incidents"
-                    rows={rows}
+                    rows={alerts}
                     columns={alertColumns}
                     getRowId={(row) => row.alertId}
                     defaultSort={[

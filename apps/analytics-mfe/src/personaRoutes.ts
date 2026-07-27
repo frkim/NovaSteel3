@@ -145,7 +145,24 @@ export const personaSections: PersonaSection[] = [
     description:
       'Every requirement of the use-case brief, the evidence in the running solution that satisfies it, and the caveats we state openly.',
     defaultSubView: 'requirements',
-    tabs: [{ slug: 'requirements', label: 'Requirement Register' }],
+    tabs: [
+      { slug: 'requirements', label: 'Requirement Register' },
+      { slug: 'use-case', label: 'Use Case' },
+    ],
+  },
+  {
+    section: 'technical-requirements',
+    title: 'Technical Requirements',
+    persona: 'All personas',
+    personaIds: [
+      'plant-manager', 'furnace-operator', 'maintenance-engineer', 'energy-manager',
+      'quality-engineer', 'sustainability-officer', 'knowledge-engineer', 'executive',
+      'ot-systems-engineer', 'platform-ops',
+    ],
+    description:
+      'The technical grading rubric answered criterion by criterion, with the evidence behind each score and the gaps we state openly.',
+    defaultSubView: 'criteria',
+    tabs: [{ slug: 'criteria', label: 'Rating Grid' }],
   },
   {
     section: 'platform-ops',

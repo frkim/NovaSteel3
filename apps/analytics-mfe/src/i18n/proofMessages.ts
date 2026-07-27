@@ -38,6 +38,7 @@ const EN: Catalog = {
   'proof.detail.evidence': 'Where to see it',
   'proof.detail.caveat': 'Honest caveat',
   'proof.detail.openScreen': 'Open the screen',
+  'proof.detail.openGithub': 'Open this file on GitHub',
   'proof.evidence.ui': 'Screen',
   'proof.evidence.api': 'API',
   'proof.evidence.code': 'Code',
@@ -48,6 +49,24 @@ const EN: Catalog = {
   'proof.empty': 'No requirement matches that search.',
   'proof.legend':
     'Reference IDs are stamped on the screens that satisfy them, so any panel can be traced back to the brief.',
+  'usecase.title': 'Use case',
+  'usecase.subtitle':
+    'The original brief, reproduced word for word, with the reference ID that proves each statement.',
+  'usecase.source': 'Source of truth',
+  'usecase.sourceNote':
+    'This page mirrors docs/usecase/usecase.md. Nothing here is paraphrased \u2014 compare it line by line with the brief.',
+  'usecase.openSource': 'Read the original Markdown on GitHub',
+  'usecase.section.profile': 'Industry profile',
+  'usecase.section.challenge': 'Business challenge',
+  'usecase.section.objective': 'Transformation objective',
+  'usecase.section.outcome': 'Expected outcomes',
+  'usecase.section.ai': 'AI infusion point',
+  'usecase.profile.industry': 'Industry',
+  'usecase.profile.headquarters': 'Headquarters',
+  'usecase.profile.region': 'Operating region',
+  'usecase.profile.regulatory': 'Regulatory context',
+  'usecase.legend': 'Select any reference chip to open its evidence in Proof of execution.',
+  'usecase.covered': '{met} of {total} statements evidenced',
 }
 
 const FR: Catalog = {
@@ -81,6 +100,7 @@ const FR: Catalog = {
   'proof.detail.evidence': 'O\u00f9 le constater',
   'proof.detail.caveat': 'R\u00e9serve assum\u00e9e',
   'proof.detail.openScreen': "Ouvrir l'\u00e9cran",
+  'proof.detail.openGithub': 'Ouvrir ce fichier sur GitHub',
   'proof.evidence.ui': '\u00c9cran',
   'proof.evidence.api': 'API',
   'proof.evidence.code': 'Code',
@@ -92,6 +112,24 @@ const FR: Catalog = {
   'proof.empty': 'Aucune exigence ne correspond \u00e0 cette recherche.',
   'proof.legend':
     "Les identifiants sont appos\u00e9s sur les \u00e9crans qui les satisfont, afin que chaque panneau soit tra\u00e7able jusqu'au cahier des charges.",
+  'usecase.title': "Cas d'usage",
+  'usecase.subtitle':
+    "Le cahier des charges d'origine, reproduit mot pour mot, avec l'identifiant qui prouve chaque \u00e9nonc\u00e9.",
+  'usecase.source': 'Source de v\u00e9rit\u00e9',
+  'usecase.sourceNote':
+    "Cette page reproduit docs/usecase/usecase.md. Rien n'est paraphras\u00e9 \u2014 comparez ligne par ligne avec le cahier des charges.",
+  'usecase.openSource': "Lire le Markdown d'origine sur GitHub",
+  'usecase.section.profile': 'Profil sectoriel',
+  'usecase.section.challenge': 'Enjeu m\u00e9tier',
+  'usecase.section.objective': 'Objectif de transformation',
+  'usecase.section.outcome': 'R\u00e9sultats attendus',
+  'usecase.section.ai': "Point d'infusion IA",
+  'usecase.profile.industry': 'Secteur',
+  'usecase.profile.headquarters': 'Si\u00e8ge social',
+  'usecase.profile.region': "R\u00e9gion d'exploitation",
+  'usecase.profile.regulatory': 'Contexte r\u00e9glementaire',
+  'usecase.legend': "S\u00e9lectionnez un identifiant pour ouvrir sa preuve dans Preuve d'ex\u00e9cution.",
+  'usecase.covered': '{met} \u00e9nonc\u00e9s sur {total} sont prouv\u00e9s',
 }
 
 const DE: Catalog = {
@@ -125,6 +163,7 @@ const DE: Catalog = {
   'proof.detail.evidence': 'Wo es zu sehen ist',
   'proof.detail.caveat': 'Ehrlicher Vorbehalt',
   'proof.detail.openScreen': 'Bildschirm \u00f6ffnen',
+  'proof.detail.openGithub': 'Diese Datei auf GitHub \u00f6ffnen',
   'proof.evidence.ui': 'Bildschirm',
   'proof.evidence.api': 'API',
   'proof.evidence.code': 'Code',
@@ -136,6 +175,24 @@ const DE: Catalog = {
   'proof.empty': 'Keine Anforderung entspricht dieser Suche.',
   'proof.legend':
     'Referenz-IDs sind auf den Bildschirmen vermerkt, die sie erf\u00fcllen, sodass jedes Panel bis zum Lastenheft zur\u00fcckverfolgbar ist.',
+  'usecase.title': 'Anwendungsfall',
+  'usecase.subtitle':
+    'Das urspr\u00fcngliche Lastenheft, wortgetreu wiedergegeben, mit der Referenz-ID, die jede Aussage belegt.',
+  'usecase.source': 'Quelle der Wahrheit',
+  'usecase.sourceNote':
+    'Diese Seite spiegelt docs/usecase/usecase.md. Nichts ist umformuliert \u2014 vergleichen Sie Zeile f\u00fcr Zeile.',
+  'usecase.openSource': 'Original-Markdown auf GitHub lesen',
+  'usecase.section.profile': 'Branchenprofil',
+  'usecase.section.challenge': 'Gesch\u00e4ftliche Herausforderung',
+  'usecase.section.objective': 'Transformationsziel',
+  'usecase.section.outcome': 'Erwartete Ergebnisse',
+  'usecase.section.ai': 'KI-Infusionspunkt',
+  'usecase.profile.industry': 'Branche',
+  'usecase.profile.headquarters': 'Hauptsitz',
+  'usecase.profile.region': 'Einsatzregion',
+  'usecase.profile.regulatory': 'Regulatorischer Kontext',
+  'usecase.legend': 'W\u00e4hlen Sie eine Referenz, um den Nachweis im Ausf\u00fchrungsnachweis zu \u00f6ffnen.',
+  'usecase.covered': '{met} von {total} Aussagen belegt',
 }
 
 const NL: Catalog = {
@@ -169,6 +226,7 @@ const NL: Catalog = {
   'proof.detail.evidence': 'Waar het te zien is',
   'proof.detail.caveat': 'Eerlijk voorbehoud',
   'proof.detail.openScreen': 'Scherm openen',
+  'proof.detail.openGithub': 'Dit bestand op GitHub openen',
   'proof.evidence.ui': 'Scherm',
   'proof.evidence.api': 'API',
   'proof.evidence.code': 'Code',
@@ -179,6 +237,24 @@ const NL: Catalog = {
   'proof.empty': 'Geen eis komt overeen met die zoekopdracht.',
   'proof.legend':
     'Referentie-ID\u2019s staan op de schermen die eraan voldoen, zodat elk paneel herleidbaar is tot de opdracht.',
+  'usecase.title': 'Use case',
+  'usecase.subtitle':
+    'De originele opdracht, woord voor woord weergegeven, met de referentie-ID die elke uitspraak bewijst.',
+  'usecase.source': 'Bron van waarheid',
+  'usecase.sourceNote':
+    'Deze pagina spiegelt docs/usecase/usecase.md. Niets is geparafraseerd \u2014 vergelijk regel voor regel.',
+  'usecase.openSource': 'Lees de originele Markdown op GitHub',
+  'usecase.section.profile': 'Sectorprofiel',
+  'usecase.section.challenge': 'Zakelijke uitdaging',
+  'usecase.section.objective': 'Transformatiedoel',
+  'usecase.section.outcome': 'Verwachte resultaten',
+  'usecase.section.ai': 'AI-infusiepunt',
+  'usecase.profile.industry': 'Sector',
+  'usecase.profile.headquarters': 'Hoofdkantoor',
+  'usecase.profile.region': 'Werkgebied',
+  'usecase.profile.regulatory': 'Regelgevend kader',
+  'usecase.legend': 'Kies een referentie om het bewijs in Uitvoeringsbewijs te openen.',
+  'usecase.covered': '{met} van {total} uitspraken onderbouwd',
 }
 
 const ES: Catalog = {
@@ -212,6 +288,7 @@ const ES: Catalog = {
   'proof.detail.evidence': 'D\u00f3nde verlo',
   'proof.detail.caveat': 'Salvedad honesta',
   'proof.detail.openScreen': 'Abrir la pantalla',
+  'proof.detail.openGithub': 'Abrir este archivo en GitHub',
   'proof.evidence.ui': 'Pantalla',
   'proof.evidence.api': 'API',
   'proof.evidence.code': 'C\u00f3digo',
@@ -222,6 +299,24 @@ const ES: Catalog = {
   'proof.empty': 'Ning\u00fan requisito coincide con esa b\u00fasqueda.',
   'proof.legend':
     'Los identificadores se estampan en las pantallas que los satisfacen, de modo que cada panel es trazable hasta el pliego.',
+  'usecase.title': 'Caso de uso',
+  'usecase.subtitle':
+    'El pliego original, reproducido palabra por palabra, con el identificador que prueba cada enunciado.',
+  'usecase.source': 'Fuente de verdad',
+  'usecase.sourceNote':
+    'Esta p\u00e1gina refleja docs/usecase/usecase.md. Nada est\u00e1 parafraseado: compare l\u00ednea por l\u00ednea.',
+  'usecase.openSource': 'Leer el Markdown original en GitHub',
+  'usecase.section.profile': 'Perfil del sector',
+  'usecase.section.challenge': 'Reto de negocio',
+  'usecase.section.objective': 'Objetivo de transformaci\u00f3n',
+  'usecase.section.outcome': 'Resultados esperados',
+  'usecase.section.ai': 'Punto de infusi\u00f3n de IA',
+  'usecase.profile.industry': 'Sector',
+  'usecase.profile.headquarters': 'Sede',
+  'usecase.profile.region': 'Regi\u00f3n de operaci\u00f3n',
+  'usecase.profile.regulatory': 'Contexto regulatorio',
+  'usecase.legend': 'Seleccione un identificador para abrir su prueba en Prueba de ejecuci\u00f3n.',
+  'usecase.covered': '{met} de {total} enunciados probados',
 }
 
 export const PROOF_CATALOGS: Record<string, Catalog> = { en: EN, fr: FR, de: DE, nl: NL, es: ES }

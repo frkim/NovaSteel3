@@ -22,6 +22,8 @@ import { DeviceSensors } from './DeviceSensors'
 import { DeviceSimulator } from './DeviceSimulator'
 import { DashboardCollections } from './DashboardCollections'
 import { ProofOfExecution } from './ProofOfExecution'
+import { UseCaseBrief } from './UseCaseBrief'
+import { TechnicalRequirements } from './TechnicalRequirements'
 import { CompanyWebsiteHome } from './CompanyWebsiteHome'
 import { CompanyWebsiteCompany } from './CompanyWebsiteCompany'
 import { CompanyWebsiteProducts } from './CompanyWebsiteProducts'
@@ -54,6 +56,8 @@ export const screenRegistry: Record<string, ComponentType> = {
   'device-operations/simulator': DeviceSimulator,
   'dashboards/collections': DashboardCollections,
   'proof-of-execution/requirements': ProofOfExecution,
+  'proof-of-execution/use-case': UseCaseBrief,
+  'technical-requirements/criteria': TechnicalRequirements,
   'company-website/home': CompanyWebsiteHome,
   'company-website/company': CompanyWebsiteCompany,
   'company-website/products': CompanyWebsiteProducts,

@@ -71,18 +71,6 @@
                 </p>
             </section>
 
-            <section class="settings-section">
-                <h3>Persona</h3>
-                <label class="settings-label">
-                    Primary persona
-                    <select value="@Shell.PrimaryPersona" @onchange="OnPersonaChanged" class="settings-select">
-                        @foreach (var persona in Shell.Auth.CurrentUser.Personas)
-                        {
-                            <option value="@persona">@FormatPersona(persona)</option>
-                        }
-                    </select>
-                </label>
-            </section>
         </div>
     </div>
 }
@@ -155,12 +143,6 @@
         Shell.SetHelpBilingual(args.Value is bool b ? b : bool.Parse(args.Value?.ToString() ?? "false"));
     }
 
-    private void OnPersonaChanged(ChangeEventArgs args)
-    {
-        var persona = args.Value?.ToString() ?? Shell.PrimaryPersona;
-        Shell.SetPrimaryPersona(persona);
-    }
-
     private async Task ActivateFocusTrapAsync()
     {
         _focusTrapModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/settingsFocusTrap.js");
@@ -176,9 +158,6 @@
             _trapActive = false;
         }
     }
-
-    private static string FormatPersona(string persona) =>
-        System.Text.RegularExpressions.Regex.Replace(persona, "([a-z])([A-Z])", "$1 $2");
 
     public async ValueTask DisposeAsync()
     {

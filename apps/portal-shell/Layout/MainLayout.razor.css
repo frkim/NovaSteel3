@@ -34,17 +34,22 @@
 
 .brand-logo-img {
     display: block;
-    height: 26px;
-    width: 26px;
+    height: 28px;
+    width: auto;
     object-fit: contain;
 }
 
+/*
+ * The <picture> source keys off the OS preference, which is wrong whenever the
+ * user has explicitly chosen a theme that contradicts it. `data-theme` always
+ * carries the *resolved* mode, so both branches are pinned here.
+ */
 :global([data-theme="dark"]) .brand-logo-img {
-    content: url("../brand/novasteel-mark-dark.png");
+    content: url("../brand/novasteel-logo-full-dark.png");
 }
 
-.brand-text {
-    font-size: 0.9375rem;
+:global([data-theme="light"]) .brand-logo-img {
+    content: url("../brand/novasteel-logo-full.png");
 }
 
 .topbar-spacer {
@@ -61,6 +66,7 @@
     font-size: 0.8125rem;
     min-height: 28px;
     padding: 0 6px;
+    max-width: 240px;
 }
 
 .icon-button,
@@ -208,7 +214,7 @@
 }
 
 .shell-nav ::deep .shell-nav-link.active {
-    background: var(--ns-color-surface-alt);
+    background: color-mix(in srgb, var(--ns-color-brand-primary) 12%, var(--ns-color-surface));
     border-left-color: var(--ns-color-brand-primary);
     color: var(--ns-color-text-primary);
     font-weight: 700;
@@ -303,10 +309,6 @@
     .topbar-search {
         order: 10;
         width: 100%;
-    }
-
-    .brand-text {
-        display: none;
     }
 
     .shell-nav {

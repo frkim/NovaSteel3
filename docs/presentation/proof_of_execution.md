@@ -38,6 +38,16 @@ Status vocabulary used throughout:
 
 The single machine-readable source of truth is
 [`apps/analytics-mfe/src/proof/proofCatalog.ts`](../../apps/analytics-mfe/src/proof/proofCatalog.ts).
+
+The same in-app page carries a second tab, **Use case**
+(`/{site}/proof-of-execution/use-case`), which reproduces the original brief
+[`docs/usecase/usecase.md`](../usecase/usecase.md) verbatim with every clause
+badged by the reference IDs that prove it. Every source-code evidence entry on
+these screens links straight to the file in the GitHub repository. The companion
+rating-grid answer lives in
+[`docs/tech/technical-analysis.md`](../tech/technical-analysis.md) and its own
+in-app screen, **Technical Requirements**
+(`/{site}/technical-requirements/criteria`).
 This document and the in-app page are both projections of it — they cannot drift
 apart without a failing build.
 

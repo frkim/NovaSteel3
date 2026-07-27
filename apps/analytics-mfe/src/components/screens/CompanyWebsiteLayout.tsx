@@ -60,9 +60,10 @@ export function WebsiteFooter() {
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ alignItems: { sm: 'center' }, mb: 3 }}>
           <Box
             component="img"
-            src="/brand/axelormetal-mark.png"
+            src="/brand/axelormetal-logo-full.png"
             alt="AxelorMetal"
-            height={36}
+            height={40}
+            sx={{ mr: 3, width: 'auto' }}
             onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
               e.currentTarget.style.display = 'none'
             }}

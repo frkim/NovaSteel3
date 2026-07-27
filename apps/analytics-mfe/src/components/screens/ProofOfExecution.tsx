@@ -6,6 +6,7 @@ import {
   Divider,
   InputAdornment,
   LinearProgress,
+  Link,
   Stack,
   TextField,
   Tooltip,
@@ -13,6 +14,7 @@ import {
 } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import LaunchIcon from '@mui/icons-material/Launch'
+import GitHubIcon from '@mui/icons-material/GitHub'
 import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined'
 import ReportProblemOutlinedIcon from '@mui/icons-material/ReportProblemOutlined'
 import FlagOutlinedIcon from '@mui/icons-material/FlagOutlined'
@@ -23,6 +25,7 @@ import { useTokens } from '../../hooks/useTokens'
 import { DataTable, type DataTableColumn } from '../primitives/DataTable'
 import { KpiBand, PanelCard, SectionStack, TwoColumn } from './common'
 import {
+  githubUrlFor,
   PROOF_CATEGORY_ORDER,
   PROOF_REQUIREMENTS,
   proofCoverage,
@@ -325,30 +328,57 @@ export function ProofOfExecution() {
                   {t('proof.detail.evidence')}
                 </Typography>
                 <Stack spacing={1} sx={{ mt: 0.5 }}>
-                  {selected.evidence.map((entry) => (
-                    <Box key={`${entry.kind}-${entry.label}`}>
-                      <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
-                        <Chip
-                          size="small"
-                          label={evidenceLabel(entry.kind)}
-                          sx={{ height: 18, fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}
-                        />
-                        <Typography variant="body2" sx={{ fontFamily: 'ui-monospace, SFMono-Regular, monospace', fontSize: '0.78rem' }}>
-                          {entry.label}
-                        </Typography>
-                        {entry.route ? (
-                          <Button size="small" sx={{ minWidth: 0, px: 0.5 }} onClick={() => open(entry.route as string)}>
-                            <LaunchIcon fontSize="inherit" />
-                          </Button>
+                  {selected.evidence.map((entry) => {
+                    const href = githubUrlFor(entry)
+                    return (
+                      <Box key={`${entry.kind}-${entry.label}`}>
+                        <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
+                          <Chip
+                            size="small"
+                            label={evidenceLabel(entry.kind)}
+                            sx={{ height: 18, fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}
+                          />
+                          {href ? (
+                            <Tooltip title={t('proof.detail.openGithub')} describeChild>
+                              <Link
+                                href={href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                underline="hover"
+                                sx={{
+                                  fontFamily: 'ui-monospace, SFMono-Regular, monospace',
+                                  fontSize: '0.78rem',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: 0.4,
+                                }}
+                              >
+                                {entry.label}
+                                <GitHubIcon sx={{ fontSize: '0.85rem' }} />
+                              </Link>
+                            </Tooltip>
+                          ) : (
+                            <Typography
+                              variant="body2"
+                              sx={{ fontFamily: 'ui-monospace, SFMono-Regular, monospace', fontSize: '0.78rem' }}
+                            >
+                              {entry.label}
+                            </Typography>
+                          )}
+                          {entry.route ? (
+                            <Button size="small" sx={{ minWidth: 0, px: 0.5 }} onClick={() => open(entry.route as string)}>
+                              <LaunchIcon fontSize="inherit" />
+                            </Button>
+                          ) : null}
+                        </Stack>
+                        {entry.detail ? (
+                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', pl: 0.5 }}>
+                            {entry.detail}
+                          </Typography>
                         ) : null}
-                      </Stack>
-                      {entry.detail ? (
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', pl: 0.5 }}>
-                          {entry.detail}
-                        </Typography>
-                      ) : null}
-                    </Box>
-                  ))}
+                      </Box>
+                    )
+                  })}
                 </Stack>
               </Box>
 

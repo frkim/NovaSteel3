@@ -90,13 +90,13 @@ export function CompanyWebsiteHome() {
         <Container maxWidth="lg">
           <Box
             component="img"
-            src="/brand/axelormetal-wordmark.png"
+            src="/brand/axelormetal-logo-full.png"
             alt="AxelorMetal"
-            height={52}
+            height={64}
             onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
               e.currentTarget.style.display = 'none'
             }}
-            sx={{ mb: 4, display: 'block' }}
+            sx={{ mb: 4, mr: 4, display: 'block', width: 'auto' }}
           />
           <Typography
             variant="h1"

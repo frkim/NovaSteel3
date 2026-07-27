@@ -122,7 +122,7 @@ See [the rehearsal report](../artifacts/demo-validation/rehearsal-report.md),
 | Audience | Start here | Then read |
 |---|---|---|
 | Newcomer to the app or to steel making | [Illustrated application guide (EN)](presentation/assets/app-guide/en/README.md) / [(FR)](presentation/assets/app-guide/fr/LISEZMOI.md) | [Use case](usecase/usecase.md), [proof of execution](presentation/proof_of_execution.md) |
-| Defense panel / presenter | [Root handoff](../README.md) | [Proof of execution](presentation/proof_of_execution.md), [runbook](demo/demo-runbook.md), [slide plan](presentation/oral-defense-and-slide-plan.md), [FAQ](presentation/faq.md) |
+| Defense panel / presenter | [Root handoff](../README.md) | [Proof of execution](presentation/proof_of_execution.md), [technical analysis](tech/technical-analysis.md), [runbook](demo/demo-runbook.md), [slide plan](presentation/oral-defense-and-slide-plan.md), [FAQ](presentation/faq.md) |
 | Product owner | [Requirements](specs/solution-requirements.md) | [Personas](personas/personas-and-journeys.md), [UX specification](ux/dashboard-specification.md) |
 | Solution/data architect | [Solution architecture](architecture/solution-architecture.md) | [Deployment topology](architecture/deployment-topology.md), [Fabric assets](../fabric/README.md) |
 | Application engineer | [Root quick start](../README.md) | [API contracts](implementation/api-contracts.md), [implementation guide](implementation/implementation-guide.md) |
@@ -135,7 +135,7 @@ See [the rehearsal report](../artifacts/demo-validation/rehearsal-report.md),
 |---|---|---|
 | 00:00–30:00 | 20-slide architecture and value narrative | [Plan](presentation/oral-defense-and-slide-plan.md) and `presentation\NovaSteel-Oral-Defense.pptx` |
 | 30:00–45:00 | Six-moment deterministic persona demo | [Runbook](demo/demo-runbook.md) and `..\artifacts\demo-validation\drive_demo.py` |
-| 45:00–60:00 | Moderated FAQ / validation-gate discussion | [FAQ](presentation/faq.md) and [proof of execution](presentation/proof_of_execution.md) |
+| 45:00–60:00 | Moderated FAQ / validation-gate discussion | [FAQ](presentation/faq.md), [proof of execution](presentation/proof_of_execution.md) and [technical analysis](tech/technical-analysis.md) |
 
 The PowerPoint has 26 slides: 20 primary narrative/demo-handoff slides and six
 FAQ backup slides. The package validator found no placeholders and confirms
@@ -152,6 +152,7 @@ alignment to the demo transitions.
 | Experience | [Illustrated application guide](presentation/assets/app-guide/en/README.md), [UX spec §9.7](ux/dashboard-specification.md#97-dockview-workspace-model-all-screens), [UX spec §12.11](ux/dashboard-specification.md#1211-axelormetal-corporate-website-company-website-s-24), [Solution architecture ADR-014](architecture/solution-architecture.md#adr-014--two-level-dockview-workspace-with-jsx-derived-panels) |
 | Device Operations | [Synthetic data §13](data/synthetic-data-and-simulators.md#13-device-simulator-estate), [UX spec §12.9–12.10](ux/dashboard-specification.md), [API contracts §4.12](implementation/api-contracts.md#412-device-operations), [Operations §12](operations/operations-and-cost.md) |
 | Security/operations | [Security governance](security/security-governance-and-threat-model.md), [operations](operations/operations-and-cost.md), [package-feed policy](tech/security_requirement.md) |
+| Rating grid | [Rubric](tech/rating_grid.md), [technical analysis](tech/technical-analysis.md), in-app **Technical Requirements** screen (`/{site}/technical-requirements/criteria`) |
 | Validation | [Validation report](validation-report.md), [local evidence](../artifacts/validation/final/evidence-manifest.json), [rehearsal report](../artifacts/demo-validation/rehearsal-report.md) |
 
 ## Remaining production gates

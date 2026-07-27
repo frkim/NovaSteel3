@@ -22,6 +22,18 @@ public sealed class ShellState
 
     public static IReadOnlyList<string> Sites { get; } = ["lu", "de", "be", "es", "all"];
 
+    public static IReadOnlyDictionary<string, string> SiteNames { get; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        ["lu"] = "LU - Moselle Integrated Works",
+        ["de"] = "DE - Saarbrücken Steelworks",
+        ["be"] = "BE - Liège Rolling Mill",
+        ["es"] = "ES - Asturias Long Products",
+        ["all"] = "ALL - All sites",
+    };
+
+    public static string SiteLabel(string site) =>
+        SiteNames.TryGetValue(site, out var label) ? label : site.ToUpperInvariant();
+
     public static IReadOnlyList<string> Locales { get; } =
         ["en-LU", "fr-LU", "de-DE", "nl-BE", "es-ES"];
 
@@ -39,6 +51,7 @@ public sealed class ShellState
         new("Knowledge Hub", "knowledge-hub", "procedures", "KnowledgeEngineer", "⌕", "Insight & governance"),
         new("Dashboards", "dashboards", "collections", "PlantManager", "▦", "Insight & governance"),
         new("Proof of Execution", "proof-of-execution", "requirements", "PlantManager", "⎋", "Insight & governance"),
+        new("Technical Requirements", "technical-requirements", "criteria", "PlantManager", "⌘", "Insight & governance"),
         // Platform & reference
         new("Device Operations", "device-operations", "fleet", "PlatformOps", "◈", "Platform & reference"),
         new("Platform Ops", "platform-ops", "capacity", "PlatformOps", "⚙", "Platform & reference"),

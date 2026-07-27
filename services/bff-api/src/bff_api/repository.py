@@ -6,6 +6,7 @@ import json
 import hashlib
 from copy import deepcopy
 from dataclasses import dataclass, field
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
@@ -330,7 +331,10 @@ class DemoRepository:
                     metrics.get("lining_rul_p50_days", 21.0) * factor, 0
                 ),
                 "openAlerts": sum(
-                    1 for alert in self.alerts.values() if alert["status"] != "CLOSED"
+                    1
+                    for alert in self.alerts.values()
+                    if alert["status"] != "CLOSED"
+                    and (site == "all" or alert.get("site") == site)
                 ),
             },
             "scenario": {
@@ -409,6 +413,182 @@ class DemoRepository:
                 "createdBy": "SYSTEM",
                 "detectedAt": record.get("detected_ts"),
             }
+        self._hydrate_supplementary_alerts()
+
+    def _hydrate_supplementary_alerts(self) -> None:
+        """Add the deterministic Warning/Info alert deck the demo triages.
+
+        The generated scenario only raises the single critical lining alarm. The
+        Command Center needs a realistic severity mix across all four sites, so
+        this deck is layered on top without touching the checksum-verified pack.
+        """
+        anchor = _anchor_timestamp(self.manifest)
+        for entry in _SUPPLEMENTARY_ALERTS:
+            alert_id = str(entry["alertId"])
+            if alert_id in self.alerts:
+                continue
+            created_at = _shift_hours(anchor, -int(entry["offsetHours"]))
+            self.alerts[alert_id] = {
+                "alertId": alert_id,
+                "site": entry["site"],
+                "assetId": entry["assetId"],
+                "componentId": entry["componentId"],
+                "severity": entry["severity"],
+                "status": entry["status"],
+                "message": entry["message"],
+                "confidence": entry["confidence"],
+                "createdAt": created_at,
+                "updatedAt": created_at,
+                "sourceRef": f"demo:supplementary-alert:{alert_id}",
+                "correlationId": f"demo-alert-deck-{self.manifest.get('root_seed', 240725)}",
+            }
+
+
+_SUPPLEMENTARY_ALERTS: tuple[dict[str, Any], ...] = (
+    {
+        "alertId": "ALERT-ENERGY-SCARCITY-1830",
+        "site": "NS-DEMO-LUX-01",
+        "assetId": "LUX-UTIL-01",
+        "componentId": "GRID",
+        "severity": "WARNING",
+        "status": "OPEN",
+        "message": "Evening scarcity spike to 280 EUR/MWh forecast for 18:30-19:00.",
+        "confidence": 0.74,
+        "offsetHours": 6,
+    },
+    {
+        "alertId": "ALERT-ETS-ALLOWANCE-Q3",
+        "site": "NS-DEMO-LUX-01",
+        "assetId": "LUX-SITE-01",
+        "componentId": "ETS-LEDGER",
+        "severity": "WARNING",
+        "status": "OPEN",
+        "message": "Q3 EU ETS allowance headroom down to 6.2% at current emission intensity.",
+        "confidence": 0.71,
+        "offsetHours": 9,
+    },
+    {
+        "alertId": "ALERT-STOVE-04-DOME-TEMP",
+        "site": "NS-DEMO-LUX-01",
+        "assetId": "LUX-BF-01",
+        "componentId": "STOVE-04",
+        "severity": "WARNING",
+        "status": "OPEN",
+        "message": "Hot blast stove 04 dome temperature 24 C below setpoint over three cycles.",
+        "confidence": 0.66,
+        "offsetHours": 12,
+    },
+    {
+        "alertId": "ALERT-SENSOR-DRIFT-TC-114",
+        "site": "NS-DEMO-LUX-01",
+        "assetId": "LUX-BF-01",
+        "componentId": "TC-114",
+        "severity": "WARNING",
+        "status": "ACKNOWLEDGED",
+        "message": "Thermocouple TC-114 drifting 1.8 C/h against neighbouring sensors; calibration due.",
+        "confidence": 0.63,
+        "offsetHours": 15,
+    },
+    {
+        "alertId": "ALERT-LADLE-12-CYCLE-COUNT",
+        "site": "NS-DEMO-LUX-01",
+        "assetId": "LUX-BOF-01",
+        "componentId": "LADLE-12",
+        "severity": "INFO",
+        "status": "OPEN",
+        "message": "Ladle 12 reached 88 of 110 refractory heats; schedule relining window.",
+        "confidence": 0.58,
+        "offsetHours": 18,
+    },
+    {
+        "alertId": "ALERT-PPA-WIND-SURPLUS",
+        "site": "NS-DEMO-LUX-01",
+        "assetId": "LUX-UTIL-01",
+        "componentId": "PPA-WIND",
+        "severity": "INFO",
+        "status": "OPEN",
+        "message": "Wind PPA surplus 12 MWh forecast 02:00-05:00; candidate window for reheat pre-charge.",
+        "confidence": 0.61,
+        "offsetHours": 21,
+    },
+    {
+        "alertId": "ALERT-KNOWLEDGE-REVIEW-QUEUE",
+        "site": "NS-DEMO-LUX-01",
+        "assetId": "LUX-SITE-01",
+        "componentId": "KNOWLEDGE-HUB",
+        "severity": "INFO",
+        "status": "OPEN",
+        "message": "Three captured procedures awaiting expert review beyond the 5-day SLA.",
+        "confidence": 0.55,
+        "offsetHours": 24,
+    },
+    {
+        "alertId": "ALERT-DE-CASTER-MOULD-LEVEL",
+        "site": "NS-DEMO-DE-01",
+        "assetId": "DE-CC-01",
+        "componentId": "MOULD-LEVEL-02",
+        "severity": "WARNING",
+        "status": "OPEN",
+        "message": "Caster 01 mould level oscillation above 4.5 mm band on two consecutive sequences.",
+        "confidence": 0.69,
+        "offsetHours": 7,
+    },
+    {
+        "alertId": "ALERT-DE-SCRAP-MIX-COST",
+        "site": "NS-DEMO-DE-01",
+        "assetId": "DE-EAF-01",
+        "componentId": "CHARGE-MIX",
+        "severity": "INFO",
+        "status": "OPEN",
+        "message": "Scrap charge mix 3.1% above least-cost recipe; alternative bundle available.",
+        "confidence": 0.57,
+        "offsetHours": 16,
+    },
+    {
+        "alertId": "ALERT-BE-ROLL-FORCE-TREND",
+        "site": "NS-DEMO-BE-01",
+        "assetId": "BE-HSM-01",
+        "componentId": "STAND-F4",
+        "severity": "WARNING",
+        "status": "OPEN",
+        "message": "Stand F4 roll force trending 5.8% high for NS-AUTO-DP780; check work-roll wear.",
+        "confidence": 0.64,
+        "offsetHours": 10,
+    },
+    {
+        "alertId": "ALERT-BE-COIL-COOLING-BANK",
+        "site": "NS-DEMO-BE-01",
+        "assetId": "BE-HSM-01",
+        "componentId": "COOLING-BANK-03",
+        "severity": "INFO",
+        "status": "OPEN",
+        "message": "Cooling bank 03 nozzle flow 6% below nominal; routine descaling proposed.",
+        "confidence": 0.53,
+        "offsetHours": 20,
+    },
+    {
+        "alertId": "ALERT-ES-REHEAT-AIR-RATIO",
+        "site": "NS-DEMO-ES-01",
+        "assetId": "ES-RHF-01",
+        "componentId": "BURNER-ZONE-02",
+        "severity": "WARNING",
+        "status": "OPEN",
+        "message": "Reheat furnace zone 02 air/fuel ratio rich by 4%; ~180 kWh/h avoidable loss.",
+        "confidence": 0.67,
+        "offsetHours": 11,
+    },
+    {
+        "alertId": "ALERT-ES-BILLET-YIELD-WATCH",
+        "site": "NS-DEMO-ES-01",
+        "assetId": "ES-BM-01",
+        "componentId": "BILLET-LINE",
+        "severity": "INFO",
+        "status": "OPEN",
+        "message": "Billet line yield 0.9 pt under weekly plan; no action required yet.",
+        "confidence": 0.51,
+        "offsetHours": 22,
+    },
+)
 
 
 def _site_factor(site: str) -> float:
@@ -462,6 +642,24 @@ def _verify_checksums(directory: Path) -> None:
 def _public_batch_id(raw: str) -> str:
     """Keep the documented demo coil identifier stable across generated snapshots."""
     return raw.replace("260610", "260725")
+
+
+def _anchor_timestamp(manifest: Mapping[str, Any]) -> str:
+    """Latest event timestamp in the pack; the supplementary deck hangs off it."""
+    window = manifest.get("min_max_event_ts") or {}
+    raw = window.get("max") if isinstance(window, Mapping) else None
+    return str(raw) if raw else "2026-06-11T00:00:00Z"
+
+
+def _shift_hours(timestamp: str, hours: int) -> str:
+    try:
+        parsed = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+    except ValueError:
+        return timestamp
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    shifted = parsed + timedelta(hours=hours)
+    return shifted.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
 def _latest(rows: list[Mapping[str, Any]], field: str) -> str | None:

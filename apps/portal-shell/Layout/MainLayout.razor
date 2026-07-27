@@ -9,10 +9,9 @@
     <header class="shell-topbar">
         <NavLink class="brand" href="@Shell.RouteFor("command-center", null)" aria-label="NovaSteel Command Center">
             <picture class="brand-logo">
-                <source srcset="brand/novasteel-mark-dark.png" media="(prefers-color-scheme: dark)" />
-                <img src="brand/novasteel-mark.png" alt="NovaSteel" width="26" height="26" class="brand-logo-img" />
+                <source srcset="brand/novasteel-logo-full-dark.png" media="(prefers-color-scheme: dark)" />
+                <img src="brand/novasteel-logo-full.png" alt="NovaSteel" class="brand-logo-img" />
             </picture>
-            <span class="brand-text">NovaSteel</span>
         </NavLink>
 
         <label class="topbar-field">
@@ -20,7 +19,17 @@
             <select value="@Shell.Site" @onchange="OnSiteChanged" aria-label="Selected site">
                 @foreach (var site in ShellState.Sites)
                 {
-                    <option value="@site">@site.ToUpperInvariant()</option>
+                    <option value="@site">@ShellState.SiteLabel(site)</option>
+                }
+            </select>
+        </label>
+
+        <label class="topbar-field">
+            <span class="sr-only">Persona</span>
+            <select value="@Shell.PrimaryPersona" @onchange="OnPersonaChanged" aria-label="Selected persona">
+                @foreach (var persona in Shell.Auth.CurrentUser.Personas)
+                {
+                    <option value="@persona">@FormatPersona(persona)</option>
                 }
             </select>
         </label>
@@ -124,10 +133,10 @@
                         lastGroup = item.Group;
                         <span class="nav-group-heading" aria-hidden="true">@item.Group</span>
                     }
-                    <NavLink class="shell-nav-link"
-                             ActiveClass="active"
+                    <NavLink class="@NavLinkClass(item)"
                              href="@Shell.RouteFor(item.Section, item.DefaultSubView)"
-                             Match="NavLinkMatch.Prefix">
+                             Match="NavLinkMatch.All"
+                             aria-current="@(IsActive(item) ? "page" : null)">
                         <span aria-hidden="true">@item.Symbol</span>
                         <span>@item.Label</span>
                     </NavLink>
@@ -279,6 +288,12 @@
 
     private static string FormatPersona(string persona) =>
         System.Text.RegularExpressions.Regex.Replace(persona, "([a-z])([A-Z])", "$1 $2");
+
+    private bool IsActive(ShellNavItem item) =>
+        string.Equals(item.Section, Shell.Section, StringComparison.OrdinalIgnoreCase);
+
+    private string NavLinkClass(ShellNavItem item) =>
+        IsActive(item) ? "shell-nav-link active" : "shell-nav-link";
 
     private static string Initials(string name)
     {

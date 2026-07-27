@@ -6,6 +6,7 @@ import { KPI_CATALOGS } from './kpiMessages'
 import { KNOWLEDGE_CATALOGS } from './knowledgeMessages'
 import { PERSONA_CATALOGS } from './personaMessages'
 import { PROOF_CATALOGS } from './proofMessages'
+import { TECH_CATALOGS } from './technicalMessages'
 import { WEBSITE_CATALOGS } from './websiteMessages'
 
 export type TranslateFn = (key: string, params?: Record<string, string | number>) => string
@@ -279,11 +280,11 @@ const ES: Catalog = {
 }
 
 const CATALOGS: Record<string, Catalog> = {
-  en: { ...EN, ...COPILOT_CATALOGS.en, ...DEVICE_CATALOGS.en, ...WEBSITE_CATALOGS.en, ...HELP_UI_CATALOGS.en, ...CHART_CATALOGS.en, ...PERSONA_CATALOGS.en, ...KNOWLEDGE_CATALOGS.en, ...KPI_CATALOGS.en, ...PROOF_CATALOGS.en },
-  fr: { ...FR, ...COPILOT_CATALOGS.fr, ...DEVICE_CATALOGS.fr, ...WEBSITE_CATALOGS.fr, ...HELP_UI_CATALOGS.fr, ...CHART_CATALOGS.fr, ...PERSONA_CATALOGS.fr, ...KNOWLEDGE_CATALOGS.fr, ...KPI_CATALOGS.fr, ...PROOF_CATALOGS.fr },
-  de: { ...DE, ...COPILOT_CATALOGS.de, ...DEVICE_CATALOGS.de, ...WEBSITE_CATALOGS.de, ...HELP_UI_CATALOGS.de, ...CHART_CATALOGS.de, ...PERSONA_CATALOGS.de, ...KNOWLEDGE_CATALOGS.de, ...KPI_CATALOGS.de, ...PROOF_CATALOGS.de },
-  nl: { ...NL, ...COPILOT_CATALOGS.nl, ...DEVICE_CATALOGS.nl, ...WEBSITE_CATALOGS.nl, ...HELP_UI_CATALOGS.nl, ...CHART_CATALOGS.nl, ...PERSONA_CATALOGS.nl, ...KNOWLEDGE_CATALOGS.nl, ...KPI_CATALOGS.nl, ...PROOF_CATALOGS.nl },
-  es: { ...ES, ...COPILOT_CATALOGS.es, ...DEVICE_CATALOGS.es, ...WEBSITE_CATALOGS.es, ...HELP_UI_CATALOGS.es, ...CHART_CATALOGS.es, ...PERSONA_CATALOGS.es, ...KNOWLEDGE_CATALOGS.es, ...KPI_CATALOGS.es, ...PROOF_CATALOGS.es },
+  en: { ...EN, ...COPILOT_CATALOGS.en, ...DEVICE_CATALOGS.en, ...WEBSITE_CATALOGS.en, ...HELP_UI_CATALOGS.en, ...CHART_CATALOGS.en, ...PERSONA_CATALOGS.en, ...KNOWLEDGE_CATALOGS.en, ...KPI_CATALOGS.en, ...PROOF_CATALOGS.en, ...TECH_CATALOGS.en },
+  fr: { ...FR, ...COPILOT_CATALOGS.fr, ...DEVICE_CATALOGS.fr, ...WEBSITE_CATALOGS.fr, ...HELP_UI_CATALOGS.fr, ...CHART_CATALOGS.fr, ...PERSONA_CATALOGS.fr, ...KNOWLEDGE_CATALOGS.fr, ...KPI_CATALOGS.fr, ...PROOF_CATALOGS.fr, ...TECH_CATALOGS.fr },
+  de: { ...DE, ...COPILOT_CATALOGS.de, ...DEVICE_CATALOGS.de, ...WEBSITE_CATALOGS.de, ...HELP_UI_CATALOGS.de, ...CHART_CATALOGS.de, ...PERSONA_CATALOGS.de, ...KNOWLEDGE_CATALOGS.de, ...KPI_CATALOGS.de, ...PROOF_CATALOGS.de, ...TECH_CATALOGS.de },
+  nl: { ...NL, ...COPILOT_CATALOGS.nl, ...DEVICE_CATALOGS.nl, ...WEBSITE_CATALOGS.nl, ...HELP_UI_CATALOGS.nl, ...CHART_CATALOGS.nl, ...PERSONA_CATALOGS.nl, ...KNOWLEDGE_CATALOGS.nl, ...KPI_CATALOGS.nl, ...PROOF_CATALOGS.nl, ...TECH_CATALOGS.nl },
+  es: { ...ES, ...COPILOT_CATALOGS.es, ...DEVICE_CATALOGS.es, ...WEBSITE_CATALOGS.es, ...HELP_UI_CATALOGS.es, ...CHART_CATALOGS.es, ...PERSONA_CATALOGS.es, ...KNOWLEDGE_CATALOGS.es, ...KPI_CATALOGS.es, ...PROOF_CATALOGS.es, ...TECH_CATALOGS.es },
 }
 
 export const SUPPORTED_LANGUAGES = ['en', 'fr', 'de', 'nl', 'es'] as const

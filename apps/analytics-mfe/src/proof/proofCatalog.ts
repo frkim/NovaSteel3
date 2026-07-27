@@ -27,6 +27,62 @@ export interface ProofEvidence {
   detail?: string
   /** Optional in-app deep link, `section/subView`, used by the "open" action. */
   route?: string
+  /**
+   * Repo-relative path used to build the GitHub link, when the label is not
+   * itself resolvable (see {@link githubUrlFor}).
+   */
+  path?: string
+}
+
+/** Public repository the evidence links resolve against. */
+export const GITHUB_REPO_URL = 'https://github.com/frkim/NovaSteel3'
+
+/**
+ * Evidence labels abbreviate the Python source layout so the register stays
+ * readable — `services/scoring-worker/.../rul_model.py` rather than the full
+ * `services/scoring-worker/src/scoring_worker/rul_model.py`. Every service in
+ * this repository follows the same `src/<package>` convention, so the ellipsis
+ * expands deterministically.
+ */
+const SERVICE_PACKAGE_PATH: Record<string, string> = {
+  'services/knowledge-orchestrator': 'src/knowledge_orchestrator',
+  'services/scoring-worker': 'src/scoring_worker',
+  'services/optimizer-worker': 'src/optimizer_worker',
+  'services/bff-api': 'src/bff_api',
+}
+
+const FILE_LABEL = /\.(py|ts|tsx|cs|razor|bicep|json|md|ps1|yml|yaml|sql|kql)$/i
+
+/**
+ * Fabric items are checked in as *directories* (`ns-silver-to-gold.Notebook/`),
+ * so they resolve to a GitHub `tree` URL rather than a `blob` URL.
+ */
+const FABRIC_ITEM =
+  /\.(Notebook|Lakehouse|Eventhouse|Eventstream|Report|SemanticModel|KQLDatabase|KQLQueryset|DataPipeline|Environment|Reflex)$/
+
+/** Expands an abbreviated evidence label into a real repo-relative path. */
+export function resolveEvidencePath(evidence: ProofEvidence): string | undefined {
+  if (evidence.path) return evidence.path
+  const label = evidence.label.trim()
+  if (!label.includes('/')) return undefined
+  if (!FILE_LABEL.test(label) && !FABRIC_ITEM.test(label)) return undefined
+  const ellipsis = label.indexOf('/.../')
+  if (ellipsis === -1) return label
+  const service = label.slice(0, ellipsis)
+  const rest = label.slice(ellipsis + '/.../'.length)
+  const pkg = SERVICE_PACKAGE_PATH[service]
+  return pkg ? `${service}/${pkg}/${rest}` : undefined
+}
+
+/**
+ * The GitHub URL a jury can open to read the cited source, or `undefined` when
+ * the evidence is a screen or an HTTP route rather than a file.
+ */
+export function githubUrlFor(evidence: ProofEvidence): string | undefined {
+  const path = resolveEvidencePath(evidence)
+  if (!path) return undefined
+  const view = FABRIC_ITEM.test(path) ? 'tree' : 'blob'
+  return `${GITHUB_REPO_URL}/${view}/main/${path}`
 }
 
 export interface ProofRequirement {
