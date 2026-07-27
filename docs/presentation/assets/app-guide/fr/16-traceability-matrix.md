@@ -2,7 +2,7 @@
 
 **Public visé :** toute personne devant démontrer que NovaSteel répond réellement au cas d'usage AxelorMetal — examinateur, membre du jury, nouvel arrivant dans l'équipe.
 **Temps de lecture :** ~12 minutes (ou 30 secondes s'il ne vous faut qu'une seule ligne).
-**Écrans couverts :** les 30 écrans.
+**Écrans couverts :** les 31 écrans.
 **Dernière mise à jour :** 2026-07-27
 **Langue :** 🇬🇧 [English version](../en/16-traceability-matrix.md)
 
@@ -79,7 +79,7 @@ Source : [`docs/usecase/usecase.md`](../../../../usecase/usecase.md).
 
 ---
 
-## 3. Matrice écran → exigence (les 30 écrans)
+## 3. Matrice écran → exigence (les 31 écrans)
 
 La grammaire d'URL est `/{site}/{section}/{subView}`, par exemple
 `http://localhost:5266/lu/furnace-health/lining-forecast`. `{site}` vaut `lu`, `de`, `be` ou `es`.
@@ -112,22 +112,23 @@ La grammaire d'URL est `/{site}/{section}/{subView}`, par exemple
 | 17 | Dashboard Collections | `dashboards/collections` | Tous les personas | Navigation / prise en main | [11](11-dashboard-collections.md) |
 | 18 | Requirement Register | `proof-of-execution/requirements` | Tous les personas | **Les 19 identifiants** | [12](12-proof-of-execution.md) |
 | 19 | Use Case | `proof-of-execution/use-case` | Tous les personas | Le cahier des charges lui-même, rendu dans l'application | [12](12-proof-of-execution.md) |
+| 20 | Technical Requirements | `technical-requirements/criteria` | Tous les personas | La grille technique, auto-évaluée 56/60 | [12](12-proof-of-execution.md) |
 
 ### Plateforme et référence (Platform & reference)
 
 | N° | Écran | Route | Persona | Prouve | Chapitre du guide |
 |---|---|---|---|---|---|
-| 20 | Device Fleet | `device-operations/fleet` | Rui Almeida — ingénieur systèmes OT | Provenance des données pour `AI-01` | [10](10-device-operations.md) |
-| 21 | Sensor Explorer | `device-operations/sensors` | Rui Almeida — ingénieur systèmes OT | Provenance des données pour `AI-01` | [10](10-device-operations.md) |
-| 22 | Simulator Control | `device-operations/simulator` | Rui Almeida — ingénieur systèmes OT | Déterminisme / reproductibilité | [10](10-device-operations.md) |
-| 23 | Fabric Capacity | `platform-ops/capacity` | Nils Andersen — exploitation plateforme | Maîtrise des coûts, contrôle des rôles | [13](13-platform-ops.md) |
-| 24 | Jobs & Pipelines | `platform-ops/jobs` | Nils Andersen — exploitation plateforme | Observabilité des pipelines de données | [13](13-platform-ops.md) |
-| 25 | Cost & Telemetry | `platform-ops/cost-telemetry` | Nils Andersen — exploitation plateforme | Transparence du coût d'exploitation | [13](13-platform-ops.md) |
-| 26 | AxelorMetal — Home | `company-website/home` | Site public | Récit métier | [02](02-company-website.md) |
-| 27 | AxelorMetal — Company | `company-website/company` | Site public | Récit métier | [02](02-company-website.md) |
-| 28 | AxelorMetal — Products & Markets | `company-website/products` | Site public | Récit métier | [02](02-company-website.md) |
-| 29 | AxelorMetal — Steel Knowledge | `company-website/steel-knowledge` | Site public | Point d'entrée pour les débutants | [02](02-company-website.md) |
-| 30 | AxelorMetal — Contact | `company-website/contact` | Site public | Récit métier | [02](02-company-website.md) |
+| 21 | Device Fleet | `device-operations/fleet` | Rui Almeida — ingénieur systèmes OT | Provenance des données pour `AI-01` | [10](10-device-operations.md) |
+| 22 | Sensor Explorer | `device-operations/sensors` | Rui Almeida — ingénieur systèmes OT | Provenance des données pour `AI-01` | [10](10-device-operations.md) |
+| 23 | Simulator Control | `device-operations/simulator` | Rui Almeida — ingénieur systèmes OT | Déterminisme / reproductibilité | [10](10-device-operations.md) |
+| 24 | Fabric Capacity | `platform-ops/capacity` | Nils Andersen — exploitation plateforme | Maîtrise des coûts, contrôle des rôles | [13](13-platform-ops.md) |
+| 25 | Jobs & Pipelines | `platform-ops/jobs` | Nils Andersen — exploitation plateforme | Observabilité des pipelines de données | [13](13-platform-ops.md) |
+| 26 | Cost & Telemetry | `platform-ops/cost-telemetry` | Nils Andersen — exploitation plateforme | Transparence du coût d'exploitation | [13](13-platform-ops.md) |
+| 27 | AxelorMetal — Home | `company-website/home` | Site public | Récit métier | [02](02-company-website.md) |
+| 28 | AxelorMetal — Company | `company-website/company` | Site public | Récit métier | [02](02-company-website.md) |
+| 29 | AxelorMetal — Products & Markets | `company-website/products` | Site public | Récit métier | [02](02-company-website.md) |
+| 30 | AxelorMetal — Steel Knowledge | `company-website/steel-knowledge` | Site public | Point d'entrée pour les débutants | [02](02-company-website.md) |
+| 31 | AxelorMetal — Contact | `company-website/contact` | Site public | Récit métier | [02](02-company-website.md) |
 
 ---
 

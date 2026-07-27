@@ -55,15 +55,15 @@ stock photography.
 
 ## Application screenshots (committed, no licence risk)
 
-`app-guide/screenshots/` holds **36 PNG captures of this repository's own running
-application** — 30 route screenshots (one per screen of the analytics microfrontend,
+`app-guide/screenshots/` holds **37 PNG captures of this repository's own running
+application** — 31 route screenshots (one per screen of the analytics microfrontend,
 rendered inside the Blazor portal shell) and 6 feature captures (Copilot panel, help
 assistant, capacity panel, settings dialog, dark theme, account menu).
 
 | Property | Value |
 |---|---|
 | Source | `apps/portal-shell` + `apps/analytics-mfe` running locally against the local BFF (`DEMO_MODE=local`) |
-| Captured on | 2026-07-27 |
+| Captured on | 2026-07-27, with `technical-requirements-criteria`, `proof-of-execution-use-case` and `proof-of-execution-requirements` re-captured on 2026-07-28 |
 | Viewport | 1680 px wide, full-page capture |
 | Data shown | Deterministic **synthetic** fixture data only — every capture carries the "Synthetic demo data — not for operational control" banner |
 | Licence risk | **None.** Self-authored capture of first-party software; no third-party imagery, no personal data, no tenant identifiers. |

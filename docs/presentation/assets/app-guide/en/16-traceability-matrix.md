@@ -2,7 +2,7 @@
 
 **Audience:** anyone who has to prove that NovaSteel actually answers the AxelorMetal use case — examiner, jury member, new team member.
 **Reading time:** ~12 minutes (or 30 seconds if you only need one row).
-**Routes covered:** all 30 screens.
+**Routes covered:** all 31 screens.
 **Last updated:** 2026-07-27
 **Language:** 🇫🇷 [Version française](../fr/16-traceability-matrix.md)
 
@@ -78,7 +78,7 @@ Source: [`docs/usecase/usecase.md`](../../../../usecase/usecase.md).
 
 ---
 
-## 3. Screen → requirement matrix (all 30 screens)
+## 3. Screen → requirement matrix (all 31 screens)
 
 Route grammar is `/{site}/{section}/{subView}`, e.g. `http://localhost:5266/lu/furnace-health/lining-forecast`.
 `{site}` is one of `lu`, `de`, `be`, `es`.
@@ -111,22 +111,23 @@ Route grammar is `/{site}/{section}/{subView}`, e.g. `http://localhost:5266/lu/f
 | 17 | Dashboard Collections | `dashboards/collections` | All personas | Navigation / onboarding | [11](11-dashboard-collections.md) |
 | 18 | Requirement Register | `proof-of-execution/requirements` | All personas | **All 19 IDs** | [12](12-proof-of-execution.md) |
 | 19 | Use Case | `proof-of-execution/use-case` | All personas | The brief itself, rendered in-app | [12](12-proof-of-execution.md) |
+| 20 | Technical Requirements | `technical-requirements/criteria` | All personas | The technical rubric, self-scored 56/60 | [12](12-proof-of-execution.md) |
 
 ### Platform & reference
 
 | # | Screen | Route | Persona | Proves | Guide chapter |
 |---|---|---|---|---|---|
-| 20 | Device Fleet | `device-operations/fleet` | Rui Almeida — OT Systems Engineer | Data provenance for `AI-01` | [10](10-device-operations.md) |
-| 21 | Sensor Explorer | `device-operations/sensors` | Rui Almeida — OT Systems Engineer | Data provenance for `AI-01` | [10](10-device-operations.md) |
-| 22 | Simulator Control | `device-operations/simulator` | Rui Almeida — OT Systems Engineer | Determinism / reproducibility | [10](10-device-operations.md) |
-| 23 | Fabric Capacity | `platform-ops/capacity` | Nils Andersen — Platform Ops | Cost control, role gating | [13](13-platform-ops.md) |
-| 24 | Jobs & Pipelines | `platform-ops/jobs` | Nils Andersen — Platform Ops | Data-pipeline observability | [13](13-platform-ops.md) |
-| 25 | Cost & Telemetry | `platform-ops/cost-telemetry` | Nils Andersen — Platform Ops | Run cost transparency | [13](13-platform-ops.md) |
-| 26 | AxelorMetal — Home | `company-website/home` | Public site | Business narrative | [02](02-company-website.md) |
-| 27 | AxelorMetal — Company | `company-website/company` | Public site | Business narrative | [02](02-company-website.md) |
-| 28 | AxelorMetal — Products & Markets | `company-website/products` | Public site | Business narrative | [02](02-company-website.md) |
-| 29 | AxelorMetal — Steel Knowledge | `company-website/steel-knowledge` | Public site | Newcomer on-ramp | [02](02-company-website.md) |
-| 30 | AxelorMetal — Contact | `company-website/contact` | Public site | Business narrative | [02](02-company-website.md) |
+| 21 | Device Fleet | `device-operations/fleet` | Rui Almeida — OT Systems Engineer | Data provenance for `AI-01` | [10](10-device-operations.md) |
+| 22 | Sensor Explorer | `device-operations/sensors` | Rui Almeida — OT Systems Engineer | Data provenance for `AI-01` | [10](10-device-operations.md) |
+| 23 | Simulator Control | `device-operations/simulator` | Rui Almeida — OT Systems Engineer | Determinism / reproducibility | [10](10-device-operations.md) |
+| 24 | Fabric Capacity | `platform-ops/capacity` | Nils Andersen — Platform Ops | Cost control, role gating | [13](13-platform-ops.md) |
+| 25 | Jobs & Pipelines | `platform-ops/jobs` | Nils Andersen — Platform Ops | Data-pipeline observability | [13](13-platform-ops.md) |
+| 26 | Cost & Telemetry | `platform-ops/cost-telemetry` | Nils Andersen — Platform Ops | Run cost transparency | [13](13-platform-ops.md) |
+| 27 | AxelorMetal — Home | `company-website/home` | Public site | Business narrative | [02](02-company-website.md) |
+| 28 | AxelorMetal — Company | `company-website/company` | Public site | Business narrative | [02](02-company-website.md) |
+| 29 | AxelorMetal — Products & Markets | `company-website/products` | Public site | Business narrative | [02](02-company-website.md) |
+| 30 | AxelorMetal — Steel Knowledge | `company-website/steel-knowledge` | Public site | Newcomer on-ramp | [02](02-company-website.md) |
+| 31 | AxelorMetal — Contact | `company-website/contact` | Public site | Business narrative | [02](02-company-website.md) |
 
 ---
 

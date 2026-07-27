@@ -1,9 +1,9 @@
-# 12 · Proof of Execution
+# 12 · Proof of Execution & Technical Requirements
 
 **Audience:** jury, examiner, auditor, developer, or newcomer who wants proof  
-**Reading time:** 22 minutes  
+**Reading time:** 30 minutes  
 **Persona:** all personas; especially a defense panel  
-**Routes covered:** `/{site}/proof-of-execution/requirements`, `/{site}/proof-of-execution/use-case`  
+**Routes covered:** `/{site}/proof-of-execution/requirements`, `/{site}/proof-of-execution/use-case`, `/{site}/technical-requirements/criteria`  
 **Last updated:** 2026-07-27  
 **Language:** 🇫🇷 [Version française](../fr/12-proof-of-execution.md)
 
@@ -84,11 +84,16 @@
 
 **Background for newcomers.** A use-case brief is the short business story: industry, challenge, transformation objective, expected outcomes and AI mechanisms. NovaSteel’s source brief is `docs\usecase\usecase.md`; the component reproduces those sections with proof badges (`UseCaseBrief.tsx`; `docs\usecase\usecase.md`).
 
-**What you see on screen.** The supplied screenshot currently shows the same visible register layout as Requirements: KPI cards, filters, progress bar, requirement table and `REG-01` detail panel (`../screenshots/proof-of-execution-use-case.png`; `ProofOfExecution.tsx`). The source component for the Use Case tab defines these panels:
-1. a use-case KPI band using `proofCoverage()` (`UseCaseBrief.tsx`; `proofCatalog.ts`);
-2. a source panel linking `docs/usecase/usecase.md` (`UseCaseBrief.tsx`);
-3. industry profile: Heavy Industry & Metals, Luxembourg headquarters, LU/DE/BE/ES, GDPR/EU AI Act/EU directives (`UseCaseBrief.tsx`; `docs\usecase\usecase.md`);
-4. business challenges, objectives, expected outcomes and AI infusion points, each with proof badges (`UseCaseBrief.tsx`).
+**What you see on screen.**
+1. **Two tabs.** `Requirement Register` and `Use Case` sit above the workspace; the Use Case tab is the one selected here (`apps\analytics-mfe\src\components\screens\ProofOfExecution.tsx`).
+2. **KPI band.** Requirements tracked **19**, Met **15**, Partially met **4**, Coverage **78.9 %** — computed from the same catalog the register uses, so the two tabs can never disagree (`UseCaseBrief.tsx`; `apps\analytics-mfe\src\proof\proofCatalog.ts`).
+3. **Source of truth panel.** Titled *NovaSteel — AI-Powered Steel Production Optimization Platform*, it states “The original brief, reproduced word for word, with the reference ID that proves each statement”, links out to `docs/usecase/usecase.md` on GitHub, and shows a green **15 of 19 statements evidenced** chip (`UseCaseBrief.tsx`; `docs\usecase\usecase.md`).
+4. **Industry profile.** Industry *Heavy Industry & Metals*, headquarters *Luxembourg*, operating region *Luxembourg, Germany, Belgium, Spain*, regulatory context *GDPR · EU AI Act · Sector-specific EU Directives* — the last row carrying the `REG-01`, `REG-02` and `REG-03` badges (`UseCaseBrief.tsx`).
+5. **Business challenge panel.** The five challenges from the brief, each with its badge: energy at 35 % of production cost (`CHL-01`), ETS pressure on CO₂ (`CHL-02`), unpredictable lining wear costing €8M per event (`CHL-03`), quality consistency for automotive customers (`CHL-04`), and retiring operators (`CHL-05`).
+6. **Transformation objective panel.** Reduce energy consumption (`OBJ-01`), predict equipment failures (`OBJ-02`), improve steel quality (`OBJ-03`), and capture expert knowledge (`OBJ-04`).
+7. **Expected outcome and AI infusion point panels.** The target figures (e.g. energy per tonne −14 %) and the AI mechanisms — a physics-informed ML model predicting lining degradation from thermal signatures (`AI-01`) and an energy dispatch optimization agent scheduling around spot prices (`AI-02`).
+
+**How to read the badge colours.** Green means the linked requirement is `met`; amber means `partial` or `demo`. A badge is not decoration — click through to the register tab and the same ID carries its evidence and its caveat (`UseCaseBrief.tsx`; `proofCatalog.ts`).
 
 **Why this component was implemented.** The brief says to implement an “AI-driven production optimization platform” and lists measurable outcomes (`docs\usecase\usecase.md`). Rendering the brief inside the app prevents a gap between what the presenter says and what the application proves (`UseCaseBrief.tsx`; `docs\presentation\proof_of_execution.md`).
 
@@ -102,9 +107,74 @@
 
 **How the data reaches this screen.** `UseCaseBrief.tsx` → local arrays lifted from `docs\usecase\usecase.md` → `PROOF_BY_ID` and `proofCoverage()` → no BFF route. Proving screens then use their own data routes (`UseCaseBrief.tsx`; `dataClient.ts`).
 
-**Honesty & caveats.** If the current captured image still shows the register, describe the visible register widgets and cite the source component for intended Use Case content. The Use Case tab is a projection, not a separate source of truth (`ProofOfExecution.tsx`; `UseCaseBrief.tsx`; `proofCatalog.ts`).
+**Honesty & caveats.** The Use Case tab is a projection of the register, not a second source of truth — if a requirement slips, both tabs move together. The headline **78.9 % coverage** is deliberately not 100 %: four statements are only partially evidenced or shown through a demo surrogate, and the tab says so rather than hiding them (`UseCaseBrief.tsx`; `proofCatalog.ts`).
 
-**Try it yourself.** Open `http://localhost:5266/{site}/proof-of-execution/use-case` and switch between Requirements and Use Case if the tab state is not already selected.
+**Try it yourself.** Open `http://localhost:5266/lu/proof-of-execution/use-case`, read the *Business challenge* panel, then click the **Requirement Register** tab and find `CHL-03` — the €8M lining failure — to see the evidence behind the badge you just read.
+
+---
+
+## Technical Requirements — `/{site}/technical-requirements/criteria`
+![Technical requirements criteria](../screenshots/technical-requirements-criteria.png)
+
+**In one sentence.** The grading rubric answered criterion by criterion: for each of the 12 technical criteria the app shows the score it awards itself, the evidence behind that score and — when the score is below 5 — the gap and the work that would close it (`apps\analytics-mfe\src\components\screens\TechnicalRequirements.tsx`; `apps\analytics-mfe\src\proof\technicalCatalog.ts`).
+
+**Background for newcomers.** The two screens above answer *“does the app do what the business asked?”*. This one answers a different question: *“is it built well?”* A **rubric** (or rating grid) is the marking scheme an examiner uses — architecture, design patterns, security, monitoring, AI, and so on — each scored out of 5. NovaSteel publishes its own score against that grid inside the product, so nothing has to be taken on trust (`docs\tech\rating_grid.md`).
+
+**Why it looks like the Proof of Execution screen.** It is deliberate. A jury moving between the two tabs only has to learn one layout: KPI band → category chips → searchable table → detail panel on the right (`TechnicalRequirements.tsx`).
+
+**What you see on screen.**
+1. **KPI band.** **Total score 56 / 60**, **Grade band A** — *“Exceptional implementation and architectural rigor”* —, **Criteria at 5/5: 8 / 12**, and **Criteria assessed: 12** (`techScorecard()` in `technicalCatalog.ts`).
+2. **Category chips with running subtotals.** Design (15/15), Development (8/10), Monitoring (5/5), AI integration (9/10), Agentic behaviour (10/10), Additional architecture (4/5), Presentation & documentation (5/5). Click one to filter the table (`TechnicalRequirements.tsx`).
+3. **A progress bar** for the total, plus the sentence *“Self-assessed against docs/tech/rating_grid.md. Every score below 5 states its gap and the work that would close it.”* with two GitHub links: **rating_grid.md** and **Full analysis** (`RUBRIC_URL` in `TechnicalRequirements.tsx`).
+4. **Search box** — it matches the ID, criterion, rubric bar, verdict, explanation, gap, uplift and every evidence label at once (`TechnicalRequirements.tsx`).
+5. **Criterion scorecard table** with Ref, Category, Criterion, Verdict and Score columns, per-column search, column chooser, density toggle and export (`TechnicalRequirements.tsx`).
+6. **Assessment panel** on the right. In the screenshot `TR-DES-01` is selected: a green **Score 5 of 5** chip, the **Design** category chip, the criterion title, the verdict, a *WHAT THE RUBRIC CALLS EXCELLENT* block quoting the rubric verbatim, and an **Open the screen** button that jumps to the screen which demonstrates the criterion.
+7. **Score by category** panel underneath, one bar per category — green when the category is perfect, amber when points were left on the table.
+
+**How to read the score colours.** Green = 5 / 5, amber = 4 / 5, red = 3 or below. There is no red on this screen today, but the amber is real and is meant to be seen (`scoreColor()` in `TechnicalRequirements.tsx`).
+
+**Why this component was implemented.** A defense is graded against a rubric, and the honest move is to grade yourself first, in public, in the running product. Putting the self-assessment on screen — with the gaps attached — turns a claim (“the architecture is modular”) into something a reviewer can click through to the code that proves it (`docs\tech\rating_grid.md`; `docs\tech\technical-analysis.md`).
+
+**The full rubric, criterion by criterion.** This table reproduces the catalog in beginner-friendly wording (`apps\analytics-mfe\src\proof\technicalCatalog.ts`).
+
+| Ref | Category | Criterion | Score | Verdict, in plain language |
+|---|---|---|---|---|
+| `TR-DES-01` | Design | System architecture, modularity, scalability | 5 / 5 | Documented, modular and horizontally scalable by construction. |
+| `TR-DES-02` | Design | Use of design patterns | 5 / 5 | Six named patterns, each chosen for a specific pressure, each unit-tested. |
+| `TR-DES-03` | Design | Security | 5 / 5 | Threat-modelled first, then implemented — not bolted on. |
+| `TR-DEV-01` | Development | Application demo | 4 / 5 | Rehearsed, executive-legible and resilient offline — but not every Fabric asset runs live. |
+| `TR-DEV-02` | Development | Implementation completeness | 4 / 5 | Every brief requirement is implemented and traceable; a few enterprise integrations are design-only. |
+| `TR-MON-01` | Monitoring | Logging and metrics | 5 / 5 | OpenTelemetry end to end, with business KPIs treated as first-class metrics. |
+| `TR-AI-01` | AI integration | Use of AI technologies | 5 / 5 | Four distinct AI techniques, each answering a named line of the brief. |
+| `TR-AI-02` | AI integration | AI model selection and deployment | 4 / 5 | Tiered model choice deployed securely in the EU — but the lifecycle story is documented, not tooled. |
+| `TR-AGT-01` | Agentic behaviour | Autonomy and orchestration | 5 / 5 | A real state graph with autonomous safety work and a deliberate human gate. |
+| `TR-AGT-02` | Agentic behaviour | Multi-agent coordination | 5 / 5 | All three named patterns — handoff, reflection and state graph — are implemented and traced. |
+| `TR-ARC-01` | Additional architecture | Performance and reliability | 4 / 5 | Reliability is engineered into the design; it is not yet backed by measurement. |
+| `TR-PRE-01` | Presentation & documentation | Clarity of explanation and presentation | 5 / 5 | Three audience registers — executive, technical and novice — each served deliberately. |
+
+**The four gaps, stated openly.** These are the only criteria below 5, and the app prints each gap next to its score rather than rounding it away (`technicalCatalog.ts`).
+
+| Ref | What is honestly missing |
+|---|---|
+| `TR-DEV-01` | Some Fabric artefacts (notebooks, Activator rules, the Real-Time Intelligence eventstream) are provisioned as templates and demonstrated from captured output rather than executed live inside the 15-minute demo window. |
+| `TR-DEV-02` | Manufacturing Execution System (MES) and batch-historian integrations are specified in the architecture but not implemented; the demo reads a synthetic feed in their place. |
+| `TR-AI-02` | There is no model registry artefact, training notebook or automated evaluation gate in the repository. Model versioning is a constant in code and the physics model is fitted analytically rather than trained, so the lifecycle is described in documentation rather than enforced by tooling. |
+| `TR-ARC-01` | No load-test results, no published Service Level Objective / Agreement targets, and no circuit-breaker middleware in code. The reliability claims rest on infrastructure configuration and design intent rather than on measured behaviour under load. |
+
+**Objective & evidence (proof of execution).**
+
+| Use-case element | Requirement ID | Evidence in the running app | Where the number comes from (API route + source file) |
+|---|---|---|---|
+| Build quality is defensible | — (rubric, not brief) | 12 criteria, 56/60, grade A, with per-criterion evidence links | No BFF route; `techScorecard()` and `TECH_REQUIREMENTS` in `apps\analytics-mfe\src\proof\technicalCatalog.ts`. |
+| Every score traces to code | — | Evidence chips resolve to GitHub file links | `githubUrlFor()` in `apps\analytics-mfe\src\proof\proofCatalog.ts`, reused by `TechnicalRequirements.tsx`. |
+| Every gap has a named fix | `TR-DEV-01`, `TR-DEV-02`, `TR-AI-02`, `TR-ARC-01` | `gap` + `uplift` shown in the assessment panel | `gap` / `uplift` fields in `technicalCatalog.ts`. |
+| Criterion → proving screen | 10 of 12 | **Open the screen** button | `primaryRoute` in `technicalCatalog.ts`; navigation via the `nav.intent` event (`TechnicalRequirements.tsx`). |
+
+**How the data reaches this screen.** `TechnicalRequirements.tsx` → `TECH_REQUIREMENTS`, `TECH_CATEGORY_ORDER`, `techScorecard()` → **no BFF route** → the local catalog (`apps\analytics-mfe\src\proof\technicalCatalog.ts`). Like the register, it is a pure client-side projection of one file, so it renders identically offline. The long-form narrative behind the same scores lives in `docs\tech\technical-analysis.md`, and the rubric it is scored against in `docs\tech\rating_grid.md`; the three must be kept in step by hand.
+
+**Honesty & caveats.** The score is a **self-assessment**, not an external audit — the screen says so in its own subtitle. 56/60 is not 60/60 on purpose: four criteria carry an amber score and a written gap. And because the catalog is a TypeScript file rather than a generated artefact, keeping it aligned with `docs\tech\technical-analysis.md` is a discipline, not an automated guarantee (`technicalCatalog.ts`).
+
+**Try it yourself.** Open `http://localhost:5266/lu/technical-requirements/criteria`, click the amber **Development (8/10)** chip to filter down to the two 4/5 criteria, select `TR-DEV-02` and read its gap — then press **Open the screen** and land on the Requirement Register you read about at the top of this chapter.
 
 ---
 

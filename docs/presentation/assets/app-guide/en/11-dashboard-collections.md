@@ -35,7 +35,7 @@
 | Compliance evidence pack | Can we prove how every automated recommendation was decided? | Sustainability Officer / Auditor | Audit & Reports → Emissions Ledger → Procedures (`dashboardCollectionCatalog.ts`) |
 | Platform health and spend | Is the platform healthy, and what is it costing us? | Platform Ops | Fabric Capacity → Jobs & Pipelines → Simulator Control → Cost & Telemetry (`dashboardCollectionCatalog.ts`) |
 
-**Why this component was implemented.** The brief asks NovaSteel to reduce energy, predict equipment failures, improve quality, and capture expertise (`docs\usecase\usecase.md`). Those proofs span many screens. This launcher turns a 30-screen application into guided journeys for a role, a demo, or an examiner (`docs\ux\dashboard-specification.md`; `docs\demo\demo-runbook.md`).
+**Why this component was implemented.** The brief asks NovaSteel to reduce energy, predict equipment failures, improve quality, and capture expertise (`docs\usecase\usecase.md`). Those proofs span many screens. This launcher turns a 31-screen application into guided journeys for a role, a demo, or an examiner (`docs\ux\dashboard-specification.md`; `docs\demo\demo-runbook.md`).
 
 **Objective & evidence (proof of execution).**
 

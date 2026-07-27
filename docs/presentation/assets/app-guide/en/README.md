@@ -8,7 +8,7 @@ number come from?").
 
 **Languages.** 🇬🇧 English (this folder) · 🇫🇷 [Version française](../fr/LISEZMOI.md)
 
-**Last updated:** 2026-07-27 · **Screenshots:** 36, captured from the running
+**Last updated:** 2026-07-27 · **Screenshots:** 37, captured from the running
 application at `http://localhost:5266` (Blazor portal shell + FastAPI BFF, synthetic
 demo data).
 
@@ -49,7 +49,7 @@ demo data).
 | 09 | [Executive Overview](09-executive-overview.md) | Executive | `OUT-01`…`OUT-04` roll-up |
 | 10 | [Device Operations](10-device-operations.md) | OT Systems Engineer | Where the sensor data comes from |
 | 11 | [Dashboard Collections](11-dashboard-collections.md) | All | Curated, question-driven dashboard bundles |
-| 12 | [Proof of Execution](12-proof-of-execution.md) | All | The full requirement register, in-app |
+| 12 | [Proof of Execution](12-proof-of-execution.md) | All | The full requirement register, the brief in-app, and the technical rubric |
 | 13 | [Platform Ops](13-platform-ops.md) | Platform Ops | Fabric capacity, jobs, cost |
 
 ### Cross-cutting and reference
@@ -58,7 +58,7 @@ demo data).
 |---|---|---|
 | 14 | [Cross-cutting features](14-cross-cutting-features.md) | The Dockview workspace, Copilot chat, "What's this?" help, guided tour, settings, theming, localization, shared UI primitives. |
 | 15 | [Glossary](15-glossary.md) | Every steel and platform term, EN ↔ FR, with "where you meet it in NovaSteel". |
-| 16 | [Traceability matrix](16-traceability-matrix.md) | Screen ↔ use case ↔ requirement ID ↔ evidence ↔ test, for all 30 screens. |
+| 16 | [Traceability matrix](16-traceability-matrix.md) | Screen ↔ use case ↔ requirement ID ↔ evidence ↔ test, for all 31 screens. |
 | 17 | [How it works behind the screens](17-how-it-works-behind-the-screens.md) | What happens between a click and a chart: shell, microfrontend, BFF, workers, and the target Fabric architecture. |
 | 18 | [Guided demo walkthrough](18-guided-demo-walkthrough.md) | A self-guided tour you can run alone, plus a jury Q&A table and troubleshooting. |
 
@@ -96,7 +96,7 @@ Every screen is documented with the same seven blocks, so you always know where 
 |---|---|
 | This guide (English) | `docs/presentation/assets/app-guide/en/` |
 | This guide (French) | `docs/presentation/assets/app-guide/fr/` |
-| Screenshots (36 PNG) | `docs/presentation/assets/app-guide/screenshots/` |
+| Screenshots (37 PNG) | `docs/presentation/assets/app-guide/screenshots/` |
 | Requirement catalog (source of truth) | `apps/analytics-mfe/src/proof/proofCatalog.ts` |
 | Use-case brief | `docs/usecase/usecase.md` |
 | Proof-of-execution document | `docs/presentation/proof_of_execution.md` |

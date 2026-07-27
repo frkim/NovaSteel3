@@ -48,11 +48,18 @@ FastAPI BFF → Blazor shell + React dashboard`
   - Python: `https://packagefeedproxy.microsoft.io/pypi/simple`
   - NuGet: `https://packagefeedproxy.microsoft.io/nuget/v3/index.json`
 
+Microsoft-managed devices block direct access to the public PyPI and NuGet
+registries; package downloads must go through Microsoft-protected feeds backed
+by Central Feed Services (CFS). The full policy, including the blocked-endpoint
+list, is [`docs\tech\security_requirement.md`](docs/tech/security_requirement.md).
+
 `pip.conf` supplies the only Python index. `NuGet.Config` clears inherited
 sources and maps every package to `MicrosoftProtectedFeed`. Never add an extra
 Python index or another NuGet source. If Node dependencies must be restored,
 set `NPM_CONFIG_REGISTRY` to the organization-approved protected npm proxy; do
-not use a public fallback.
+not use a public fallback. If a package is unavailable on a protected feed,
+stop and request the approved CFS exception rather than falling back to a
+public registry.
 
 ### First-time protected restore
 
@@ -139,6 +146,7 @@ to `NS-DEMO-LUX-01`. Useful direct routes are:
 | Persona / proof point | Route |
 |---|---|
 | Plant Manager command center | `http://localhost:5266/lu/command-center` |
+| Shift operations board | `http://localhost:5266/lu/operations/overview` |
 | Energy Manager dispatch | `http://localhost:5266/lu/energy-optimization/spot-price-schedule` |
 | Reliability Engineer RUL | `http://localhost:5266/lu/furnace-health/lining-forecast` |
 | Quality Engineer genealogy | `http://localhost:5266/lu/quality/batches` |
@@ -151,6 +159,9 @@ to `NS-DEMO-LUX-01`. Useful direct routes are:
 | Device Simulator (wave 3) | `http://localhost:5266/lu/device-operations/simulator` |
 | Dashboard Collections (wave 3) | `http://localhost:5266/lu/dashboards/collections` |
 | AxelorMetal corporate website (wave 4) | `http://localhost:5266/lu/company-website/home` |
+| Use-case brief | `http://localhost:5266/lu/proof-of-execution/use-case` |
+| Requirement register / proof of execution | `http://localhost:5266/lu/proof-of-execution/requirements` |
+| Technical requirements (rating grid) | `http://localhost:5266/lu/technical-requirements/criteria` |
 
 Every analytics route is a Dockview workspace: panels can be rearranged,
 maximized, persisted per screen, and reset from the dashboard header. The
@@ -227,6 +238,33 @@ foreach ($port in 8080, 5266) {
 }
 ```
 
+## Documentation
+
+Start with [`docs\README.md`](docs/README.md), which routes each audience to the
+right document.
+
+If you are **new to the application or to steel making**, read the illustrated
+application guide instead — a screenshot-driven, beginner-oriented walkthrough
+of every screen, available in both languages:
+
+- English — [`docs\presentation\assets\app-guide\en\README.md`](docs/presentation/assets/app-guide/en/README.md)
+- Français — [`docs\presentation\assets\app-guide\fr\LISEZMOI.md`](docs/presentation/assets/app-guide/fr/LISEZMOI.md)
+
+It explains, for every screen, what you are looking at, why the component
+exists, and which use-case requirement it evidences, and closes with a
+glossary, a traceability matrix, and a guided demo walkthrough.
+
+Other frequently used entry points:
+
+| Topic | Document |
+|---|---|
+| Business brief | [`docs\usecase\usecase.md`](docs/usecase/usecase.md) |
+| Requirement register / proof of execution | [`docs\presentation\proof_of_execution.md`](docs/presentation/proof_of_execution.md) |
+| Architecture and ADRs | [`docs\architecture\solution-architecture.md`](docs/architecture/solution-architecture.md) |
+| Screen-by-screen UX specification | [`docs\ux\dashboard-specification.md`](docs/ux/dashboard-specification.md) |
+| Demo runbook | [`docs\demo\demo-runbook.md`](docs/demo/demo-runbook.md) |
+| Package-feed security policy | [`docs\tech\security_requirement.md`](docs/tech/security_requirement.md) |
+
 ## Oral-defense handoff — 30 + 15 + 15 minutes
 
 1. **00:00–30:00:** architecture/value story (20 primary slides).
@@ -243,8 +281,10 @@ in `artifacts\demo-validation\rehearsal-report.md`; final handoff is
 
 ## Validated proof
 
-- 66/66 live BFF checks passed against the deterministic scenario; 571 automated
-  tests and all 19 repository validation gates pass.
+- 66/66 live BFF checks passed against the deterministic scenario; 1,139
+  automated tests (874 Python, 265 frontend) and all 19 repository validation
+  gates pass. Three further end-to-end persona journeys run against a live
+  demo instance.
 - RUL: P10/P50/P90 = 18.69/19.65/20.61 days, risk 0.8995 HIGH, confidence 0.7846.
   Regressed wear slope −3.21 mm/day at r² = 0.88 — the forecast moves when the
   thermal input moves.
@@ -277,7 +317,7 @@ the difference is scope, not a shortfall against the model.
 | `fabric` | Fabric REST/CLI assets, KQL, Lakehouse, notebooks, pipeline, semantic model |
 | `tests` | Contract, simulator, backend, integration, E2E, infra, and knowledge tests |
 | `tools\validation` | Local validation, feed/security scans, SBOM, PPTX validation |
-| `docs` | Architecture, operations, runbook, presentation, and research |
+| `docs` | Architecture, operations, runbook, presentation, research, and the bilingual illustrated application guide |
 | `artifacts` | Local validation, rehearsal, fallback, and final-handoff evidence |
 
 ## Cloud deployment

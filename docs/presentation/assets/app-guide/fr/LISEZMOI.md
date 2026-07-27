@@ -8,7 +8,7 @@ cas d'usage cet écran démontre-t-il, et d'où vient ce chiffre ? »).
 
 **Langues.** 🇫🇷 Français (ce dossier) · 🇬🇧 [English version](../en/README.md)
 
-**Dernière mise à jour :** 2026-07-27 · **Captures d'écran :** 36, prises sur
+**Dernière mise à jour :** 2026-07-27 · **Captures d'écran :** 37, prises sur
 l'application en fonctionnement à l'adresse `http://localhost:5266` (coque Blazor +
 BFF FastAPI, données de démonstration synthétiques).
 
@@ -49,7 +49,7 @@ BFF FastAPI, données de démonstration synthétiques).
 | 09 | [Executive Overview](09-executive-overview.md) | Direction générale | Consolidation `OUT-01`…`OUT-04` |
 | 10 | [Device Operations](10-device-operations.md) | Ingénieur systèmes OT | D'où viennent les données capteurs |
 | 11 | [Dashboard Collections](11-dashboard-collections.md) | Tous | Bouquets de tableaux de bord organisés par question |
-| 12 | [Proof of Execution](12-proof-of-execution.md) | Tous | Le registre complet des exigences, dans l'application |
+| 12 | [Proof of Execution](12-proof-of-execution.md) | Tous | Le registre complet des exigences, le brief dans l'application et la grille technique |
 | 13 | [Platform Ops](13-platform-ops.md) | Exploitation plateforme | Capacité Fabric, traitements, coûts |
 
 ### Transverse et référence
@@ -58,7 +58,7 @@ BFF FastAPI, données de démonstration synthétiques).
 |---|---|---|
 | 14 | [Fonctionnalités transverses](14-cross-cutting-features.md) | L'espace de travail Dockview, le chat Copilot, l'aide « What's this? », la visite guidée, les réglages, les thèmes, la localisation et les composants d'interface partagés. |
 | 15 | [Glossaire](15-glossary.md) | Tous les termes sidérurgiques et techniques, EN ↔ FR, avec « où vous le rencontrez dans NovaSteel ». |
-| 16 | [Matrice de traçabilité](16-traceability-matrix.md) | Écran ↔ cas d'usage ↔ identifiant d'exigence ↔ preuve ↔ test, pour les 30 écrans. |
+| 16 | [Matrice de traçabilité](16-traceability-matrix.md) | Écran ↔ cas d'usage ↔ identifiant d'exigence ↔ preuve ↔ test, pour les 31 écrans. |
 | 17 | [Ce qui se passe derrière les écrans](17-how-it-works-behind-the-screens.md) | Ce qui se produit entre un clic et un graphique : coque, microfrontend, BFF, workers et l'architecture Fabric cible. |
 | 18 | [Visite guidée de la démonstration](18-guided-demo-walkthrough.md) | Un parcours autonome, plus un tableau de questions/réponses pour le jury et un guide de dépannage. |
 
@@ -97,7 +97,7 @@ regarder :
 |---|---|
 | Ce guide (français) | `docs/presentation/assets/app-guide/fr/` |
 | Ce guide (anglais) | `docs/presentation/assets/app-guide/en/` |
-| Captures d'écran (36 PNG) | `docs/presentation/assets/app-guide/screenshots/` |
+| Captures d'écran (37 PNG) | `docs/presentation/assets/app-guide/screenshots/` |
 | Catalogue des exigences (source de vérité) | `apps/analytics-mfe/src/proof/proofCatalog.ts` |
 | Cahier des charges du cas d'usage | `docs/usecase/usecase.md` |
 | Document de preuve d'exécution | `docs/presentation/proof_of_execution.md` |
