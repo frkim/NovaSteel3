@@ -50,3 +50,24 @@ In all cases: **do not `git add` third-party imagery**. The `.gitignore` entry
 
 These carry zero licensing risk and are more defensible in front of a technical jury than
 stock photography.
+
+---
+
+## Application screenshots (committed, no licence risk)
+
+`app-guide/screenshots/` holds **36 PNG captures of this repository's own running
+application** — 30 route screenshots (one per screen of the analytics microfrontend,
+rendered inside the Blazor portal shell) and 6 feature captures (Copilot panel, help
+assistant, capacity panel, settings dialog, dark theme, account menu).
+
+| Property | Value |
+|---|---|
+| Source | `apps/portal-shell` + `apps/analytics-mfe` running locally against the local BFF (`DEMO_MODE=local`) |
+| Captured on | 2026-07-27 |
+| Viewport | 1680 px wide, full-page capture |
+| Data shown | Deterministic **synthetic** fixture data only — every capture carries the "Synthetic demo data — not for operational control" banner |
+| Licence risk | **None.** Self-authored capture of first-party software; no third-party imagery, no personal data, no tenant identifiers. |
+| Consumed by | [`app-guide/en/README.md`](app-guide/en/README.md) and [`app-guide/fr/LISEZMOI.md`](app-guide/fr/LISEZMOI.md) |
+
+Regeneration instructions are in the guide index (§"Regenerating the screenshots").
+
