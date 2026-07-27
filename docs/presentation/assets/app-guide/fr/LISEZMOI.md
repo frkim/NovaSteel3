@@ -8,7 +8,7 @@ cas d'usage cet écran démontre-t-il, et d'où vient ce chiffre ? »).
 
 **Langues.** 🇫🇷 Français (ce dossier) · 🇬🇧 [English version](../en/README.md)
 
-**Dernière mise à jour :** 2026-07-27 · **Captures d'écran :** 37, prises sur
+**Dernière mise à jour :** 2026-07-28 · **Captures d'écran :** 37, prises sur
 l'application en fonctionnement à l'adresse `http://localhost:5266` (coque Blazor +
 BFF FastAPI, données de démonstration synthétiques).
 

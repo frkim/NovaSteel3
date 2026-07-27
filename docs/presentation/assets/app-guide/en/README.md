@@ -8,7 +8,7 @@ number come from?").
 
 **Languages.** 🇬🇧 English (this folder) · 🇫🇷 [Version française](../fr/LISEZMOI.md)
 
-**Last updated:** 2026-07-27 · **Screenshots:** 37, captured from the running
+**Last updated:** 2026-07-28 · **Screenshots:** 37, captured from the running
 application at `http://localhost:5266` (Blazor portal shell + FastAPI BFF, synthetic
 demo data).
 

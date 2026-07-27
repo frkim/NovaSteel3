@@ -63,7 +63,7 @@ assistant, capacity panel, settings dialog, dark theme, account menu).
 | Property | Value |
 |---|---|
 | Source | `apps/portal-shell` + `apps/analytics-mfe` running locally against the local BFF (`DEMO_MODE=local`) |
-| Captured on | 2026-07-27, with `technical-requirements-criteria`, `proof-of-execution-use-case` and `proof-of-execution-requirements` re-captured on 2026-07-28 |
+| Captured on | 2026-07-28, all 37 re-captured in one pass against the current `main` |
 | Viewport | 1680 px wide, full-page capture |
 | Data shown | Deterministic **synthetic** fixture data only — every capture carries the "Synthetic demo data — not for operational control" banner |
 | Licence risk | **None.** Self-authored capture of first-party software; no third-party imagery, no personal data, no tenant identifiers. |
