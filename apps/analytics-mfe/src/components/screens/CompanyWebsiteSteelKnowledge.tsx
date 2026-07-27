@@ -33,6 +33,7 @@ import { DataTable, type DataTableColumn } from '../primitives/DataTable'
 import { PanelCard } from './common'
 import { useAnalytics } from '../../context/analytics'
 import { WebsiteFooter, WebsitePage } from './CompanyWebsiteLayout'
+import { ProcessDiagram } from './CompanyWebsiteDiagram'
 
 // ── Glossary data ──────────────────────────────────────────────────────────────
 
@@ -269,6 +270,13 @@ export function CompanyWebsiteSteelKnowledge() {
               <strong>electric arc furnace</strong> route. AxelorMetal operates both.
             </Typography>
 
+            <ProcessDiagram
+              stem="steel-route-blast-furnace"
+              title="The integrated route, end to end"
+              alt="Illustrated overview of the steps of steel creation: raw material extraction, ironmaking in a blast furnace, steelmaking in a basic oxygen furnace with secondary metallurgy, continuous casting, rolling and shaping, and finished products."
+              caption="Iron ore, coke and limestone enter on the left; coils, plates, rebar and structural sections leave on the right. The six numbered stages are read left to right."
+            />
+
             <Typography variant="h6" sx={{ fontWeight: 700, mt: 2, mb: 1 }}>The blast furnace route</Typography>
             <Typography variant="body2" sx={{ mb: 2 }}>
               One traditional way to make steel starts with a <strong>blast furnace</strong>. In this
@@ -309,6 +317,20 @@ export function CompanyWebsiteSteelKnowledge() {
               This route supports <strong>recycling</strong> and is{' '}
               <strong>flexible</strong> for producing different grades of steel.
             </Typography>
+
+            <ProcessDiagram
+              stem="steel-route-electric-arc-furnace"
+              title="The same journey, starting from scrap"
+              alt="Illustrated overview of steel creation via the electric arc furnace: scrap and raw material preparation, melting in an electric arc furnace powered by electricity, ladle refining, continuous casting, rolling and shaping, and finished products."
+              caption="The casting, rolling and finishing stages are identical to the integrated route. What changes is the front end: recycled scrap and electricity replace iron ore and coke."
+            />
+
+            <ProcessDiagram
+              stem="eaf-process-detail"
+              title="Inside the electric arc furnace, step by step"
+              alt="Detailed ten-step diagram of steel creation with an electric arc furnace: raw material preparation, charging the furnace, melting with electric arcs, oxygen injection and refining, slag formation, tapping the furnace, secondary metallurgy in a ladle furnace, continuous casting, hot rolling, and finished steel products."
+              caption="A closer look at the ten operations behind the EAF route — the same equipment the Furnace Health and Energy Optimization screens of this portal monitor in real time."
+            />
 
             <Typography variant="h6" sx={{ fontWeight: 700, mt: 3, mb: 2 }}>Comparing the two routes</Typography>
             <TableContainer>

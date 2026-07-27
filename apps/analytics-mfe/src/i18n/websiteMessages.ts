@@ -21,6 +21,8 @@ const EN: Catalog = {
     'Synthetic demo — all data and content are fictitious and for demonstration purposes only.',
   'website.cta.learnMore': 'Learn more',
   'website.cta.getInTouch': 'Get in touch',
+  'website.diagram.enlarge': 'Click the diagram to enlarge it.',
+  'website.diagram.close': 'Close the diagram',
 }
 
 const FR: Catalog = {
@@ -36,6 +38,8 @@ const FR: Catalog = {
     'Démo synthétique — toutes les données et contenus sont fictifs et à des fins de démonstration uniquement.',
   'website.cta.learnMore': 'En savoir plus',
   'website.cta.getInTouch': 'Nous contacter',
+  'website.diagram.enlarge': 'Cliquez sur le schéma pour l\u2019agrandir.',
+  'website.diagram.close': 'Fermer le schéma',
 }
 
 const DE: Catalog = {
@@ -51,6 +55,8 @@ const DE: Catalog = {
     'Synthetische Demo — alle Daten und Inhalte sind fiktiv und dienen nur Demonstrationszwecken.',
   'website.cta.learnMore': 'Mehr erfahren',
   'website.cta.getInTouch': 'Kontakt aufnehmen',
+  'website.diagram.enlarge': 'Klicken Sie auf das Schema, um es zu vergrößern.',
+  'website.diagram.close': 'Schema schließen',
 }
 
 const NL: Catalog = {
@@ -66,6 +72,8 @@ const NL: Catalog = {
     'Synthetische demo — alle gegevens en inhoud zijn fictief en uitsluitend voor demonstratiedoeleinden.',
   'website.cta.learnMore': 'Meer informatie',
   'website.cta.getInTouch': 'Neem contact op',
+  'website.diagram.enlarge': 'Klik op het schema om het te vergroten.',
+  'website.diagram.close': 'Schema sluiten',
 }
 
 const ES: Catalog = {
@@ -81,6 +89,8 @@ const ES: Catalog = {
     'Demo sintética — todos los datos y el contenido son ficticios y solo para fines de demostración.',
   'website.cta.learnMore': 'Saber más',
   'website.cta.getInTouch': 'Ponerse en contacto',
+  'website.diagram.enlarge': 'Haga clic en el esquema para ampliarlo.',
+  'website.diagram.close': 'Cerrar el esquema',
 }
 
 export const WEBSITE_CATALOGS: Record<string, Catalog> = { en: EN, fr: FR, de: DE, nl: NL, es: ES }

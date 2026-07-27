@@ -30,3 +30,8 @@ tests/simulator/.tmp/*
 # Local CI validation output
 /artifacts/
 /.validation-venv/
+
+# Source artwork for the corporate-website process diagrams (~8 MB each).
+# Only the optimised web renditions under apps/portal-shell/wwwroot/media are
+# committed. See docs/images/README.md to regenerate them.
+/docs/images/*.png

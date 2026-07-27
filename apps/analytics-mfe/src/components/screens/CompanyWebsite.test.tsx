@@ -77,6 +77,24 @@ describe('CompanyWebsiteHome', () => {
   })
 })
 
+describe('CompanyWebsiteSteelKnowledge — process diagrams', () => {
+  it('illustrates both steelmaking routes plus the EAF deep dive', async () => {
+    renderSteelKnowledge()
+    await screen.findByRole('table', { name: /glossary/i })
+
+    for (const stem of [
+      'steel-route-blast-furnace',
+      'steel-route-electric-arc-furnace',
+      'eaf-process-detail',
+    ]) {
+      const img = document.querySelector(`img[src="/media/${stem}.webp"]`)
+      expect(img, `${stem} diagram must be on the page`).not.toBeNull()
+      // Informative artwork, so it must carry real alternative text.
+      expect(img?.getAttribute('alt')?.length ?? 0).toBeGreaterThan(40)
+    }
+  })
+})
+
 describe('CompanyWebsiteSteelKnowledge — glossary', () => {
   it('renders the glossary table with all 10 rows visible', async () => {
     renderSteelKnowledge()

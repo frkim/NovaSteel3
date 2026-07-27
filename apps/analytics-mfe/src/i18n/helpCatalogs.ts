@@ -4,14 +4,21 @@ import { HELP_FR } from './helpMessages.fr'
 import { HELP_DE } from './helpMessages.de'
 import { HELP_NL } from './helpMessages.nl'
 import { HELP_ES } from './helpMessages.es'
+import { HELP_DIAGRAM } from './helpDiagramMessages'
 import { languageOf } from './messages'
 
+const EN: HelpCatalog = { ...HELP_EN, ...HELP_DIAGRAM.en }
+const FR: HelpCatalog = { ...HELP_FR, ...HELP_DIAGRAM.fr }
+const DE: HelpCatalog = { ...HELP_DE, ...HELP_DIAGRAM.de }
+const NL: HelpCatalog = { ...HELP_NL, ...HELP_DIAGRAM.nl }
+const ES: HelpCatalog = { ...HELP_ES, ...HELP_DIAGRAM.es }
+
 export const HELP_CATALOGS: Record<string, HelpCatalog> = {
-  en: HELP_EN,
-  fr: HELP_FR,
-  de: HELP_DE,
-  nl: HELP_NL,
-  es: HELP_ES,
+  en: EN,
+  fr: FR,
+  de: DE,
+  nl: NL,
+  es: ES,
 }
 
 function mergeField(primary?: string, secondary?: string): string | undefined {
@@ -46,8 +53,8 @@ function bilingual(base: HelpCatalog, other: HelpCatalog): HelpCatalog {
   return merged
 }
 
-const BILINGUAL_EN_FR = bilingual(HELP_EN, HELP_FR)
-const BILINGUAL_FR_EN = bilingual(HELP_FR, HELP_EN)
+const BILINGUAL_EN_FR = bilingual(EN, FR)
+const BILINGUAL_FR_EN = bilingual(FR, EN)
 
 /**
  * @param locale portal locale, e.g. `fr-FR`.
@@ -57,5 +64,5 @@ const BILINGUAL_FR_EN = bilingual(HELP_FR, HELP_EN)
 export function resolveHelpCatalog(locale: string, enFr = false): HelpCatalog {
   const language = languageOf(locale)
   if (enFr) return language === 'fr' ? BILINGUAL_FR_EN : BILINGUAL_EN_FR
-  return HELP_CATALOGS[language] ?? HELP_EN
+  return HELP_CATALOGS[language] ?? EN
 }

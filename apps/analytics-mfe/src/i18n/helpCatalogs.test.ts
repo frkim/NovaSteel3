@@ -1,13 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import { HELP_CATALOGS, resolveHelpCatalog } from './helpCatalogs'
-import { HELP_EN } from './helpMessages'
 import { HELP_UI_CATALOGS } from './helpUiMessages'
 import { SUPPORTED_LANGUAGES } from './messages'
 
 const TOPIC_FIELDS = ['title', 'what', 'steel', 'useIt'] as const
 
 describe('help catalogs', () => {
-  const expectedTopics = Object.keys(HELP_EN).sort()
+  // The English catalog is assembled from the base topics plus satellite
+  // catalogs (see helpCatalogs.ts), so the merged result — not the raw
+  // HELP_EN export — is the contract every other locale must match.
+  const english = HELP_CATALOGS.en
+  const expectedTopics = Object.keys(english).sort()
 
   it('covers every supported language', () => {
     expect(Object.keys(HELP_CATALOGS).sort()).toEqual([...SUPPORTED_LANGUAGES].sort())
@@ -22,7 +25,7 @@ describe('help catalogs', () => {
     it(`${language} declares the same optional fields as English`, () => {
       const catalog = HELP_CATALOGS[language]
       for (const topicId of expectedTopics) {
-        const source = HELP_EN[topicId]
+        const source = english[topicId]
         const translated = catalog[topicId]
         for (const field of TOPIC_FIELDS) {
           expect(
@@ -50,7 +53,7 @@ describe('help catalogs', () => {
   }
 
   it('falls back to English for an unknown locale', () => {
-    expect(resolveHelpCatalog('pt-BR')).toBe(HELP_EN)
+    expect(resolveHelpCatalog('pt-BR')).toBe(HELP_CATALOGS.en)
   })
 
   it('resolves by language, ignoring the region', () => {
@@ -74,7 +77,7 @@ describe('help catalogs', () => {
     const bilingual = resolveHelpCatalog('en', true)
     for (const topicId of expectedTopics) {
       for (const field of TOPIC_FIELDS) {
-        expect(field in bilingual[topicId], `${topicId}/${field}`).toBe(field in HELP_EN[topicId])
+        expect(field in bilingual[topicId], `${topicId}/${field}`).toBe(field in english[topicId])
       }
     }
   })

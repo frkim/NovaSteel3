@@ -22,7 +22,8 @@ public sealed record ShellNavItem(
     string Section,
     string? DefaultSubView,
     string Persona,
-    string Symbol);
+    string Symbol,
+    string Group = "");
 
 public sealed record AnalyticsNavigation(
     [property: JsonPropertyName("section")] string Section,
@@ -39,7 +40,8 @@ public sealed record AnalyticsBridgeContext(
     [property: JsonPropertyName("bridgeVersion")] string BridgeVersion,
     [property: JsonPropertyName("navigation")] AnalyticsNavigation Navigation,
     [property: JsonPropertyName("bffBaseUrl")] string? BffBaseUrl,
-    [property: JsonPropertyName("permittedActions")] IReadOnlyList<string> PermittedActions);
+    [property: JsonPropertyName("permittedActions")] IReadOnlyList<string> PermittedActions,
+    [property: JsonPropertyName("helpBilingual")] bool HelpBilingual = false);
 
 public sealed record AnalyticsEvent(string Type, JsonElement Payload);
 

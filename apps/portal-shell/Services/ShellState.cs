@@ -21,18 +21,21 @@ public sealed class ShellState
 
     public IReadOnlyList<ShellNavItem> NavigationItems { get; } =
     [
-        new("Command Center", "command-center", null, "PlantManager", "⌂"),
-        new("Operations", "operations", null, "PlantManager", "◫"),
-        new("Furnace Health", "furnace-health", "lining-forecast", "FurnaceOperator", "◉"),
-        new("Energy Optimization", "energy-optimization", "spot-price-schedule", "EnergyManager", "ϟ"),
-        new("Quality", "quality", "batches", "QualityEngineer", "✓"),
-        new("Sustainability", "sustainability-compliance", "emissions-ledger", "SustainabilityOfficer", "♧"),
-        new("Knowledge Hub", "knowledge-hub", "procedures", "KnowledgeEngineer", "⌕"),
-        new("Executive Overview", "executive-overview", null, "Executive", "▤"),
-        new("Device Operations", "device-operations", "fleet", "PlatformOps", "◈"),
-        new("Dashboards", "dashboards", "collections", "PlantManager", "▦"),
-        new("Platform Ops", "platform-ops", "capacity", "PlatformOps", "⚙"),
-        new("AxelorMetal", "company-website", "home", "PlantManager", "◇")
+        // Daily operations
+        new("Command Center", "command-center", null, "PlantManager", "⌂", "Daily operations"),
+        new("Operations", "operations", null, "PlantManager", "◫", "Daily operations"),
+        new("Furnace Health", "furnace-health", "lining-forecast", "FurnaceOperator", "◉", "Daily operations"),
+        new("Energy Optimization", "energy-optimization", "spot-price-schedule", "EnergyManager", "ϟ", "Daily operations"),
+        new("Quality", "quality", "batches", "QualityEngineer", "✓", "Daily operations"),
+        // Insight & governance
+        new("Executive Overview", "executive-overview", null, "Executive", "▤", "Insight & governance"),
+        new("Sustainability", "sustainability-compliance", "emissions-ledger", "SustainabilityOfficer", "♧", "Insight & governance"),
+        new("Knowledge Hub", "knowledge-hub", "procedures", "KnowledgeEngineer", "⌕", "Insight & governance"),
+        new("Dashboards", "dashboards", "collections", "PlantManager", "▦", "Insight & governance"),
+        // Platform & reference
+        new("Device Operations", "device-operations", "fleet", "PlatformOps", "◈", "Platform & reference"),
+        new("Platform Ops", "platform-ops", "capacity", "PlatformOps", "⚙", "Platform & reference"),
+        new("AxelorMetal", "company-website", "home", "PlantManager", "◇", "Platform & reference")
     ];
 
     public event Action? Changed;
@@ -56,6 +59,8 @@ public sealed class ShellState
     public string BffBaseUrl => _options.BffBaseUrl;
 
     public bool DemoMode { get; private set; } = true;
+
+    public bool HelpBilingual { get; private set; }
 
     public ToastNotification? LastToast { get; private set; }
 
@@ -114,6 +119,12 @@ public sealed class ShellState
         Notify();
     }
 
+    public void SetHelpBilingual(bool value)
+    {
+        HelpBilingual = value;
+        Notify();
+    }
+
     public string RouteFor(string section, string? subView)
     {
         var route = $"/{Site}/{section}";
@@ -145,7 +156,8 @@ public sealed class ShellState
             "1.0",
             new AnalyticsNavigation(Section, SubView, Site),
             _options.BffBaseUrl,
-            Auth.PermittedActions);
+            Auth.PermittedActions,
+            HelpBilingual);
 
     private static string NormalizeSite(string? site) =>
         Sites.Contains(site ?? string.Empty, StringComparer.OrdinalIgnoreCase)
