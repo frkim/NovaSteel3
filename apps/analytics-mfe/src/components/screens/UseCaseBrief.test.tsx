@@ -99,6 +99,22 @@ describe('UseCaseBrief screen', () => {
     }
   })
 
+  it('presents the whole brief as a single dock tab', async () => {
+    renderWithProviders(<UseCaseBrief />)
+    const tabs = await screen.findAllByTestId(/^dock-tab-/)
+    expect(tabs.map((tab) => tab.getAttribute('data-testid'))).toEqual(['dock-tab-usecase-document'])
+    // Every heading of the source Markdown reads inside that one tab.
+    for (const heading of [
+      'Industry profile',
+      'Business challenge',
+      'Transformation objective',
+      'Expected outcomes',
+      'AI infusion point',
+    ]) {
+      expect(screen.getByRole('heading', { name: heading }), `${heading} missing`).toBeTruthy()
+    }
+  })
+
   it('links back to the Markdown brief on GitHub', async () => {
     renderWithProviders(<UseCaseBrief />)
     const link = await screen.findByRole('link', { name: /docs\/usecase\/usecase\.md/ })

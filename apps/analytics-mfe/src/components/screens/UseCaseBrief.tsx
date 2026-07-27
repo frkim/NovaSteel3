@@ -7,7 +7,7 @@ import PsychologyOutlinedIcon from '@mui/icons-material/PsychologyOutlined'
 import GitHubIcon from '@mui/icons-material/GitHub'
 import { useAnalytics } from '../../context/analytics'
 import { useTokens } from '../../hooks/useTokens'
-import { KpiBand, PanelCard, SectionStack, TwoColumn } from './common'
+import { KpiBand, PanelCard, SectionStack } from './common'
 import { ProofBadge } from '../primitives/ProofBadge'
 import { GITHUB_REPO_URL, PROOF_BY_ID, proofCoverage, type ProofStatus } from '../../proof/proofCatalog'
 
@@ -103,6 +103,10 @@ const AI_POINTS: BriefLine[] = [
  * every sentence of `docs/usecase/usecase.md` is bound to a proof reference, so
  * a jury can walk the brief top to bottom and click straight through to the
  * evidence — which a rendered blob of Markdown could not offer.
+ *
+ * The whole brief lives in a single dock panel, so the page presents one tab
+ * holding one continuous document that reads in the same order as the source
+ * Markdown, rather than a grid of separately dockable fragments.
  */
 export function UseCaseBrief() {
   const { t } = useAnalytics()
@@ -175,6 +179,10 @@ export function UseCaseBrief() {
     </Box>
   )
 
+  /**
+   * One heading + body block of the brief, rendered inline so the whole
+   * document reads top to bottom in a single tab, the way the Markdown does.
+   */
   const section = (
     id: string,
     icon: typeof FactoryOutlinedIcon,
@@ -184,28 +192,26 @@ export function UseCaseBrief() {
   ) => {
     const Icon = icon
     return (
-      <PanelCard
-        id={id}
-        title={t(titleKey)}
-        action={<Icon fontSize="small" sx={{ color: 'text.secondary' }} />}
-      >
+      <Box key={id} id={id} component="section" aria-label={t(titleKey)} sx={{ scrollMarginTop: 16 }}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 1 }}>
+          <Icon fontSize="small" sx={{ color: 'text.secondary' }} />
+          <Typography variant="h3">{t(titleKey)}</Typography>
+        </Stack>
         {intro ? (
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
             {intro}
           </Typography>
         ) : null}
         <Stack divider={<Divider flexItem sx={{ opacity: 0.4 }} />}>{lines.map(renderLine)}</Stack>
-      </PanelCard>
+      </Box>
     )
   }
 
   return (
     <SectionStack>
-      <KpiBand id="usecase-kpis" title={t('usecase.title')} metrics={metrics} />
-
       <PanelCard
-        id="usecase-source"
-        title={t('usecase.source')}
+        id="usecase-document"
+        title={t('usecase.title')}
         action={
           <Tooltip title={t('usecase.openSource')} describeChild>
             <Link
@@ -221,58 +227,79 @@ export function UseCaseBrief() {
           </Tooltip>
         }
       >
-        <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
-          {'NovaSteel \u2014 AI\u2011Powered Steel Production Optimization Platform'}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {t('usecase.subtitle')}
-        </Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-          {t('usecase.sourceNote')}
-        </Typography>
-        <Chip
-          size="small"
-          label={t('usecase.covered')
-            .replace('{met}', String(coverage.met))
-            .replace('{total}', String(coverage.total))}
-          sx={{ mt: 1.25, height: 22, bgcolor: `${tokens.status.success}22`, color: tokens.status.success, fontWeight: 600 }}
-        />
-      </PanelCard>
+        <Stack spacing={2.5} sx={{ maxWidth: 1080 }}>
+          <Box id="usecase-source" component="section" aria-label={t('usecase.source')}>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
+              {'NovaSteel \u2014 AI\u2011Powered Steel Production Optimization Platform'}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {t('usecase.subtitle')}
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+              {t('usecase.sourceNote')}
+            </Typography>
+            <Chip
+              size="small"
+              label={t('usecase.covered')
+                .replace('{met}', String(coverage.met))
+                .replace('{total}', String(coverage.total))}
+              sx={{
+                mt: 1.25,
+                height: 22,
+                bgcolor: `${tokens.status.success}22`,
+                color: tokens.status.success,
+                fontWeight: 600,
+              }}
+            />
+          </Box>
 
-      <PanelCard id="usecase-profile" title={t('usecase.section.profile')}>
-        <Stack spacing={0.75}>
-          {PROFILE.map((row) => (
-            <Stack
-              key={row.key}
-              direction="row"
-              spacing={1}
-              sx={{ alignItems: 'center', flexWrap: 'wrap', gap: 0.5 }}
-            >
-              <Typography variant="body2" sx={{ fontWeight: 700, minWidth: 160 }}>
-                {t(`usecase.profile.${row.key}`)}
-              </Typography>
-              <Typography variant="body2" sx={{ flex: 1 }}>
-                {row.value}
-              </Typography>
-              {row.refs.map((id) => (
-                <ProofBadge key={id} id={id} />
+          <KpiBand id="usecase-kpis" title={t('usecase.title')} metrics={metrics} minWidth={170} />
+
+          <Box id="usecase-profile" component="section" aria-label={t('usecase.section.profile')}>
+            <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 1 }}>
+              <FactoryOutlinedIcon fontSize="small" sx={{ color: 'text.secondary' }} />
+              <Typography variant="h3">{t('usecase.section.profile')}</Typography>
+            </Stack>
+            <Stack spacing={0.75}>
+              {PROFILE.map((row) => (
+                <Stack
+                  key={row.key}
+                  direction="row"
+                  spacing={1}
+                  sx={{ alignItems: 'center', flexWrap: 'wrap', gap: 0.5 }}
+                >
+                  <Typography variant="body2" sx={{ fontWeight: 700, minWidth: 160 }}>
+                    {t(`usecase.profile.${row.key}`)}
+                  </Typography>
+                  <Typography variant="body2" sx={{ flex: 1 }}>
+                    {row.value}
+                  </Typography>
+                  {row.refs.map((id) => (
+                    <ProofBadge key={id} id={id} />
+                  ))}
+                </Stack>
               ))}
             </Stack>
-          ))}
+          </Box>
+
+          {section(
+            'usecase-challenge',
+            ReportProblemOutlinedIcon,
+            'usecase.section.challenge',
+            CHALLENGE_INTRO,
+            CHALLENGES,
+          )}
+          {section(
+            'usecase-objective',
+            FlagOutlinedIcon,
+            'usecase.section.objective',
+            OBJECTIVE_INTRO,
+            OBJECTIVES,
+          )}
+          {section('usecase-outcome', EmojiEventsOutlinedIcon, 'usecase.section.outcome', null, OUTCOMES)}
+          {section('usecase-ai', PsychologyOutlinedIcon, 'usecase.section.ai', null, AI_POINTS)}
         </Stack>
       </PanelCard>
-
-      <TwoColumn
-        sideWidth={480}
-        main={section('usecase-challenge', ReportProblemOutlinedIcon, 'usecase.section.challenge', CHALLENGE_INTRO, CHALLENGES)}
-        side={section('usecase-objective', FlagOutlinedIcon, 'usecase.section.objective', OBJECTIVE_INTRO, OBJECTIVES)}
-      />
-
-      <TwoColumn
-        sideWidth={480}
-        main={section('usecase-outcome', EmojiEventsOutlinedIcon, 'usecase.section.outcome', null, OUTCOMES)}
-        side={section('usecase-ai', PsychologyOutlinedIcon, 'usecase.section.ai', null, AI_POINTS)}
-      />
     </SectionStack>
   )
 }
