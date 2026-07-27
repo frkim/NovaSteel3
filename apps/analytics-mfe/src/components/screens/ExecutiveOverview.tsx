@@ -9,6 +9,7 @@ import { ChartContainer } from '../charts/ChartContainer'
 import { KpiBand, PanelCard, SectionStack, TwoColumn } from './common'
 import { formatNumber } from '../../utils/format'
 import type { KpiCardModel } from '../primitives/KpiCard'
+import { ProofBadges } from '../primitives/ProofBadge'
 
 interface SiteRow {
   site: string
@@ -72,7 +73,10 @@ export function ExecutiveOverview() {
           </ChartContainer>
         }
         side={
-          <PanelCard title="Target vs actual">
+          <PanelCard
+            title="Target vs actual"
+            action={<ProofBadges ids={['OUT-01', 'OUT-02', 'OUT-03', 'OUT-04']} />}
+          >
             <ProgressBullet
               items={[
                 { label: 'Energy −14% target', value: 92, target: 100, color: tokens.palette[0] },

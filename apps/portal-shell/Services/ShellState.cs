@@ -38,6 +38,7 @@ public sealed class ShellState
         new("Sustainability", "sustainability-compliance", "emissions-ledger", "SustainabilityOfficer", "♧", "Insight & governance"),
         new("Knowledge Hub", "knowledge-hub", "procedures", "KnowledgeEngineer", "⌕", "Insight & governance"),
         new("Dashboards", "dashboards", "collections", "PlantManager", "▦", "Insight & governance"),
+        new("Proof of Execution", "proof-of-execution", "requirements", "PlantManager", "⎋", "Insight & governance"),
         // Platform & reference
         new("Device Operations", "device-operations", "fleet", "PlatformOps", "◈", "Platform & reference"),
         new("Platform Ops", "platform-ops", "capacity", "PlatformOps", "⚙", "Platform & reference"),

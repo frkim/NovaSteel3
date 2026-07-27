@@ -11,6 +11,7 @@ import { ChartContainer } from '../charts/ChartContainer'
 import { KpiBand, PanelCard, SectionStack, revealPanel } from './common'
 import { formatCurrency, formatNumber, formatTime, msOf } from '../../utils/format'
 import type { KpiCardModel } from '../primitives/KpiCard'
+import { ProofBadges } from '../primitives/ProofBadge'
 
 export function EnergySpotSchedule() {
   const { client, emit, locale, site } = useAnalytics()
@@ -89,7 +90,11 @@ export function EnergySpotSchedule() {
         />
       </ChartContainer>
       </div>
-      <PanelCard id="energy-schedule" title="Schedule">
+      <PanelCard
+        id="energy-schedule"
+        title="Schedule"
+        action={<ProofBadges ids={['CHL-01', 'OBJ-01', 'AI-02']} />}
+      >
         <StateBoundary state={recommendationState} isEmpty={(rec: EnergyRecommendation) => rec.optimized.schedule.length === 0}>
           {(rec) => (
             <DataTable

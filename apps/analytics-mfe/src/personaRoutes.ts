@@ -134,6 +134,20 @@ export const personaSections: PersonaSection[] = [
     tabs: [{ slug: 'collections', label: 'Collections' }],
   },
   {
+    section: 'proof-of-execution',
+    title: 'Proof of Execution',
+    persona: 'All personas',
+    personaIds: [
+      'plant-manager', 'furnace-operator', 'maintenance-engineer', 'energy-manager',
+      'quality-engineer', 'sustainability-officer', 'knowledge-engineer', 'executive',
+      'ot-systems-engineer', 'platform-ops',
+    ],
+    description:
+      'Every requirement of the use-case brief, the evidence in the running solution that satisfies it, and the caveats we state openly.',
+    defaultSubView: 'requirements',
+    tabs: [{ slug: 'requirements', label: 'Requirement Register' }],
+  },
+  {
     section: 'platform-ops',
     title: 'Platform Ops',
     persona: 'Nils Andersen - Platform Ops',

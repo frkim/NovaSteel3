@@ -6,6 +6,7 @@ import { DataTable, type DataTableColumn } from '../primitives/DataTable'
 import { KpiBand, PanelCard, SectionStack, revealPanel } from './common'
 import { formatDateTime } from '../../utils/format'
 import type { KpiCardModel } from '../primitives/KpiCard'
+import { ProofBadges } from '../primitives/ProofBadge'
 
 export function SustainabilityAudit() {
   const { client, locale } = useAnalytics()
@@ -33,7 +34,11 @@ export function SustainabilityAudit() {
   return (
     <SectionStack>
       <KpiBand metrics={metrics} />
-      <PanelCard id="audit-evidence" title="Audit & decision evidence (read-only)">
+      <PanelCard
+        id="audit-evidence"
+        title="Audit & decision evidence (read-only)"
+        action={<ProofBadges ids={['REG-01', 'REG-02']} />}
+      >
         <StateBoundary state={auditState} isEmpty={(data) => data.length === 0}>
           {(data) => (
             <DataTable

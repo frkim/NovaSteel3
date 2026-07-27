@@ -10,6 +10,7 @@ import { ChartContainer } from '../charts/ChartContainer'
 import { KpiBand, PanelCard, SectionStack, TwoColumn, revealPanel } from './common'
 import { formatCurrency, formatNumber } from '../../utils/format'
 import type { KpiCardModel } from '../primitives/KpiCard'
+import { ProofBadges } from '../primitives/ProofBadge'
 
 const CAP_PCT = 100
 const USED_PCT = 71
@@ -72,7 +73,11 @@ export function SustainabilityEts() {
         side={
           <StateBoundary state={summaryState} dockId="ets-gauge" dockTitle="Allowances used vs cap">
             {() => (
-              <PanelCard id="ets-gauge" title="Allowances used vs cap">
+              <PanelCard
+                id="ets-gauge"
+                title="Allowances used vs cap"
+                action={<ProofBadges ids={['REG-03']} />}
+              >
                 <GaugeChart
                   value={USED_PCT}
                   min={0}

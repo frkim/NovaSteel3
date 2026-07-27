@@ -11,6 +11,7 @@ import { ChartContainer } from '../charts/ChartContainer'
 import { KpiBand, PanelCard, SectionStack, TwoColumn, revealPanel } from './common'
 import { formatCurrency, formatDateTime, formatNumber, msOf } from '../../utils/format'
 import type { KpiCardModel } from '../primitives/KpiCard'
+import { ProofBadges } from '../primitives/ProofBadge'
 
 export function SustainabilityEmissions() {
   const { client, emit, locale, site } = useAnalytics()
@@ -94,7 +95,11 @@ export function SustainabilityEmissions() {
           </StateBoundary>
         }
       />
-      <PanelCard id="emissions-ledger" title="Emissions ledger (immutable)">
+      <PanelCard
+        id="emissions-ledger"
+        title="Emissions ledger (immutable)"
+        action={<ProofBadges ids={['CHL-02', 'OUT-02']} />}
+      >
         <StateBoundary state={emissionsState} isEmpty={(rows) => rows.length === 0}>
           {(rows) => (
             <DataTable

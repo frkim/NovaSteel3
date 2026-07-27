@@ -11,6 +11,7 @@ import { ChartContainer } from '../charts/ChartContainer'
 import { KpiBand, PanelCard, SectionStack, revealPanel } from './common'
 import { formatDateTime, formatNumber } from '../../utils/format'
 import type { KpiCardModel } from '../primitives/KpiCard'
+import { ProofBadges } from '../primitives/ProofBadge'
 import { QualityBatchDrawer } from './QualityBatchDrawer'
 
 const RESULT_RANK: Record<string, number> = { FAIL: 0, REVIEW: 1, PASS: 2 }
@@ -65,7 +66,11 @@ export function QualityBatches() {
           yFormat={(value) => formatNumber(value, locale)}
         />
       </ChartContainer>
-      <PanelCard id="quality-batches-table" title="Batches">
+      <PanelCard
+        id="quality-batches-table"
+        title="Batches"
+        action={<ProofBadges ids={['CHL-04', 'OBJ-03', 'OUT-04']} />}
+      >
         <StateBoundary state={batchesState} isEmpty={(rows) => rows.length === 0}>
           {(rows) => (
             <DataTable

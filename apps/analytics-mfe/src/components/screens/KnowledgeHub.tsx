@@ -37,6 +37,7 @@ import { KnowledgeClient } from '../../api/knowledgeClient'
 import { StateBoundary } from '../primitives/StateBoundary'
 import { SeverityPill } from '../primitives/SeverityPill'
 import { DataTable, type DataTableColumn } from '../primitives/DataTable'
+import { ProofBadges } from '../primitives/ProofBadge'
 import { ProgressBullet } from '../charts/ProgressBullet'
 import { KpiBand, PanelCard, SectionStack, TwoColumn, revealPanel } from './common'
 import type { KpiCardModel } from '../primitives/KpiCard'
@@ -482,7 +483,8 @@ export function KnowledgeHub() {
             id="knowledge-procedures"
             title="Procedure cards"
             action={
-              <Stack direction="row" spacing={1}>
+              <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                <ProofBadges ids={['CHL-05', 'OBJ-04', 'AI-03']} />
                 <Button size="small" variant="contained" startIcon={<NoteAddIcon />} onClick={() => setCreateOpen(true)} data-help="knowledge:createEntry">
                   New entry
                 </Button>

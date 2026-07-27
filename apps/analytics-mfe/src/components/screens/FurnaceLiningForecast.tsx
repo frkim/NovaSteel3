@@ -13,6 +13,7 @@ import { ChartContainer } from '../charts/ChartContainer'
 import { KpiBand, PanelCard, SectionStack, TwoColumn, revealPanel } from './common'
 import { formatDateTime, formatNumber } from '../../utils/format'
 import type { KpiCardModel } from '../primitives/KpiCard'
+import { ProofBadges } from '../primitives/ProofBadge'
 
 const FURNACE_ASSET = 'LUX-BF-01'
 const RISK_THRESHOLD = 0.8
@@ -144,7 +145,11 @@ export function FurnaceLiningForecast() {
         side={
           <StateBoundary state={forecastState} dockId="lining-drivers" dockTitle="Why? · drivers · freshness">
             {(forecast) => (
-              <PanelCard id="lining-drivers" title="Why? · drivers · freshness">
+              <PanelCard
+          id="lining-drivers"
+          title="Why? · drivers · freshness"
+          action={<ProofBadges ids={['CHL-03', 'OBJ-02', 'OUT-03', 'AI-01']} />}
+        >
                 <Stack spacing={2}>
                   <SeverityPill severity="HIGH" label={`Risk ${(forecast.riskScore * 100).toFixed(0)}% · ${forecast.riskLevel}`} />
                   <ConfidenceMeter band={forecast.confidence} unit="days" label="Remaining useful life (P10–P90)" />
