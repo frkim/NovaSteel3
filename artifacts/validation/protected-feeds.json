@@ -1,7 +1,7 @@
 {
   "status": "PASS",
-  "checkedAtUtc": "2026-07-26T20:55:18.386342+00:00",
-  "checkedFiles": 490,
+  "checkedAtUtc": "2026-07-26T23:49:01.577887+00:00",
+  "checkedFiles": 505,
   "blockedEndpointCount": 4,
   "violations": []
 }
