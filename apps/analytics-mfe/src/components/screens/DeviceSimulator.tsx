@@ -71,7 +71,7 @@ export function DeviceSimulator() {
     <SectionStack>
       {metrics.length > 0 && <KpiBand metrics={metrics} />}
 
-      <StateBoundary state={simulatorState}>
+      <StateBoundary state={simulatorState} dockId="simulator-controls" dockTitle="Simulator controls & incidents">
         {(sim) => (
           <>
             <PanelCard

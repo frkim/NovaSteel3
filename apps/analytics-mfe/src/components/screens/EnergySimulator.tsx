@@ -40,7 +40,7 @@ export function EnergySimulator() {
       <TwoColumn
         main={
           <div id="simulator-chart">
-          <StateBoundary state={recState}>
+          <StateBoundary state={recState} dockId="simulator-chart-panel" dockTitle="Baseline vs optimized">
             {(rec: EnergyRecommendation) => (
               <ChartContainer
                 title="Baseline vs optimized"

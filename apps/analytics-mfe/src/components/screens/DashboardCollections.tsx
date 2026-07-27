@@ -129,6 +129,8 @@ export function DashboardCollections() {
           <Box
             component="section"
             aria-label={t('dashboards.title')}
+            data-dock-id="dashboard-collections"
+            data-dock-title="Collection cards"
             sx={{
               display: 'grid',
               gap: 2,

@@ -108,13 +108,13 @@ export function FurnaceLiningForecast() {
 
   return (
     <SectionStack>
-      <StateBoundary state={forecastState} skeletonRows={2}>
+      <StateBoundary state={forecastState} skeletonRows={2} dockId="lining-kpis" dockTitle="Key metrics">
         {() => <KpiBand metrics={metrics} />}
       </StateBoundary>
 
       <TwoColumn
         main={
-          <StateBoundary state={forecastState}>
+          <StateBoundary state={forecastState} dockId="lining-risk-chart" dockTitle="Lining risk forecast">
             {(forecast) => {
               const projection = riskProjection(forecast)
               return (
@@ -142,7 +142,7 @@ export function FurnaceLiningForecast() {
           </StateBoundary>
         }
         side={
-          <StateBoundary state={forecastState}>
+          <StateBoundary state={forecastState} dockId="lining-drivers" dockTitle="Why? · drivers · freshness">
             {(forecast) => (
               <PanelCard id="lining-drivers" title="Why? · drivers · freshness">
                 <Stack spacing={2}>

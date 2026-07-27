@@ -112,12 +112,12 @@ export function PlatformCapacity() {
       <KpiBand metrics={metrics} />
 
       {status?.demoModeSimulated && (
-        <Alert severity="info" icon={false}>
+        <Alert severity="info" icon={false} data-dock-id="capacity-demo-note" data-dock-title="Demo mode" data-dock-height={110}>
           <strong>Simulated</strong> — capacity transitions are timed to look realistic; no real ARM operation fires in Demo Mode.
         </Alert>
       )}
 
-      <StateBoundary state={capacityState}>
+      <StateBoundary state={capacityState} dockId="capacity-mirror" dockTitle="Fabric capacity (read-only mirror)">
         {(capacity: CapacityStatus) => (
           <PanelCard
             title="Fabric capacity (read-only mirror)"

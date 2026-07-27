@@ -236,7 +236,12 @@ export function DeviceSensors() {
 
       {/* Linked chart panel */}
       {selectedSensorId && (
-        <PanelCard id="sensor-chart-panel" title="">
+        <PanelCard
+          id="sensor-chart-panel"
+          title={t('device.sensors.chart')}
+          onDockClose={() => setSelectedSensorId(null)}
+          dockHeight={420}
+        >
           <SensorChartPanel
             sensorId={selectedSensorId}
             onClose={() => setSelectedSensorId(null)}

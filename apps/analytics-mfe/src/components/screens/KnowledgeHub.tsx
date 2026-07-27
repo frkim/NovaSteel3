@@ -58,6 +58,9 @@ export function KnowledgeHub() {
       <KpiBand metrics={metrics} />
       <TextField
         fullWidth
+        data-dock-id="knowledge-search"
+        data-dock-title="Search"
+        data-dock-height={110}
         value={query}
         onChange={(event) => setQuery(event.target.value)}
         placeholder="Search procedures & captured expertise…"

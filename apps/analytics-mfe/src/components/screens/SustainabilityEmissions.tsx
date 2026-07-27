@@ -73,7 +73,7 @@ export function SustainabilityEmissions() {
           </div>
         }
         side={
-          <StateBoundary state={summaryState}>
+          <StateBoundary state={summaryState} dockId="emissions-by-scope" dockTitle="Emissions by scope">
             {(summary: SustainabilitySummary) => (
               <ChartContainer
                 title="Emissions by scope"

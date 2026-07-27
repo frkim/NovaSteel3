@@ -70,7 +70,7 @@ export function SustainabilityEts() {
           </div>
         }
         side={
-          <StateBoundary state={summaryState}>
+          <StateBoundary state={summaryState} dockId="ets-gauge" dockTitle="Allowances used vs cap">
             {() => (
               <PanelCard id="ets-gauge" title="Allowances used vs cap">
                 <GaugeChart

@@ -259,7 +259,6 @@ export function SensorChartPanel({ sensorId, onClose }: SensorChartPanelProps) {
 
   return (
     <Box
-      id="sensor-chart-panel"
       component="section"
       aria-label={chartTitle}
       sx={{ scrollMarginTop: 16 }}

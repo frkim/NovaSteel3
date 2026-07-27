@@ -258,6 +258,8 @@ export function DeviceFleet() {
         <PanelCard
           id={DEVICE_DETAIL_ID}
           title={`${selectedDevice.deviceId} — ${selectedDevice.description}`}
+          onDockClose={() => setSelectedDeviceId(null)}
+          dockHeight={380}
           action={
             <Button
               size="small"
