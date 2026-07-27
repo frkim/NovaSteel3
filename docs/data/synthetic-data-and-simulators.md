@@ -554,24 +554,45 @@ add `--extra-index-url` for public registries. NuGet-based components must use
 
 ## 13. Device Operations simulator estate
 
-Wave 3 introduces a real-time device-telemetry simulator (`services/device-simulator`) that is separate from the batch scenario generator above. It produces a live, clock-driven ring buffer of sensor readings from a six-device industrial estate and is consumed by the BFF's Device Operations routes.
+Wave 3 introduces a real-time device-telemetry simulator (`services/device-simulator`) that is separate from the batch scenario generator above. It produces a live, clock-driven ring buffer of sensor readings from a sixteen-device, four-site industrial estate and is consumed by the BFF's Device Operations routes. Wave 6 extended the estate from the original Luxembourg-only six devices to all four demo plants so that the site selector exercises a genuinely different fleet at every site.
 
 ### 13.1 Device catalog
 
-Site identifier: `NS-DEMO-LUX-01` (Moselle Integrated Works, Luxembourg).
+**Total: 16 devices across 4 sites, 86 sensors.**
 
-**Total: 6 devices, 34 sensors** (18 core + 16 extended).
-
-| Device ID | Area | Asset type | Core sensors | Extended sensors |
+| Device ID | Site | Area | Asset type | Sensors |
 |---|---|---|---|---|
-| `LUX-BF-01` | Ironmaking | Blast furnace | 18 | 0 |
-| `LUX-BOF-01` | Steelmaking | Basic oxygen furnace | 0 | 5 |
-| `LUX-CC-01` | Casting | Slab caster | 0 | 5 |
-| `LUX-RHF-01` | Rolling | Reheat furnace | 0 | 0 (shares core) |
-| `LUX-HSM-01` | Rolling | Hot strip mill | 0 | 0 (shares core) |
-| `LUX-UTIL-01` | Utilities | Energy system | 0 | 6 |
+| `LUX-BF-01` | `NS-DEMO-LUX-01` | Ironmaking | Blast furnace | 11 |
+| `LUX-BOF-01` | `NS-DEMO-LUX-01` | Steelmaking | Basic oxygen furnace | 5 |
+| `LUX-CC-01` | `NS-DEMO-LUX-01` | Casting | Slab caster | 5 |
+| `LUX-RHF-01` | `NS-DEMO-LUX-01` | Rolling | Reheat furnace | 3 |
+| `LUX-HSM-01` | `NS-DEMO-LUX-01` | Rolling | Hot strip mill | 4 |
+| `LUX-UTIL-01` | `NS-DEMO-LUX-01` | Utilities | Energy system | 6 |
+| `DE-EAF-01` | `NS-DEMO-DE-01` | Steelmaking | Electric arc furnace | 6 |
+| `DE-LF-01` | `NS-DEMO-DE-01` | Steelmaking | Ladle furnace | 5 |
+| `DE-BCM-01` | `NS-DEMO-DE-01` | Casting | Billet caster | 5 |
+| `DE-UTIL-01` | `NS-DEMO-DE-01` | Utilities | Energy system | 6 |
+| `BE-CRM-01` | `NS-DEMO-BE-01` | Rolling | Cold rolling mill | 5 |
+| `BE-GAL-01` | `NS-DEMO-BE-01` | Coating | Hot-dip galvanizing line | 5 |
+| `BE-UTIL-01` | `NS-DEMO-BE-01` | Utilities | Energy system | 6 |
+| `ES-EAF-01` | `NS-DEMO-ES-01` | Steelmaking | Electric arc furnace | 4 |
+| `ES-WRM-01` | `NS-DEMO-ES-01` | Rolling | Wire rod mill | 5 |
+| `ES-UTIL-01` | `NS-DEMO-ES-01` | Utilities | Energy system | 5 |
 
-The 18 core sensors on `LUX-BF-01` mirror the thermal-process signals defined in `simulator/config.py` (hearth-shell thermocouples by sector, cooling-water inlet/outlet temperatures and flow, local heat flux, hot-blast temperature and pressure, top pressure, PCI rate, hot-metal temperature, production rate). Extended sensors on `LUX-BOF-01`, `LUX-CC-01`, and `LUX-UTIL-01` add steelmaking, casting, and utility-energy signals specific to those asset classes.
+Site totals: Luxembourg 6 devices / 34 sensors, Germany 4 / 22, Belgium 3 / 16, Spain 3 / 14.
+
+The estate is deliberately heterogeneous by route: Luxembourg runs the integrated blast-furnace/BOF route, Germany and Spain run electric-arc-furnace routes, and Belgium is a downstream finishing site with no melting at all. This means the Device Operations screen shows a materially different asset mix per site rather than a renamed copy, and it lets the demo contrast the CO2 profile of the BF/BOF route against the EAF route.
+
+Sensor signals on `LUX-BF-01` mirror the thermal-process signals defined in `simulator/config.py` (hearth-shell thermocouples by sector, cooling-water inlet/outlet temperatures and flow, local heat flux, hot-blast temperature and pressure, top pressure, PCI rate, hot-metal temperature, production rate). The remaining devices add steelmaking, casting, rolling, coating, and utility-energy signals specific to those asset classes.
+
+### 13.1.1 Site filtering contract
+
+`GET /v1/devices` and `GET /v1/devices/sensors` both accept an optional `site` query parameter (default `all`). Two independent filters apply, in this order:
+
+1. **Plant scope** — rows whose `site` is outside the caller's `plant_scope` are removed. This is an authorisation boundary and is never bypassable from the client.
+2. **Site selection** — when `site != "all"`, the remaining rows are narrowed to that single site. This is a presentation filter reflecting the portal's site selector.
+
+Sensors carry no `site` field of their own; they are filtered by resolving their parent `deviceId` through the device catalog. Regression coverage lives in `services/bff-api/tests/test_device_routes.py`.
 
 ### 13.2 Determinism guarantees
 
@@ -596,7 +617,7 @@ Reads auto-advance the deterministic clock by the elapsed wall-clock delta (up t
 | `edge-outage-recovery` | 240729 | Sensors go stale then recover, exercising buffering and reconnect |
 | `demo-full` | 240725 | Full-estate composite; the BFF demo-mode adapter starts this with seed `240726` (lining-degradation seed) to pre-warm hearth thermal signals |
 
-> **Note:** The device-simulator `README.md` states "23 signals" and "5 demo scenarios." These figures are incorrect; the source code (`catalog.py`) defines **34 sensors** and `SCENARIO_SEEDS` contains **6 entries**. The README predates the extension of the catalog and has not been updated; `catalog.py` is the authoritative source.
+> **Note:** The device-simulator `README.md` states "23 signals" and "5 demo scenarios." These figures are incorrect; the source code (`catalog.py`) is the authoritative source and defines **16 devices / 86 sensors** across four sites, with `SCENARIO_SEEDS` containing **6 entries**. The README predates both the extension of the catalog and the wave-6 multi-site expansion.
 
 ### 13.4 Incident catalog
 

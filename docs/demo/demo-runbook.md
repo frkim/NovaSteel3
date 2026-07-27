@@ -103,6 +103,23 @@ Use this as a 30–45 second insert during DM-2, or during Device Operations if 
 
 Do not imply the dock changes authorization or model outputs. It is a workspace affordance: panels stay mounted, layouts persist in browser `localStorage`, and reset is the recovery path.
 
+### 4.2 Help Assistant beat (~40 seconds)
+
+Use this as an insert during DM-2 (after the Energy Manager KPIs are visible), or during DM-1 if you prefer to demonstrate it on the Plant Manager fleet overview. It borrows ~40 seconds from the recap/buffer (reducing it from 1:00 to ~0:20). If the dock beat is already in DM-2 and the slot feels crowded, move this beat to DM-3 (after the Reliability Engineer screen loads) instead.
+
+1. Click the **?** toggle (question-mark icon) in the dashboard header. The cursor becomes a help cursor and a blue "Explain mode" banner appears at the top.
+2. Click any KPI tile — for example **Energy intensity** or **Lining risk**. A floating popup appears next to it with a plain-language explanation: what the number is, why it matters in a steel plant, and how to use it on this screen.
+3. Click a second element — a chart or a table row — to show that the popup replaces itself without leaving explain mode.
+4. Press **Esc** or click the close button on the banner to exit.
+
+**Say:** "You are not metallurgists, and neither is a new plant manager on day one. This mode teaches both the application and the steel process behind it. It covers 87 topics in five languages, and we achieved it with almost no screen edits — the topics resolve from the DOM at click time because the shared primitives already declare themselves."
+
+**Point being made:** The platform is self-teaching for non-expert users, which matters for a jury that does not know the steel domain. The engineering story is that topic resolution is DOM-based (`resolveHelpTarget.ts`), not a per-screen registry: three shared primitives (`KpiCard`, `ChartContainer`, `DataTable`) plus structural detection of dock tabs and table rows mean any new screen built from those components is explainable for free.
+
+**Fallback:** If the popup does not appear on the first click, click a KPI tile (they always resolve). If explain mode fails to activate at all, say: "The help system resolves topics from the DOM — here is the popup from a rehearsal screenshot," show the cached help-popup screenshot from the fallback pack, and continue.
+
+**Optional aside (10 seconds, only if timing allows and a juror asks "how does steel get made?"):** While on the AxelorMetal corporate website tab (Steel Knowledge page), point at the process diagrams and say: "These three diagrams map the entire steelmaking route. Click one to magnify it to 400 %." Do not open the lightbox unless a juror explicitly asks — it is slower to close than it is worth in a timed demo.
+
 ## 5. Expected cue sheet
 
 | Cue | Expected value/state |
@@ -146,6 +163,7 @@ Store the pack in an access-controlled, offline-capable demo folder and verify c
 - quality genealogy, drift, and what-if results;
 - licensed synthetic interview WAV, transcript, extracted facts, and procedure draft;
 - Fabric architecture/lineage image and contract-health report;
+- help-popup screenshot (explain mode active on a KPI tile, showing all four topic sections);
 - 90-second end-to-end recording;
 - scenario manifest, expected values, and reset checklist.
 

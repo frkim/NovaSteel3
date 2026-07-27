@@ -2,7 +2,7 @@
 
 > **Source of truth:** `docs\usecase\usecase.md`
 > **Companion document:** `docs\specs\solution-requirements.md` (functional/non-functional requirements, KPI catalog, traceability matrix)
-> **Status:** Aligned v1.0
+> **Status:** Aligned v1.1
 > **Owner:** Business Specification workstream (`business-spec`)
 > **Note:** Detailed dashboard visual design belongs to `ux-spec`; RBAC control implementation belongs to `security-spec`. This document defines role goals, pains, decisions, permissions (business-level), key screens (by name/purpose, not pixel design), and journeys — including the binding 15-minute demo storyboard used in the 1-hour defense.
 
@@ -10,7 +10,7 @@
 
 ## 1. How to Read This Document
 
-Eight personas represent the full decision-making surface of the NovaSteel platform. For each persona:
+Ten personas represent the full decision-making surface of the NovaSteel platform. For each persona:
 
 - **Profile** — role, scope, a representative name/quote for the defense narrative.
 - **Goals** — what "good" looks like for this role.
@@ -26,7 +26,45 @@ A cross-persona RACI-style summary and the full 15-minute demo storyboard for th
 
 ---
 
-## 2. Persona: Plant Manager
+## 1a. The AxelorMetal Cast
+
+Every persona has a name. This is not decoration: an unnamed "Plant Manager" is
+an abstraction a jury forgets, whereas *Marc Weber, who needs to know by 06:40
+whether today is a good day*, is a person whose problem the platform either
+solves or does not. Naming also makes the demo narration concrete — the
+presenter says what Elena does next, not what "the operator persona" does next.
+
+These names are **binding across the whole solution**. They appear in the
+portal's section headers (`apps\analytics-mfe\src\personaRoutes.ts`), in the
+Copilot Chat suggested questions, and in the defense deck. Changing a name here
+means changing it in the code.
+
+| Name | Role | Scope | Persona ID |
+|---|---|---|---|
+| **Marc Weber** | Plant Manager | Site | `plant-manager` |
+| **Elena Duarte** | Furnace Operator | Shift / asset | `furnace-operator` |
+| **Sofia Lindqvist** | Energy Manager | Site / portfolio | `energy-manager` |
+| **Tomás Rossi** | Maintenance & Reliability Engineer | Asset / site | `maintenance-engineer` |
+| **Jens Bakker** | Quality Engineer | Product / site | `quality-engineer` |
+| **Amina Haddad** | Sustainability Officer | Portfolio | `sustainability-officer` |
+| **Pieter Claes** | Knowledge Engineer / Admin | Platform-wide | `knowledge-engineer` |
+| **Isabelle Moreau** | Executive (COO) | Enterprise | `executive` |
+| **Rui Almeida** | OT Systems Engineer | Plant floor / edge | `ot-systems-engineer` |
+| **Nils Andersen** | Platform Ops | Cloud platform | `platform-ops` |
+
+The first eight are the decision-making personas documented in full in §2–§9.
+**Rui Almeida** and **Nils Andersen** are supporting technical roles: they do not
+make production trade-offs, but they own the two surfaces without which nothing
+else works — the sensor fleet and the cloud platform. They are profiled briefly
+in §9a.
+
+Nationalities are spread across the sites AxelorMetal operates (Luxembourg,
+Belgium, Germany, Sweden) to keep the fiction internally consistent with a
+European multi-site group.
+
+---
+
+## 2. Persona: Marc Weber — Plant Manager
 
 **Profile**: Site director accountable for safety, production output, cost, and quality at one integrated site (e.g., the Luxembourg home site). Represents operations leadership in the defense narrative. *"I need one screen that tells me if today is a good day — and why, if it isn't."*
 
@@ -71,7 +109,7 @@ A cross-persona RACI-style summary and the full 15-minute demo storyboard for th
 
 ---
 
-## 3. Persona: Furnace Operator
+## 3. Persona: Elena Duarte — Furnace Operator
 
 **Profile**: Frontline/shift operator responsible for real-time, safe operation of the blast furnace. Represents the "veteran expertise at risk" narrative from the use case. *"I've run this furnace for 22 years — I know when something feels wrong before any sensor tells me."*
 
@@ -117,7 +155,7 @@ A cross-persona RACI-style summary and the full 15-minute demo storyboard for th
 
 ---
 
-## 4. Persona: Energy Manager
+## 4. Persona: Sofia Lindqvist — Energy Manager
 
 **Profile**: Site or portfolio-level manager accountable for energy cost, consumption, and procurement strategy across the 4-country footprint. *"Energy is 35% of our cost base — I need to act on price signals in hours, not renegotiate contracts once a year."*
 
@@ -162,7 +200,7 @@ A cross-persona RACI-style summary and the full 15-minute demo storyboard for th
 
 ---
 
-## 5. Persona: Maintenance/Reliability Engineer
+## 5. Persona: Tomás Rossi — Maintenance & Reliability Engineer
 
 **Profile**: Engineer accountable for asset health, reliability strategy, and maintenance planning for furnaces and critical rotating/refractory equipment. *"An €8M failure isn't a maintenance problem, it's a business continuity problem — I need weeks of warning, not hours."*
 
@@ -207,7 +245,7 @@ A cross-persona RACI-style summary and the full 15-minute demo storyboard for th
 
 ---
 
-## 6. Persona: Quality Engineer
+## 6. Persona: Jens Bakker — Quality Engineer
 
 **Profile**: Metallurgist/quality engineer responsible for ensuring steel grades — especially automotive-grade — meet specification, with full traceability for OEM customers. *"Our automotive customers don't just want good steel, they want proof it was good, heat by heat."*
 
@@ -252,7 +290,7 @@ A cross-persona RACI-style summary and the full 15-minute demo storyboard for th
 
 ---
 
-## 7. Persona: Sustainability Officer
+## 7. Persona: Amina Haddad — Sustainability Officer
 
 **Profile**: ESG/environmental manager accountable for CO₂ performance, EU ETS exposure management, and regulatory/ESG reporting across the 4-country portfolio. *"Our carbon cost is becoming as material as our energy cost — and right now I find out about it a month late."*
 
@@ -294,7 +332,7 @@ A cross-persona RACI-style summary and the full 15-minute demo storyboard for th
 
 ---
 
-## 8. Persona: Knowledge Engineer/Admin
+## 8. Persona: Pieter Claes — Knowledge Engineer / Admin
 
 **Profile**: Knowledge-management owner responsible for the GenAI knowledge-capture program, procedure-library governance, scoped role-assignment requests, and model/audit oversight. *"If we don't capture what our retiring experts know in a structured way, we lose it forever — and if we capture it carelessly, we risk publishing something unsafe."*
 
@@ -341,7 +379,7 @@ A cross-persona RACI-style summary and the full 15-minute demo storyboard for th
 
 ---
 
-## 9. Persona: Executive (CEO / COO / CFO)
+## 9. Persona: Isabelle Moreau — Executive (COO)
 
 **Profile**: Senior leadership accountable for enterprise strategy, capital allocation, and board/investor reporting across the full 4-country portfolio. *"I need to know this platform is making us money and reducing our risk — in one page, with numbers I can defend to the board."*
 
@@ -383,6 +421,63 @@ A cross-persona RACI-style summary and the full 15-minute demo storyboard for th
 
 ---
 
+## 9a. Supporting Technical Personas
+
+These two roles make no production trade-offs, so they do not carry the full
+profile structure of §2–§9. They are documented because they own the two
+surfaces the decision-making personas silently depend on, and because each has a
+dedicated screen in the portal.
+
+### 9a.1 Rui Almeida — OT Systems Engineer
+
+**Profile**: Operational-technology engineer responsible for the sensor fleet on the plant floor — thermocouples, flow meters, vibration probes, gas analysers — and for the edge gateways that carry their readings into the platform. Based at the Luxembourg site, supports all four. *"Every number on your dashboard is a sensor I have to keep alive."*
+
+**Goals**
+- Keep every sensor reporting, calibrated and within its expected range.
+- Detect a failing or drifting sensor before it corrupts a downstream decision.
+- Onboard new tags without a change request cycle measured in weeks.
+
+**Pains**
+- A silently dead sensor looks exactly like a stable process until someone acts on the stale value.
+- No single view of fleet health across sites; each plant has its own historian.
+- Simulating a fault to test a response plan means waiting for a real one.
+
+**Permissions**: Read across all telemetry; operate the device simulator; acknowledge and annotate device faults. **No** authority to approve production, energy or maintenance recommendations.
+
+**Key decisions**
+- Whether a suspect reading is a process excursion or an instrument fault — an important distinction, because the two demand opposite responses.
+- When to take a sensor out of service and how to flag the resulting gap so downstream models do not treat it as signal.
+
+**Key screens**: Device Operations (fleet table, per-sensor charts, simulator and incident controls).
+
+**Why the platform matters to him**: the fleet view makes data quality a first-class, visible property rather than an assumption, and the incident simulator lets a response be rehearsed rather than improvised.
+
+### 9a.2 Nils Andersen — Platform Ops
+
+**Profile**: Cloud platform engineer accountable for the NovaSteel platform itself — the Container Apps, the Fabric capacity, cost, availability and the audit trail. Based in Sweden, near the Sweden Central region the platform runs in. *"The platform has to be cheap when nobody is looking and instant when somebody is."*
+
+**Goals**
+- Keep the platform inside its cost envelope, notably by keeping Fabric capacity paused outside demonstration and working hours.
+- Keep data freshness, ingestion lag and service availability inside their thresholds, and be told by an alert rather than by a user.
+- Be able to prove, after the fact, who approved what and on what evidence.
+
+**Pains**
+- Idle cloud capacity is pure cost, but a paused capacity that nobody can resume blocks the people who need it.
+- Alerts that exist only as prose in a runbook are not alerts.
+- Reconstructing an incident from unstructured logs.
+
+**Permissions**: Operate platform infrastructure, including Fabric capacity pause/resume and SKU changes; read the audit log; **no** access to approve domain recommendations.
+
+**Key decisions**
+- When to resume or pause Fabric capacity, and at which SKU (F2/F4/F8) a given workload should run.
+- Whether a degraded signal is a platform problem or a plant problem — the first question to answer in any incident.
+
+**Key screens**: Platform Ops (capacity control, service health, cost posture, audit log).
+
+**Why the platform matters to him**: capacity control is exposed in the product rather than requiring portal access, and the hash-chained audit log makes "who approved this" answerable rather than reconstructable.
+
+---
+
 ## 10. The 15-Minute Demo Storyboard (1-Hour Defense)
 
 This storyboard is the binding link between personas and the demo, matching `docs\specs\solution-requirements.md` §15/§19. It is designed to be reliably rehearsed, run on synthetic data only, and to fit the 1-hour defense allocation: 30-minute slides, 15-minute demo, and 15-minute FAQ.
@@ -409,14 +504,16 @@ The demo above is nested inside the 60-minute agenda defined in `solution-requir
 
 | Persona | Scope | Primary decision | Primary screen | Demo moment |
 |---|---|---|---|---|
-| Plant Manager | Site | Approve cross-domain trade-offs | Site Command Center Cockpit | DM-1, DM-3, DM-6 |
-| Furnace Operator | Shift/asset | React to furnace alerts within limits | Furnace Health Monitor / Procedure Library | DM-3, DM-5 |
-| Energy Manager | Site/portfolio | Accept/reject dispatch recommendations | Energy Dispatch Optimization Cockpit | DM-2 |
-| Maintenance/Reliability Engineer | Asset/site | Schedule reline based on RUL | Furnace Lining RUL Dashboard | DM-3 |
-| Quality Engineer | Product/site | Adjust process on quality risk | In-line Quality Prediction Dashboard | DM-4 |
-| Sustainability Officer | Portfolio | Escalate emissions trajectory risk | Sustainability & ETS Cockpit | DM-6 |
-| Knowledge Engineer/Admin | Platform-wide | Approve/publish procedures; govern platform | GenAI Knowledge Capture Studio / Admin Console | DM-5, DM-6 |
-| Executive | Enterprise | Approve phase scale-up investment | Executive Value & ROI Cockpit | DM-1, DM-6 |
+| **Marc Weber** — Plant Manager | Site | Approve cross-domain trade-offs | Site Command Center Cockpit | DM-1, DM-3, DM-6 |
+| **Elena Duarte** — Furnace Operator | Shift/asset | React to furnace alerts within limits | Furnace Health Monitor / Procedure Library | DM-3, DM-5 |
+| **Sofia Lindqvist** — Energy Manager | Site/portfolio | Accept/reject dispatch recommendations | Energy Dispatch Optimization Cockpit | DM-2 |
+| **Tomás Rossi** — Maintenance & Reliability Engineer | Asset/site | Schedule reline based on RUL | Furnace Lining RUL Dashboard | DM-3 |
+| **Jens Bakker** — Quality Engineer | Product/site | Adjust process on quality risk | In-line Quality Prediction Dashboard | DM-4 |
+| **Amina Haddad** — Sustainability Officer | Portfolio | Escalate emissions trajectory risk | Sustainability & ETS Cockpit | DM-6 |
+| **Pieter Claes** — Knowledge Engineer/Admin | Platform-wide | Approve/publish procedures; govern platform | GenAI Knowledge Capture Studio / Admin Console | DM-5, DM-6 |
+| **Isabelle Moreau** — Executive | Enterprise | Approve phase scale-up investment | Executive Value & ROI Cockpit | DM-1, DM-6 |
+| **Rui Almeida** — OT Systems Engineer | Plant floor/edge | Distinguish instrument fault from process excursion | Device Operations | — |
+| **Nils Andersen** — Platform Ops | Cloud platform | Resume/pause Fabric capacity and set SKU | Platform Ops | — |
 
 ---
 
@@ -425,3 +522,4 @@ The demo above is nested inside the 60-minute agenda defined in `solution-requir
 | Version | Date | Change |
 |---|---|---|
 | v1.0 | 2026-07-25 | Initial persona and journey set derived from `docs\usecase\usecase.md`, aligned to `docs\specs\solution-requirements.md`. |
+| v1.1 | 2026-07-26 | Named every persona (§1a, "The AxelorMetal Cast") and carried the names into the section headings and the cross-persona table. Added §9a for the two supporting technical personas, Rui Almeida (OT Systems Engineer) and Nils Andersen (Platform Ops), each of which now has a dedicated screen in the portal. Names are binding and mirrored in `apps\analytics-mfe\src\personaRoutes.ts`. |

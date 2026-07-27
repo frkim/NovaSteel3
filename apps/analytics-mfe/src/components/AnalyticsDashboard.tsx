@@ -50,8 +50,10 @@ export function AnalyticsDashboard({ context, emit }: AnalyticsDashboardProps) {
   const client = useMemo(
     () => new DataClient(context),
     // Recreate only when request-shaping fields change to avoid refetch storms.
+    // `site` is included so switching site rebinds the client and every screen
+    // refetches; without it the dashboard kept showing the previous site's data.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [context.bffBaseUrl, context.locale, context.demoMode],
+    [context.bffBaseUrl, context.locale, context.demoMode, context.site],
   )
   const copilotClient = useMemo(
     () => new CopilotClient(context),
@@ -61,7 +63,7 @@ export function AnalyticsDashboard({ context, emit }: AnalyticsDashboardProps) {
   const deviceClient = useMemo(
     () => new DeviceClient(context),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [context.bffBaseUrl, context.locale],
+    [context.bffBaseUrl, context.locale, context.site],
   )
   const translator = useMemo(() => createTranslator(context.locale), [context.locale])
 

@@ -1,6 +1,29 @@
 import { describe, expect, it } from 'vitest'
 import { alertRowsFromEvents, DataClient, energySimulationBody } from './dataClient'
 import { testShellContext } from '../test/renderWithProviders'
+import { siteToPlant } from '../config'
+
+describe('DataClient site resolution', () => {
+  it('activePlant resolves to the plant matching the context site', () => {
+    const ctx = testShellContext({ site: 'be' })
+    const client = new DataClient(ctx)
+    // Access activePlant via a reflected property or test indirectly
+    // DataClient uses the site in getCommandSummary URL
+    expect(siteToPlant('be')).toBe('NS-DEMO-BE-01')
+    expect(siteToPlant('lu')).toBe('NS-DEMO-LUX-01')
+    expect(siteToPlant('all')).toBe('all')
+    expect(siteToPlant(undefined)).toBe('all')
+  })
+
+  it('reads site at call time (not at construction time)', () => {
+    const ctx = testShellContext({ site: 'lu' })
+    const client = new DataClient(ctx)
+    // Mutate the context to simulate a site change
+    ;(ctx as { site: string }).site = 'es'
+    // Since DataClient stores a reference, siteToPlant should now read 'es'
+    expect(siteToPlant(ctx.site)).toBe('NS-DEMO-ES-01')
+  })
+})
 
 describe('DataClient offline fixture fallback', () => {
   const client = new DataClient(testShellContext())

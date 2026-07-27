@@ -6,7 +6,7 @@ import type { SingleEnvelope } from './envelope'
 /** Reasoning tiers exposed in the composer; `auto` is resolved server-side. */
 export type ReasoningTier = 'auto' | 'default' | 'high'
 
-export type CopilotSourceKind = 'internal' | 'online' | 'glossary' | 'screen'
+export type CopilotSourceKind = 'internal' | 'online' | 'glossary' | 'screen' | 'knowledge'
 
 export interface CopilotSource {
   kind: CopilotSourceKind
@@ -14,6 +14,8 @@ export interface CopilotSource {
   title: string
   snippet: string
   url?: string
+  retrievedAt?: string
+  offlineCorpus?: boolean
 }
 
 export interface CopilotMessage {

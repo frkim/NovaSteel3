@@ -445,6 +445,103 @@ The dashboard header exposes **Reset layout** only when a dock is mounted. Activ
 
 Covered in §11 (capacity), §18 (locale), §19 (theme), §20 (demo mode).
 
+### 9.9 Help Assistant — explain mode
+
+A **"What's this?"** toggle button in the dashboard header (with `data-help-surface` so the help system does not capture its own click) enters *explain mode*. While active, the cursor becomes a help cursor across the entire viewport, a centred banner confirms the mode, and clicking any visual element selects it with a primary-coloured frame and opens a floating popup beside the cursor explaining that element in plain language. Selecting another element replaces the previous popup. The user exits with the banner close button, the popup Escape key, or by pressing Escape anywhere. The audience is explicitly someone who has never seen a steel plant and has never used the portal — the goal is to teach both the application and the steelmaking process.
+
+Implementation: `apps/analytics-mfe/src/components/help/HelpAssistant.tsx`, `resolveHelpTarget.ts`, `helpTypes.ts`.
+
+#### 9.9.1 Topic resolution
+
+`resolveHelpTarget(from, scope)` walks up at most 24 ancestors from the clicked element and collects candidates in three layers. `pickHelpKey(keys, catalog)` then returns the first key that exists in the resolved catalog.
+
+**Precedence (strict, first match wins):**
+
+| Priority | Layer | How it matches | Example |
+| --- | --- | --- | --- |
+| 1 | Structural shape | `<th>` → `generic.tableHeader`; `<tr>` inside `<tbody>` → `generic.tableRow`; `.dv-tab` or `role="tab"` → `generic.dockTab` | A column header resolves to its own topic rather than the enclosing table's `data-help`. |
+| 2 | Declared `[data-help]` | Nearest ancestor with the attribute. If a `scope` is active, tries `"<scope>:<topic>"` first, then bare `topic`. | `data-help="kpi:peak"` on `furnace-health/thermal-explorer` resolves to key `furnace-health/thermal-explorer:kpi:peak`, allowing the same metric id `peak` to mean shell temperature on one screen and grid demand on another. |
+| 3 | DOM-shape fallback | `article` → `generic.kpi`, `figure` → `generic.chart`, `table` → `generic.table`, `[data-dock-panel]` → `generic.panel`, `button` or `role="button"` → `generic.button` | A figure with no `data-help` still resolves to the generic chart explanation. |
+
+**The nearest declared topic wins.** An individual chart's `data-help="chart.pareto"` beats a containing `ChartContainer`'s `<figure>` shape because the walk finds the declared attribute before it reaches the figure element. When a structural match and a declared topic are both found, the structural keys lead and the declared keys are appended as fallbacks — this lets a header row inside a known table borrow the table's explanation when no row-specific topic has been written.
+
+**Architectural payoff.** Only three shared primitives (`KpiCard`, `DataTable`, `ChartContainer`) plus two screen files (`CompanyWebsiteDiagram`, `KnowledgeHub`) carry `data-help` attributes. Every other screen in the application is explainable for free through the structural and DOM-shape fallback layers, because the screens are composed of those primitives.
+
+**Label resolution order.** A page-supplied label always beats the catalog `title`:
+
+1. `data-help-label` attribute on the resolved element.
+2. `aria-label` attribute.
+3. Text content of the first `<figcaption>`, heading (`h1`–`h6`), or `[data-help-label-source]` descendant.
+
+Labels are truncated to 90 characters with an ellipsis.
+
+**`data-help-surface`** marks a subtree as the assistant's own chrome. Elements inside it are exempt from the help cursor and from the capture-phase click interception. This attribute is critical on the header toggle button itself; without it, the capture-phase handler swallows the button's click and explain mode can never be turned off. (This was a real bug found during testing.)
+
+**`data-help-detail`** carries an existing expert-facing tooltip through as a secondary, italicised line in the popup. The expert tooltip (`metric.tooltip`) is deliberately *not* reused as the primary help text: the tooltip is written for someone who already knows the process, while the help popup is written for a newcomer encountering the measurement for the first time.
+
+#### 9.9.2 Content and house style
+
+Each topic in the help catalog implements the `HelpTopic` interface:
+
+| Field | Required | Purpose |
+| --- | --- | --- |
+| `title` | Yes | Short name shown when the element has no accessible name. |
+| `what` | Yes | Plain-language answer to "what am I looking at?" |
+| `steel` | No | Why the measurement or visual matters to a steel plant — teaches the process, not the software. |
+| `useIt` | No | What the reader can do with it on this screen — teaches the software, not the process. |
+
+**House style rules:** assume the reader has never seen a steel plant and has never used this portal; two short sentences per field; no acronym without its expansion; no marketing language.
+
+The catalog currently contains **87 topics** (79 in the base `helpMessages.ts`, 1 in the satellite `helpDiagramMessages.ts`, and 7 in the satellite `helpKnowledgeMessages.ts`).
+
+**Worked example** — `kpi:energy` (English):
+
+```json
+{
+  "title": "Energy intensity",
+  "what": "Electricity and fuel used to make one tonne of steel, in kilowatt-hours per tonne.",
+  "steel": "Making steel means heating iron ore or scrap to around 1,600 degrees Celsius. Energy is therefore both the biggest cost and the biggest source of emissions.",
+  "useIt": "Compare against the target line. A fall here flows straight through to cost and to carbon."
+}
+```
+
+#### 9.9.3 Bilingual mode
+
+A settings toggle (`context.helpBilingual`), off by default, shows English and French together in the same popup. When the portal locale is French, French leads; every other locale leads with English.
+
+**Merging rules:**
+
+- Titles join with ` / ` (e.g. "Energy intensity / Intensité énergétique").
+- Body fields (`what`, `steel`, `useIt`) stack with a blank line (`\n\n`) between the two languages.
+- Optional fields remain optional: if `steel` is absent in English, it stays absent in the merged catalog.
+
+The merged bilingual catalogs (`BILINGUAL_EN_FR`, `BILINGUAL_FR_EN`) are precomputed at module load, not merged per render.
+
+#### 9.9.4 Localisation and parity
+
+Topics exist in all five supported locales (`en`, `fr`, `de`, `nl`, `es`). The test `helpCatalogs.test.ts` enforces:
+
+1. Every locale declares **exactly** the same set of topic keys as English.
+2. Every locale declares the same optional fields (presence/absence) as English.
+3. No topic field is empty or whitespace-only.
+4. Every locale defines all `help.*` chrome strings.
+
+These constraints exist because missing i18n keys fail silently in this codebase — a missing translation renders as its key string with no runtime error.
+
+New topics are added through **satellite catalog files** spread into `HELP_CATALOGS` — `helpDiagramMessages.ts` is the working example. This structure ensures that a whole-file rewrite of one locale catalog cannot silently drop satellite entries, because the satellite is merged separately and the parity test catches any mismatch.
+
+#### 9.9.5 Accessibility and interaction states
+
+| Concern | Implementation |
+| --- | --- |
+| Keyboard exit | `Escape` key fires `onExit()` via a capture-phase `keydown` listener, leaving explain mode entirely. |
+| Popup close without exiting | The popup close button clears the selection but leaves explain mode active. |
+| Click swallowing | During explain mode, all clicks are intercepted in the capture phase (`preventDefault` + `stopPropagation`) so interactive elements explain themselves instead of navigating or submitting. |
+| Popup placement | The popup flips horizontally and vertically to stay inside the viewport, with a 12 px margin and an 18 px cursor gap. |
+| Scroll and resize | The selection frame repositions on `scroll` (capture) and `resize` events. If the selected element is removed from the DOM, the selection clears automatically. |
+| Screen navigation | Changing `scope` (navigating to a different section/tab) clears any active selection so the frame is never drawn over a stale layout. |
+| ARIA | The popup carries `role="dialog"` with `aria-label`. The banner includes an accessible exit button label. |
+
 ---
 
 ## 10. Component Hierarchy
@@ -978,6 +1075,56 @@ WCAG 2.2 AA 4.5:1 floor.
 - Theme sync: pass a Power BI theme JSON derived from design tokens so embedded visuals match dark/light.
 - States: token fetch → `STATE-LOAD` skeleton; failure → `STATE-ERROR` with retry; requires Fabric capacity `Running` (surface capacity prompt if `Stopped`).
 - Requires Fabric capacity; the report tab shows a capacity hint and, for P8, a shortcut to the capacity control (§11).
+
+---
+
+### 14.5 Illustrated process diagrams (`DIAGRAM-PROCESS`)
+
+The AxelorMetal corporate website (§9.8) carries three illustrated diagrams of
+the steelmaking process on the **Steel Knowledge** page. They exist to give a
+visitor — a juror, a new joiner, a business stakeholder — a mental model of the
+plant before they look at any telemetry. Everything the operational screens
+measure happens at one of the numbered stages on these pictures.
+
+| Rendition stem | Placement | Subject |
+|---|---|---|
+| `steel-route-blast-furnace` | Opens the *Making Iron & Steel* section | The integrated route end to end: extraction → blast furnace → basic oxygen furnace → continuous casting → rolling → finished products |
+| `steel-route-electric-arc-furnace` | After *The electric arc furnace route* | The same journey starting from recycled scrap and electricity |
+| `eaf-process-detail` | Immediately after it | A ten-step deep dive into the EAF route |
+
+**Component.** `ProcessDiagram` (`components/screens/CompanyWebsiteDiagram.tsx`).
+
+- Renders a `<figure>` with a `<figcaption>` carrying a bold title and a
+  plain-language caption. The artwork is informative, not decorative, so each
+  image carries full alternative text naming every stage — a screen-reader user
+  gets the same content as a sighted one.
+- **Zoomable lightbox.** The diagrams carry a lot of small labels that are not
+  readable inline, so clicking the figure opens a dialog where the artwork can
+  be magnified from 100 % to 400 % in 50 % steps and panned. The cursor is
+  `zoom-in` on the figure to advertise this. Zoom resets when the lightbox is
+  reopened.
+- **Graceful degradation.** If the asset cannot be served the figure removes
+  itself rather than rendering a broken image — the surrounding editorial text
+  stands on its own.
+- **Help Assistant.** The figure declares `data-help="website.processDiagram"`
+  and a `data-help-label` carrying the diagram title, so explain mode names the
+  specific diagram rather than falling back to `generic.chart`. The lightbox
+  root is marked `data-help-surface` so its own controls stay clickable while
+  explain mode is active (§9.9).
+- **Localisation.** Chrome strings (`website.diagram.enlarge`,
+  `website.diagram.close`) and the help topic exist in all five locales. In line
+  with §9.8, long-form editorial body copy — including the diagram captions —
+  stays English-only.
+
+**Asset pipeline.** Sources are ~8 MB PNGs at 2816 × 1536. Committing them
+would add ~24 MB to the repository permanently, so `.gitignore` excludes
+`docs/images/*.png` and only the optimised renditions are tracked: WebP at
+quality 86, in a 900 px `-sm` variant and an 1800 px full variant per diagram,
+about 1.4 MB for all six. `srcSet`/`sizes` let the browser take the cheaper one
+on small screens, and `loading="lazy"` keeps them off the critical path.
+Quality 86 is the point where the small in-diagram labels stay legible at 400 %
+zoom while each file stays under 400 KB. `docs/images/README.md` records the
+provenance and the exact regeneration command.
 
 ---
 

@@ -5,13 +5,14 @@ import { HELP_DE } from './helpMessages.de'
 import { HELP_NL } from './helpMessages.nl'
 import { HELP_ES } from './helpMessages.es'
 import { HELP_DIAGRAM } from './helpDiagramMessages'
+import { HELP_KNOWLEDGE } from './helpKnowledgeMessages'
 import { languageOf } from './messages'
 
-const EN: HelpCatalog = { ...HELP_EN, ...HELP_DIAGRAM.en }
-const FR: HelpCatalog = { ...HELP_FR, ...HELP_DIAGRAM.fr }
-const DE: HelpCatalog = { ...HELP_DE, ...HELP_DIAGRAM.de }
-const NL: HelpCatalog = { ...HELP_NL, ...HELP_DIAGRAM.nl }
-const ES: HelpCatalog = { ...HELP_ES, ...HELP_DIAGRAM.es }
+const EN: HelpCatalog = { ...HELP_EN, ...HELP_DIAGRAM.en, ...HELP_KNOWLEDGE.en }
+const FR: HelpCatalog = { ...HELP_FR, ...HELP_DIAGRAM.fr, ...HELP_KNOWLEDGE.fr }
+const DE: HelpCatalog = { ...HELP_DE, ...HELP_DIAGRAM.de, ...HELP_KNOWLEDGE.de }
+const NL: HelpCatalog = { ...HELP_NL, ...HELP_DIAGRAM.nl, ...HELP_KNOWLEDGE.nl }
+const ES: HelpCatalog = { ...HELP_ES, ...HELP_DIAGRAM.es, ...HELP_KNOWLEDGE.es }
 
 export const HELP_CATALOGS: Record<string, HelpCatalog> = {
   en: EN,

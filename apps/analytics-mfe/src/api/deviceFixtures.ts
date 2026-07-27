@@ -220,7 +220,7 @@ export const INCIDENT_CATALOG: IncidentCatalogEntry[] = [
     description: 'A slow additive bias builds on the selected sensor while the process stays nominal.',
     severity: 'medium',
     defaultDurationMinutes: 60,
-    targetDeviceIds: ['LUX-BF-01', 'DE-EAF-01', 'BE-CRM-01', 'ES-EAF-01'],
+    targetDeviceIds: [],
     affectedSignalCodes: [],
   },
   {
@@ -229,7 +229,7 @@ export const INCIDENT_CATALOG: IncidentCatalogEntry[] = [
     description: 'The selected sensor stops publishing; quality degrades to bad and the row goes stale.',
     severity: 'medium',
     defaultDurationMinutes: 10,
-    targetDeviceIds: ['LUX-BF-01', 'DE-EAF-01', 'BE-CRM-01', 'ES-EAF-01'],
+    targetDeviceIds: [],
     affectedSignalCodes: [],
   },
   {
@@ -256,7 +256,7 @@ export const INCIDENT_CATALOG: IncidentCatalogEntry[] = [
     description: 'The edge gateway drops, sensors go stale, then a catch-up burst replays the buffer.',
     severity: 'low',
     defaultDurationMinutes: 20,
-    targetDeviceIds: ['LUX-UTIL-01', 'DE-UTIL-01', 'BE-UTIL-01', 'ES-UTIL-01'],
+    targetDeviceIds: [],
     affectedSignalCodes: [],
   },
 ]

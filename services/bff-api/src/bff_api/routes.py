@@ -902,13 +902,17 @@ def register_routes(app: FastAPI) -> None:
     @app.get("/v1/devices", tags=["Devices"])
     async def list_devices(
         request: Request,
+        site: str = Query(default="all"),
         user: UserContext = Depends(current_user),
     ) -> dict[str, Any]:
         require_reader(user)
         rows = request.app.state.services.devices.devices()
+        scoped = [row for row in rows if row["site"] in user.plant_scope]
+        if site != "all":
+            scoped = [row for row in scoped if row["site"] == site]
         return _table_envelope(
             request,
-            [row for row in rows if row["site"] in user.plant_scope],
+            scoped,
             columns={
                 "deviceId": "text",
                 "area": "enum",
@@ -927,10 +931,22 @@ def register_routes(app: FastAPI) -> None:
     async def list_device_sensors(
         request: Request,
         deviceId: str | None = None,
+        site: str = Query(default="all"),
         user: UserContext = Depends(current_user),
     ) -> dict[str, Any]:
         require_reader(user)
         rows = request.app.state.services.devices.sensors(device_id=deviceId)
+        device_site = {
+            row["deviceId"]: row["site"]
+            for row in request.app.state.services.devices.devices()
+        }
+        rows = [
+            row
+            for row in rows
+            if device_site.get(row["deviceId"]) in user.plant_scope
+        ]
+        if site != "all":
+            rows = [row for row in rows if device_site.get(row["deviceId"]) == site]
         return _table_envelope(
             request,
             rows,
@@ -1252,6 +1268,21 @@ def register_routes(app: FastAPI) -> None:
             ),
         )
 
+    @app.get("/v1/copilot/glossary/online", tags=["Copilot"])
+    async def copilot_glossary_online(
+        request: Request,
+        q: str = Query(default="", min_length=1),
+        locale: str | None = None,
+        user: UserContext = Depends(current_user),
+    ) -> dict[str, Any]:
+        require_reader(user)
+        return _envelope(
+            request,
+            request.app.state.services.copilot.glossary_online_fallback(
+                query=q, language=locale or user.locale
+            ),
+        )
+
     @app.get("/v1/copilot/conversations", tags=["Copilot"])
     async def copilot_conversations(
         request: Request, user: UserContext = Depends(current_user)
@@ -1286,6 +1317,15 @@ def register_routes(app: FastAPI) -> None:
         request.app.state.services.copilot.delete_conversation(
             owner=user.user_id, conversation_id=conversation_id
         )
+        return JSONResponse(status_code=204, content=None)
+
+    @app.delete("/v1/copilot/conversations", tags=["Copilot"])
+    async def delete_all_copilot_conversations(
+        request: Request,
+        user: UserContext = Depends(current_user),
+    ) -> JSONResponse:
+        require_reader(user)
+        request.app.state.services.copilot.delete_all_conversations(owner=user.user_id)
         return JSONResponse(status_code=204, content=None)
 
     @app.post("/v1/copilot/chat", tags=["Copilot"])

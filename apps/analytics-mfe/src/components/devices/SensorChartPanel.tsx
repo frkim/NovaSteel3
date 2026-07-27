@@ -393,6 +393,7 @@ export function SensorChartPanel({ sensorId, onClose }: SensorChartPanelProps) {
             title={chartTitle}
             summary={summary}
             height={260}
+            zoomable={false}
             tableColumns={tableColumns}
             tableRows={tableRows}
           >

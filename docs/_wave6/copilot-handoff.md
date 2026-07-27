@@ -64,9 +64,10 @@
 
 ## Test Results
 - Backend: **66 passed** (18 new copilot adapter tests + 48 existing)
-- Frontend copilot + i18n: **39 passed** (9 copilot panel + 30 catalog)
-- TypeScript: clean compilation
-- Build: succeeds (1,996 KB bundle)
+- Frontend copilot: **11 passed** (context toggle, grouped suggestions, optimistic delete, sources, error handling)
+- Frontend i18n catalogs: **4 passed** (key parity across all 5 locales)
+- TypeScript: clean compilation (0 errors)
+- Build: succeeds (2,088 KB bundle)
 
 ## Environment Switch
 Set `COPILOT_SEARCH_ENDPOINT` env var to use a real search backend. When absent, the offline corpus is used automatically and labelled honestly in the UI.

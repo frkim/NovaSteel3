@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ThemeProvider } from '@mui/material/styles'
@@ -124,33 +124,59 @@ function renderPanel(stub: Stub, locale = 'en-LU') {
 }
 
 describe('CopilotPanel', () => {
-  it('shows the enterprise data protection notice and the current screen context', async () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  it('shows the enterprise data protection notice and general mode by default', async () => {
     renderPanel(stubClient())
 
     expect(screen.getByText('Enterprise data protection applies to this chat.')).toBeInTheDocument()
-    expect(screen.getByTestId('copilot-context-chip')).toHaveTextContent('Furnace Health')
-    // Let the suggestion, glossary and history fetches settle inside this test.
-    expect(await screen.findByText('What is the risk?')).toBeInTheDocument()
+    // Context is OFF by default, so the chip shows general mode
+    expect(screen.getByText('General steel expert mode')).toBeInTheDocument()
+    // Glossary fetches settle
     expect(await screen.findByText('Thermal signature')).toBeInTheDocument()
   })
 
-  it('offers persona suggestions and sends the screen context when one is used', async () => {
+  it('offers persona suggestions via grouped autocomplete', async () => {
+    renderPanel(stubClient())
+
+    const suggestionsBox = screen.getByTestId('copilot-suggestions')
+    expect(suggestionsBox).toBeInTheDocument()
+    expect(within(suggestionsBox).getByRole('combobox')).toBeInTheDocument()
+  })
+
+  it('sends context when context toggle is ON', async () => {
     const stub = stubClient()
     const user = userEvent.setup({ delay: null })
     renderPanel(stub)
 
-    const suggestion = await screen.findByText('Explain how thermal signature works')
-    await user.click(suggestion)
+    await user.click(screen.getByTestId('copilot-context-toggle'))
+    expect(screen.getByTestId('copilot-context-chip')).toHaveTextContent('Furnace Health')
+
+    fireEvent.change(screen.getByLabelText('Ask a question about this screen…'), {
+      target: { value: 'What is the risk?' },
+    })
+    await user.click(screen.getByRole('button', { name: 'Send' }))
 
     await waitFor(() => expect(stub.chat).toHaveBeenCalledTimes(1))
     expect(stub.chat.mock.calls[0][0]).toMatchObject({
-      question: 'Explain how thermal signature works',
       context: { section: 'furnace-health', subView: 'lining-forecast', site: 'de' },
-      reasoning: 'auto',
-      onlineSearch: false,
-      temporary: false,
     })
-    expect(await screen.findByTestId('copilot-message-assistant')).toHaveTextContent('Furnace Health')
+  })
+
+  it('does not send context when context toggle is OFF', async () => {
+    const stub = stubClient()
+    const user = userEvent.setup({ delay: null })
+    renderPanel(stub)
+
+    fireEvent.change(screen.getByLabelText('Ask a question about this screen…'), {
+      target: { value: 'General question' },
+    })
+    await user.click(screen.getByRole('button', { name: 'Send' }))
+
+    await waitFor(() => expect(stub.chat).toHaveBeenCalledTimes(1))
+    expect(stub.chat.mock.calls[0][0].context).toBeUndefined()
   })
 
   it('renders answer sources, linking online results to their public page', async () => {
@@ -158,7 +184,10 @@ describe('CopilotPanel', () => {
     const user = userEvent.setup({ delay: null })
     renderPanel(stub)
 
-    await user.click(await screen.findByText('What is the risk?'))
+    fireEvent.change(screen.getByLabelText('Ask a question about this screen…'), {
+      target: { value: 'What is the risk?' },
+    })
+    await user.click(screen.getByRole('button', { name: 'Send' }))
 
     const sources = await screen.findByTestId('copilot-sources')
     expect(within(sources).getByText('EU Emissions Trading System')).toHaveAttribute(
@@ -173,11 +202,8 @@ describe('CopilotPanel', () => {
     const user = userEvent.setup({ delay: null })
     renderPanel(stub)
 
-    await screen.findByText('What is the risk?')
     await user.click(await screen.findByRole('switch', { name: 'Online search' }))
     await user.click(screen.getByRole('button', { name: 'High reasoning' }))
-    // `fireEvent.change` keeps the test well inside the default timeout; the
-    // typing path itself is covered by the error test below.
     fireEvent.change(screen.getByLabelText('Ask a question about this screen…'), {
       target: { value: 'What changed?' },
     })
@@ -192,13 +218,14 @@ describe('CopilotPanel', () => {
     const user = userEvent.setup({ delay: null })
     renderPanel(stub)
 
-    await screen.findByText('What is the risk?')
     await user.click(screen.getByRole('button', { name: 'Temporary chat' }))
-    await user.click(await screen.findByText('What is the risk?'))
+    fireEvent.change(screen.getByLabelText('Ask a question about this screen…'), {
+      target: { value: 'Temp question' },
+    })
+    await user.click(screen.getByRole('button', { name: 'Send' }))
 
     await waitFor(() => expect(stub.chat).toHaveBeenCalledTimes(1))
     expect(stub.chat.mock.calls[0][0]).toMatchObject({ temporary: true })
-    // A temporary answer is never persisted, so the saved history is not reloaded.
     expect(stub.client.conversations).toHaveBeenCalledTimes(1)
   })
 
@@ -234,14 +261,12 @@ describe('CopilotPanel', () => {
     const user = userEvent.setup({ delay: null })
     renderPanel(stub)
 
-    await screen.findByText('What is the risk?')
     await user.click(screen.getByRole('combobox', { name: 'Chat language' }))
     await user.click(await screen.findByRole('option', { name: 'FR' }))
 
     expect(
       await screen.findByText('La protection des données d’entreprise s’applique à ce chat.'),
     ).toBeInTheDocument()
-    await waitFor(() => expect(stub.client.suggestions).toHaveBeenCalledWith('furnace-health', 'fr'))
   })
 
   it('surfaces a retry-able error instead of inventing an answer', async () => {
@@ -249,7 +274,6 @@ describe('CopilotPanel', () => {
     const user = userEvent.setup({ delay: null })
     renderPanel(stub)
 
-    await screen.findByText('What is the risk?')
     fireEvent.change(screen.getByLabelText('Ask a question about this screen…'), {
       target: { value: 'What changed?' },
     })

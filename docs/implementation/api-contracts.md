@@ -277,6 +277,8 @@ Every successful response except `DELETE` uses the single-resource envelope (§2
 | `GET /v1/copilot/conversations` | none | `{ "conversations": [{ "conversationId", "title", "language", "createdAt", "updatedAt", "messageCount", "temporary": false }] }`, most-recently updated first | `200`; `401`; `403` |
 | `GET /v1/copilot/conversations/{conversationId}` | path `conversationId` | Conversation summary plus `messages[]`; each message has `messageId`, `role`, `content`, `createdAt`, `sources[]`, and assistant-only `reasoning`, `onlineSearch`, `agent` | `200`; `404 NOT_FOUND` for an unknown or non-owned conversation; `401`; `403` |
 | `DELETE /v1/copilot/conversations/{conversationId}` | path `conversationId` | no body | `204`; `404 NOT_FOUND` for an unknown or non-owned conversation; `401`; `403` |
+| `DELETE /v1/copilot/conversations` | none | no body; deletes every conversation owned by the caller | `204`; `401`; `403` |
+| `GET /v1/copilot/glossary/online?q=&locale=` | `q` required, minimum length 1 | `{ "query", "language", "entries": [...] }` from the offline web corpus; used only when the local glossary returns no match | `200`; `400 VALIDATION_ERROR` for an empty `q`; `401`; `403` |
 | `POST /v1/copilot/chat` | body below | Grounded answer turn, conversation metadata, `resolvedReasoning`, `resolvedConcepts`, `onlineSearchUsed`, and `persisted` | `200`; `400 VALIDATION_ERROR`; `401`; `403` |
 
 `POST /v1/copilot/chat` request body:
@@ -412,6 +414,8 @@ query semantics in §5; they are advisory/read-only and plant-scoped.
 | `/v1/copilot/conversations` | GET | reader role | no | no |
 | `/v1/copilot/conversations/{conversationId}` | GET | reader role + owner | no | no |
 | `/v1/copilot/conversations/{conversationId}` | DELETE | reader role + owner | yes (history delete) | no |
+| `/v1/copilot/conversations` | DELETE | reader role + owner | yes (history delete) | no |
+| `/v1/copilot/glossary/online` | GET | reader role | no | no |
 | `/v1/copilot/chat` | POST | reader role | yes (history unless temporary) | no |
 | `/v1/audit/decisions` | GET | `Compliance.Auditor`/owner | no | no |
 | `/v1/platform/capacity` | GET | any authenticated | no | no |
@@ -464,11 +468,11 @@ Response: list envelope of device objects.
 }
 ```
 
-`status` is one of `healthy | degraded | fault | offline`. `site` query param is optional and is always subject to the caller's `plant_scope`.
+`status` is one of `healthy | degraded | fault | offline`. The `site` query parameter is optional and defaults to `all`. Two filters apply in order: rows outside the caller's `plant_scope` are removed first (an authorisation boundary), then, when `site != "all"`, the remainder is narrowed to that single site (a presentation filter). The fleet spans 16 devices across the four demo sites.
 
 **`GET /v1/devices/{deviceId}`** — reader role. Returns the same shape as a single list item plus an array of current sensor snapshots. Returns `403 FORBIDDEN_SCOPE` if the device's site is outside the caller's plant scope.
 
-**`GET /v1/devices/sensors?deviceId=&status=`** — reader role. Returns a list envelope of sensor snapshot objects.
+**`GET /v1/devices/sensors?deviceId=&site=&status=`** — reader role. Returns a list envelope of sensor snapshot objects. Sensors carry no `site` field of their own, so both the plant-scope filter and the `site` selection resolve each row's parent `deviceId` through the device catalog. The full estate is 86 sensors.
 
 ```json
 {

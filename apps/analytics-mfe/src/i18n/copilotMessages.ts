@@ -54,6 +54,18 @@ const EN: Catalog = {
   'copilot.answeredWith': 'Answered with {tier}',
   'copilot.sources.glossary': 'Glossary',
   'copilot.sources.screen': 'Screen context',
+  'copilot.context.toggle': 'Screen context',
+  'copilot.context.toggle.hint': 'When on, the assistant knows which screen you are viewing and answers about what is on it.',
+  'copilot.context.off': 'General steel expert mode',
+  'copilot.suggestions.grouped': 'Browse suggested questions by persona…',
+  'copilot.sources.offlineCorpus': 'offline demo corpus',
+  'copilot.conversations.deleteAll': 'Delete all conversations',
+  'copilot.conversations.deleteAll.confirm': 'Delete all saved conversations? This cannot be undone.',
+  'copilot.conversations.deleteAll.yes': 'Delete all',
+  'copilot.conversations.deleteAll.no': 'Cancel',
+  'copilot.glossary.searchOnline': 'Search online',
+  'copilot.glossary.noLocalMatch': 'No local match found.',
+  'copilot.glossary.onlineResults': 'Online results',
 }
 
 const FR: Catalog = {
@@ -110,6 +122,18 @@ const FR: Catalog = {
   'copilot.answeredWith': 'Répondu avec {tier}',
   'copilot.sources.glossary': 'Glossaire',
   'copilot.sources.screen': 'Contexte de l’écran',
+  'copilot.context.toggle': 'Contexte d’écran',
+  'copilot.context.toggle.hint': 'Lorsqu’activé, l’assistant sait quel écran vous consultez et répond en conséquence.',
+  'copilot.context.off': 'Mode expert acier général',
+  'copilot.suggestions.grouped': 'Parcourir les questions suggérées par persona…',
+  'copilot.sources.offlineCorpus': 'corpus de démo hors ligne',
+  'copilot.conversations.deleteAll': 'Supprimer toutes les conversations',
+  'copilot.conversations.deleteAll.confirm': 'Supprimer toutes les conversations enregistrées ? Cette action est irréversible.',
+  'copilot.conversations.deleteAll.yes': 'Tout supprimer',
+  'copilot.conversations.deleteAll.no': 'Annuler',
+  'copilot.glossary.searchOnline': 'Rechercher en ligne',
+  'copilot.glossary.noLocalMatch': 'Aucune correspondance locale trouvée.',
+  'copilot.glossary.onlineResults': 'Résultats en ligne',
 }
 
 const DE: Catalog = {
@@ -166,6 +190,18 @@ const DE: Catalog = {
   'copilot.answeredWith': 'Beantwortet mit {tier}',
   'copilot.sources.glossary': 'Glossar',
   'copilot.sources.screen': 'Bildschirmkontext',
+  'copilot.context.toggle': 'Bildschirmkontext',
+  'copilot.context.toggle.hint': 'Wenn aktiviert, weiß der Assistent, welchen Bildschirm Sie betrachten, und antwortet entsprechend.',
+  'copilot.context.off': 'Allgemeiner Stahl-Expertenmodus',
+  'copilot.suggestions.grouped': 'Vorgeschlagene Fragen nach Persona durchsuchen…',
+  'copilot.sources.offlineCorpus': 'Offline-Demo-Korpus',
+  'copilot.conversations.deleteAll': 'Alle Unterhaltungen löschen',
+  'copilot.conversations.deleteAll.confirm': 'Alle gespeicherten Unterhaltungen löschen? Dies kann nicht rückgängig gemacht werden.',
+  'copilot.conversations.deleteAll.yes': 'Alle löschen',
+  'copilot.conversations.deleteAll.no': 'Abbrechen',
+  'copilot.glossary.searchOnline': 'Online suchen',
+  'copilot.glossary.noLocalMatch': 'Keine lokale Übereinstimmung gefunden.',
+  'copilot.glossary.onlineResults': 'Online-Ergebnisse',
 }
 
 const NL: Catalog = {
@@ -222,6 +258,18 @@ const NL: Catalog = {
   'copilot.answeredWith': 'Beantwoord met {tier}',
   'copilot.sources.glossary': 'Woordenlijst',
   'copilot.sources.screen': 'Schermcontext',
+  'copilot.context.toggle': 'Schermcontext',
+  'copilot.context.toggle.hint': 'Wanneer ingeschakeld, weet de assistent welk scherm u bekijkt en antwoordt daarover.',
+  'copilot.context.off': 'Algemene staalexpertmodus',
+  'copilot.suggestions.grouped': 'Voorgestelde vragen per persona doorzoeken…',
+  'copilot.sources.offlineCorpus': 'offline demo-corpus',
+  'copilot.conversations.deleteAll': 'Alle gesprekken verwijderen',
+  'copilot.conversations.deleteAll.confirm': 'Alle opgeslagen gesprekken verwijderen? Dit kan niet ongedaan worden gemaakt.',
+  'copilot.conversations.deleteAll.yes': 'Alles verwijderen',
+  'copilot.conversations.deleteAll.no': 'Annuleren',
+  'copilot.glossary.searchOnline': 'Online zoeken',
+  'copilot.glossary.noLocalMatch': 'Geen lokale overeenkomst gevonden.',
+  'copilot.glossary.onlineResults': 'Online resultaten',
 }
 
 const ES: Catalog = {
@@ -278,6 +326,18 @@ const ES: Catalog = {
   'copilot.answeredWith': 'Respondido con {tier}',
   'copilot.sources.glossary': 'Glosario',
   'copilot.sources.screen': 'Contexto de pantalla',
+  'copilot.context.toggle': 'Contexto de pantalla',
+  'copilot.context.toggle.hint': 'Cuando está activado, el asistente sabe qué pantalla está viendo y responde sobre lo que hay en ella.',
+  'copilot.context.off': 'Modo experto general en acero',
+  'copilot.suggestions.grouped': 'Explorar preguntas sugeridas por persona…',
+  'copilot.sources.offlineCorpus': 'corpus de demo sin conexión',
+  'copilot.conversations.deleteAll': 'Eliminar todas las conversaciones',
+  'copilot.conversations.deleteAll.confirm': '¿Eliminar todas las conversaciones guardadas? Esto no se puede deshacer.',
+  'copilot.conversations.deleteAll.yes': 'Eliminar todas',
+  'copilot.conversations.deleteAll.no': 'Cancelar',
+  'copilot.glossary.searchOnline': 'Buscar en línea',
+  'copilot.glossary.noLocalMatch': 'No se encontró coincidencia local.',
+  'copilot.glossary.onlineResults': 'Resultados en línea',
 }
 
 /**

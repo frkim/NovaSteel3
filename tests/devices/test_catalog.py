@@ -25,7 +25,7 @@ from device_simulator.catalog import (
 
 
 def test_catalog_has_6_devices():
-    assert len(CATALOG_ASSETS) == 6
+    assert len(CATALOG_ASSETS) == 16
 
 
 def test_catalog_has_exactly_18_core_signals():
@@ -33,30 +33,29 @@ def test_catalog_has_exactly_18_core_signals():
 
 
 def test_catalog_has_34_total_signals():
-    """18 core + 16 extended = 34 total sensors across 6 devices."""
-    assert len(CATALOG_SIGNALS) == 34
+    """18 core + 68 extended = 86 total sensors across 16 devices."""
+    assert len(CATALOG_SIGNALS) == 86
 
 
 def test_catalog_has_16_extended_signals():
-    assert len(_EXTENDED_SIGNALS) == 16
+    assert len(_EXTENDED_SIGNALS) == 68
 
 
 def test_all_expected_asset_ids_present():
     expected = {
-        "LUX-BF-01",
-        "LUX-BOF-01",
-        "LUX-CC-01",
-        "LUX-RHF-01",
-        "LUX-HSM-01",
-        "LUX-UTIL-01",
+        "LUX-BF-01", "LUX-BOF-01", "LUX-CC-01", "LUX-RHF-01", "LUX-HSM-01", "LUX-UTIL-01",
+        "DE-EAF-01", "DE-LF-01", "DE-BCM-01", "DE-UTIL-01",
+        "BE-CRM-01", "BE-GAL-01", "BE-UTIL-01",
+        "ES-EAF-01", "ES-WRM-01", "ES-UTIL-01",
     }
     assert set(CATALOG_ASSETS.keys()) == expected
 
 
 def test_all_asset_ids_well_formed():
     for asset_id in CATALOG_ASSETS:
-        assert asset_id.startswith("LUX-"), f"Bad asset_id: {asset_id}"
-        assert "-" in asset_id
+        parts = asset_id.split("-")
+        assert len(parts) >= 3, f"Bad asset_id: {asset_id}"
+        assert parts[0] in ("LUX", "DE", "BE", "ES"), f"Unknown site prefix: {asset_id}"
 
 
 def test_all_signal_codes_map_to_known_asset():
@@ -130,8 +129,8 @@ def test_extended_signals_have_valid_ranges():
 
 def test_event_driven_signals_exist_in_core():
     """hot_metal_temperature and coiling_temperature must have sample_period_ms == 0."""
-    assert CATALOG_SIGNALS["hot_metal_temperature"].sample_period_ms == 0
-    assert CATALOG_SIGNALS["coiling_temperature"].sample_period_ms == 0
+    assert CATALOG_SIGNALS["LUX-BF-01:hot_metal_temperature"].sample_period_ms == 0
+    assert CATALOG_SIGNALS["LUX-HSM-01:coiling_temperature"].sample_period_ms == 0
 
 
 def test_catalog_mirror_in_sync_with_simulator_config():
@@ -168,7 +167,8 @@ def test_catalog_mirror_in_sync_with_simulator_config():
         assert code in CORE_SIGNAL_CODES, (
             f"simulator.config signal {code!r} missing from core registry"
         )
-        our_sig = CATALOG_SIGNALS[code]
+        catalog_key = f"{sim_sig.asset_id}:{code}"
+        our_sig = CATALOG_SIGNALS[catalog_key]
         assert our_sig.unit == sim_sig.unit, f"{code}: unit mismatch"
         assert our_sig.low == float(sim_sig.low), f"{code}: low mismatch"
         assert our_sig.high == float(sim_sig.high), f"{code}: high mismatch"

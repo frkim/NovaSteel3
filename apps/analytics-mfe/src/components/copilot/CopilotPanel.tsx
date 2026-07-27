@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Alert,
+  Autocomplete,
   Box,
   Chip,
   CircularProgress,
@@ -21,6 +22,7 @@ import {
 import AddCommentIcon from '@mui/icons-material/AddComment'
 import CloseIcon from '@mui/icons-material/Close'
 import GppGoodIcon from '@mui/icons-material/GppGood'
+import LayersIcon from '@mui/icons-material/Layers'
 import MicIcon from '@mui/icons-material/Mic'
 import MicOffIcon from '@mui/icons-material/MicOff'
 import SendIcon from '@mui/icons-material/Send'
@@ -45,6 +47,56 @@ const LANGUAGE_LABELS: Record<string, string> = {
   nl: 'NL',
   es: 'ES',
 }
+
+const CONTEXT_KEY = 'copilot-context-enabled'
+
+interface PersonaQuestion {
+  persona: string
+  question: string
+}
+
+const PERSONA_QUESTIONS: PersonaQuestion[] = [
+  { persona: 'Marc Weber', question: 'Which line is furthest behind target today?' },
+  { persona: 'Marc Weber', question: 'Why did the night shift have lower yield than usual?' },
+  { persona: 'Marc Weber', question: 'What should I prioritise in this morning\u2019s triage?' },
+  { persona: 'Marc Weber', question: 'What is the current overall equipment effectiveness (OEE)?' },
+  { persona: 'Elena Duarte', question: 'What is the current thermal profile of BF-01 hearth?' },
+  { persona: 'Elena Duarte', question: 'Why is the temperature rising at sensor T12-North?' },
+  { persona: 'Elena Duarte', question: 'What tap parameters should I adjust for the next cast?' },
+  { persona: 'Elena Duarte', question: 'How does coke rate affect hearth wear?' },
+  { persona: 'Tomás Rossi', question: 'Which assets have the highest failure probability this week?' },
+  { persona: 'Tomás Rossi', question: 'Why is the predicted RUL dropping faster than the historical trend?' },
+  { persona: 'Tomás Rossi', question: 'What maintenance should I schedule before the next planned stop?' },
+  { persona: 'Tomás Rossi', question: 'What is the difference between P50 and P90 remaining useful life?' },
+  { persona: 'Sofia Lindqvist', question: 'When is the next low-carbon electricity window today?' },
+  { persona: 'Sofia Lindqvist', question: 'Why did energy intensity spike during the last shift?' },
+  { persona: 'Sofia Lindqvist', question: 'What load-shift opportunities can save the most this week?' },
+  { persona: 'Sofia Lindqvist', question: 'What is the Scope 2 emissions impact of shifting EAF heats to off-peak?' },
+  { persona: 'Jens Bakker', question: 'Which coils failed the surface quality check today?' },
+  { persona: 'Jens Bakker', question: 'Why is the defect rate trending up on Line 3?' },
+  { persona: 'Jens Bakker', question: 'What process parameters correlate with centreline segregation?' },
+  { persona: 'Jens Bakker', question: 'What is statistical process control telling us about thickness variation?' },
+  { persona: 'Amina Haddad', question: 'Are we on track to meet this quarter\u2019s ETS compliance target?' },
+  { persona: 'Amina Haddad', question: 'What would a 10% production increase mean for our CBAM exposure?' },
+  { persona: 'Amina Haddad', question: 'What is our current carbon intensity per tonne of steel?' },
+  { persona: 'Amina Haddad', question: 'How does our emissions performance compare to the benchmark?' },
+  { persona: 'Pieter Claes', question: 'Which glossary terms are most frequently looked up?' },
+  { persona: 'Pieter Claes', question: 'How does the Copilot decide which sources to cite?' },
+  { persona: 'Pieter Claes', question: 'What is the knowledge grounding architecture of this platform?' },
+  { persona: 'Pieter Claes', question: 'What are the guardrails against prompt injection?' },
+  { persona: 'Isabelle Moreau', question: 'Give me a one-paragraph executive summary of plant performance today.' },
+  { persona: 'Isabelle Moreau', question: 'What are the top three risks across all sites this week?' },
+  { persona: 'Isabelle Moreau', question: 'How does this month\u2019s energy cost compare to budget?' },
+  { persona: 'Isabelle Moreau', question: 'What is the business case for the hydrogen-DRI pilot?' },
+  { persona: 'Rui Almeida', question: 'Which OT data feeds are currently delayed or missing?' },
+  { persona: 'Rui Almeida', question: 'What is the polling latency for the furnace sensor network?' },
+  { persona: 'Rui Almeida', question: 'How do I configure a new PLC tag for ingestion?' },
+  { persona: 'Rui Almeida', question: 'What communication protocol does the thermal sensor array use?' },
+  { persona: 'Nils Andersen', question: 'What is the current API response time for the BFF layer?' },
+  { persona: 'Nils Andersen', question: 'Are there any unhealthy pods in the analytics cluster?' },
+  { persona: 'Nils Andersen', question: 'What infrastructure changes were deployed in the last 24 hours?' },
+  { persona: 'Nils Andersen', question: 'How do I scale up the ingestion pipeline for a new site?' },
+]
 
 export interface CopilotPanelProps {
   client: CopilotClient
@@ -115,6 +167,8 @@ function SourceList({ sources, t }: { sources: CopilotSource[]; t: (key: string)
         return t('copilot.sources.glossary')
       case 'screen':
         return t('copilot.sources.screen')
+      case 'knowledge':
+        return t('copilot.sources.internal')
       default:
         return t('copilot.sources.internal')
     }
@@ -125,22 +179,38 @@ function SourceList({ sources, t }: { sources: CopilotSource[]; t: (key: string)
         {t('copilot.sources')}
       </Typography>
       <Stack spacing={0.25} sx={{ mt: 0.25 }}>
-        {sources.map((source) => (
-          <Typography
+        {sources.map((source, index) => (
+          <Stack
             key={`${source.kind}-${source.sourceId}`}
+            direction="row"
+            spacing={0.5}
+            sx={{ alignItems: 'center' }}
             data-testid="copilot-source"
-            variant="caption"
-            color="text.secondary"
           >
-            {label(source.kind)} ·{' '}
-            {source.url ? (
-              <Link href={source.url} target="_blank" rel="noopener noreferrer">
-                {source.title}
-              </Link>
-            ) : (
-              source.title
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, minWidth: 16 }}>
+              [{index + 1}]
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {label(source.kind)} ·{' '}
+              {source.url ? (
+                <Link href={source.url} target="_blank" rel="noopener noreferrer">
+                  {source.title}
+                </Link>
+              ) : (
+                source.title
+              )}
+              {source.retrievedAt && (
+                <> · {source.retrievedAt}</>
+              )}
+            </Typography>
+            {source.offlineCorpus && (
+              <Chip
+                size="small"
+                label={t('copilot.sources.offlineCorpus')}
+                sx={{ height: 16, fontSize: '0.6rem' }}
+              />
             )}
-          </Typography>
+          </Stack>
         ))}
       </Stack>
     </Box>
@@ -163,18 +233,35 @@ export function CopilotPanel({
   const [messages, setMessages] = useState<Bubble[]>([])
   const [conversationId, setConversationId] = useState<string | null>(null)
   const [conversations, setConversations] = useState<CopilotConversationSummary[]>([])
-  const [suggestions, setSuggestions] = useState<string[]>([])
   const [draft, setDraft] = useState('')
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [onlineSearch, setOnlineSearch] = useState(false)
   const [temporary, setTemporary] = useState(false)
   const [reasoning, setReasoning] = useState<ReasoningTier>('auto')
+  const [contextEnabled, setContextEnabled] = useState(() => {
+    try { return localStorage.getItem(CONTEXT_KEY) === 'true' } catch { return false }
+  })
   const transcriptRef = useRef<HTMLDivElement | null>(null)
 
   const dictation = useDictation(language, (text) =>
     setDraft((current) => (current ? `${current} ${text}` : text)),
   )
+
+  const toggleContext = useCallback(() => {
+    setContextEnabled((prev) => {
+      const next = !prev
+      try { localStorage.setItem(CONTEXT_KEY, String(next)) } catch { /* noop */ }
+      return next
+    })
+  }, [])
+
+  // Grouped suggestions: current persona first
+  const groupedSuggestions = useMemo(() => {
+    const forPersona = PERSONA_QUESTIONS.filter((q) => q.persona === persona)
+    const rest = PERSONA_QUESTIONS.filter((q) => q.persona !== persona)
+    return [...forPersona, ...rest]
+  }, [persona])
 
   const refreshConversations = useCallback(() => {
     client
@@ -184,25 +271,6 @@ export function CopilotPanel({
   }, [client])
 
   useEffect(refreshConversations, [refreshConversations])
-
-  useEffect(() => {
-    let cancelled = false
-    client
-      .suggestions(section, language)
-      .then((result) => {
-        if (!cancelled) {
-          setSuggestions(result.questions)
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setSuggestions([])
-        }
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [client, section, language])
 
   useEffect(() => {
     const transcript = transcriptRef.current
@@ -238,7 +306,7 @@ export function CopilotPanel({
             reasoning,
             onlineSearch,
             temporary,
-            context: { section, subView, site },
+            context: contextEnabled ? { section, subView, site } : undefined,
           },
           t('copilot.offline'),
         )
@@ -261,6 +329,7 @@ export function CopilotPanel({
     },
     [
       client,
+      contextEnabled,
       conversationId,
       language,
       onlineSearch,
@@ -373,6 +442,18 @@ export function CopilotPanel({
             <VisibilityOffIcon fontSize="small" />
           </IconButton>
         </Tooltip>
+        <Tooltip title={t('copilot.context.toggle.hint')}>
+          <IconButton
+            size="small"
+            aria-label={t('copilot.context.toggle')}
+            aria-pressed={contextEnabled}
+            data-testid="copilot-context-toggle"
+            color={contextEnabled ? 'primary' : 'default'}
+            onClick={toggleContext}
+          >
+            <LayersIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
         <Tooltip title={t('copilot.conversations.new')}>
           <IconButton size="small" aria-label={t('copilot.conversations.new')} onClick={startNewChat}>
             <AddCommentIcon fontSize="small" />
@@ -403,12 +484,21 @@ export function CopilotPanel({
       </Stack>
 
       <Stack direction="row" spacing={1} sx={{ px: 1.5, pb: 1, flexWrap: 'wrap', rowGap: 0.5 }}>
-        <Chip
-          size="small"
-          variant="outlined"
-          data-testid="copilot-context-chip"
-          label={t('copilot.context.screen', { screen: screenTitle })}
-        />
+        {contextEnabled && (
+          <Chip
+            size="small"
+            variant="outlined"
+            data-testid="copilot-context-chip"
+            label={t('copilot.context.screen', { screen: screenTitle })}
+          />
+        )}
+        {!contextEnabled && (
+          <Chip
+            size="small"
+            variant="outlined"
+            label={t('copilot.context.off')}
+          />
+        )}
         {temporary && <Chip size="small" color="primary" variant="outlined" label={t('copilot.temporary')} />}
       </Stack>
 
@@ -469,25 +559,32 @@ export function CopilotPanel({
         )}
       </Box>
 
-      {suggestions.length > 0 && messages.length === 0 && (
+      {messages.length === 0 && (
         <Box sx={{ px: 1.5, pb: 1 }} data-testid="copilot-suggestions">
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-            {t('copilot.suggestions')} · {t('copilot.suggestions.hint', { persona })}
-          </Typography>
-          <Stack spacing={0.5} sx={{ mt: 0.5 }}>
-            {suggestions.map((question) => (
-              <Chip
-                key={question}
-                size="small"
-                variant="outlined"
-                clickable
+          <Autocomplete
+            size="small"
+            options={groupedSuggestions}
+            groupBy={(option) => option.persona}
+            getOptionLabel={(option) => `${option.persona} – ${option.question}`}
+            onChange={(_, value) => {
+              if (value) setDraft(value.question)
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                placeholder={t('copilot.suggestions.grouped')}
                 data-testid="copilot-suggestion"
-                label={question}
-                onClick={() => void ask(question)}
-                sx={{ justifyContent: 'flex-start', height: 'auto', py: 0.5, '& .MuiChip-label': { whiteSpace: 'normal' } }}
               />
-            ))}
-          </Stack>
+            )}
+            renderOption={(props, option) => (
+              <li {...props} key={`${option.persona}-${option.question}`}>
+                <Typography variant="body2" noWrap>{option.question}</Typography>
+              </li>
+            )}
+            blurOnSelect
+            clearOnBlur={false}
+            sx={{ mt: 0.5 }}
+          />
         </Box>
       )}
 

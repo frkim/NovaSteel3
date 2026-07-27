@@ -9,6 +9,7 @@
   --ns-radius-s: 4px;
   --ns-radius-m: 8px;
   --ns-radius-l: 12px;
+  --ns-radius-pill: 999px;
   --ns-color-canvas: #F5F6F8;
   --ns-color-surface: #FFFFFF;
   --ns-color-surface-alt: #EEF1F4;
@@ -21,6 +22,9 @@
   --ns-color-success: #0F7B0F;
   --ns-color-stale: #8A6D3B;
   --ns-color-focus: #0B5FFF;
+  --ns-color-demo: #6E56CF;
+  --ns-color-demo-surface: #F1EDFB;
+  --ns-color-demo-text: #FFFFFF;
 }
 
 :root[data-theme="dark"] {
@@ -36,4 +40,7 @@
   --ns-color-success: #5BD75B;
   --ns-color-stale: #D6B77A;
   --ns-color-focus: #8FB6FF;
+  --ns-color-demo: #9B8AE8;
+  --ns-color-demo-surface: #241F33;
+  --ns-color-demo-text: #141719;
 }

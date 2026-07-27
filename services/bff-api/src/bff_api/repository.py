@@ -306,6 +306,8 @@ class DemoRepository:
             * float(row["carbonIntensityKgCo2eMwh"] or 0)
             for row in energy
         )
+        # Deterministic site-specific scaling so each site shows different figures.
+        factor = _site_factor(site)
         return {
             "site": site,
             "syntheticBanner": "Synthetic demo data — not for operational control",
@@ -315,15 +317,18 @@ class DemoRepository:
                 "quality": {"asOf": _latest(quality, "eventTs"), "stale": False},
             },
             "kpis": {
-                "plannedTonnage": metrics.get("energy_tonnage_before", 960.0),
-                "energyConsumptionMwh": round(total_consumption, 2),
+                "plannedTonnage": round(metrics.get("energy_tonnage_before", 960.0) * factor, 1),
+                "energyConsumptionMwh": round(total_consumption * factor, 2),
                 "energyDispatchSavingsTargetPct": 10.4,
-                "scope2KgCo2e": round(scope2, 2),
+                "scope2KgCo2e": round(scope2 * factor, 2),
                 "qualityPredictedFirstPassYieldPct": round(
-                    float(metrics.get("quality_predicted_yield_before", 0.88)) * 100,
+                    float(metrics.get("quality_predicted_yield_before", 0.88)) * 100
+                    - _site_yield_offset(site),
                     1,
                 ),
-                "liningRulDaysP50": metrics.get("lining_rul_p50_days", 21.0),
+                "liningRulDaysP50": round(
+                    metrics.get("lining_rul_p50_days", 21.0) * factor, 0
+                ),
                 "openAlerts": sum(
                     1 for alert in self.alerts.values() if alert["status"] != "CLOSED"
                 ),
@@ -344,11 +349,12 @@ class DemoRepository:
             for row in energy
         )
         tonnage = float(self.summary_metrics.get("energy_tonnage_before", 960.0))
+        factor = _site_factor(site)
         return {
             "site": site,
-            "energyConsumptionMwh": round(total_mwh, 2),
-            "scope1KgCo2e": round(tonnage * 1425, 2),
-            "scope2KgCo2e": round(scope2, 2),
+            "energyConsumptionMwh": round(total_mwh * factor, 2),
+            "scope1KgCo2e": round(tonnage * 1425 * factor, 2),
+            "scope2KgCo2e": round(scope2 * factor, 2),
             "etsAllowancePriceEurTonne": 86.0,
             "modeledDispatchCo2ReductionPct": 8.7,
             "synthetic": True,
@@ -403,6 +409,28 @@ class DemoRepository:
                 "createdBy": "SYSTEM",
                 "detectedAt": record.get("detected_ts"),
             }
+
+
+def _site_factor(site: str) -> float:
+    """Deterministic per-site scaling factor so KPIs visibly differ between sites."""
+    factors = {
+        "NS-DEMO-LUX-01": 1.0,
+        "NS-DEMO-DE-01": 0.72,
+        "NS-DEMO-BE-01": 0.38,
+        "NS-DEMO-ES-01": 0.55,
+    }
+    return factors.get(site, 1.0)
+
+
+def _site_yield_offset(site: str) -> float:
+    """Offset to first-pass yield % so each site looks different."""
+    offsets = {
+        "NS-DEMO-LUX-01": 0.0,
+        "NS-DEMO-DE-01": 2.3,
+        "NS-DEMO-BE-01": -1.4,
+        "NS-DEMO-ES-01": 3.8,
+    }
+    return offsets.get(site, 0.0)
 
 
 def _read_ndjson(path: Path) -> list[dict[str, Any]]:

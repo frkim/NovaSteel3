@@ -11,12 +11,12 @@ from device_simulator.registry import DEVICES, SENSORS, build_registry
 
 def test_build_registry_returns_all_devices():
     devices, _ = build_registry()
-    assert len(devices) == 6
+    assert len(devices) == 16
 
 
 def test_build_registry_returns_all_sensors():
     _, sensors = build_registry()
-    assert len(sensors) == 34
+    assert len(sensors) == 86
 
 
 def test_sensor_id_format():
@@ -50,3 +50,33 @@ def test_device_sensor_ids_reference_existing_sensors():
             assert sid in SENSORS, (
                 f"Device {device.deviceId!r} references non-existent sensor {sid!r}"
             )
+
+
+def test_different_sites_return_different_device_sets():
+    """Two different sites have non-overlapping device sets."""
+    lux_devices = [d for d in DEVICES.values() if d.site == "NS-DEMO-LUX-01"]
+    de_devices = [d for d in DEVICES.values() if d.site == "NS-DEMO-DE-01"]
+    be_devices = [d for d in DEVICES.values() if d.site == "NS-DEMO-BE-01"]
+    es_devices = [d for d in DEVICES.values() if d.site == "NS-DEMO-ES-01"]
+    assert len(lux_devices) == 6
+    assert len(de_devices) == 4
+    assert len(be_devices) == 3
+    assert len(es_devices) == 3
+    lux_ids = {d.deviceId for d in lux_devices}
+    de_ids = {d.deviceId for d in de_devices}
+    assert lux_ids.isdisjoint(de_ids), "LUX and DE should have no shared devices"
+
+
+def test_sites_have_distinct_sensor_counts():
+    """Each site has a genuinely different number of sensors."""
+    from device_simulator.catalog import SIGNALS_BY_ASSET, CATALOG_ASSETS
+
+    site_sensor_counts: dict[str, int] = {}
+    for asset_id, asset in CATALOG_ASSETS.items():
+        site = asset.plant_id
+        site_sensor_counts[site] = site_sensor_counts.get(site, 0) + len(
+            SIGNALS_BY_ASSET.get(asset_id, [])
+        )
+    counts = list(site_sensor_counts.values())
+    # All 4 sites have different counts
+    assert len(set(counts)) == len(counts), f"Sensor counts should differ: {site_sensor_counts}"
