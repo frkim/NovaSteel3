@@ -28,6 +28,17 @@ describe('ProcessDiagram', () => {
     expect(img.getAttribute('srcset')).toContain('/media/steel-route-blast-furnace.webp 1800w')
   })
 
+  it('serves a figure from a single rendition so every figure shares one frame', () => {
+    renderWithProviders(
+      <ProcessDiagram {...PROPS} stem="rolling-mill-stand" variant="figure" />,
+      testAnalyticsValue({}),
+    )
+    const img = image()
+    expect(img).toHaveAttribute('src', '/media/rolling-mill-stand.webp')
+    expect(img).not.toHaveAttribute('srcset')
+    expect(img).not.toHaveAttribute('sizes')
+  })
+
   it('defers loading the artwork so it never blocks first paint', () => {
     renderDiagram()
     expect(image()).toHaveAttribute('loading', 'lazy')

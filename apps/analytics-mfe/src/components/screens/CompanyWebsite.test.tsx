@@ -93,6 +93,19 @@ describe('CompanyWebsiteSteelKnowledge — process diagrams', () => {
       expect(img?.getAttribute('alt')?.length ?? 0).toBeGreaterThan(40)
     }
   })
+
+  it('illustrates the furnace cutaway and the rolling mill at a uniform figure size', async () => {
+    renderSteelKnowledge()
+    await screen.findByRole('table', { name: /glossary/i })
+
+    for (const stem of ['blast-furnace-cutaway', 'rolling-mill-stand', 'rolling-mill-line']) {
+      const img = document.querySelector(`img[src="/media/${stem}.webp"]`)
+      expect(img, `${stem} figure must be on the page`).not.toBeNull()
+      expect(img?.getAttribute('alt')?.length ?? 0).toBeGreaterThan(40)
+      // Uniform frame: figures are served from one rendition, not a source set.
+      expect(img?.hasAttribute('srcset'), `${stem} must not opt into the full-width source set`).toBe(false)
+    }
+  })
 })
 
 describe('CompanyWebsiteSteelKnowledge — glossary', () => {

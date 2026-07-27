@@ -71,3 +71,33 @@ assistant, capacity panel, settings dialog, dark theme, account menu).
 
 Regeneration instructions are in the guide index (§"Regenerating the screenshots").
 
+---
+
+## Steel Knowledge page artwork (committed as WebP renditions)
+
+The **Steel Knowledge** page of the in-portal AxelorMetal website
+(`/{site}/company-website/steel-knowledge`) carries six pieces of process
+artwork. Only the optimised WebP renditions in
+`apps/portal-shell/wwwroot/media/` are committed; the sources stay local under
+`docs/images/` (see [`../../images/README.md`](../../images/README.md)).
+
+| Rendition | Kind | Source | Licence position |
+|---|---|---|---|
+| `steel-route-blast-furnace` | Illustrated diagram | Generated for this project | No licence risk |
+| `steel-route-electric-arc-furnace` | Illustrated diagram | Generated for this project | No licence risk |
+| `eaf-process-detail` | Illustrated diagram | Generated for this project | No licence risk |
+| `blast-furnace-cutaway` | Schematic | **Supplied by the repository owner** | ⚠️ Confirm before publishing |
+| `rolling-mill-stand` | Photograph | **Supplied by the repository owner** | ⚠️ Confirm before publishing |
+| `rolling-mill-line` | Photograph | **Supplied by the repository owner** | ⚠️ Confirm before publishing |
+
+> **Action required.** The last three were added on the owner's explicit
+> instruction and are the only images in the repository that the "no
+> third-party photography" rule above does not already clear. Before this
+> repository is published, confirm each one is either owned by AxelorMetal /
+> the author, CC0/CC-BY (then attribute here), or covered by a stock licence
+> that permits redistribution in a public repository. If a licence cannot be
+> confirmed, delete the three `*.webp` renditions and the matching
+> `variant="figure"` blocks in `CompanyWebsiteSteelKnowledge.tsx` — the page
+> degrades gracefully, because `ProcessDiagram` hides any figure whose asset
+> fails to load.
+

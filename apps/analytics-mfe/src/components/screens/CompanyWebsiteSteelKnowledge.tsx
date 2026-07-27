@@ -294,6 +294,14 @@ export function CompanyWebsiteSteelKnowledge() {
               </ListItem>
             </List>
 
+            <ProcessDiagram
+              variant="figure"
+              stem="blast-furnace-cutaway"
+              title="Inside a blast furnace"
+              alt="Cutaway schematic of a blast furnace: charge hoppers load iron ore, coke and limestone at the top, exhaust gases leave through the uptakes, an air preheater feeds heated air through the tuyeres, and temperatures rise from 600 °C at the throat to 1,600 °C at the hearth where pig iron and slag are tapped into trolleys."
+              caption="The same vessel drawn as a section. Notice the temperature gradient — 600 °C where the charge enters, 1,600 °C at the hearth. That heat is what the Furnace Health screens of this portal watch, because it is what slowly eats the refractory lining."
+            />
+
             <Typography variant="h6" sx={{ fontWeight: 700, mt: 2, mb: 1 }}>The basic oxygen furnace</Typography>
             <Typography variant="body2" sx={{ mb: 2 }}>
               Molten iron from the blast furnace contains <strong>too much carbon</strong> to be used
@@ -461,6 +469,33 @@ export function CompanyWebsiteSteelKnowledge() {
                 <Typography variant="body2" color="text.secondary">{item.desc}</Typography>
               </Box>
             ))}
+
+            <Typography variant="h6" sx={{ fontWeight: 700, mt: 3, mb: 2 }}>Rolling in practice</Typography>
+            <Typography variant="body2" sx={{ mb: 1 }}>
+              Rolling is the shaping step AxelorMetal runs the most, so it is worth picturing.
+              A <strong>stand</strong> is one pair of rollers; a <strong>mill</strong> is a line of
+              stands, each squeezing the metal a little thinner than the one before.
+            </Typography>
+            <Stack
+              direction={{ xs: 'column', md: 'row' }}
+              spacing={3}
+              sx={{ alignItems: 'flex-start', flexWrap: 'wrap' }}
+            >
+              <ProcessDiagram
+                variant="figure"
+                stem="rolling-mill-stand"
+                title="A single rolling stand"
+                alt="Close-up of a rolling mill stand: a strip of steel passes between polished cylindrical work rolls held in a green machine frame."
+                caption="One pass, seen close up. The strip enters on the right and leaves thinner and longer. Roll gap, roll force and strip temperature are the settings a rolling operator adjusts."
+              />
+              <ProcessDiagram
+                variant="figure"
+                stem="rolling-mill-line"
+                title="A hot rolling mill line"
+                alt="Wide view of a hot rolling mill hall: several blue rolling stands in a row, with glowing orange steel bar running between them and an operator standing beside the line."
+                caption="The same operation at plant scale. The bar glows because it is still around 1,000 °C — hot rolling shapes steel while it is soft, which is why reheating furnaces and energy prices dominate the cost of this step."
+              />
+            </Stack>
 
             <Typography variant="h6" sx={{ fontWeight: 700, mt: 3, mb: 2 }}>At a glance</Typography>
             <TableContainer>

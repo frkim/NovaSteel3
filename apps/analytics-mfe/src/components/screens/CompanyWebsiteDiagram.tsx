@@ -17,10 +17,19 @@ const MIN_ZOOM = 100
 const MAX_ZOOM = 400
 const ZOOM_STEP = 50
 
+/**
+ * Every `figure` renders inside a frame of exactly this size, whatever the
+ * shape of the source artwork, so supporting photographs and schematics line
+ * up with one another instead of each claiming a different slice of the page.
+ */
+export const FIGURE_WIDTH = 460
+export const FIGURE_RATIO = 4 / 3
+
 export interface ProcessDiagramProps {
   /**
-   * Asset stem below `/media`, without extension. A `-sm` rendition at 900 px
-   * and a full rendition at 1800 px are both expected to exist.
+   * Asset stem below `/media`, without extension. `full` diagrams expect a
+   * `-sm` rendition at 900 px and a full rendition at 1800 px; `figure`
+   * artwork is served from a single rendition.
    */
   stem: string
   /** Aspect ratio of the source artwork, used to reserve space before load. */
@@ -28,20 +37,34 @@ export interface ProcessDiagramProps {
   alt: string
   title: string
   caption: string
+  /**
+   * `full` (default) stretches the artwork across the content column — used
+   * for the large end-to-end diagrams whose small labels need the width.
+   * `figure` uses the uniform frame described by {@link FIGURE_WIDTH}.
+   */
+  variant?: 'full' | 'figure'
 }
 
 /**
- * A full-width illustrated process diagram with a zoomable lightbox.
+ * An illustrated process figure with a zoomable lightbox.
  *
  * The artwork carries a lot of small labels, so a static in-page image is not
  * enough — a reader needs to enlarge it. Clicking the figure opens a dialog
  * where the picture can be magnified up to 400 % and panned.
  */
-export function ProcessDiagram({ stem, ratio = 2816 / 1536, alt, title, caption }: ProcessDiagramProps) {
+export function ProcessDiagram({
+  stem,
+  ratio = 2816 / 1536,
+  alt,
+  title,
+  caption,
+  variant = 'full',
+}: ProcessDiagramProps) {
   const { t } = useAnalytics()
   const [open, setOpen] = useState(false)
   const [zoom, setZoom] = useState(MIN_ZOOM)
   const [failed, setFailed] = useState(false)
+  const isFigure = variant === 'figure'
 
   function close() {
     setOpen(false)
@@ -56,7 +79,7 @@ export function ProcessDiagram({ stem, ratio = 2816 / 1536, alt, title, caption 
         component="figure"
         data-help="website.processDiagram"
         data-help-label={title}
-        sx={{ m: 0, my: 3 }}
+        sx={{ m: 0, my: 3, width: '100%', maxWidth: isFigure ? FIGURE_WIDTH : undefined }}
       >
         <ButtonBase
           onClick={() => setOpen(true)}
@@ -77,13 +100,19 @@ export function ProcessDiagram({ stem, ratio = 2816 / 1536, alt, title, caption 
           <Box
             component="img"
             src={`/media/${stem}.webp`}
-            srcSet={`/media/${stem}-sm.webp 900w, /media/${stem}.webp 1800w`}
-            sizes="(max-width: 900px) 100vw, 1200px"
+            srcSet={isFigure ? undefined : `/media/${stem}-sm.webp 900w, /media/${stem}.webp 1800w`}
+            sizes={isFigure ? undefined : '(max-width: 900px) 100vw, 1200px'}
             alt={alt}
             loading="lazy"
             decoding="async"
             onError={() => setFailed(true)}
-            sx={{ display: 'block', width: '100%', height: 'auto', aspectRatio: String(ratio) }}
+            sx={{
+              display: 'block',
+              width: '100%',
+              height: 'auto',
+              aspectRatio: String(isFigure ? FIGURE_RATIO : ratio),
+              ...(isFigure ? { objectFit: 'contain', bgcolor: 'action.hover' } : null),
+            }}
           />
         </ButtonBase>
         <Stack

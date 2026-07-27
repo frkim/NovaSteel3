@@ -1108,17 +1108,34 @@ accessible name with localized text such as `status: At risk`, satisfying WCAG 1
 
 ### 14.5 Illustrated process diagrams (`DIAGRAM-PROCESS`)
 
-The AxelorMetal corporate website (§9.8) carries three illustrated diagrams of
-the steelmaking process on the **Steel Knowledge** page. They exist to give a
-visitor — a juror, a new joiner, a business stakeholder — a mental model of the
-plant before they look at any telemetry. Everything the operational screens
-measure happens at one of the numbered stages on these pictures.
+The AxelorMetal corporate website (§9.8) carries six pieces of process artwork
+on the **Steel Knowledge** page. They exist to give a visitor — a juror, a new
+joiner, a business stakeholder — a mental model of the plant before they look at
+any telemetry. Everything the operational screens measure happens at one of the
+stages on these pictures.
+
+**Full-width diagrams** (`variant="full"`, the default) take the whole content
+column because their small in-artwork labels are unreadable at any smaller size.
 
 | Rendition stem | Placement | Subject |
 |---|---|---|
 | `steel-route-blast-furnace` | Opens the *Making Iron & Steel* section | The integrated route end to end: extraction → blast furnace → basic oxygen furnace → continuous casting → rolling → finished products |
 | `steel-route-electric-arc-furnace` | After *The electric arc furnace route* | The same journey starting from recycled scrap and electricity |
 | `eaf-process-detail` | Immediately after it | A ten-step deep dive into the EAF route |
+
+**Uniform figures** (`variant="figure"`) illustrate one step rather than the
+whole chain. Every figure renders in the same 460 px, 4:3 frame
+(`FIGURE_WIDTH` / `FIGURE_RATIO`) with `object-fit: contain`, whatever the shape
+of the source: portrait schematics and 16:9 photographs sit in identical boxes
+and line up with one another instead of each claiming a different slice of the
+page. Because the frame never exceeds 460 CSS px, a figure is served from a
+single rendition — no `srcSet`.
+
+| Rendition stem | Placement | Subject |
+|---|---|---|
+| `blast-furnace-cutaway` | After the pig iron / slag list in *The blast furnace route* | Labelled section of a blast furnace showing the 600 → 1,600 °C gradient, tuyeres, tap holes and stove |
+| `rolling-mill-stand` | *Shaping Metals* → *Rolling in practice* | Close-up of one stand with strip passing between the work rolls |
+| `rolling-mill-line` | Beside it, in the same row | A hot rolling line at plant scale with glowing bar between the stands |
 
 **Component.** `ProcessDiagram` (`components/screens/CompanyWebsiteDiagram.tsx`).
 
@@ -1144,15 +1161,18 @@ measure happens at one of the numbered stages on these pictures.
   with §9.8, long-form editorial body copy — including the diagram captions —
   stays English-only.
 
-**Asset pipeline.** Sources are ~8 MB PNGs at 2816 × 1536. Committing them
-would add ~24 MB to the repository permanently, so `.gitignore` excludes
-`docs/images/*.png` and only the optimised renditions are tracked: WebP at
-quality 86, in a 900 px `-sm` variant and an 1800 px full variant per diagram,
-about 1.4 MB for all six. `srcSet`/`sizes` let the browser take the cheaper one
-on small screens, and `loading="lazy"` keeps them off the critical path.
-Quality 86 is the point where the small in-diagram labels stay legible at 400 %
-zoom while each file stays under 400 KB. `docs/images/README.md` records the
-provenance and the exact regeneration command.
+**Asset pipeline.** Diagram sources are ~8 MB PNGs at 2816 × 1536. Committing
+them would add ~24 MB to the repository permanently, so `.gitignore` excludes
+`docs/images/*.png`, `*.jpg` and `*.jpeg`, and only the optimised renditions are
+tracked: WebP at quality 86, in a 900 px `-sm` variant and an 1800 px full
+variant per diagram, plus one rendition per figure capped at the source width so
+nothing is upscaled — about 1.6 MB for all nine files. `srcSet`/`sizes` let the
+browser take the cheaper diagram on small screens, and `loading="lazy"` keeps
+every image off the critical path. Quality 86 is the point where the small
+in-diagram labels stay legible at 400 % zoom while each file stays under 400 KB.
+`docs/images/README.md` records the provenance and the exact regeneration
+command; `docs/presentation/assets/PROVENANCE.md` tracks the licence position of
+each rendition.
 
 ---
 
