@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Sequence
 
 from .agents import CopilotChatAgent, create_chat_agents
 from .context import resolve as resolve_context
@@ -18,6 +18,7 @@ from .models import (
     ChatMessage,
     ChatTurnRequest,
     Conversation,
+    GroundingItem,
     MessageRole,
     ReasoningTier,
     ScreenContext,
@@ -160,6 +161,7 @@ class CopilotService:
         temporary: bool = False,
         conversation_id: str | None = None,
         context: ScreenContext | None = None,
+        grounding: Sequence[GroundingItem] | None = None,
     ) -> ChatResponse:
         """Answer one question and, unless the chat is temporary, persist it."""
         text = (question or "").strip()
@@ -200,6 +202,7 @@ class CopilotService:
                 online_search=online_search,
                 context=screen,
                 history=tuple(history),
+                grounding=tuple(grounding or ()),
             )
         )
 
@@ -223,7 +226,9 @@ class CopilotService:
             )
             persisted = True
 
-        concepts = resolve_context(text, screen).labels
+        # Concepts are a *screen* notion. With the screen-context toggle off
+        # there is no screen, so nothing may be resolved from one.
+        concepts = () if screen.is_general else resolve_context(text, screen).labels
         logger.info(
             "copilot chat: section=%s tier=%s online=%s agent=%s persisted=%s",
             screen.section or "-",

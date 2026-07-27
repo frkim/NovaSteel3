@@ -291,7 +291,7 @@ Every successful response except `DELETE` uses the single-resource envelope (§2
 | `reasoning` | `auto|default|high` | no | Defaults to `auto`. Invalid values return `400 VALIDATION_ERROR`. `auto` is resolved server-side and echoed as `resolvedReasoning`. |
 | `onlineSearch` | boolean | no | Enables the curated public-context corpus. Non-boolean values return `400 VALIDATION_ERROR`. |
 | `temporary` | boolean | no | Answers the turn without writing it to the conversation store. Non-boolean values return `400 VALIDATION_ERROR`. |
-| `context` | object | no | `{ "site", "section", "subView", "persona" }` screen context. A non-object value returns `400 VALIDATION_ERROR`; unknown fields at the top level also return `400`. |
+| `context` | object | no | `{ "site", "section", "subView", "persona" }` screen context. **Omitted by default** — the panel's "Screen context" toggle is off unless the operator turns it on. A non-object value returns `400 VALIDATION_ERROR`; unknown fields at the top level also return `400`. |
 
 Reasoning tiers are explicit. `default` maps to `FOUNDRY_CHAT_DEPLOYMENT`; `high` maps to `FOUNDRY_REASONING_DEPLOYMENT`. The `auto` selector resolves to `high` when the question is at least 120 characters or contains a why/compare/simulate-style marker in English, French, German, Dutch, or Spanish; otherwise it resolves to `default`. The resolved value is returned in `data.resolvedReasoning` and attached to the assistant message so the user never has to infer which tier answered.
 
@@ -299,9 +299,15 @@ Foundry access uses managed identity (`DefaultAzureCredential`) against scope `h
 
 Screen context is part of the contract, not UI decoration. The orchestrator maintains 25 domain concepts with multilingual trigger words and nine screen profiles matching the `analytics-mfe` persona sections. It ranks explicitly named concepts first; when the question is ambiguous, it uses the current section/sub-view ordering. For example, asking **"What is the risk?"** on `section="furnace-health", subView="lining-forecast"` resolves to **Lining risk**; the same bare wording on `sustainability-compliance/ets-exposure` resolves to **EU ETS exposure**.
 
+Screen context is **opt-in and off by default**. When `context` is absent (or its `section` is empty or `"-"`), the assistant runs in **general steel-expert mode**: it must not name, describe or infer any screen, persona or site. Concretely, `ScreenContext.is_general` is true and the agent then omits the "You are on …" framing, the "On this screen: …" summary, the screen citation, and the screen-scoped concept expansion; `data.resolvedConcepts` comes back empty. The answer is grounded on the glossary plus the grounding the BFF retrieves for the question — the general steel knowledge corpus and, when `onlineSearch` is true, the public-context corpus. This is why *"When was the latest EU ETS revision released?"* returns the dated public-context entry rather than a Command Center framing: an empty `ScreenContext` previously fell back to the default Command Center profile, which is no longer the case.
+
+The BFF performs retrieval at the boundary that owns the demo corpora and passes the hits to the orchestrator as `grounding` (`GroundingItem(source_id, title, snippet, kind, url)`), so the answer text itself is built on that material instead of having citations appended to an already-composed answer. The BFF then re-attaches corpus provenance (`publishedDate`, `retrievedAt`, `offlineCorpus`, `corpusLabel`) to the returned sources by source id.
+
 The glossary contains 36 terms in five languages. Search is accent- and case-insensitive and ranks both the localized term and wording inside the localized definition, with a small current-screen bonus. Suggestions are five predefined questions per screen per language, with a five-question default set for unknown sections.
 
 "Online search" is deliberately not a live web search. The container has no outbound internet path for this feature; the toggle unlocks a curated offline corpus of eight durable public-context entries with official URLs. Answers and sources indicate whether that corpus was used (`onlineSearchUsed`, `source.kind = "online"`). With the toggle off, answers use only AxelorMetal internal material and screen/glossary grounding.
+
+`source.kind = "knowledge"` marks the general steel knowledge corpus, which is retrieved only in general mode (screen context off).
 
 Conversations are in-process, owner-scoped, and bounded to 25 conversations per owner and 60 messages per conversation. They are deliberately not persisted to Fabric because free-text questions from named users would widen the data-protection surface for no demo value. A container restart clears history; this is intended behaviour. Temporary chats are represented in the response but never written to the store and never appear in `GET /v1/copilot/conversations`.
 

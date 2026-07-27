@@ -13,6 +13,7 @@ from knowledge_orchestrator.copilot.models import (
     SUPPORTED_LANGUAGES,
     ChatTurnRequest,
     ChatTurnResult,
+    GroundingItem,
     ReasoningTier,
     ScreenContext,
     SourceKind,
@@ -295,3 +296,119 @@ def test_chat_result_defaults_are_safe():
     result = ChatTurnResult(answer="ok")
     assert result.sources == ()
     assert result.online_search_used is False
+
+
+# --- general mode (screen-context toggle off) ------------------------------
+#
+# The "Screen context" toggle in the chat panel is off by default. When it is
+# off the panel sends no context at all, and nothing about a screen may leak
+# into the answer -- previously an empty ScreenContext silently resolved to the
+# Command Center profile, so every general question was framed as "You are on
+# Command Center (Plant Manager)...".
+
+SCREEN_PHRASES = ("You are on", "On this screen", "Command Center", "Plant Manager")
+
+
+def test_empty_screen_context_is_general():
+    assert ScreenContext().is_general is True
+    assert ScreenContext(section="-").is_general is True
+    assert ScreenContext(site="lu").is_general is True
+    assert FURNACE.is_general is False
+
+
+def test_general_mode_answer_has_no_screen_framing():
+    result = LocalCopilotChatAgent().answer(
+        turn("When was the latest EU ETS revision released?", context=ScreenContext())
+    )
+    for phrase in SCREEN_PHRASES:
+        assert phrase not in result.answer
+    assert all(source.kind is not SourceKind.SCREEN for source in result.sources)
+
+
+def test_general_mode_high_tier_reasoning_mentions_no_screen():
+    result = LocalCopilotChatAgent().answer(
+        turn(
+            "What is a blast furnace?",
+            context=ScreenContext(),
+            reasoning=ReasoningTier.HIGH,
+        )
+    )
+    for phrase in SCREEN_PHRASES:
+        assert phrase not in result.answer
+
+
+def test_general_mode_uses_caller_supplied_grounding():
+    item = GroundingItem(
+        source_id="eu-ets-revision-2026",
+        title="Commission releases latest EU ETS revision proposal",
+        snippet="Released on July 17, 2026, tightening the cap reduction factor to 4.4%.",
+        kind=SourceKind.ONLINE,
+        url="https://example.invalid/ets",
+    )
+    result = LocalCopilotChatAgent().answer(
+        ChatTurnRequest(
+            question="When was the latest EU ETS released?",
+            language="en",
+            reasoning=ReasoningTier.DEFAULT,
+            online_search=True,
+            context=ScreenContext(),
+            grounding=(item,),
+        )
+    )
+    assert "July 17, 2026" in result.answer
+    assert result.online_search_used is True
+    assert any(source.source_id == "eu-ets-revision-2026" for source in result.sources)
+
+
+def test_knowledge_grounding_is_rendered_in_general_mode():
+    item = GroundingItem(
+        source_id="steelmaking-routes",
+        title="Steelmaking routes overview",
+        snippet="BF-BOF and EAF are the two primary routes.",
+    )
+    result = LocalCopilotChatAgent().answer(
+        ChatTurnRequest(
+            question="What are the different processes to create steel?",
+            language="en",
+            reasoning=ReasoningTier.DEFAULT,
+            online_search=False,
+            context=ScreenContext(),
+            grounding=(item,),
+        )
+    )
+    assert "BF-BOF and EAF are the two primary routes." in result.answer
+    assert any(source.source_id == "steelmaking-routes" for source in result.sources)
+
+
+def test_general_mode_without_any_match_says_so():
+    result = LocalCopilotChatAgent().answer(
+        turn("zzzqqq wibble", context=ScreenContext())
+    )
+    assert "knowledge base" in result.answer
+    for phrase in SCREEN_PHRASES:
+        assert phrase not in result.answer
+
+
+def test_service_resolves_no_concepts_without_screen_context():
+    response = make_service().chat(owner="alice", question="What is the risk?")
+    assert response.resolved_concepts == ()
+    for phrase in SCREEN_PHRASES:
+        assert phrase not in response.answer.content
+
+
+def test_service_still_resolves_concepts_with_screen_context():
+    response = make_service().chat(
+        owner="alice", question="What is the risk?", context=FURNACE
+    )
+    assert response.resolved_concepts
+    assert "You are on" in response.answer.content
+
+
+@pytest.mark.parametrize("language", sorted(SUPPORTED_LANGUAGES))
+def test_general_mode_answers_in_every_language(language: str):
+    result = LocalCopilotChatAgent().answer(
+        turn("What is CBAM?", context=ScreenContext(), language=language)
+    )
+    assert result.answer.strip()
+    assert "You are on" not in result.answer
+

@@ -36,13 +36,17 @@ class CopilotAdapter:
                 ConversationNotFoundError,
                 CopilotService,
                 CopilotValidationError,
+                GroundingItem,
                 ScreenContext,
+                SourceKind,
             )
         except ImportError as exc:  # pragma: no cover - repository integration failure
             raise RuntimeError("knowledge-orchestrator is required by the BFF.") from exc
 
         self._service = CopilotService()
         self._screen_context = ScreenContext
+        self._grounding_item = GroundingItem
+        self._source_kind = SourceKind
         self._not_found = ConversationNotFoundError
         self._validation = CopilotValidationError
 
@@ -165,6 +169,42 @@ class CopilotAdapter:
         correlation_id: str,
     ) -> dict[str, Any]:
         screen = context or {}
+        section_val = str(screen.get("section") or "")
+        general = not section_val or section_val == "-"
+        live_endpoint = os.environ.get("COPILOT_SEARCH_ENDPOINT")
+
+        # Retrieval happens here, at the boundary that owns the demo corpora,
+        # and is handed to the agent as grounding so the answer text itself is
+        # built on it -- rather than bolting citations onto a finished answer.
+        online_hits = (
+            search_offline_corpus(question)
+            if online_search and not live_endpoint
+            else []
+        )
+        # With the screen-context toggle off the assistant is a general steel
+        # expert, so the steel knowledge base is what grounds it.
+        steel_hits = search_steel_corpus(question) if general else []
+
+        grounding = [
+            self._grounding_item(
+                source_id=hit.source_id,
+                title=hit.title,
+                snippet=hit.snippet,
+                kind=self._source_kind.ONLINE,
+                url=hit.url,
+            )
+            for hit in online_hits
+        ]
+        grounding.extend(
+            self._grounding_item(
+                source_id=hit.entry_id,
+                title=hit.title,
+                snippet=hit.content,
+                kind=self._source_kind.KNOWLEDGE,
+            )
+            for hit in steel_hits
+        )
+
         try:
             response = self._service.chat(
                 owner=owner,
@@ -176,10 +216,11 @@ class CopilotAdapter:
                 conversation_id=conversation_id,
                 context=self._screen_context(
                     site=str(screen.get("site") or ""),
-                    section=str(screen.get("section") or ""),
+                    section=section_val,
                     sub_view=str(screen.get("subView") or ""),
                     persona=str(screen.get("persona") or ""),
                 ),
+                grounding=grounding,
             )
         except self._validation as exc:
             raise ApiError(400, ErrorCode.VALIDATION_ERROR, str(exc)) from exc
@@ -187,43 +228,28 @@ class CopilotAdapter:
             raise ApiError(404, ErrorCode.NOT_FOUND, str(exc)) from exc
 
         logger.info(
-            "copilot chat answered correlation_id=%s section=%s tier=%s",
+            "copilot chat answered correlation_id=%s section=%s tier=%s general=%s",
             correlation_id,
-            screen.get("section") or "-",
+            section_val or "-",
             response.resolved_reasoning.value,
+            general,
         )
         view = response.to_view()
 
-        # Post-processing: inject supplementary online corpus sources
-        if online_search and not os.environ.get("COPILOT_SEARCH_ENDPOINT"):
-            extra = search_offline_corpus(question)
-            for item in extra:
-                view["answer"]["sources"].append({
-                    "sourceId": item.source_id,
-                    "title": item.title,
-                    "kind": "online",
-                    "snippet": item.snippet,
-                    "url": item.url,
-                    "publishedDate": item.published,
-                    "retrievedAt": RETRIEVAL_DATE,
-                    "offlineCorpus": True,
-                    "corpusLabel": CORPUS_LABEL,
-                })
-
-        # Post-processing: inject steel corpus when no screen context (general mode)
-        section_val = str(screen.get("section") or "")
-        if not section_val or section_val == "-":
-            extra_steel = search_steel_corpus(question)
-            for item in extra_steel:
-                view["answer"]["sources"].append({
-                    "sourceId": item.entry_id,
-                    "title": item.title,
-                    "kind": "knowledge",
-                    "snippet": item.content[:200],
-                    "url": "",
-                    "publishedDate": "",
-                    "retrievedAt": "",
-                    "offlineCorpus": True,
-                })
+        # The orchestrator's ChatSource carries no publication metadata, so the
+        # corpus provenance is stitched back on here, keyed by source id.
+        published = {hit.source_id: hit.published for hit in online_hits}
+        steel_ids = {hit.entry_id for hit in steel_hits}
+        for source in view["answer"]["sources"]:
+            source_id = source.get("sourceId")
+            if source_id in published:
+                source["publishedDate"] = published[source_id]
+                source["retrievedAt"] = RETRIEVAL_DATE
+                source["offlineCorpus"] = True
+                source["corpusLabel"] = CORPUS_LABEL
+            elif source_id in steel_ids:
+                source["publishedDate"] = ""
+                source["retrievedAt"] = ""
+                source["offlineCorpus"] = True
 
         return view

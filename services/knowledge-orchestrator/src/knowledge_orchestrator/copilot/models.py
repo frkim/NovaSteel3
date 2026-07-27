@@ -77,6 +77,7 @@ class SourceKind(str, enum.Enum):
     ONLINE = "online"
     GLOSSARY = "glossary"
     SCREEN = "screen"
+    KNOWLEDGE = "knowledge"
 
 
 @dataclass(frozen=True)
@@ -118,6 +119,18 @@ class ScreenContext:
     def route(self) -> str:
         parts = [part for part in (self.section, self.sub_view) if part]
         return "/".join(parts)
+
+    @property
+    def is_general(self) -> bool:
+        """True when the caller supplied no screen.
+
+        The "Screen context" toggle in the chat panel is off by default. When it
+        is off the panel sends no context at all, and the assistant must answer
+        as a general steel expert: no screen framing, no screen summary, no
+        screen citation.
+        """
+        section = (self.section or "").strip()
+        return not section or section == "-"
 
     def to_view(self) -> dict[str, str]:
         return {
@@ -199,6 +212,32 @@ class Conversation:
 
 
 @dataclass(frozen=True)
+class GroundingItem:
+    """A retrieval hit supplied by the caller as extra grounding.
+
+    The BFF owns the demo corpora (public-context and general steel knowledge);
+    it retrieves the relevant fragments and hands them to the agent so the
+    *answer itself* is grounded on them, rather than bolting citations onto an
+    already-composed answer.
+    """
+
+    source_id: str
+    title: str
+    snippet: str
+    kind: SourceKind = SourceKind.KNOWLEDGE
+    url: str = ""
+
+    def to_source(self) -> ChatSource:
+        return ChatSource(
+            kind=self.kind,
+            source_id=self.source_id,
+            title=self.title,
+            snippet=self.snippet,
+            url=self.url or None,
+        )
+
+
+@dataclass(frozen=True)
 class ChatTurnRequest:
     """A validated question ready to be answered."""
 
@@ -208,6 +247,7 @@ class ChatTurnRequest:
     online_search: bool
     context: ScreenContext
     history: tuple[ChatMessage, ...] = ()
+    grounding: tuple[GroundingItem, ...] = ()
 
 
 @dataclass(frozen=True)
