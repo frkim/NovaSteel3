@@ -29,7 +29,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  REGISTRY: ${{ vars.ACR_LOGIN_SERVER }}
+  REGISTRY: ${{ vars.ACR_LOGIN_SERVER || 'localhost:5000' }}
   PIP_INDEX_URL: https://packagefeedproxy.microsoft.io/pypi/simple
   PIP_EXTRA_INDEX_URL: ""
 
@@ -44,6 +44,25 @@ jobs:
       ingest-relay: ${{ steps.filter.outputs.ingest-relay }}
       knowledge-orchestrator: ${{ steps.filter.outputs.knowledge-orchestrator }}
     steps:
+      - name: Verify Azure federation variables
+        if: github.event_name != 'pull_request'
+        shell: bash
+        env:
+          CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+          TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+          SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          LOGIN_SERVER: ${{ vars.ACR_LOGIN_SERVER }}
+        run: |
+          set -euo pipefail
+          missing=()
+          [ -n "${CLIENT_ID:-}" ] || missing+=(AZURE_CLIENT_ID)
+          [ -n "${TENANT_ID:-}" ] || missing+=(AZURE_TENANT_ID)
+          [ -n "${SUBSCRIPTION_ID:-}" ] || missing+=(AZURE_SUBSCRIPTION_ID)
+          [ -n "${LOGIN_SERVER:-}" ] || missing+=(ACR_LOGIN_SERVER)
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "::error::Missing repository variables: ${missing[*]}. Image builds push to ACR via workload identity federation; see .github/README.md."
+            exit 1
+          fi
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
@@ -100,12 +119,14 @@ jobs:
           persist-credentials: false
       - uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
       - name: Azure login via workload identity federation
+        if: github.event_name != 'pull_request'
         uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
         with:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
       - name: ACR login
+        if: github.event_name != 'pull_request'
         run: az acr login --name "${REGISTRY%%.*}"
       - name: Build and push bff-api
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
@@ -135,12 +156,14 @@ jobs:
           persist-credentials: false
       - uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
       - name: Azure login via workload identity federation
+        if: github.event_name != 'pull_request'
         uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
         with:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
       - name: ACR login
+        if: github.event_name != 'pull_request'
         run: az acr login --name "${REGISTRY%%.*}"
       - name: Build and push optimizer-worker
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
@@ -166,12 +189,14 @@ jobs:
           persist-credentials: false
       - uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
       - name: Azure login via workload identity federation
+        if: github.event_name != 'pull_request'
         uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
         with:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
       - name: ACR login
+        if: github.event_name != 'pull_request'
         run: az acr login --name "${REGISTRY%%.*}"
       - name: Build and push scoring-worker
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
@@ -197,12 +222,14 @@ jobs:
           persist-credentials: false
       - uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
       - name: Azure login via workload identity federation
+        if: github.event_name != 'pull_request'
         uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
         with:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
       - name: ACR login
+        if: github.event_name != 'pull_request'
         run: az acr login --name "${REGISTRY%%.*}"
       - name: Build and push ingest-relay
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
@@ -228,12 +255,14 @@ jobs:
           persist-credentials: false
       - uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
       - name: Azure login via workload identity federation
+        if: github.event_name != 'pull_request'
         uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
         with:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
       - name: ACR login
+        if: github.event_name != 'pull_request'
         run: az acr login --name "${REGISTRY%%.*}"
       - name: Build and push knowledge-orchestrator
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
