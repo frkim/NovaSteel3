@@ -8,6 +8,7 @@ on:
       - "services/scoring-worker/**"
       - "services/ingest-relay/**"
       - "services/knowledge-orchestrator/**"
+      - "services/device-simulator/**"
   push:
     branches:
       - main
@@ -17,6 +18,7 @@ on:
       - "services/scoring-worker/**"
       - "services/ingest-relay/**"
       - "services/knowledge-orchestrator/**"
+      - "services/device-simulator/**"
   workflow_dispatch:
 
 permissions:
@@ -99,7 +101,7 @@ jobs:
             fi
           }
 
-          emit bff-api '^services/bff-api/'
+          emit bff-api '^services/(bff-api|optimizer-worker|scoring-worker|knowledge-orchestrator|device-simulator)/'
           emit optimizer-worker '^services/optimizer-worker/'
           emit scoring-worker '^services/scoring-worker/'
           emit ingest-relay '^services/ingest-relay/'
@@ -136,6 +138,7 @@ jobs:
             optimizer-worker=services/optimizer-worker
             scoring-worker=services/scoring-worker
             knowledge=services/knowledge-orchestrator
+            device-simulator=services/device-simulator
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
             ${{ env.REGISTRY }}/novasteel/bff-api:${{ github.sha }}
