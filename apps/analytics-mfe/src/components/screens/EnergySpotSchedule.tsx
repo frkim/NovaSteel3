@@ -17,7 +17,8 @@ export function EnergySpotSchedule() {
   const { client, emit, locale, site } = useAnalytics()
   const tokens = useTokens()
   const intervalsState = useResource(() => client.getEnergyIntervals(), [client])
-  const recommendationState = useResource(() => client.simulateEnergy({ maxShiftMinutes: 180, maxConcurrentBatches: 2 }), [client])
+  // 120 minutes: the documented demo window behind the 7.25% headline.
+  const recommendationState = useResource(() => client.simulateEnergy({ maxShiftMinutes: 120, maxConcurrentBatches: 2 }), [client])
 
   const overlay = useMemo<PriceLoadPoint[]>(() => {
     const rows = intervalsState.data ?? []

@@ -14,9 +14,13 @@ import type { KpiCardModel } from '../primitives/KpiCard'
 export function EnergySimulator() {
   const { client, emit, locale, can } = useAnalytics()
   const tokens = useTokens()
-  const [maxShift, setMaxShift] = useState(180)
+  // 120 minutes is the documented demo scenario: it is the BFF default, the
+  // window the recorded evidence was produced with, and the one every figure in
+  // the runbook and the deck (7.25%, EUR 2,688.7) refers to. The presenter
+  // widens it live to show the trade-off.
+  const [maxShift, setMaxShift] = useState(120)
   const [maxConcurrent, setMaxConcurrent] = useState(2)
-  const [committed, setCommitted] = useState({ maxShiftMinutes: 180, maxConcurrentBatches: 2 })
+  const [committed, setCommitted] = useState({ maxShiftMinutes: 120, maxConcurrentBatches: 2 })
 
   const recState = useResource(() => client.simulateEnergy(committed), [client, committed])
 
