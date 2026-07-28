@@ -5,7 +5,7 @@
 > **Owning workstream:** `delivery-pack`
 > **Companion artifacts:** [solution-architecture.md](../architecture/solution-architecture.md) · [deployment-topology.md](../architecture/deployment-topology.md) · [demo-runbook.md](../demo/demo-runbook.md) · [faq.md](faq.md)
 > **Delivered deck:** [`NovaSteel-Oral-Defense.pptx`](NovaSteel-Oral-Defense.pptx)
-> is the validated 27-slide defense deck (20 primary slides plus seven FAQ
+> is the validated 28-slide defense deck (20 primary slides plus eight FAQ
 > backups). This document remains the authoritative script, storyboard, and
 > speaker-note companion.
 
@@ -388,6 +388,7 @@ Rehearse against these hard gates; if a checkpoint slips by more than ~30 s, cut
 - **Answer discipline (same contract as the slides):** name whether the answer is EVIDENCE or TARGET; cite the owning document/ADR; if you don't know, say "that's a validation gate, not a claim" and log it as a written follow-up rather than inventing a number.
 - Reserve the **Limitations** answers for skeptics — leading with candor (daily-not-real-time scoring, Custom-Endpoint Contributor scope, no automatic BCDR, no production cost figure yet) buys credibility for the confident answers.
 - **If the panel asks "why is this only advisory?"** go straight to backup slide 7 ("Why we do not write to the furnace"). Frame the boundary as a designed acceptance criterion (O1, C-04, AI-05) resting on ISA-95/Purdue placement, IEC 62443 outbound-only conduits, and IEC 61511 safety-instrumented functions — then show that the platform is *not* read-only: it writes approved dispatch decisions, work orders, published procedures, and an append-only decision trail. Close on Phase 2 guarded write-back to CMMS/MES, never direct control.
+- **If the panel asks "these are furnaces — why no IoT Hub?"** go to backup slide 8 ("Why not Azure IoT Hub — or IoT Operations?") and answer with ADR-016: what IoT Hub adds over Event Hubs is a cloud-to-device control plane (DPS, twins, direct methods, jobs) that the advisory boundary forbids; it would replace `disableLocalAuth: true` + per-hub Entra RBAC with per-device keys and a key-based Fabric source (ADR-005); the senders are four plant gateways, not a device fleet. Close on candour: if the OT edge itself ever comes into scope, the 2026 strategic path is **Azure IoT Operations**, not IoT Hub — deferred, not rejected.
 - Time-box each answer to ~60–90 s; park deep dives for after.
 
 ---

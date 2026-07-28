@@ -10,6 +10,7 @@ const SLIDE_LIMIT = Number(process.env.NOVASTEEL_SLIDE_LIMIT || 0);
 const ASSETS = path.join(__dirname, "assets");
 const W = 13.333;
 const H = 7.5;
+const BACKUP_SLIDES = 8;
 
 const C = {
   carbon: "121719",
@@ -182,7 +183,7 @@ function addFooter(slide, index, dark = false) {
   tx(slide, "PHASE 0  |  SYNTHETIC DEMONSTRATION  |  NOT FOR OPERATIONAL CONTROL", 0.56, 7.205, 3.6, 0.08, {
     fontSize: 6.25, color: footerText, bold: true, charSpacing: 0.65,
   });
-  tx(slide, index <= 20 ? `ORAL DEFENSE  •  ${String(index).padStart(2, "0")} / 20` : `FAQ & VALIDATION BACKUP  •  ${String(index - 20).padStart(2, "0")} / 07`, 9.55, 7.205, 3.3, 0.08, {
+  tx(slide, index <= 20 ? `ORAL DEFENSE  •  ${String(index).padStart(2, "0")} / 20` : `FAQ & VALIDATION BACKUP  •  ${String(index - 20).padStart(2, "0")} / ${String(BACKUP_SLIDES).padStart(2, "0")}`, 9.55, 7.205, 3.3, 0.08, {
     fontSize: 6.5, color: footerText, bold: true, align: "right", charSpacing: 0.5,
   });
 }
@@ -1232,6 +1233,66 @@ function addThermalLegend(slide, x, y) {
   finish(slide, 27,
     "This is the question I want. Not writing to the furnace is a decision, not a gap. Setpoints, interlocks, and control logic live at Purdue levels zero to two, under IEC 61511 safety-instrumented functions and vendor certification, and our conduit across that boundary is outbound-only by design.\nBut the platform is not a read-only dashboard. It writes decisions: an approved energy dispatch, a maintenance work order, a published procedure, and an append-only record of who decided what against which model version. That is a decision system of record.\nActuation is a Phase 2 conversation and it starts with guarded write-back to CMMS and MES under human approval and thresholds, never a direct control action. Advice that is wrong costs a rejection; a setpoint that is wrong can cost an eight-million-euro event.",
     "Source cue | FAQ H — faq.md Q39b  •  solution-requirements.md O1, C-04, AI-05, §18 phasing  •  solution-architecture.md §1.1, ADR-007/008",
+  );
+}
+
+// 28 — backup: ingestion service choice
+{
+  const slide = newSlide(28, "Architecture decision ADR-016", "Why not Azure IoT Hub — or IoT Operations?", "", { backup: true, dark: true, texture: true });
+  badge(slide, 0.5, 1.3, "Ingress defense", "guardrail", 1.5);
+  tx(slide, "The ingress can only receive. Choosing a device-management service would buy us the inbound control plane we promised not to build.", 2.13, 1.335, 8.6, 0.18, {
+    fontSize: 8.4, color: C.steel, bold: true,
+  });
+
+  label(slide, 0.5, 1.78, "Three candidates, one verdict each", C.steel, 4.2);
+  const candidates = [
+    ["AZURE EVENT HUBS", "CHOSEN", C.teal,
+      "Outbound-only buffer, one hub per plant. Local auth disabled, private endpoint, and each mi-ns-otgw-<plant> identity scoped to its own hub — not the namespace. The relay then publishes to the Fabric Eventstream Custom Endpoint with a workload identity.",
+      "1 TU  ·  disableLocalAuth: true  ·  private endpoint  ·  per-hub Data Sender"],
+    ["AZURE IOT HUB", "REJECTED", C.rust,
+      "Its differentiators over Event Hubs are all cloud-to-device: provisioning (DPS), twins, direct methods, jobs. Every one of them is an inbound path into the plant, and device authentication is per-device key or certificate.",
+      "Would add: DPS  ·  device twins  ·  direct methods  ·  jobs  —  all cloud-to-device"],
+    ["AZURE IOT OPERATIONS", "DEFERRED", C.amber,
+      "The 2026 strategic industrial stack: Arc-enabled MQTT broker, OPC UA connector, data flows native to Fabric. The right answer the day the OT edge, gateway lifecycle, or per-sensor cloud identity enters scope — not before.",
+      "Cost of entry: an Arc-enabled Kubernetes footprint inside every plant"],
+  ];
+  candidates.forEach((c, i) => {
+    const y = 1.99 + i * 1.3;
+    card(slide, 0.5, y, 6.15, 1.18, { dark: true, fill: C.coal, border: c[2], bar: c[2], lineWidth: 0.9 });
+    tx(slide, c[0], 0.78, y + 0.17, 3.5, 0.14, { fontSize: 9.4, color: C.white, bold: true, charSpacing: 0.6 });
+    roundRect(slide, 5.32, y + 0.14, 1.11, 0.24, c[2], c[2], { lineWidth: 0.4 });
+    tx(slide, c[1], 5.37, y + 0.225, 1.01, 0.09, { fontSize: 6.4, color: C.carbon, bold: true, align: "center" });
+    tx(slide, c[3], 0.78, y + 0.46, 5.6, 0.5, { fontSize: 7.6, color: C.steel, valign: "top" });
+    line(slide, 0.78, y + 0.94, 5.6, 0, C.graphite, 0.6);
+    tx(slide, c[4], 0.78, y + 0.985, 5.6, 0.1, { fontSize: 6.6, color: C.mist, fontFace: F.mono });
+  });
+
+  label(slide, 7.05, 1.78, "Why IoT Hub loses on our own guardrails", C.steel, 5.4);
+  const reasons = [
+    ["01", "IT SELLS THE CONTROL PLANE WE BANNED", "O1 / C-04 / AI-05 forbid a write path to OT. We would acquire the capability, disable it, then keep proving it stays disabled.", C.rust],
+    ["02", "IT WEAKENS THE NO-KEY POSTURE", "Event Hubs runs disableLocalAuth: true with Entra RBAC. IoT Hub device auth is SAS or X.509, and Fabric's IoT Hub source is key-based — the very thing ADR-005 avoids.", C.amber],
+    ["03", "THE SENDERS ARE FOUR GATEWAYS", "Not a device fleet. Per-device identity already rides the envelope (source_id, asset_id) and the Device Operations registry — 17 devices, 91 sensors.", C.teal],
+    ["04", "NO NEW CAPABILITY, A NEW BILL", "A second ingestion service on a deliberately minimal footprint: one throughput unit, small Fabric capacity, nightly pause.", C.green],
+  ];
+  reasons.forEach((r, i) => {
+    const y = 1.99 + i * 0.99;
+    card(slide, 7.05, y, 5.78, 0.87, { dark: true, fill: C.coal, border: C.graphite, bar: r[3], lineWidth: 0.7 });
+    circle(slide, 7.28, y + 0.19, 0.28, r[3], r[3]);
+    tx(slide, r[0], 7.28, y + 0.288, 0.28, 0.09, { fontSize: 7, color: C.carbon, bold: true, align: "center" });
+    tx(slide, r[1], 7.72, y + 0.16, 4.9, 0.13, { fontSize: 8.2, color: C.white, bold: true, charSpacing: 0.4 });
+    tx(slide, r[2], 7.72, y + 0.44, 4.9, 0.36, { fontSize: 7.1, color: C.steel, valign: "top" });
+  });
+
+  card(slide, 0.5, 5.95, 12.33, 0.7, { dark: true, fill: C.oxide, border: C.rust, bar: C.amber, lineWidth: 0.9 });
+  tx(slide, "REVISIT WHEN", 0.78, 6.09, 1.5, 0.12, { fontSize: 7.6, color: C.amber, bold: true, charSpacing: 0.9 });
+  tx(slide, "a business requirement demands cloud-initiated action on plant equipment, or gateways can no longer aggregate upstream devices. The migration target is then IoT Operations, not IoT Hub — and closed-loop control of machinery changes the EU AI Act risk classification, so it reopens the conformity assessment.", 2.14, 6.06, 10.45, 0.44, {
+    fontSize: 7.7, color: C.mist, bold: true, valign: "top",
+  });
+
+  finish(slide, 28,
+    "If the panel knows industrial Azure, this is the first question they ask: these are furnaces, so why is there no IoT Hub?\nBecause what IoT Hub adds over Event Hubs is a cloud-to-device control plane — device provisioning, twins, direct methods, jobs. Every one of those is an inbound path into the plant. Our advisory boundary is an acceptance criterion, not a gap, so we would be buying a capability we must never use, disabling it, and then carrying the burden of proving it stays disabled in every threat model review. Event Hubs simply cannot do it.\nIt would also cost us the no-standing-secret property. Our namespace runs with local authentication disabled, behind a private endpoint, and each plant gateway identity can write to exactly one hub. IoT Hub authenticates devices with per-device keys or certificates, and Fabric's IoT Hub source connector is a shared-access-policy connection — the exact pattern ADR-005 exists to eliminate.\nAnd the shape is wrong: we have four plant gateways, not a fleet of thousands. Device identity already lives in the event envelope and in Device Operations.\nThe honest forward-looking answer is that if the OT edge itself ever comes into scope, the strategic path in 2026 is Azure IoT Operations — Arc-enabled, MQTT broker, OPC UA connector, native to Fabric. Not IoT Hub. Moving to IoT Hub today would be adopting the older device-centric service to solve a problem we do not have.",
+    "Source cue | FAQ C — faq.md Q14b  •  solution-architecture.md ADR-016, ADR-005, §4.1  •  infra/bicep/modules/eventhubs.bicep",
+    true,
   );
 }
 

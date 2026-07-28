@@ -1466,8 +1466,8 @@ slide has a single idea, timing target (29:45 total speech + 15s buffer to
 30:00), and fallback instruction. Evidence vs. target labelling is colour-coded
 throughout (amber chip for TARGET, blue chip for EVIDENCE).
 
-The slide plan includes seven FAQ backup slides for panel questions, bringing the
-total to 27 slides. Design principles are explicit: "one idea per slide",
+The slide plan includes eight FAQ backup slides for panel questions, bringing the
+total to 28 slides. Design principles are explicit: "one idea per slide",
 "Fabric is the spine, not a logo", "targets vs. evidence are color-coded",
 "every AI output shows uncertainty and human approver", "the demo is the payoff,
 not a tangent".
