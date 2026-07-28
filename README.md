@@ -347,13 +347,23 @@ cloud action may introduce an OT control write.
 
 ## Known limitations
 
-- Fabric, Foundry Agent Service, Speech, Eventstream, and Power BI tenant
-  resources are **not** provisioned; the deployed slice covers Container Apps,
-  storage, networking, Key Vault, Event Hubs, and monitoring. Fabric access from
-  a guest account is still unresolved.
-- The knowledge agent calls GPT-4o only when the container environment sets
-  `KNOWLEDGE_AGENT_MODE=azure` and `FOUNDRY_ENDPOINT`; images ship offline-safe
-  and fall back to fixtures otherwise.
+- Fabric, Speech, Eventstream, and Power BI tenant resources are **not**
+  provisioned in the deployed slice, which covers Container Apps, storage,
+  networking, Key Vault, Event Hubs, and monitoring. Fabric access from a guest
+  account is still unresolved. The Bicep templates now also declare the Foundry
+  project, AI Search, Cosmos agent-thread storage and the Agent Service
+  connections, but the Agent Service **capability host** stays behind the
+  `foundryAgentServiceManuallyValidated` gate (it is immutable once created) and
+  has not been deployed — see `infra/README.md`.
+- The knowledge agent calls the Foundry chat deployment (`gpt-5.4-mini`) only when
+  the container environment sets `KNOWLEDGE_AGENT_MODE=azure` and
+  `FOUNDRY_ENDPOINT`; images ship offline-safe and fall back to fixtures
+  otherwise. The same applies to Copilot chat (`COPILOT_CHAT_MODE`), the AI Search
+  procedure store (`AI_SEARCH_ENDPOINT`) and hosted agents
+  (`FOUNDRY_PROJECT_ENDPOINT`).
+- Online search is `offline` by default. Web IQ / web-search grounding leaves the
+  Azure compliance boundary and needs DPO sign-off before `ONLINE_SEARCH_MODE` is
+  changed.
 - Capacity actions remain simulated; no OT control write exists on any path.
 - Full browser click-through automation is not installed; evidence covers served
   assets, CORS, component tests, and live BFF HTTP assertions.

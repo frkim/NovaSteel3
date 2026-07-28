@@ -34,6 +34,13 @@ from .models import (
     normalize_language,
 )
 from .online import OnlineHit, online_context
+from .online_provider import (
+    CuratedOnlineSearchProvider,
+    OnlineSearchProvider,
+    WebIQOnlineSearchProvider,
+    WebSearchToolProvider,
+    create_online_search_provider,
+)
 from .service import ChatResponse, CopilotService, CopilotValidationError, resolve_auto_tier
 from .store import ConversationNotFoundError, ConversationStore
 from .suggestions import SuggestionSet, suggestions_for
@@ -52,19 +59,24 @@ __all__ = [
     "CopilotChatAgent",
     "CopilotService",
     "CopilotValidationError",
+    "CuratedOnlineSearchProvider",
     "GlossaryEntry",
     "GroundingItem",
     "LocalCopilotChatAgent",
     "MessageRole",
     "OnlineHit",
+    "OnlineSearchProvider",
     "ReasoningTier",
     "ResolvedContext",
     "ScreenContext",
     "ScreenProfile",
     "SourceKind",
     "SuggestionSet",
+    "WebIQOnlineSearchProvider",
+    "WebSearchToolProvider",
     "all_entries",
     "create_chat_agents",
+    "create_online_search_provider",
     "lookup",
     "normalize_language",
     "online_context",

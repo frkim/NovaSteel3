@@ -14,7 +14,14 @@ dependencies = []
 [project.optional-dependencies]
 # Resolve ONLY from the approved feed (see pip.conf). Never from public PyPI.
 serve = ["fastapi", "uvicorn"]
-azure = ["azure-identity", "azure-ai-projects", "requests"]
+azure = [
+  "azure-identity",
+  "azure-ai-projects",
+  "azure-ai-agents",
+  "azure-search-documents",
+  "azure-monitor-opentelemetry",
+  "requests",
+]
 test = ["pytest"]
 
 [tool.setuptools.packages.find]

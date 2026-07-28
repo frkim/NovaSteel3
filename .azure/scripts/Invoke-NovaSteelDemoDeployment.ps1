@@ -11,6 +11,16 @@ param(
 
     [switch]$DeployAiServices,
 
+    [switch]$DeployModelDeployments,
+
+    [switch]$DeployAgentPlatform,
+
+    # A capability host is immutable once created. Passing this is a one-way door.
+    [switch]$AgentServiceManuallyValidated,
+
+    [ValidateSet('offline', 'web_iq', 'web_search')]
+    [string]$OnlineSearchMode = 'offline',
+
     [switch]$DeployBudget,
 
     [ValidateRange(1, 1000000)]
@@ -38,8 +48,20 @@ if (-not (Test-Path -LiteralPath $paths.TemplateFile) -or -not (Test-Path -Liter
 
 $commonParameters = @{
     deployAiServices = $DeployAiServices.IsPresent
+    deployModelDeployments = $DeployModelDeployments.IsPresent
+    deployAgentPlatform = $DeployAgentPlatform.IsPresent
+    agentServiceManuallyValidated = $AgentServiceManuallyValidated.IsPresent
+    onlineSearchMode = $OnlineSearchMode
     deployBudget = $DeployBudget.IsPresent
     monthlyBudgetAmount = $MonthlyBudgetAmount
+}
+
+if ($DeployAgentPlatform.IsPresent -and -not $DeployAiServices.IsPresent) {
+    throw 'DeployAgentPlatform requires DeployAiServices: the Foundry project is a child of the AI Services account.'
+}
+
+if ($AgentServiceManuallyValidated.IsPresent -and -not $DeployAgentPlatform.IsPresent) {
+    throw 'AgentServiceManuallyValidated requires DeployAgentPlatform: a capability host needs the project and its connections.'
 }
 
 if ($Phase -eq 'Bootstrap') {
@@ -56,6 +78,31 @@ if ($Phase -eq 'Bootstrap') {
         -Name $BootstrapDeploymentName `
         -TemplateParameters $bootstrapParameters
     Write-NovaSteelDeploymentOutputs -Deployment $deployment
+
+    # The management-group Modify policy `cosmosdb_publicnetwork_modify` overwrites
+    # the template's `publicNetworkAccess: Enabled` on every write. The Agent
+    # Service reaches its thread storage over the public endpoint here, so the
+    # estate deploys clean and then fails at first agent use with
+    # `cosmos_vnet_blocked`. Surface it now rather than leaving it to be
+    # rediscovered. Reporting only: silently re-enabling it would defeat a
+    # corporate security control, so the operator decides.
+    if ($DeployAgentPlatform.IsPresent) {
+        $cosmosName = [string]$deployment.properties.outputs.resourceNames.value.cosmosAccount
+        if (-not [string]::IsNullOrWhiteSpace($cosmosName)) {
+            $pna = az cosmosdb show --resource-group $script:NovaSteelResourceGroup --name $cosmosName --query 'publicNetworkAccess' --output tsv 2>$null
+            if ($pna -ne 'Enabled') {
+                Write-Warning @"
+Cosmos DB '$cosmosName' has publicNetworkAccess='$pna'.
+Azure Policy 'cosmosdb_publicnetwork_modify' reverts this on every deployment.
+Until a policy exemption is granted, the Foundry Agent Service cannot reach its
+thread storage and agent creation fails with 'cosmos_vnet_blocked'. To unblock:
+  az cosmosdb update -g $script:NovaSteelResourceGroup -n $cosmosName --public-network-access ENABLED
+See .azure/infra/README.md for the durable fix.
+"@
+            }
+        }
+    }
+
     Write-Host "`nBootstrap complete. Publish immutable images to the reported ACR, then run the Apps phase." -ForegroundColor Green
     return
 }

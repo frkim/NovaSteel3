@@ -17,6 +17,8 @@ export const HELP_UI_CATALOGS: Record<string, Catalog> = {
     'help.section.useIt': 'How to use it here',
     'help.fallback.title': 'This element',
     'help.fallback.what': 'No explanation has been written for this element yet.',
+    'help.insight.open': 'What this screen is for',
+    'help.insight.hint': 'Press Esc or click outside to close.',
   },
   fr: {
     'help.toggle': "Qu'est-ce que c'est ?",
@@ -30,6 +32,8 @@ export const HELP_UI_CATALOGS: Record<string, Catalog> = {
     'help.section.useIt': 'Comment l\u2019utiliser ici',
     'help.fallback.title': 'Cet élément',
     'help.fallback.what': "Aucune explication n'a encore été rédigée pour cet élément.",
+    'help.insight.open': 'À quoi sert cet écran',
+    'help.insight.hint': 'Appuyez sur Échap ou cliquez à l’extérieur pour fermer.',
   },
   de: {
     'help.toggle': 'Was ist das?',
@@ -43,6 +47,8 @@ export const HELP_UI_CATALOGS: Record<string, Catalog> = {
     'help.section.useIt': 'So nutzen Sie es hier',
     'help.fallback.title': 'Dieses Element',
     'help.fallback.what': 'Für dieses Element wurde noch keine Erklärung geschrieben.',
+    'help.insight.open': 'Wozu dieser Bildschirm dient',
+    'help.insight.hint': 'Esc drücken oder außerhalb klicken, um zu schließen.',
   },
   nl: {
     'help.toggle': 'Wat is dit?',
@@ -56,6 +62,8 @@ export const HELP_UI_CATALOGS: Record<string, Catalog> = {
     'help.section.useIt': 'Zo gebruikt u het hier',
     'help.fallback.title': 'Dit element',
     'help.fallback.what': 'Voor dit element is nog geen uitleg geschreven.',
+    'help.insight.open': 'Waarvoor dit scherm dient',
+    'help.insight.hint': 'Druk op Esc of klik ernaast om te sluiten.',
   },
   es: {
     'help.toggle': '¿Qué es esto?',
@@ -69,5 +77,7 @@ export const HELP_UI_CATALOGS: Record<string, Catalog> = {
     'help.section.useIt': 'Cómo usarlo aquí',
     'help.fallback.title': 'Este elemento',
     'help.fallback.what': 'Todavía no se ha redactado una explicación para este elemento.',
+    'help.insight.open': 'Para qué sirve esta pantalla',
+    'help.insight.hint': 'Pulse Esc o haga clic fuera para cerrar.',
   },
 }

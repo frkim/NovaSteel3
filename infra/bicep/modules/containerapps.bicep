@@ -62,6 +62,29 @@ param foundryChatDeployment string = ''
 @description('Embedding model deployment name from foundry-speech module (wired, not hardcoded).')
 param foundryEmbedDeployment string = ''
 
+@description('Advanced-reasoning model deployment name (GPT-5.5) used by the Copilot chat "high reasoning" tier. Empty string keeps the Copilot on the default tier only.')
+param foundryReasoningDeployment string = ''
+
+@description('Foundry project data-plane endpoint. This is how the knowledge-orchestrator creates and runs agents in Agent Service — there is no ARM resource for an agent.')
+param foundryProjectEndpoint string = ''
+
+@description('Azure AI Search endpoint holding the approved procedures.')
+param searchEndpoint string = ''
+
+@description('Name of the AI Search index holding the approved procedures.')
+param searchIndexName string = ''
+
+@description('Name of the Foundry IQ knowledge base built over the procedure index. The procedure agent reaches it through the knowledge-base MCP tool.')
+param knowledgeBaseName string = ''
+
+@description('Online search backend for the Copilot "Online search" toggle: web_iq (Foundry IQ web knowledge source), web_search (Agent Service web search tool), or offline (curated local corpus). Defaults to offline because the web backends route queries outside the Azure compliance boundary.')
+@allowed([
+  'web_iq'
+  'web_search'
+  'offline'
+])
+param onlineSearchMode string = 'offline'
+
 resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' = {
   name: 'cae-ns-${environment}'
   location: location
@@ -190,6 +213,30 @@ resource placeholderApps 'Microsoft.App/containerApps@2024-03-01' = [
               {
                 name: 'FOUNDRY_EMBED_DEPLOYMENT'
                 value: foundryEmbedDeployment
+              }
+              {
+                name: 'FOUNDRY_REASONING_DEPLOYMENT'
+                value: foundryReasoningDeployment
+              }
+              {
+                name: 'FOUNDRY_PROJECT_ENDPOINT'
+                value: foundryProjectEndpoint
+              }
+              {
+                name: 'AI_SEARCH_ENDPOINT'
+                value: searchEndpoint
+              }
+              {
+                name: 'AI_SEARCH_INDEX'
+                value: searchIndexName
+              }
+              {
+                name: 'FOUNDRY_KNOWLEDGE_BASE'
+                value: knowledgeBaseName
+              }
+              {
+                name: 'ONLINE_SEARCH_MODE'
+                value: onlineSearchMode
               }
             ] : [])
           }

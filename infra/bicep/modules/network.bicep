@@ -221,7 +221,7 @@ resource firewall 'Microsoft.Network/azureFirewalls@2023-11-01' = if (deployFire
 }
 
 // Private DNS zones for every PaaS private endpoint used across modules (Key Vault, Storage,
-// Event Hubs, Cognitive Services/Speech/Foundry) — centralized in the hub per
+// Event Hubs, Cognitive Services/Speech/Foundry, Azure AI Search, Cosmos DB) — centralized in the hub per
 // security-governance-and-threat-model.md §4.1 ("Centralized Private DNS zones"). These are
 // Microsoft's fixed private-link DNS zone names (identical across environments), not
 // environment-specific endpoints, so they are intentionally hardcoded rather than derived from
@@ -237,6 +237,8 @@ var privateDnsZoneNames = [
   'privatelink.azurecr.io'
   #disable-next-line no-hardcoded-env-urls
   'privatelink.table.core.windows.net'
+  'privatelink.search.windows.net'
+  'privatelink.documents.azure.com'
 ]
 
 resource privateDnsZones 'Microsoft.Network/privateDnsZones@2024-06-01' = [
@@ -292,4 +294,6 @@ output privateDnsZoneIds object = {
   openAi: privateDnsZones[4].id
   containerRegistry: privateDnsZones[5].id
   table: privateDnsZones[6].id
+  search: privateDnsZones[7].id
+  cosmosDb: privateDnsZones[8].id
 }

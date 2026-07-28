@@ -12,6 +12,35 @@ param fabricAdministrator string
 param fabricCapacityLifecycleRoleDefinitionId string
 param deployAiServices bool
 
+@description('Create the GPT-5-series chat/reasoning and embedding model deployments on the AI Services account. Kept separate from deployAiServices because model availability and quota must be reconfirmed in Sweden Central before the first deployment attempt.')
+param deployModelDeployments bool = false
+
+@description('Chat/extraction deployment. A 5-series mini model: fast and cheap enough for ordinary turns.')
+param chatModelName string = 'gpt-5.4-mini'
+
+param chatModelVersion string = '2026-03-17'
+
+@description('High-reasoning deployment used by the Copilot chat "high" tier.')
+param reasoningModelName string = 'gpt-5.5'
+
+param reasoningModelVersion string = '2026-04-24'
+
+param embeddingModelName string = 'text-embedding-3-large'
+
+param embeddingModelVersion string = '1'
+
+@description('Neither GPT-5-series model is offered on regional Standard in Sweden Central, so GlobalStandard is the default. DataZoneStandard is the escape hatch when policy requires EU-zone-bounded inference.')
+@allowed([
+  'GlobalStandard'
+  'DataZoneStandard'
+])
+param modelDeploymentSku string = 'GlobalStandard'
+
+@description('Thousands of tokens per minute for each deployment. Deliberately small for a cost-capped demo estate.')
+param chatCapacity int = 30
+param reasoningCapacity int = 10
+param embeddingCapacity int = 30
+
 var acrName = '${resourcePrefix}acr${nameSuffix}'
 var containerAppsEnvironmentName = '${resourcePrefix}-cae'
 var portalIdentityName = '${resourcePrefix}-portal-mi'
@@ -328,25 +357,107 @@ resource logicAppFabricCapacityLifecycleOperator 'Microsoft.Authorization/roleAs
   }
 }
 
-resource aiServices 'Microsoft.CognitiveServices/accounts@2024-10-01' = if (deployAiServices) {
+// The account is declared at 2025-04-01-preview, not 2024-10-01: older API
+// versions do not know `allowProjectManagement` and ARM silently drops unknown
+// properties, so the account would deploy successfully but never become able to
+// host a Foundry project.
+resource aiServices 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = if (deployAiServices) {
   name: aiServicesName
   location: location
-  tags: tags
+  // `SecurityControl: Ignore` is applied by a subscription-scoped Modify policy
+  // (`Add SecurityControl=Ignore tag`), not by hand. Reapplied here so a redeploy
+  // manages tags declaratively without reporting the policy's tag as drift.
+  tags: union(tags, {
+    SecurityControl: 'Ignore'
+  })
   kind: 'AIServices'
   sku: {
     name: 'S0'
+  }
+  // The account-level Agents capability host requires the account to have an
+  // identity of its own; without it the capability host fails to provision.
+  identity: {
+    type: 'SystemAssigned'
   }
   properties: {
     customSubDomainName: aiServicesName
     publicNetworkAccess: 'Enabled'
     disableLocalAuth: true
+    // Required before the account can host a Foundry project (and therefore Agent
+    // Service). The ARM type definition lags the service, so Bicep does not yet
+    // know this property exists.
+    #disable-next-line BCP037
+    allowProjectManagement: true
   }
+}
+
+// Model deployments are serial: the Cognitive Services control plane rejects
+// concurrent deployment writes against the same account with a 409, and Bicep
+// otherwise fans these out in parallel.
+resource chatDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = if (deployAiServices && deployModelDeployments) {
+  parent: aiServices
+  name: chatModelName
+  sku: {
+    name: modelDeploymentSku
+    capacity: chatCapacity
+  }
+  properties: {
+    model: {
+      format: 'OpenAI'
+      name: chatModelName
+      version: chatModelVersion
+    }
+    versionUpgradeOption: 'NoAutoUpgrade'
+  }
+}
+
+resource reasoningDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = if (deployAiServices && deployModelDeployments) {
+  parent: aiServices
+  name: reasoningModelName
+  sku: {
+    name: modelDeploymentSku
+    capacity: reasoningCapacity
+  }
+  properties: {
+    model: {
+      format: 'OpenAI'
+      name: reasoningModelName
+      version: reasoningModelVersion
+    }
+    versionUpgradeOption: 'NoAutoUpgrade'
+  }
+  dependsOn: [
+    chatDeployment
+  ]
+}
+
+resource embeddingDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = if (deployAiServices && deployModelDeployments) {
+  parent: aiServices
+  name: embeddingModelName
+  sku: {
+    name: 'Standard'
+    capacity: embeddingCapacity
+  }
+  properties: {
+    model: {
+      format: 'OpenAI'
+      name: embeddingModelName
+      version: embeddingModelVersion
+    }
+    versionUpgradeOption: 'NoAutoUpgrade'
+  }
+  dependsOn: [
+    reasoningDeployment
+  ]
 }
 
 resource speech 'Microsoft.CognitiveServices/accounts@2024-10-01' = if (deployAiServices) {
   name: speechName
   location: location
-  tags: tags
+  // Same policy-applied tag as the AI Services account above.
+  tags: union(tags, {
+    SecurityControl: 'Ignore'
+  })
   kind: 'SpeechServices'
   sku: {
     name: 'S0'
@@ -389,6 +500,7 @@ output portalIdentityClientId string = portalIdentity.properties.clientId
 output bffIdentityId string = bffIdentity.id
 output bffIdentityName string = bffIdentity.name
 output bffIdentityClientId string = bffIdentity.properties.clientId
+output bffIdentityPrincipalId string = bffIdentity.properties.principalId
 output fabricCapacityId string = fabricCapacity.id
 output fabricCapacityName string = fabricCapacity.name
 output capacityPauseLogicAppId string = capacityPauseLogicApp.id
@@ -411,6 +523,9 @@ output appInsightsName string = applicationInsights.name
 output aiServicesId string = deployAiServices ? (aiServices.?id ?? '') : ''
 output aiServicesName string = deployAiServices ? (aiServices.?name ?? '') : ''
 output aiServicesEndpoint string = deployAiServices ? (aiServices.?properties.?endpoint ?? '') : ''
+output chatDeploymentName string = deployAiServices && deployModelDeployments ? chatModelName : ''
+output reasoningDeploymentName string = deployAiServices && deployModelDeployments ? reasoningModelName : ''
+output embeddingDeploymentName string = deployAiServices && deployModelDeployments ? embeddingModelName : ''
 output speechId string = deployAiServices ? (speech.?id ?? '') : ''
 output speechName string = deployAiServices ? (speech.?name ?? '') : ''
 output speechEndpoint string = deployAiServices ? (speech.?properties.?endpoint ?? '') : ''

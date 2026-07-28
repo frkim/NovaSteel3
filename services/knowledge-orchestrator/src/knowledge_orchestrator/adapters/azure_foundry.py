@@ -1,4 +1,4 @@
-"""Production Foundry adapter — calls Azure OpenAI GPT-4o with grounded RAG.
+"""Production Foundry adapter — calls the Foundry chat deployment with grounded RAG.
 
 Ported from Project A's live ``FoundryClient`` + ``KnowledgeAssistant`` patterns
 (citation regex enforcement, decline-on-no-source, Content Safety). Authenticates
@@ -37,10 +37,17 @@ ENV_ENDPOINT = "FOUNDRY_ENDPOINT"
 ENV_CHAT_DEPLOYMENT = "FOUNDRY_CHAT_DEPLOYMENT"
 ENV_EMBED_DEPLOYMENT = "FOUNDRY_EMBED_DEPLOYMENT"
 ENV_API_VERSION = "FOUNDRY_API_VERSION"
+ENV_REASONING_EFFORT = "FOUNDRY_EXTRACTION_REASONING_EFFORT"
 
-DEFAULT_CHAT_DEPLOYMENT = "gpt-4o"
+DEFAULT_CHAT_DEPLOYMENT = "gpt-5.4-mini"
 DEFAULT_EMBED_DEPLOYMENT = "text-embedding-3-large"
 DEFAULT_API_VERSION = "2025-01-01-preview"
+
+# Not every 5-series model accepts every effort level: gpt-5.4-mini supports
+# 'minimal', while gpt-5.5 rejects it and offers only
+# none/low/medium/high/xhigh. The default pairs with DEFAULT_CHAT_DEPLOYMENT;
+# override this if FOUNDRY_CHAT_DEPLOYMENT is repointed at a larger model.
+DEFAULT_EXTRACTION_REASONING_EFFORT = "minimal"
 
 # Citation tag pattern identical to Project A's enforcement (assistant.py:39).
 _CITE_TAG = re.compile(r"\[S(\d+)\]")
@@ -77,7 +84,7 @@ _OPERATOR_LABELS = ("operator", "interviewee", "expert")
 
 
 class AzureFoundryKnowledgeAgent(FoundryAgentAdapter):
-    """Knowledge-capture agent backed by Azure OpenAI (GPT-4o) with grounded RAG."""
+    """Knowledge-capture agent backed by a Foundry chat deployment with grounded RAG."""
 
     agent_name = "knowledge-capture"
 
@@ -102,6 +109,9 @@ class AzureFoundryKnowledgeAgent(FoundryAgentAdapter):
             api_version or os.environ.get(ENV_API_VERSION, DEFAULT_API_VERSION)
         )
         self._credential = credential
+        self.reasoning_effort = os.environ.get(
+            ENV_REASONING_EFFORT, DEFAULT_EXTRACTION_REASONING_EFFORT
+        )
         self.registry = ToolRegistry(self.agent_name)
 
     def _get_token(self) -> str:  # pragma: no cover - requires azure-identity
@@ -120,6 +130,11 @@ class AzureFoundryKnowledgeAgent(FoundryAgentAdapter):
                 {"role": "system", "content": system},
                 {"role": "user", "content": user},
             ],
+            # Reasoning tokens are billed against max_completion_tokens, so an
+            # unbounded reasoning budget on a 5-series model can consume the whole
+            # allowance and return an empty completion. Extraction is a structured
+            # transcript-to-fields task, not a reasoning problem.
+            "reasoning_effort": self.reasoning_effort,
             "max_completion_tokens": 3000,
         }
         token = self._get_token()
@@ -133,7 +148,7 @@ class AzureFoundryKnowledgeAgent(FoundryAgentAdapter):
         return resp.json()["choices"][0]["message"]["content"].strip()
 
     def extract_draft(self, task: str, transcript: Transcript) -> AgentResult:
-        """Extract a grounded procedure draft by calling Azure OpenAI GPT-4o.
+        """Extract a grounded procedure draft by calling the Foundry chat deployment.
 
         Implements Project A's citation-enforcement + decline path:
         - Builds a numbered SOURCES block from operator transcript segments

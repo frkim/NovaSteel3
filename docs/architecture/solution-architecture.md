@@ -256,7 +256,11 @@ flowchart TD
 5. The raw recording is held in a restricted EU store for the approved retention period. The BFF records consent state, language, speaker role, retention deadline, and deletion request linkage before submitting audio. A transcript is classified Highly Confidential until de-identified/approved.
 6. The Foundry knowledge agent has a restricted procedure search/retrieval corpus and a separate draft-writing tool. It cannot publish. The `Knowledge Engineer/Admin` approves, edits, or rejects a versioned draft; only the approved version is indexed for general retrieval.
 7. The energy agent is an explanatory/orchestration surface. Its only OpenAPI tools are read/forecast/simulate and a separated propose endpoint. A commit endpoint independently validates a human approval record and is disabled outside approved production phases.
-8. The **Copilot chat agents** are a third, read-only Foundry surface. They have **no tools at all**: the grounding material — screen profile, glossary definitions, and optionally the curated public-context corpus — is assembled by `knowledge-orchestrator` and passed in the prompt, so the model cannot reach data the caller is not entitled to see. One deployment serves the `default` tier and a separate reasoning deployment serves the `high` tier; `auto` is resolved before the deployment is chosen and the resolved tier is returned to the browser. If Foundry is unconfigured or a call fails, the service answers from the same grounding material through a deterministic local agent rather than failing or inventing.
+8. The **Copilot chat agents** are a third, read-only Foundry surface. They have **no tools at all**: the grounding material — screen profile, glossary definitions, and optionally live or curated public context — is assembled by `knowledge-orchestrator` and passed in the prompt, so the model cannot reach data the caller is not entitled to see. One deployment serves the `default` tier (a 5-series **mini** model, minimal reasoning effort, tuned for latency) and a separate, more capable 5-series deployment serves the `high` tier at high reasoning effort; `auto` is resolved before the deployment is chosen and the resolved tier is returned to the browser. If Foundry is unconfigured or a call fails, the service answers from the same grounding material through a deterministic local agent rather than failing or inventing.
+9. Approved procedures are stored in **Azure AI Search** — a private, key-disabled service with integrated vectorization and hybrid (vector + keyword + semantic reranker) retrieval. The APPROVED-only rule from item 6 is enforced again at the store boundary, so a draft cannot become retrievable even if a caller misbehaves. The index is a data-plane object: infrastructure declares the service and the index *name*; the orchestrator creates the index itself under its managed identity.
+10. The procedure agent is **hosted in Agent Service** using the standard (bring-your-own-storage) setup, so threads, messages and file uploads land in NovaSteel-owned EU accounts — Cosmos DB for threads, a dedicated storage account for files, AI Search for the vector store. This is what makes GDPR erasure and the residency commitments in `deployment-topology.md` §2.3 achievable; the basic setup, where Microsoft holds that state, is not. The agent reaches the corpus through a **Foundry IQ knowledge base** rather than a raw search tool, so query planning, retrieval across sources and answer synthesis happen inside the retrieval pipeline and arrive already citable.
+11. When the user enables **Online Search**, the preferred backend is a Foundry IQ **web knowledge source** (Web IQ), which folds live results into the same agentic-retrieval pipeline as the procedures; a web-search tool is the fallback. Both are First Party Consumption Services: the Microsoft DPA does not apply, data leaves the Azure compliance and geo boundary, and neither is available in sovereign clouds. They are therefore **off by default**, require DPO sign-off to enable, and are domain-restricted to standards bodies. Mode resolution fails closed — an unrecognised setting degrades to offline rather than guessing at a network-touching backend.
+12. **Observability** is not optional for agent surfaces. The Foundry account carries an Application Insights connection to the platform's existing component, and the orchestrator emits GenAI-semantic-convention spans for agent runs, model calls and retrievals, so an agent answer is traceable end-to-end alongside the rest of the platform. Prompt and completion **content** capture is off by default: transcripts and chat turns are Highly Confidential and traces are not an approved store for them.
 
 ### 4.4 Copilot chat grounding boundary
 
@@ -268,13 +272,15 @@ flowchart LR
   CTX["Screen profile + 25 concepts"]
   GL["Glossary — 36 terms x 5 languages"]
   ON["Curated public-context corpus"]
-  F["Foundry chat / reasoning deployment"]
+  WIQ["Web IQ / web search\n(DPO-gated, off by default)"]
+  F["Foundry chat deployment\ndefault: 5-series mini | high: advanced 5-series"]
   L["Deterministic local agent"]
   U -->|question + screen context| BFF
   BFF --> KO
   KO --> CTX
   KO --> GL
   KO -->|only when online search is ticked| ON
+  KO -.->|only when online search is ticked AND the mode is enabled| WIQ
   KO -->|grounded prompt, managed identity| F
   F -.->|unconfigured or failed| L
   KO -->|answer + sources + resolved tier| BFF

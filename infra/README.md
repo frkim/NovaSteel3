@@ -15,13 +15,23 @@ presentation asset.
   the Fabric REST API/portal/Git integration (`docs/implementation/implementation-guide.md` §9.2),
   never to this folder. `infra/policy/definitions/deny-unsupported-fabric-items.json` enforces
   this as a policy guardrail.
-- **No Foundry Agent Service project/agent is provisioned.** The base Cognitive
-  Services/Foundry (`AIServices`) and Speech resource accounts are created, together with the
-  GPT-4o and text-embedding model **deployments** the knowledge orchestrator calls
-  (`infra/bicep/modules/foundry-speech.bicep`). Enabling the hosted Agent Service on top of that
-  is a manual, quota-gated step — see "Deployment blockers" below. Data-plane access is granted
-  as `Cognitive Services OpenAI User` (not `Cognitive Services User`), which is the role the
+- **The Foundry Agent Service project is provisioned; only its capability host is gated.**
+  `foundry-agents.bicep` creates the Foundry **project**, its BYO ("standard setup")
+  connections to AI Search, Cosmos DB and Storage, and the Application Insights connection that
+  lights up agent tracing. `foundry-agent-capability-host.bicep` — the resource that actually
+  turns Agent Service on — is deployed only when `foundryAgentServiceManuallyValidated=true`,
+  because a capability host is **immutable** once created and cannot be repointed at different
+  stores. See "Deployment blockers" below. The GPT-5-series chat/reasoning and text-embedding
+  model **deployments** the knowledge orchestrator calls live in
+  `infra/bicep/modules/foundry-speech.bicep`. Data-plane access is granted as
+  `Cognitive Services OpenAI User` (not `Cognitive Services User`), which is the role the
   inference API requires; `disableLocalAuth: true` means there is no key fallback if it is wrong.
+- **Agents, search indexes and knowledge bases are data-plane objects.** There is no ARM type
+  for a Foundry agent definition, an AI Search index, or a Foundry IQ knowledge base. Bicep
+  provisions the accounts, projects, connections, capability hosts, model deployments and RBAC;
+  the objects themselves are created at runtime by the knowledge orchestrator against the
+  project endpoint and the search endpoint. The index and knowledge-base **names** are outputs of
+  `ai-search.bicep` and are the contract between the two halves.
 - **Container Apps/Jobs take their images from the `serviceImages` parameter.** When a service
   has no entry, the app falls back to a public sample image
   (`mcr.microsoft.com/k8se/quickstart`). `.github/workflows/ci-build-services.yml` builds the
@@ -47,7 +57,13 @@ infra/
 │       ├── eventhubs.bicep               # Per-plant Event Hubs + scoped data-plane RBAC
 │       ├── fabric-capacity.bicep         # Microsoft.Fabric/capacities (the only Fabric ARM type)
 │       ├── containerapps.bicep           # Container Apps environment + placeholder apps/jobs
-│       ├── foundry-speech.bicep          # Foundry/Speech resource accounts (no Agent Service)
+│       ├── foundry-speech.bicep          # Foundry/Speech accounts + GPT-5-series deployments
+│       ├── foundry-agents.bicep          # Foundry project, BYO connections, App Insights link
+│       ├── foundry-agent-rbac.bicep      # Cosmos/Storage RBAC for the project identity
+│       ├── foundry-agent-capability-host.bicep # Agent Service switch (immutable, quota-gated)
+│       ├── appinsights-agent-access.bicep # Cross-RG App Insights reader roles for the project
+│       ├── ai-search.bicep               # AI Search service (procedure corpus + Foundry IQ source)
+│       ├── cosmos.bicep                  # Cosmos DB for NoSQL — agent thread storage
 │       ├── monitoring.bicep              # Log Analytics + App Insights + Sentinel onboarding
 │       ├── alerts.bicep                  # Metric/log alert rules + action group
 │       ├── logicapp-capacity-lifecycle.bicep  # 01:00 Europe/Luxembourg pause workflow (non-prod)
@@ -81,7 +97,7 @@ DPO approval regardless of this parameter (`deployment-topology.md` §2.3).
 | `rg-ns-<env>-hub` | Hub+spoke VNet, subnets, NSGs, private DNS zones, optional Azure Firewall |
 | `rg-ns-<env>-integration` | Event Hubs, OT-gateway Key Vault |
 | `rg-ns-<env>-apps` | Managed identities, platform Key Vault, fallback-pack storage, Container Apps environment/apps/jobs |
-| `rg-ns-<env>-ai` | Foundry/Speech accounts, audio/transcript storage |
+| `rg-ns-<env>-ai` | Foundry/Speech accounts, Foundry project + Agent Service, AI Search, Cosmos DB agent threads, audio/transcript/agent storage |
 | `rg-ns-<env>-fabric` | Fabric capacity, capacity-lifecycle Logic App (non-prod) |
 | `rg-ns-<env>-monitoring` | Log Analytics, Application Insights, Sentinel onboarding |
 
@@ -161,11 +177,40 @@ Azure/Fabric pricing calculator at deployment time, never copied from a document
 ## Outputs consumed downstream
 
 `main.bicep` outputs (resource group names, Fabric capacity ID/name, Event Hubs namespace/hub
-names, Key Vault URIs, Log Analytics/App Insights IDs, Foundry/Speech endpoints, the GitHub OIDC
+names, Key Vault URIs, Log Analytics/App Insights IDs, Foundry/Speech endpoints, the Foundry
+project endpoint and name, the chat/reasoning deployment names, the AI Search endpoint plus its
+procedure index and knowledge-base names, the agent-thread Cosmos account, the GitHub OIDC
 client ID, and the Container Apps environment ID) are intended to populate
 `fabric/deployment-parameters/<env>.json` (owned by the Fabric workstream) and application
 configuration — never a secret value, only resource identifiers/endpoints, consistent with
 `implementation-guide.md` §9.3's "no secrets, only identifiers" rule.
+
+## Agent Service and Foundry IQ topology
+
+The "standard" (bring-your-own-storage) Agent Service setup is used rather than the basic one,
+so that every byte an agent persists lands in a NovaSteel-owned, private, EU-resident account —
+a prerequisite for GDPR erasure and for the residency commitments in
+`deployment-topology.md` §2.3. Three modules deploy in a fixed order because the ordering is
+load-bearing:
+
+1. `foundry-agents.bicep` — the project, its `CognitiveSearch`/`CosmosDB`/`AzureStorageAccount`
+   connections (all `authType: 'AAD'`, no keys) and the account-level `AppInsights` connection.
+2. `foundry-agent-rbac.bicep` — Cosmos DB Operator, Cosmos SQL data contributor, Storage Account
+   Contributor and Storage Blob Data Owner for the **project's** managed identity.
+3. `foundry-agent-capability-host.bicep` — the account- and project-level capability hosts.
+
+Step 2 cannot be merged into step 1 (the project principal ID is only known after step 1) and
+must not be merged into step 3: at capability-host creation the platform provisions the
+`enterprise_memory` Cosmos database and the agent blob containers *as the project identity*, so
+those roles have to exist first. Do not pre-create `enterprise_memory` or its containers.
+
+Observability is wired through the `AppInsights` connection on the **account** (not the project),
+which is what populates the Foundry portal's Tracing and Monitoring blades, plus
+`appinsights-agent-access.bicep`, which grants the project identity Log Analytics Reader and
+Privileged Monitoring Data Reader on the component so the portal can read the traces back. The
+component lives in `rg-ns-<env>-monitoring` while the project lives in `rg-ns-<env>-ai`, and a
+resource-group-scoped module may only assign roles inside its own resource group — hence the
+separate module rather than a few more lines in `foundry-agents.bicep`.
 
 ## Deployment blockers / manual gates (must be cleared before go-live, not assumed)
 
@@ -173,7 +218,9 @@ configuration — never a secret value, only resource identifiers/endpoints, con
 |---|---|---|
 | **Fabric tenant capacity quota/region proof** | `Microsoft.Fabric/capacities` ARM creation can still fail on tenant-level quota/feature availability even though Sweden Central/West Europe are listed regions. | Re-verify in the target tenant immediately before deployment (`docs/research/fabric-platform.md`). |
 | **Fabric SaaS-item provisioning** (workspaces, Eventstream, Eventhouse/KQL, Lakehouse, pipelines, notebooks, semantic model, Power BI) | Not ARM resources; Bicep cannot create them by design. | Fabric REST API / portal / Git integration, owned by the `fabric/` workstream, after this template's capacity resource exists. |
-| **Microsoft Foundry Agent Service project/agent** | Regional/tool/model/quota availability is not guaranteed and must not be assumed (`docs/research/azure-ai-regions.md`). This template provisions only the base Foundry/Speech resource accounts. | Execute the deployment validation checklist in `azure-ai-regions.md`, then set `foundryAgentServiceManuallyValidated=true` as a record of that manual step (this flag does not itself create an Agent Service project). |
+| **Microsoft Foundry Agent Service capability host** | The project, its BYO connections and RBAC deploy unconditionally, but a `capabilityHosts` resource is **immutable** — it cannot later be repointed at a different Cosmos/Search/Storage account, so creating it before the stores are final means recreating the project. Regional/tool/model/quota availability is also not guaranteed (`docs/research/azure-ai-regions.md`). | Execute the deployment validation checklist in `azure-ai-regions.md`, confirm the AI Search, Cosmos and agent storage accounts are the ones you intend to keep, then set `foundryAgentServiceManuallyValidated=true`. |
+| **AI Search index, Foundry IQ knowledge base, and the agents themselves** | No ARM types exist for these; they are data-plane objects created through the search and project endpoints. | The knowledge orchestrator provisions them at startup (`search_store.py`, `foundry_iq.py`, `agent_service.py`) using its managed identity. Nothing to do in Bicep. |
+| **Web IQ / web search grounding** | Web knowledge sources are a First Party Consumption Service: the Microsoft DPA does not apply, data leaves the Azure compliance and geo boundary, and they are unavailable in sovereign clouds — incompatible with NovaSteel's default EU-residency posture. | `onlineSearchMode` defaults to `offline`. Setting `web_iq`/`web_search` requires DPO sign-off; the allowed-domain list is restricted to standards bodies in the orchestrator's configuration. |
 | **GitHub repository/environment configuration** | `githubOrg`/`githubRepo` parameters default to empty; the federated credential is only created once both are supplied. | Set the real org/repo in the target environment's `.bicepparam` before deploying, or use `setup-github-oidc-app-registration.ps1` for the alternative path. |
 | **Subscription-wide policy guardrails** | `deployGuardrails` defaults to `false` in dev/test/demo parameter files to avoid racy concurrent subscription-scoped writes if multiple environments deploy in parallel. | Deploy exactly one environment (the shipped `prod.bicepparam` sets `deployGuardrails=true`) as the designated governance run, or adjust which environment owns it per your rollout order. |
 | **Production onboarding** | Real EU operational/personal data must not flow until DPO/legal, OT, security/RAI, capacity/DR, and source/market-license gates are signed (`deployment-topology.md` §9, `solution-architecture.md` §13 step 8). | Manual governance sign-off; this template does not and cannot certify legal/DPO approval. |

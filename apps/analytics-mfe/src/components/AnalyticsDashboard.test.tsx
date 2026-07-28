@@ -14,6 +14,20 @@ describe('AnalyticsDashboard (UI smoke)', () => {
     expect(await screen.findByText('Active alerts')).toBeInTheDocument()
   })
 
+  it('opens the screen narrative from the affordance beside the page title', async () => {
+    const user = userEvent.setup()
+    render(<AnalyticsDashboard context={testShellContext()} emit={() => undefined} />)
+
+    await screen.findByRole('heading', { name: 'Command Center', level: 1 })
+    await user.click(screen.getByTestId('section-insight-toggle'))
+
+    const popup = await screen.findByTestId('section-insight-popup')
+    expect(popup).toHaveTextContent('How this platform creates value')
+
+    await user.keyboard('{Escape}')
+    expect(screen.queryByTestId('section-insight-popup')).not.toBeInTheDocument()
+  })
+
   it('renders the furnace lining forecast screen with the RUL uncertainty band', async () => {
     render(
       <AnalyticsDashboard

@@ -89,8 +89,16 @@ param budgetContactEmails array
 @description('Budget start date, first day of a month, e.g. 2026-08-01T00:00:00Z.')
 param budgetStartDate string = '2026-08-01T00:00:00Z'
 
-@description('MANUAL/QUOTA GATE — set true only after the research/azure-ai-regions.md deployment validation checklist has been executed in the target tenant. Does not itself enable Agent Service.')
+@description('MANUAL/QUOTA GATE — set true only after the research/azure-ai-regions.md deployment validation checklist has been executed in the target tenant. Also gates creation of the Agent Service capability host, which is immutable once created.')
 param foundryAgentServiceManuallyValidated bool = false
+
+@description('Backend for the Copilot "Online search" toggle. web_iq uses the Foundry IQ web knowledge source, web_search uses the Agent Service web search tool, offline uses the curated in-repo public-context corpus. Defaults to offline: both web backends are First Party Consumption Services, so queries leave the Azure compliance and geo boundary and the Microsoft DPA does not cover them — enabling either is a deliberate, documented decision (security-governance-and-threat-model.md §4.1).')
+@allowed([
+  'web_iq'
+  'web_search'
+  'offline'
+])
+param onlineSearchMode string = 'offline'
 
 @description('Deploy the placeholder Container Apps (bff-api, workers, ingest-relay, knowledge-orchestrator) and, for non-prod, the simulator publisher Job. Set false to provision only the platform (network/identity/data/monitoring) layer first.')
 param deployContainerAppsPlaceholders bool = true
@@ -436,8 +444,16 @@ module foundrySpeech 'modules/foundry-speech.bicep' = {
         roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd')
       }
       {
-        // Cognitive Services OpenAI User — knowledge-orchestrator makes live GPT-4o calls (M3)
+        // Cognitive Services OpenAI User — knowledge-orchestrator makes live GPT-5 calls (M3)
         principalId: identity.outputs.knowledgeOrchestratorPrincipalId
+        roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd')
+      }
+      {
+        // Cognitive Services OpenAI User for the AI Search service identity. Required
+        // for integrated vectorization: Search calls the embedding deployment itself
+        // when indexing a procedure and when vectorizing an incoming query, so no
+        // embedding keys ever leave the Foundry account.
+        principalId: aiSearch.outputs.searchPrincipalId
         roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd')
       }
     ]
@@ -448,6 +464,145 @@ module foundrySpeech 'modules/foundry-speech.bicep' = {
       }
     ]
   }
+}
+
+// ---------------------------------------------------------------------------
+// Procedure knowledge store + Foundry Agent Service backing resources
+// ---------------------------------------------------------------------------
+// Azure AI Search holds the approved procedures (the corpus the Copilot cites from,
+// and the knowledge source behind the Foundry IQ knowledge base). Cosmos DB and the
+// agents storage account are the BYO thread/file stores that Foundry Agent Service
+// "standard" setup requires — see modules/foundry-agents.bicep for why we take the
+// BYO route rather than Microsoft-managed storage.
+module aiSearch 'modules/ai-search.bicep' = {
+  name: 'ns-${environment}-ai-search'
+  scope: rgAi
+  params: {
+    environment: environment
+    location: location
+    tags: commonTags
+    privateEndpointSubnetId: network.outputs.subnetIds.aiPrivateEndpoints
+    searchPrivateDnsZoneId: network.outputs.privateDnsZoneIds.search
+    logAnalyticsWorkspaceId: monitoring.outputs.logAnalyticsWorkspaceId
+    skuName: isProd ? 'standard' : 'basic'
+    roleAssignments: [
+      {
+        // Search Index Data Contributor — knowledge-orchestrator writes approved
+        // procedures into the index and deletes them on GDPR erasure.
+        principalId: identity.outputs.knowledgeOrchestratorPrincipalId
+        roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '8ebe5a00-799e-43f5-93ac-243d3dce84a7')
+      }
+      {
+        // Search Service Contributor — the orchestrator creates/updates the index,
+        // the knowledge source and the knowledge base at startup (data-plane objects
+        // that Bicep cannot express).
+        principalId: identity.outputs.knowledgeOrchestratorPrincipalId
+        roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7ca78c08-252a-4471-8644-bb5ff32d4ba0')
+      }
+      {
+        // Search Index Data Reader — the BFF only ever queries.
+        principalId: identity.outputs.bffPrincipalId
+        roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '1407120a-92aa-4202-b7e9-c0e197c71c8f')
+      }
+    ]
+  }
+}
+
+module cosmosAgentThreads 'modules/cosmos.bicep' = {
+  name: 'ns-${environment}-cosmos-threads'
+  scope: rgAi
+  params: {
+    environment: environment
+    location: location
+    tags: commonTags
+    privateEndpointSubnetId: network.outputs.subnetIds.aiPrivateEndpoints
+    cosmosPrivateDnsZoneId: network.outputs.privateDnsZoneIds.cosmosDb
+    logAnalyticsWorkspaceId: monitoring.outputs.logAnalyticsWorkspaceId
+    zoneRedundant: isProd
+  }
+}
+
+module storageAgents 'modules/storage.bicep' = {
+  name: 'ns-${environment}-storage-agents'
+  scope: rgAi
+  params: {
+    name: 'stnsagents${environment}${regionAbbrev}'
+    location: location
+    tags: commonTags
+    // Agent file uploads can contain interview-derived content, same class as the
+    // audio/transcript store.
+    dataClassification: 'HighlyConfidential'
+    // Deliberately empty: Agent Service creates and names its own containers when the
+    // project capability host is provisioned.
+    containers: []
+    privateEndpointSubnetId: network.outputs.subnetIds.aiPrivateEndpoints
+    privateDnsZoneId: network.outputs.privateDnsZoneIds.blob
+    logAnalyticsWorkspaceId: monitoring.outputs.logAnalyticsWorkspaceId
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Foundry Agent Service — project, connections, observability link, capability host
+// ---------------------------------------------------------------------------
+// Deployed as a four-step chain because the ordering is load-bearing:
+//   foundryAgents          -> project + BYO connections + App Insights connection
+//   appInsightsAgentAccess -> project identity can read back its own traces
+//   foundryAgentRbac       -> project identity can write to Cosmos/Storage/Search
+//   foundryAgentCapability -> switches Agent Service on (needs all of the above)
+// The last step is behind the manual quota gate because a capability host is
+// immutable once created.
+module foundryAgents 'modules/foundry-agents.bicep' = {
+  name: 'ns-${environment}-foundry-agents'
+  scope: rgAi
+  params: {
+    environment: environment
+    location: location
+    tags: commonTags
+    foundryAccountName: foundrySpeech.outputs.foundryAccountName
+    searchServiceName: aiSearch.outputs.searchServiceName
+    searchServiceId: aiSearch.outputs.searchServiceId
+    cosmosAccountName: cosmosAgentThreads.outputs.cosmosAccountName
+    cosmosAccountId: cosmosAgentThreads.outputs.cosmosAccountId
+    cosmosDocumentEndpoint: cosmosAgentThreads.outputs.cosmosDocumentEndpoint
+    agentStorageAccountName: storageAgents.outputs.storageAccountName
+    agentStorageAccountId: storageAgents.outputs.storageAccountId
+    agentStorageBlobEndpoint: storageAgents.outputs.primaryBlobEndpoint
+    appInsightsId: monitoring.outputs.appInsightsId
+  }
+}
+
+module appInsightsAgentAccess 'modules/appinsights-agent-access.bicep' = {
+  name: 'ns-${environment}-appi-agent-access'
+  scope: rgMonitoring
+  params: {
+    appInsightsName: monitoring.outputs.appInsightsName
+    projectPrincipalId: foundryAgents.outputs.projectPrincipalId
+  }
+}
+
+module foundryAgentRbac 'modules/foundry-agent-rbac.bicep' = {
+  name: 'ns-${environment}-foundry-agent-rbac'
+  scope: rgAi
+  params: {
+    cosmosAccountName: cosmosAgentThreads.outputs.cosmosAccountName
+    agentStorageAccountName: storageAgents.outputs.storageAccountName
+    projectPrincipalId: foundryAgents.outputs.projectPrincipalId
+  }
+}
+
+module foundryAgentCapabilityHost 'modules/foundry-agent-capability-host.bicep' = if (foundryAgentServiceManuallyValidated) {
+  name: 'ns-${environment}-foundry-caphost'
+  scope: rgAi
+  params: {
+    foundryAccountName: foundrySpeech.outputs.foundryAccountName
+    projectName: foundryAgents.outputs.projectName
+    searchConnectionName: foundryAgents.outputs.searchConnectionName
+    cosmosConnectionName: foundryAgents.outputs.cosmosConnectionName
+    storageConnectionName: foundryAgents.outputs.storageConnectionName
+  }
+  dependsOn: [
+    foundryAgentRbac
+  ]
 }
 
 // ---------------------------------------------------------------------------
@@ -470,6 +625,12 @@ module containerApps 'modules/containerapps.bicep' = if (deployContainerAppsPlac
     foundryEndpoint: foundrySpeech.outputs.foundryEndpoint
     foundryChatDeployment: foundrySpeech.outputs.gptDeploymentModelName
     foundryEmbedDeployment: foundrySpeech.outputs.embeddingDeploymentModelName
+    foundryReasoningDeployment: foundrySpeech.outputs.reasoningDeploymentModelName
+    foundryProjectEndpoint: foundryAgents.outputs.projectEndpoint
+    searchEndpoint: aiSearch.outputs.searchEndpoint
+    searchIndexName: aiSearch.outputs.procedureIndexName
+    knowledgeBaseName: aiSearch.outputs.knowledgeBaseName
+    onlineSearchMode: onlineSearchMode
     deploySimulatorJob: !isProd
     simulatorIdentityId: isProd ? '' : identity.outputs.simulatorIdentityId
     services: {
@@ -566,5 +727,19 @@ output containerAppsEnvironmentId string = deployContainerAppsPlaceholders ? (co
 output capacityLifecycleLogicAppId string = isProd ? '' : (logicAppCapacityLifecycle.?outputs.?workflowId ?? '')
 output audioStorageAccountName string = storageAudio.outputs.storageAccountName
 output fallbackStorageAccountName string = storageFallback.outputs.storageAccountName
+output agentStorageAccountName string = storageAgents.outputs.storageAccountName
+output searchEndpoint string = aiSearch.outputs.searchEndpoint
+output searchServiceName string = aiSearch.outputs.searchServiceName
+output procedureIndexName string = aiSearch.outputs.procedureIndexName
+output knowledgeBaseName string = aiSearch.outputs.knowledgeBaseName
+output cosmosAgentThreadsAccountName string = cosmosAgentThreads.outputs.cosmosAccountName
+@description('Foundry project data-plane endpoint. Agent definitions are created here by the knowledge-orchestrator at startup; ARM has no agent resource type.')
+output foundryProjectEndpoint string = foundryAgents.outputs.projectEndpoint
+output foundryProjectName string = foundryAgents.outputs.projectName
+@description('True once the Agent Service capability host has been provisioned. Until then the project exists but cannot run agents, and the orchestrator stays on its local fallback.')
+output agentServiceReady bool = foundryAgentServiceManuallyValidated
+output foundryChatDeployment string = foundrySpeech.outputs.gptDeploymentModelName
+output foundryReasoningDeployment string = foundrySpeech.outputs.reasoningDeploymentModelName
+output onlineSearchMode string = onlineSearchMode
 output secondaryLocation string = secondaryLocation
 output alertsActionGroupId string = alerts.outputs.actionGroupId

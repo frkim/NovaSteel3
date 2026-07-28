@@ -55,6 +55,27 @@ from .retrieval import (
     extract_citations,
 )
 from .pii import PiiMatch, RedactionResult, detect, pseudonymize, redact
+from .search_store import (
+    AzureSearchProcedureStore,
+    LocalProcedureStore,
+    ProcedureStore,
+    SearchStoreConfig,
+    create_procedure_store,
+)
+from .foundry_iq import (
+    FoundryIQProvisioner,
+    KnowledgeBaseConfig,
+    KnowledgeBaseProvisionResult,
+    online_search_mode,
+    provision_knowledge_base,
+)
+from .agent_service import (
+    AgentServiceStatus,
+    FoundryAgentService,
+    HostedAgent,
+    agent_service_status,
+    host_agents,
+)
 from .content_safety import (
     LocalHeuristicContentSafety,
     SafetyCategory,
@@ -106,6 +127,21 @@ __all__ = [
     "detect",
     "redact",
     "pseudonymize",
+    "ProcedureStore",
+    "AzureSearchProcedureStore",
+    "LocalProcedureStore",
+    "SearchStoreConfig",
+    "create_procedure_store",
+    "KnowledgeBaseConfig",
+    "KnowledgeBaseProvisionResult",
+    "FoundryIQProvisioner",
+    "provision_knowledge_base",
+    "online_search_mode",
+    "AgentServiceStatus",
+    "FoundryAgentService",
+    "HostedAgent",
+    "agent_service_status",
+    "host_agents",
     "SafetyCategory",
     "SafetyVerdict",
     "LocalHeuristicContentSafety",

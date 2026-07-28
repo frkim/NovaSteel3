@@ -17,6 +17,23 @@ param portalBffBaseUrl = 'https://placeholder.invalid'
 
 // AI/Speech and budget require an explicit operator opt-in.
 param deployAiServices = false
+
+// Model deployments are gated separately from the accounts: availability and quota
+// for the GPT-5 series are per-subscription and can fail independently.
+param deployModelDeployments = false
+
+// AI Search bills a fixed monthly amount whether or not it is queried, so the agent
+// estate stays opt-in for this cost-capped demo.
+param deployAgentPlatform = false
+
+// A capability host is IMMUTABLE once created and cannot be repointed at different
+// Search/Cosmos/Storage accounts. Leave false until those three are final.
+param agentServiceManuallyValidated = false
+
+// Web IQ and web search are First Party Consumption Services: the Microsoft DPA does
+// not apply and queries leave the Azure compliance boundary. Offline needs no gate.
+param onlineSearchMode = 'offline'
+
 param deployBudget = false
 param monthlyBudgetAmount = 250
 param budgetStartDate = '2026-08-01T00:00:00Z'

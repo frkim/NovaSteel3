@@ -63,7 +63,7 @@ by the catalog actually exists in the repository.
 | TR-DEV-02 | Development | Implementation completeness | 4 | 19 requirements fully mapped with proof catalog; 20-gate validator; minor gap: some batch/MES integrations are design-only. |
 | TR-MON-01 | Monitoring | Logging and metrics | 5 | OpenTelemetry with Azure Monitor in all services; structured JSON logging with trace-id correlation; 10 Bicep-defined alert rules; Activator notification rules; business-KPI gauges. |
 | TR-AI-01 | AI Integration | Use of AI technologies | 5 | Physics-informed RUL model, MILP energy optimiser, hybrid BM25+semantic RAG, Azure Speech STT, Foundry Agent Service, screen-aware Copilot panel with five-language support. |
-| TR-AI-02 | AI Integration | AI model selection and deployment | 4 | gpt-4o default / o4-mini reasoning tier via Azure AI Foundry with managed identity; EU Data Zone placement; model versioning in code; gap: no MLflow registry artefact in the repo. |
+| TR-AI-02 | AI Integration | AI model selection and deployment | 4 | gpt-5.4-mini default / gpt-5.5 high-reasoning tier via Azure AI Foundry with managed identity; EU Data Zone placement; model versioning in code; gap: no MLflow registry artefact in the repo. |
 | TR-AGT-01 | Agentic Behaviour | Autonomy and orchestration | 5 | Knowledge-capture workflow is an explicit StateGraph with gated human-in-the-loop nodes; consent, PII, grounding, content-safety, and critic reflection all execute autonomously before the human gate. |
 | TR-AGT-02 | Agentic Behaviour | Multi-agent coordination | 5 | Handoff protocol between energy-dispatch and RUL/scoring agents; critic/reflection loop capped at 2 iterations; tool allow-list with forbidden-action enforcement; Protocol-based ports. |
 | TR-ARC-01 | Additional Architecture | Performance and reliability | 4 | VNet-integrated Container Apps; zone-redundancy parameter; idempotency boundary; retry/circuit-breaker patterns; Activator-based alerting; gap: no load-test results or documented SLA targets. |
@@ -942,7 +942,7 @@ consent is not in `GRANTED` state. The adapter supports both Azure Speech
 
 Automatic reasoning-tier selection (`AUTO_LENGTH_THRESHOLD = 120` characters
 plus keyword detection across all five languages) routes complex questions to
-the `o4-mini` reasoning model. Per-language answer templates cover context,
+the `gpt-5.5` high-reasoning deployment (`reasoning_effort="high"`). Per-language answer templates cover context,
 definition, screen summary, related concepts, online/offline mode,
 reasoning explanation, no-match fallback, refused (injection detected),
 synthetic-data disclaimer, and steel-knowledge grounding.
@@ -1014,8 +1014,8 @@ patterns, each with a different model choice:
 
 | Surface | Default model | Reasoning model | Rationale |
 |---|---|---|---|
-| Copilot chat (default tier) | `gpt-4o` | — | General-purpose, fast, multi-language |
-| Copilot chat (high tier) | — | `o4-mini` | Analytical/compare/simulate questions |
+| Copilot chat (default tier) | `gpt-5.4-mini` (`reasoning_effort="minimal"`) | — | General-purpose, fast, multi-language, low latency |
+| Copilot chat (high tier) | — | `gpt-5.5` (`reasoning_effort="high"`) | Analytical/compare/simulate questions |
 | Knowledge extraction | Configurable via `FOUNDRY_CHAT_DEPLOYMENT` | — | Domain extraction with tool calls |
 
 Automatic reasoning-tier selection routes questions based on keyword detection
@@ -1064,8 +1064,9 @@ per-case results, supporting the model-governance evidence discipline.
 #### Evidence
 
 - `services/knowledge-orchestrator/src/knowledge_orchestrator/copilot/agents.py`
-  — `DEFAULT_CHAT_DEPLOYMENT = "gpt-4o"`,
-  `DEFAULT_REASONING_DEPLOYMENT = "o4-mini"`,
+  — `DEFAULT_CHAT_DEPLOYMENT = "gpt-5.4-mini"`,
+  `DEFAULT_REASONING_DEPLOYMENT = "gpt-5.5"`,
+  `REASONING_EFFORT_BY_TIER`, `MAX_COMPLETION_TOKENS_BY_TIER`,
   `FOUNDRY_SCOPE = "https://cognitiveservices.azure.com/.default"`,
   `DEFAULT_API_VERSION = "2025-01-01-preview"`.
 - `services/knowledge-orchestrator/src/knowledge_orchestrator/adapter_factory.py`

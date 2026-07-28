@@ -48,6 +48,23 @@ param portalBffBaseUrl string = 'https://placeholder.invalid'
 @description('Create the base Azure AI Services and Speech S0 accounts only after their Sweden Central availability has been reconfirmed.')
 param deployAiServices bool = false
 
+@description('Create the GPT-5-series chat/reasoning and embedding model deployments. Separate from deployAiServices because model availability and quota must be reconfirmed in Sweden Central first. Without these the Copilot and knowledge features run on offline fixtures.')
+param deployModelDeployments bool = false
+
+@description('Create Azure AI Search, Cosmos DB agent-thread storage and the Foundry project. AI Search bills a fixed monthly amount whether or not it is queried, so this stays opt-in for a cost-capped demo estate.')
+param deployAgentPlatform bool = false
+
+@description('Create the Agent Service capability hosts. A capability host is IMMUTABLE — it cannot later be repointed at different Search/Cosmos/Storage accounts. Leave false until those three are final.')
+param agentServiceManuallyValidated bool = false
+
+@description('Online-search backend for Copilot chat. Web IQ and web search are First Party Consumption Services: the Microsoft DPA does not apply and queries leave the Azure compliance boundary, so anything other than offline needs DPO sign-off.')
+@allowed([
+  'offline'
+  'web_iq'
+  'web_search'
+])
+param onlineSearchMode string = 'offline'
+
 @description('Create the optional resource-group budget and notifications. Disabled until an owner validates the monthly amount.')
 param deployBudget bool = false
 
@@ -117,15 +134,31 @@ module platform './modules/platform.bicep' = {
     fabricAdministrator: fabricAdministrator
     fabricCapacityLifecycleRoleDefinitionId: fabricCapacityLifecycleRole.id
     deployAiServices: deployAiServices
+    deployModelDeployments: deployModelDeployments
+  }
+}
+
+// Requires deployAiServices: the project is a child of the AIServices account and
+// the search service needs the embedding deployment for integrated vectorization.
+module agentPlatform './modules/agent-platform.bicep' = if (deployAiServices && deployAgentPlatform) {
+  name: '${resourcePrefix}-agents'
+  scope: demoResourceGroup
+  params: {
+    location: location
+    resourcePrefix: resourcePrefix
+    nameSuffix: nameSuffix
+    tags: commonTags
+    aiServicesName: platform.outputs.aiServicesName
+    storageAccountName: platform.outputs.storageAccountName
+    appInsightsName: platform.outputs.appInsightsName
+    agentServiceManuallyValidated: agentServiceManuallyValidated
+    bffPrincipalId: platform.outputs.bffIdentityPrincipalId
   }
 }
 
 module apps './modules/apps.bicep' = if (deployApps) {
   name: '${resourcePrefix}-apps'
   scope: demoResourceGroup
-  dependsOn: [
-    platform
-  ]
   params: {
     location: location
     resourcePrefix: resourcePrefix
@@ -136,6 +169,15 @@ module apps './modules/apps.bicep' = if (deployApps) {
     bffImage: bffImage
     portalOrigin: portalOrigin
     portalBffBaseUrl: portalBffBaseUrl
+    foundryEndpoint: platform.outputs.aiServicesEndpoint
+    foundryChatDeployment: platform.outputs.chatDeploymentName
+    foundryReasoningDeployment: platform.outputs.reasoningDeploymentName
+    foundryEmbedDeployment: platform.outputs.embeddingDeploymentName
+    foundryProjectEndpoint: deployAiServices && deployAgentPlatform ? (agentPlatform.?outputs.?projectEndpoint ?? '') : ''
+    searchEndpoint: deployAiServices && deployAgentPlatform ? (agentPlatform.?outputs.?searchEndpoint ?? '') : ''
+    searchIndexName: deployAiServices && deployAgentPlatform ? (agentPlatform.?outputs.?procedureIndexName ?? '') : ''
+    knowledgeBaseName: deployAiServices && deployAgentPlatform ? (agentPlatform.?outputs.?knowledgeBaseName ?? '') : ''
+    onlineSearchMode: onlineSearchMode
   }
 }
 
@@ -170,6 +212,9 @@ output resourceIds object = {
   applicationInsights: platform.outputs.appInsightsId
   aiServices: platform.outputs.aiServicesId
   speech: platform.outputs.speechId
+  searchService: deployAiServices && deployAgentPlatform ? (agentPlatform.?outputs.?searchServiceId ?? '') : ''
+  cosmosAccount: deployAiServices && deployAgentPlatform ? (agentPlatform.?outputs.?cosmosAccountId ?? '') : ''
+  foundryProject: deployAiServices && deployAgentPlatform ? (agentPlatform.?outputs.?projectId ?? '') : ''
   budget: deployBudget ? (budget.?outputs.?budgetId ?? '') : ''
 }
 output resourceNames object = {
@@ -189,6 +234,9 @@ output resourceNames object = {
   applicationInsights: platform.outputs.appInsightsName
   aiServices: platform.outputs.aiServicesName
   speech: platform.outputs.speechName
+  searchService: deployAiServices && deployAgentPlatform ? (agentPlatform.?outputs.?searchServiceName ?? '') : ''
+  cosmosAccount: deployAiServices && deployAgentPlatform ? (agentPlatform.?outputs.?cosmosAccountName ?? '') : ''
+  foundryProject: deployAiServices && deployAgentPlatform ? (agentPlatform.?outputs.?projectName ?? '') : ''
 }
 output hostnames object = {
   containerRegistry: platform.outputs.acrLoginServer
@@ -199,9 +247,23 @@ output hostnames object = {
   eventHubs: platform.outputs.eventHubsHostName
   aiServices: platform.outputs.aiServicesEndpoint
   speech: platform.outputs.speechEndpoint
+  search: deployAiServices && deployAgentPlatform ? (agentPlatform.?outputs.?searchEndpoint ?? '') : ''
+  foundryProject: deployAiServices && deployAgentPlatform ? (agentPlatform.?outputs.?projectEndpoint ?? '') : ''
+}
+output modelDeployments object = {
+  chat: platform.outputs.chatDeploymentName
+  reasoning: platform.outputs.reasoningDeploymentName
+  embedding: platform.outputs.embeddingDeploymentName
+}
+output agentPlatformNames object = {
+  procedureIndex: deployAiServices && deployAgentPlatform ? (agentPlatform.?outputs.?procedureIndexName ?? '') : ''
+  knowledgeBase: deployAiServices && deployAgentPlatform ? (agentPlatform.?outputs.?knowledgeBaseName ?? '') : ''
 }
 output deploymentFlags object = {
   deployApps: deployApps
   deployAiServices: deployAiServices
+  deployModelDeployments: deployModelDeployments
+  deployAgentPlatform: deployAgentPlatform
+  agentServiceReady: deployAiServices && deployAgentPlatform && agentServiceManuallyValidated
   deployBudget: deployBudget
 }

@@ -32,7 +32,8 @@ from .models import (
     ReasoningTier,
     SourceKind,
 )
-from .online import online_context
+from .online import MAX_HITS
+from .online_provider import OnlineSearchProvider, create_online_search_provider
 
 logger = logging.getLogger(__name__)
 
@@ -42,9 +43,30 @@ ENV_DEPLOYMENT_DEFAULT = "FOUNDRY_CHAT_DEPLOYMENT"
 ENV_DEPLOYMENT_HIGH = "FOUNDRY_REASONING_DEPLOYMENT"
 ENV_API_VERSION = "FOUNDRY_API_VERSION"
 
-DEFAULT_CHAT_DEPLOYMENT = "gpt-4o"
-DEFAULT_REASONING_DEPLOYMENT = "o4-mini"
+DEFAULT_CHAT_DEPLOYMENT = "gpt-5.4-mini"
+DEFAULT_REASONING_DEPLOYMENT = "gpt-5.5"
 DEFAULT_API_VERSION = "2025-01-01-preview"
+
+# GPT-5 models expose an explicit reasoning budget. Mapping the UI's reasoning
+# toggle onto both a different deployment *and* a different effort level is what
+# makes "high reasoning" mean something: the high tier gets the larger model and
+# lets it think, while the default tier stays on the mini model with minimal
+# reasoning so the panel keeps answering at conversational latency.
+#
+# 'minimal' also disables parallel tool calls, which is fine here — the chat
+# adapter makes a single grounded completion call and no tool calls at all.
+REASONING_EFFORT_BY_TIER = {
+    "default": "minimal",
+    "high": "high",
+}
+
+# The high tier is given more room to answer as well as more room to think:
+# reasoning tokens are billed against the same completion budget, so reusing the
+# default cap would leave a heavily-reasoning model with nothing left to say.
+MAX_COMPLETION_TOKENS_BY_TIER = {
+    "default": 900,
+    "high": 4000,
+}
 
 FOUNDRY_SCOPE = "https://cognitiveservices.azure.com/.default"
 
@@ -178,12 +200,18 @@ class LocalCopilotChatAgent:
     """Deterministic offline chat agent.
 
     Composes an answer from exactly three grounded ingredients: the resolved
-    screen, the glossary and -- optionally -- the curated public-context
-    corpus. Because nothing is generated, the same question always produces the
-    same answer, which is what makes the demo reproducible.
+    screen, the glossary and -- optionally -- public context supplied by the
+    configured online-search provider. With the default ``offline`` provider
+    nothing is generated, so the same question always produces the same answer,
+    which is what makes the demo reproducible.
     """
 
     agent_name = "copilot-chat-local"
+
+    def __init__(self, online_provider: Optional["OnlineSearchProvider"] = None) -> None:
+        # Resolved once per agent rather than per turn: selecting the backend reads
+        # the environment and may construct a credential.
+        self._online = online_provider or create_online_search_provider()
 
     def answer(self, request: ChatTurnRequest) -> ChatTurnResult:
         language = request.language
@@ -301,7 +329,13 @@ class LocalCopilotChatAgent:
 
         online_used = False
         if request.online_search:
-            hits = [] if general else online_context(resolved, request.question, language)
+            hits = (
+                []
+                if general
+                else self._online.search(
+                    resolved, request.question, language, limit=MAX_HITS
+                )
+            )
             seen = {hit.source_id for hit in hits}
             bullets = [f"- {hit.title} \u2014 {hit.snippet}" for hit in hits]
             extra_sources = [
@@ -325,6 +359,7 @@ class LocalCopilotChatAgent:
                 paragraphs.append(f"{strings['online_on']}\n" + "\n".join(bullets))
                 sources.extend(extra_sources)
                 trace.append(f"online context: {sorted(seen)}")
+                trace.append(f"online backend: {self._online.mode}")
         else:
             paragraphs.append(strings["online_off"])
 
@@ -393,9 +428,11 @@ class AzureFoundryChatAgent:
     """Chat agent backed by an Azure AI Foundry deployment.
 
     One instance per reasoning tier so the tier maps onto a genuinely different
-    deployment rather than a prompt tweak. Authentication uses
-    ``DefaultAzureCredential`` (managed identity in Azure, developer identity
-    locally); no API key is ever read or stored.
+    deployment rather than a prompt tweak: the default tier runs a 5-series mini
+    model with minimal reasoning effort, the high tier runs the advanced model
+    with high effort. Authentication uses ``DefaultAzureCredential`` (managed
+    identity in Azure, developer identity locally); no API key is ever read or
+    stored.
     """
 
     def __init__(
@@ -411,6 +448,8 @@ class AzureFoundryChatAgent:
         self.endpoint = (endpoint or os.environ.get(ENV_ENDPOINT, "")).rstrip("/")
         self.deployment = deployment or _deployment_for(tier)
         self.api_version = api_version or os.environ.get(ENV_API_VERSION, DEFAULT_API_VERSION)
+        self.reasoning_effort = REASONING_EFFORT_BY_TIER.get(tier.value, "minimal")
+        self.max_completion_tokens = MAX_COMPLETION_TOKENS_BY_TIER.get(tier.value, 900)
         self._credential = credential
         self._fallback = fallback or LocalCopilotChatAgent()
         self.agent_name = f"copilot-chat-{tier.value}"
@@ -419,6 +458,23 @@ class AzureFoundryChatAgent:
         credential = self._credential or _default_credential()
         return credential.get_token(FOUNDRY_SCOPE).token
 
+    def _request_body(self, system: str, user: str) -> dict:
+        """Build the chat-completions payload for this tier.
+
+        Note ``max_completion_tokens`` rather than ``max_tokens``: the 5-series
+        reasoning models reject the legacy parameter, because reasoning tokens are
+        counted against the completion budget and the old name no longer describes
+        what is being capped.
+        """
+        return {
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+            "max_completion_tokens": self.max_completion_tokens,
+            "reasoning_effort": self.reasoning_effort,
+        }
+
     def _complete(self, system: str, user: str) -> str:  # pragma: no cover - requires network
         import requests
 
@@ -426,18 +482,11 @@ class AzureFoundryChatAgent:
             f"{self.endpoint}/openai/deployments/{self.deployment}"
             f"/chat/completions?api-version={self.api_version}"
         )
-        body = {
-            "messages": [
-                {"role": "system", "content": system},
-                {"role": "user", "content": user},
-            ],
-            "max_completion_tokens": 900,
-        }
         resp = requests.post(
             url,
             headers={"Authorization": f"Bearer {self._get_token()}"},
-            json=body,
-            timeout=60,
+            json=self._request_body(system, user),
+            timeout=120 if self.tier is ReasoningTier.HIGH else 60,
         )
         resp.raise_for_status()
         return resp.json()["choices"][0]["message"]["content"].strip()
@@ -490,7 +539,10 @@ class AzureFoundryChatAgent:
             resolved_reasoning=self.tier,
             online_search_used=grounded.online_search_used,
             resolved_terms=grounded.resolved_terms,
-            trace=grounded.trace + (f"foundry deployment {self.deployment}",),
+            trace=grounded.trace + (
+                f"foundry deployment {self.deployment} "
+                f"(reasoning_effort={self.reasoning_effort})",
+            ),
         )
 
 

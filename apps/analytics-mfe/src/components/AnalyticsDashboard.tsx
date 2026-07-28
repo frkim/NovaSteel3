@@ -32,6 +32,7 @@ import { DemoTour } from './DemoTour'
 import { CopilotDock } from './copilot/CopilotDock'
 import { CopilotPanel } from './copilot/CopilotPanel'
 import { HelpAssistant } from './help/HelpAssistant'
+import { SectionInsight } from './help/SectionInsight'
 import { hasDockLayouts, resetDockLayouts, subscribeDockPresence } from './dock/dockCommands'
 
 interface AnalyticsDashboardProps {
@@ -137,9 +138,17 @@ export function AnalyticsDashboard({ context, emit }: AnalyticsDashboardProps) {
                 </Typography>
               )}
             </Breadcrumbs>
-            <Typography component="h1" variant="h1">
-              {section.title}
-            </Typography>
+            <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
+              <Typography component="h1" variant="h1">
+                {section.title}
+              </Typography>
+              <SectionInsight
+                section={section.section}
+                locale={context.locale}
+                bilingual={context.helpBilingual ?? false}
+                t={translator}
+              />
+            </Stack>
             <Typography color="text.secondary" variant="body2">
               {section.description}
             </Typography>

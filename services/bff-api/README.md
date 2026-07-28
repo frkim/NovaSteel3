@@ -52,7 +52,10 @@ code path serves both the offline demo and the deployed environment:
 | Env var | Effect when set | Default when unset |
 |---|---|---|
 | `NOVASTEEL_TABLE_ENDPOINT` + `NOVASTEEL_STORAGE_ACCOUNT_NAME` | Audit hash-chain and idempotency records persist in Azure Table Storage via `DefaultAzureCredential` | In-memory stores, reset on restart |
-| `FOUNDRY_ENDPOINT` (+ `KNOWLEDGE_AGENT_MODE=azure`) | Knowledge extraction calls GPT-4o | Local deterministic fixture agent |
+| `FOUNDRY_ENDPOINT` (+ `KNOWLEDGE_AGENT_MODE=azure`) | Knowledge extraction calls the Foundry chat deployment (`gpt-5.4-mini`) | Local deterministic fixture agent |
+| `FOUNDRY_PROJECT_ENDPOINT` (+ `FOUNDRY_AGENT_SERVICE_MODE=azure`) | The procedure agent is hosted in Foundry Agent Service and answers via a Foundry IQ knowledge base | Local in-process agent over the approved corpus |
+| `AI_SEARCH_ENDPOINT` | Approved procedures are indexed into and retrieved from Azure AI Search | In-memory procedure store seeded from fixtures |
+| `ONLINE_SEARCH_MODE=web_iq\|web_search` | Copilot chat "Online Search" grounds on live web results | `offline` — the curated corpus only |
 | `APPLICATIONINSIGHTS_CONNECTION_STRING` | OpenTelemetry traces and business KPI metrics export to Azure Monitor | Instrumentation is a silent no-op |
 | `NOVASTEEL_LOG_FORMAT=json` | Structured JSON logs to stdout with `correlation_id` as a field | Human-readable console output |
 

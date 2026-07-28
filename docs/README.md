@@ -83,7 +83,7 @@ systems, CMMS, or production schedules.
 | Fabric | Source-controlled item/catalog/KQL/Lakehouse/notebook/pipeline/semantic/RTI assets; local structural validator | Fabric tenant workspace, capacity, item deployment, RLS/query behavior |
 | Azure IaC | Bicep, policy, OIDC deployment scripts, alert rules, static validation — **deployed to Sweden Central** | Private-network hardening proof, DR rehearsal |
 | Observability | OpenTelemetry traces, JSON logs with correlation_id, four business KPI metrics | Production dashboards and alert tuning |
-| AI/knowledge | Consent, draft/review, grounding, restricted tools, critic loop, agent handoff, live GPT-4o adapter with local fallback, screen-aware Copilot chat (5 languages, tool-free, per-tier agents) | Tenant Foundry Agent Service, model/quota, live Speech, private-network proof |
+| AI/knowledge | Consent, draft/review, grounding, restricted tools, critic loop, agent handoff, live GPT-5-series adapter with local fallback, AI Search procedure store, Foundry IQ knowledge base, hosted Agent Service procedure agent, screen-aware Copilot chat (5 languages, tool-free, per-tier agents incl. high-reasoning) | Tenant Agent Service capability host, model/quota, live Speech, private-network proof |
 | Defense | 26-slide PowerPoint, runbook, FAQ, scripted rehearsal, response/fallback evidence | Live-cloud rehearsal and presenter-browser screenshots |
 
 The rehearsal passed 66/66 BFF checks and 12/12 offline-fallback checks; 571

@@ -10,6 +10,30 @@ param bffImage string
 param portalOrigin string
 param portalBffBaseUrl string
 
+@description('Foundry account inference endpoint. Empty keeps the knowledge/Copilot agents on deterministic local fallbacks.')
+param foundryEndpoint string = ''
+
+@description('Foundry project endpoint for Agent Service. Empty means agents are not hosted.')
+param foundryProjectEndpoint string = ''
+
+param foundryChatDeployment string = ''
+param foundryReasoningDeployment string = ''
+param foundryEmbedDeployment string = ''
+
+@description('Azure AI Search endpoint. Empty keeps procedures in the in-memory store.')
+param searchEndpoint string = ''
+
+param searchIndexName string = ''
+param knowledgeBaseName string = ''
+
+@description('Web IQ and web search are First Party Consumption Services: the Microsoft DPA does not apply and data leaves the Azure compliance boundary. Offline is the only default this estate may ship.')
+@allowed([
+  'offline'
+  'web_iq'
+  'web_search'
+])
+param onlineSearchMode string = 'offline'
+
 var acrLoginServer = '${resourcePrefix}acr${nameSuffix}.azurecr.io'
 var keyVaultUri = 'https://${resourcePrefix}-kv-${nameSuffix}${environment().suffixes.keyvaultDns}/'
 var storageAccountName = '${resourcePrefix}st${nameSuffix}'
@@ -218,6 +242,46 @@ resource bffApp 'Microsoft.App/containerApps@2024-03-01' = {
             {
               name: 'EVENTHUB_NAMESPACE'
               value: eventHubsNamespace
+            }
+            // AI configuration. Every one of these is empty unless the matching
+            // deployment flag was set, and the services treat an empty value as
+            // "stay offline" — so the demo keeps working on deterministic fixtures
+            // rather than failing when the AI estate is not deployed.
+            {
+              name: 'FOUNDRY_ENDPOINT'
+              value: foundryEndpoint
+            }
+            {
+              name: 'FOUNDRY_PROJECT_ENDPOINT'
+              value: foundryProjectEndpoint
+            }
+            {
+              name: 'FOUNDRY_CHAT_DEPLOYMENT'
+              value: foundryChatDeployment
+            }
+            {
+              name: 'FOUNDRY_REASONING_DEPLOYMENT'
+              value: foundryReasoningDeployment
+            }
+            {
+              name: 'FOUNDRY_EMBED_DEPLOYMENT'
+              value: foundryEmbedDeployment
+            }
+            {
+              name: 'AI_SEARCH_ENDPOINT'
+              value: searchEndpoint
+            }
+            {
+              name: 'AI_SEARCH_INDEX'
+              value: searchIndexName
+            }
+            {
+              name: 'FOUNDRY_KNOWLEDGE_BASE'
+              value: knowledgeBaseName
+            }
+            {
+              name: 'ONLINE_SEARCH_MODE'
+              value: onlineSearchMode
             }
           ]
           probes: [
