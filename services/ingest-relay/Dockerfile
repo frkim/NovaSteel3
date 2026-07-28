@@ -48,3 +48,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD ["python", "-c", "import ingest_relay; print('ok')"]
 
 CMD ["python", "-m", "ingest_relay"]
+# ci: verify pull-request gating (temporary)
