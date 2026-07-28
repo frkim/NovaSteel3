@@ -4,27 +4,27 @@
     {
       "moment": "DM-1",
       "title": "Command center + persona switch",
-      "seconds": 0.04
+      "seconds": 0.078
     },
     {
       "moment": "TELEMETRY",
       "title": "Live/historical telemetry and alert",
-      "seconds": 0.025
+      "seconds": 0.028
     },
     {
       "moment": "DM-3",
       "title": "Furnace RUL 21-day + uncertainty + work order",
-      "seconds": 0.017
+      "seconds": 0.023
     },
     {
       "moment": "DM-2",
       "title": "Energy dispatch optimization (equal tonnage, zero violations)",
-      "seconds": 0.221
+      "seconds": 0.303
     },
     {
       "moment": "DM-4",
       "title": "Quality genealogy + what-if + yield evidence",
-      "seconds": 0.012
+      "seconds": 0.013
     },
     {
       "moment": "DM-6",
@@ -34,7 +34,7 @@
     {
       "moment": "DM-5",
       "title": "Operator interview / STT / Foundry knowledge workflow",
-      "seconds": 0.022
+      "seconds": 0.026
     },
     {
       "moment": "AUDIT",
@@ -44,20 +44,20 @@
     {
       "moment": "CAPACITY",
       "title": "Capacity start / status / pause simulation",
-      "seconds": 0.017
+      "seconds": 0.016
     },
     {
       "moment": "TABLES",
       "title": "Table search / filter / sort / pagination semantics",
-      "seconds": 0.124
+      "seconds": 0.116
     },
     {
       "moment": "AUTHZ",
       "title": "Server-side authorization boundaries",
-      "seconds": 0.005
+      "seconds": 0.006
     }
   ],
-  "totalSeconds": 0.497,
+  "totalSeconds": 0.623,
   "checks": [
     {
       "label": "Persona switch yields distinct persona identities",
@@ -127,7 +127,7 @@
     {
       "label": "Forecast carries an audit reference",
       "ok": true,
-      "detail": "667214b6-f2ed-4d00-9e3b-7815b8fb2721"
+      "detail": "03de266b-846d-4ce2-a4f5-99dd0347c264"
     },
     {
       "label": "Synthetic work order created",
@@ -153,6 +153,11 @@
       "label": "Optimization produced a recommendation",
       "ok": true,
       "detail": "REC-B503C1D47E4D"
+    },
+    {
+      "label": "Dispatch solved by the MILP solver, not the fallback heuristic",
+      "ok": true,
+      "detail": "solver=MILP_CBC"
     },
     {
       "label": "Zero hard-constraint violations",
@@ -197,7 +202,7 @@
     {
       "label": "Approval recorded an audit reference",
       "ok": true,
-      "detail": "d964abcc-fd94-415f-8f94-8221b919a53c"
+      "detail": "4f97c5dc-8f54-4e08-9240-f9c1f38ba5a6"
     },
     {
       "label": "Quality batches table returns rows",
@@ -232,7 +237,7 @@
     {
       "label": "What-if carries an audit reference",
       "ok": true,
-      "detail": "6e8b4fcc-9bee-4b02-b738-740caea2a477"
+      "detail": "1063f30a-9ca4-45d9-a97a-b7a31d46e72a"
     },
     {
       "label": "Yield evidence available (manifest predicted 0.88 -> 0.95)",
@@ -390,7 +395,7 @@
       "detail": ""
     }
   ],
-  "checksPassed": 66,
-  "checksTotal": 66,
+  "checksPassed": 67,
+  "checksTotal": 67,
   "allPassed": true
 }

@@ -8,7 +8,7 @@
       "p90": 97.0
     },
     "modelVersion": "quality-risk:1.0.0-demo",
-    "scoredAt": "2026-07-27T23:56:20.308572Z",
+    "scoredAt": "2026-07-28T00:49:51.089250Z",
     "drivers": [
       {
         "name": "coiling_temperature_correction",
@@ -34,8 +34,8 @@
       },
       "operationalWrite": false
     },
-    "auditRef": "6e8b4fcc-9bee-4b02-b738-740caea2a477"
+    "auditRef": "1063f30a-9ca4-45d9-a97a-b7a31d46e72a"
   },
-  "asOf": "2026-07-27T23:56:20.308656Z",
-  "correlationId": "18a1db9f-09e1-4bab-96a2-38c61591c20d"
+  "asOf": "2026-07-28T00:49:51.089344Z",
+  "correlationId": "9c4253fd-35ec-42fa-b5f9-331bbe92c214"
 }

@@ -209,6 +209,10 @@ def dm2() -> None:
     t_after = _num(d.get("optimized", {}), ["tonnage"])
     report = {r.get("constraint"): r for r in d.get("constraintReport", [])}
     check("Optimization produced a recommendation", bool(rec_id), str(rec_id))
+    # A missing PuLP/CBC silently degrades to the heuristic, which reports
+    # different savings from every documented figure. Fail loudly instead.
+    check("Dispatch solved by the MILP solver, not the fallback heuristic",
+          d.get("solver") == "MILP_CBC", f"solver={d.get('solver')}")
     check("Zero hard-constraint violations", viol == 0, f"violations={viol}")
     check("Equal tonnage preserved before/after", t_before is not None and t_before == t_after,
           f"before={t_before} after={t_after}")

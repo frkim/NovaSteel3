@@ -4,8 +4,8 @@
     "state": "Running",
     "operationId": "cap-local-00001",
     "capacityId": "cap-novasteel-demo-sc",
-    "auditRef": "4d46c093-e8b6-422c-96b1-1f6b19421c5f"
+    "auditRef": "e0cc55fb-c7db-4b15-b188-89301d6736e9"
   },
-  "asOf": "2026-07-27T23:56:20.352054Z",
-  "correlationId": "f614b6c7-ebc3-4dea-b322-df16f099d799"
+  "asOf": "2026-07-28T00:49:51.136694Z",
+  "correlationId": "653d4ac5-3d77-4304-b697-ff6d0d7601db"
 }

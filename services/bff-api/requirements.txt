@@ -27,6 +27,10 @@ pydantic==2.13.4
 pydantic-settings==2.14.2
 pydantic_core==2.46.4
 Pygments==2.20.0
+# The BFF runs the optimizer-worker's MILP in-process. Without PuLP the
+# dispatch silently degrades to the heuristic and reports different savings
+# from the documented MILP result, so it is a BFF runtime dependency too.
+pulp==3.3.2
 pytest==9.1.1
 python-dotenv==1.2.2
 PyYAML==6.0.3

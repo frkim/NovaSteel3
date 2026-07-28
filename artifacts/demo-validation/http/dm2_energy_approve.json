@@ -336,9 +336,9 @@
       "rawFlexibleCostPct": 21.74,
       "rawFlexibleCo2Pct": 31.71
     },
-    "auditRef": "a2ca18f2-5e39-4057-84df-ad201676d6a2",
-    "approvalAuditRef": "d964abcc-fd94-415f-8f94-8221b919a53c"
+    "auditRef": "410a2d27-6418-4706-a28c-e6c93cd11cbe",
+    "approvalAuditRef": "4f97c5dc-8f54-4e08-9240-f9c1f38ba5a6"
   },
-  "asOf": "2026-07-27T23:56:20.295762Z",
-  "correlationId": "29eecc08-595b-42e6-8189-e1a4b8fdfa5a"
+  "asOf": "2026-07-28T00:49:51.075917Z",
+  "correlationId": "665ac260-f4bd-4623-92b2-62b7d07f22d9"
 }

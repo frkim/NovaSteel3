@@ -1,10 +1,10 @@
 {
   "items": [
     {
-      "auditId": "d964abcc-fd94-415f-8f94-8221b919a53c",
+      "auditId": "4f97c5dc-8f54-4e08-9240-f9c1f38ba5a6",
       "domain": "energy",
       "entityId": "REC-B503C1D47E4D",
-      "correlationId": "29eecc08-595b-42e6-8189-e1a4b8fdfa5a",
+      "correlationId": "665ac260-f4bd-4623-92b2-62b7d07f22d9",
       "action": "energy.approve",
       "actor": "demo-energy",
       "inputSnapshotRef": "recommendation:REC-B503C1D47E4D",
@@ -17,15 +17,15 @@
         "reason": "Shadow approval for demo; preserves delivery + tonnage"
       },
       "outcome": null,
-      "recordedAt": "2026-07-27T23:56:20.295661Z",
-      "previousHash": "475a1aeac82f6c58edfd0619b3575ddc5795ea83db748f40f8d24e4c5f91e536",
-      "recordHash": "d8abfc4ba9c4cefc74b4fe7d48cf31154dbbf59acb2977be33627ba2805407d5"
+      "recordedAt": "2026-07-28T00:49:51.075814Z",
+      "previousHash": "f4a4ad1b751f7b2c587ef5f536c8dbe01cfc875a29f161fd204bc981fa6767d4",
+      "recordHash": "2fe7b6a7edfdfd4766b062bfa55ed8dfb7f579b94c245358abc24a3a8510fc9b"
     },
     {
-      "auditId": "a2ca18f2-5e39-4057-84df-ad201676d6a2",
+      "auditId": "410a2d27-6418-4706-a28c-e6c93cd11cbe",
       "domain": "energy",
       "entityId": "REC-B503C1D47E4D",
-      "correlationId": "ea4c517f-2de9-44e6-bcbb-ea62e9b85841",
+      "correlationId": "05c7d79c-7f35-4496-b7d0-033effdf1907",
       "action": "energy.simulate",
       "actor": "demo-energy",
       "inputSnapshotRef": "simulator:simulator-fixture:demo-full",
@@ -45,14 +45,14 @@
       },
       "humanAction": null,
       "outcome": null,
-      "recordedAt": "2026-07-27T23:56:20.285109Z",
-      "previousHash": "955af23614c35f5441e9f3c0a9a70c66c0f382f93961b8671d417513759fbfaf",
-      "recordHash": "475a1aeac82f6c58edfd0619b3575ddc5795ea83db748f40f8d24e4c5f91e536"
+      "recordedAt": "2026-07-28T00:49:51.066533Z",
+      "previousHash": "f4730ede8388dca88fff44ad3b021e2db467d175ab78ae97cbd84bc6e25e6ce6",
+      "recordHash": "f4a4ad1b751f7b2c587ef5f536c8dbe01cfc875a29f161fd204bc981fa6767d4"
     }
   ],
   "total": 2,
   "page": 1,
   "size": 50,
-  "asOf": "2026-07-27T23:56:20.343981Z",
-  "correlationId": "abf5a1fb-8610-4f10-8996-9f318a01e590"
+  "asOf": "2026-07-28T00:49:51.128917Z",
+  "correlationId": "3c58b31b-3534-44f9-815d-196d4fdeaf6e"
 }
