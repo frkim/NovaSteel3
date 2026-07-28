@@ -43,6 +43,15 @@ failure date or a planned work order never lands in the past. The anchors are
 resolved at module load, so a browser tab left open across midnight keeps the
 previous day until it is reloaded.
 
+Because the pack is verified by SHA-256, it has to be **byte-exact on every
+platform**. The generator writes every output — NDJSON, `manifest.json` and
+`checksums.json` — with `newline="\n"`, and `.gitattributes` pins
+`services/bff-api/fixtures/**` to LF so a Windows clone with
+`core.autocrlf=true` cannot silently rewrite the line endings. Without both,
+the digests stop matching on checkout and the BFF refuses to start.
+`services\bff-api\tests\test_fixture_integrity.py` fails loudly if either
+guard is removed.
+
 ## 2. Demonstration estate
 
 ### 2.1 Plants

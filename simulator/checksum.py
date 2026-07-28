@@ -35,7 +35,10 @@ def compute_checksums(out_dir: Path, filenames: list[str]) -> dict:
 def write_checksums(out_dir: Path, filenames: list[str]) -> Path:
     checksums = compute_checksums(out_dir, filenames)
     path = out_dir / "checksums.json"
-    path.write_text(json.dumps(checksums, indent=2, sort_keys=True), encoding="utf-8")
+    # Newline translation would make an identical run produce different bytes on
+    # Windows and Linux, and these digests are what the BFF verifies at load.
+    with path.open("w", encoding="utf-8", newline="\n") as fh:
+        fh.write(json.dumps(checksums, indent=2, sort_keys=True))
     return path
 
 

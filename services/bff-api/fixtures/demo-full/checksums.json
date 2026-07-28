@@ -16,8 +16,8 @@
     "sha256": "3bbfb1e96f06d76f0b24a1e03d44bb103b81509f661d7493ff92e00cb0bdf193"
   },
   "manifest.json": {
-    "bytes": 1951,
-    "sha256": "20375b2dfdd39228f27141dc0e19e8fe4b05e48445c5158f65fce094031c0f7d"
+    "bytes": 1894,
+    "sha256": "9ba8e9f749da662750ba014ef5ee76621523742d6cf19658173c48d528d40fef"
   },
   "model_inference.ndjson": {
     "bytes": 3358,

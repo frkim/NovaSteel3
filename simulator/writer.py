@@ -33,7 +33,7 @@ def write_ndjson(path: Path, records: list[dict]) -> None:
 def write_csv(path: Path, records: list[dict]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     if not records:
-        path.write_text("", encoding="utf-8")
+        path.write_text("", encoding="utf-8", newline="\n")
         return
     flat_records = [_flatten(r) for r in records]
     fieldnames: list[str] = []
@@ -50,7 +50,8 @@ def write_csv(path: Path, records: list[dict]) -> None:
 
 def write_json(path: Path, records: list[dict]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(records, indent=2, sort_keys=True), encoding="utf-8")
+    with path.open("w", encoding="utf-8", newline="\n") as fh:
+        fh.write(json.dumps(records, indent=2, sort_keys=True))
 
 
 def write_dataset(out_dir: Path, dataset_name: str, records: list[dict], fmt: str = "ndjson") -> Path:

@@ -1,0 +1,8 @@
+# The demo fixture pack is SHA-256 verified when the BFF loads it. Any EOL
+# translation on checkout changes the bytes, the digests stop matching and the
+# service refuses to start — which is exactly what happens on a Windows clone
+# with core.autocrlf=true. Pin the pack to LF in the index and on checkout.
+services/bff-api/fixtures/** text eol=lf
+
+# NDJSON is a line-delimited wire format; keep it LF everywhere.
+*.ndjson text eol=lf

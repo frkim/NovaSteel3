@@ -150,7 +150,10 @@ def generate_run(manifest: ScenarioManifest, *, out_dir: Path, fast: bool = Fals
         "privacy_label": config.PRIVACY_LABEL,
     }
     run_manifest_path = out_dir / "manifest.json"
-    run_manifest_path.write_text(json.dumps(run_manifest, indent=2, sort_keys=True), encoding="utf-8")
+    # newline="\n" keeps a run byte-identical across Windows and Linux; these
+    # bytes are hashed into checksums.json and verified when the BFF loads.
+    with run_manifest_path.open("w", encoding="utf-8", newline="\n") as fh:
+        fh.write(json.dumps(run_manifest, indent=2, sort_keys=True))
 
     filenames = [p.name for p in file_paths.values()] + ["manifest.json"]
     write_checksums(out_dir, filenames)
