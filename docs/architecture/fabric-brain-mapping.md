@@ -301,7 +301,7 @@ definitions in gold tables.
 | 2.5 | Set `semanticModelBindingValidated=true` and deploy semantic model | `fabric/scripts/Deploy-FabricAssets.ps1 -deploymentOption deploySemanticModel` + `semantic-model-agent` | Direct Lake binding resolves to `lh_novasteelv3_core` SQL endpoint; RLS persona tests pass; refresh completes without errors |
 | 2.6 | Build and publish Power BI reports | Portal (Legacy PBIX only) + `report-builder-agent` + `pixel-design-agent` | Executive, sustainability, and persona pages bind to `sm-novasteelv3-operations`; RLS and export permissions pass; WCAG AA contrast check passes |
 | 2.7 | Apply OneLake security roles | Portal + `workspace-admin-agent` | Role matrix from `fabric/catalog/security-role-matrix.json` applied; monthly export retained as evidence |
-| 2.8 | Full CI/CD round-trip | `.github/workflows/cd-fabric-items.yml` + `cicd-fabric-agent` + `fabric-cli-agent` | Workflow completes on protected feed; OIDC token resolves correctly (subject prefix `repo:frkim@74252080/NovaSteel3@1312557916:...`) |
+| 2.8 | Full CI/CD round-trip | `.github/workflows/cd-fabric-items.yml` + `cicd-fabric-agent` + `fabric-cli-agent` | Workflow completes on protected feed; OIDC token resolves correctly against the federated credential registered in `.github/README.md` (Repository-level variables section) |
 
 ---
 
