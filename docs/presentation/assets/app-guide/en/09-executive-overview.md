@@ -20,7 +20,7 @@
 1. The shell shows site, persona, search, Fabric capacity, demo mode and language; the purple banner warns that data is synthetic and not for operational control (`apps\portal-shell\README.md`; `docs\README.md`).
 2. The header names Isabelle Moreau — Executive, whose persona reviews portfolio investment and the four target outcomes (`docs\personas\personas-and-journeys.md`).
 3. KPI cards show **Energy / t −14%**, **CO₂ −22%**, **High-grade yield +8%**, **Advance warning 21 d**, and **Failures prevented 1**. Tooltips state which values are targets or modeled, not audited production results (`ExecutiveOverview.tsx`; `proofCatalog.ts`).
-4. The **Site comparison** bar chart compares energy, CO₂ and yield changes for Moselle (LU), Bremen (DE), Ghent (BE) and Bilbao (ES), from `executiveSites()` (`ExecutiveOverview.tsx`; `apps\analytics-mfe\src\api\fixtures.ts`).
+4. The **Site comparison** bar chart compares energy, CO₂ and yield changes for Moselle (LU), Saarbrücken (DE), Liège (BE) and Asturias (ES), from `executiveSites()` (`ExecutiveOverview.tsx`; `apps\analytics-mfe\src\api\fixtures.ts`).
 5. **Target vs actual** shows progress bars: energy 92%, CO₂ 88%, yield 96%, and 21-day warning 100%. Treat them as synthetic target-progress indicators (`ExecutiveOverview.tsx`).
 6. The **Site scorecard** table lists site, energy delta, CO₂ delta, yield delta and open alerts; it is the shared sortable/searchable data table (`ExecutiveOverview.tsx`; `docs\ux\dashboard-specification.md`).
 7. Dock controls come from the shared Dockview workspace, so panels can be rearranged without changing the data (`apps\analytics-mfe\src\components\screens\common.tsx`).

@@ -32,9 +32,9 @@ Rules:
 | Plant ID | Synthetic name | Country | Time zone | Process focus | Nominal annual output |
 |---|---|---|---|---|---:|
 | `NS-DEMO-LUX-01` | Moselle Integrated Works | Luxembourg | Europe/Luxembourg | Blast furnace, basic oxygen furnace, hot strip mill | 3.2 Mt |
-| `NS-DEMO-DE-01` | Rhine Flat Products | Germany | Europe/Berlin | Reheat furnace, hot/cold rolling, galvanizing | 2.4 Mt |
-| `NS-DEMO-BE-01` | Meuse Melt Shop | Belgium | Europe/Brussels | Electric arc furnace, caster | 1.5 Mt |
-| `NS-DEMO-ES-01` | Ebro Long Products | Spain | Europe/Madrid | Electric arc furnace, billet caster, bar mill | 1.1 Mt |
+| `NS-DEMO-DE-01` | Saarbrücken Steelworks | Germany | Europe/Berlin | Electric arc furnace, ladle furnace, billet caster | 2.4 Mt |
+| `NS-DEMO-BE-01` | Liège Melt & Rolling Works | Belgium | Europe/Brussels | Electric arc furnace, caster, cold rolling, galvanizing | 1.5 Mt |
+| `NS-DEMO-ES-01` | Asturias Long Products | Spain | Europe/Madrid | Electric arc furnace, billet caster, wire rod mill | 1.1 Mt |
 
 The default 15-minute demo focuses on `NS-DEMO-LUX-01`. The other plants provide fleet comparisons and enough history for cross-site analytics.
 
@@ -554,11 +554,11 @@ add `--extra-index-url` for public registries. NuGet-based components must use
 
 ## 13. Device Operations simulator estate
 
-Wave 3 introduces a real-time device-telemetry simulator (`services/device-simulator`) that is separate from the batch scenario generator above. It produces a live, clock-driven ring buffer of sensor readings from a sixteen-device, four-site industrial estate and is consumed by the BFF's Device Operations routes. Wave 6 extended the estate from the original Luxembourg-only six devices to all four demo plants so that the site selector exercises a genuinely different fleet at every site.
+Wave 3 introduces a real-time device-telemetry simulator (`services/device-simulator`) that is separate from the batch scenario generator above. It produces a live, clock-driven ring buffer of sensor readings from a seventeen-device, four-site industrial estate and is consumed by the BFF's Device Operations routes. Wave 6 extended the estate from the original Luxembourg-only six devices to all four demo plants so that the site selector exercises a genuinely different fleet at every site.
 
 ### 13.1 Device catalog
 
-**Total: 16 devices across 4 sites, 86 sensors.**
+**Total: 17 devices across 4 sites, 91 sensors.**
 
 | Device ID | Site | Area | Asset type | Sensors |
 |---|---|---|---|---|
@@ -572,6 +572,7 @@ Wave 3 introduces a real-time device-telemetry simulator (`services/device-simul
 | `DE-LF-01` | `NS-DEMO-DE-01` | Steelmaking | Ladle furnace | 5 |
 | `DE-BCM-01` | `NS-DEMO-DE-01` | Casting | Billet caster | 5 |
 | `DE-UTIL-01` | `NS-DEMO-DE-01` | Utilities | Energy system | 6 |
+| `BE-EAF-01` | `NS-DEMO-BE-01` | Steelmaking | Electric arc furnace | 5 |
 | `BE-CRM-01` | `NS-DEMO-BE-01` | Rolling | Cold rolling mill | 5 |
 | `BE-GAL-01` | `NS-DEMO-BE-01` | Coating | Hot-dip galvanizing line | 5 |
 | `BE-UTIL-01` | `NS-DEMO-BE-01` | Utilities | Energy system | 6 |
@@ -579,7 +580,7 @@ Wave 3 introduces a real-time device-telemetry simulator (`services/device-simul
 | `ES-WRM-01` | `NS-DEMO-ES-01` | Rolling | Wire rod mill | 5 |
 | `ES-UTIL-01` | `NS-DEMO-ES-01` | Utilities | Energy system | 5 |
 
-Site totals: Luxembourg 6 devices / 34 sensors, Germany 4 / 22, Belgium 3 / 16, Spain 3 / 14.
+Site totals: Luxembourg 6 devices / 34 sensors, Germany 4 / 22, Belgium 4 / 21, Spain 3 / 14.
 
 The estate is deliberately heterogeneous by route: Luxembourg runs the integrated blast-furnace/BOF route, Germany and Spain run electric-arc-furnace routes, and Belgium is a downstream finishing site with no melting at all. This means the Device Operations screen shows a materially different asset mix per site rather than a renamed copy, and it lets the demo contrast the CO2 profile of the BF/BOF route against the EAF route.
 
@@ -617,7 +618,7 @@ Reads auto-advance the deterministic clock by the elapsed wall-clock delta (up t
 | `edge-outage-recovery` | 240729 | Sensors go stale then recover, exercising buffering and reconnect |
 | `demo-full` | 240725 | Full-estate composite; the BFF demo-mode adapter starts this with seed `240726` (lining-degradation seed) to pre-warm hearth thermal signals |
 
-> **Note:** The device-simulator `README.md` states "23 signals" and "5 demo scenarios." These figures are incorrect; the source code (`catalog.py`) is the authoritative source and defines **16 devices / 86 sensors** across four sites, with `SCENARIO_SEEDS` containing **6 entries**. The README predates both the extension of the catalog and the wave-6 multi-site expansion.
+> **Note:** The device-simulator `README.md` states "23 signals" and "5 demo scenarios." These figures are incorrect; the source code (`catalog.py`) is the authoritative source and defines **17 devices / 91 sensors** across four sites, with `SCENARIO_SEEDS` containing **6 entries**. The README predates both the extension of the catalog and the wave-6 multi-site expansion.
 
 ### 13.4 Incident catalog
 

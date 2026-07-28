@@ -26,7 +26,7 @@ public sealed class ShellState
     {
         ["lu"] = "LU - Moselle Integrated Works",
         ["de"] = "DE - Saarbrücken Steelworks",
-        ["be"] = "BE - Liège Rolling Mill",
+        ["be"] = "BE - Liège Melt & Rolling Works",
         ["es"] = "ES - Asturias Long Products",
         ["all"] = "ALL - All sites",
     };

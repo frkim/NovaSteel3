@@ -9,7 +9,7 @@
 
 Device Operations is the operational technology (OT) layer behind the demo. **OT** means plant-floor technology that monitors physical equipment; **IT** means business information systems. NovaSteel reads simulated OT telemetry so the demo is safe and reproducible. (`docs\ux\dashboard-specification.md`; `docs\data\synthetic-data-and-simulators.md`)
 
-On the Luxembourg site, the fleet has **6 devices** and the sensor table has **34 sensors**. The simulator itself covers all four sites, so Simulator Control shows **16 devices** and **86 sensors**. (`docs\data\synthetic-data-and-simulators.md`; `apps\analytics-mfe\src\api\deviceClient.ts`)
+On the Luxembourg site, the fleet has **6 devices** and the sensor table has **34 sensors**. The simulator itself covers all four sites, so Simulator Control shows **17 devices** and **91 sensors**. (`docs\data\synthetic-data-and-simulators.md`; `apps\analytics-mfe\src\api\deviceClient.ts`)
 
 A **sensor** reports a physical value such as temperature, pressure, flow, or heat flux. **Telemetry** is the stream of those readings. **Event time** is when the measurement happened in the simulated plant clock; **ingestion time** is when a system receives it. (`services\bff-api\src\bff_api\routes.py`; `apps\analytics-mfe\src\api\deviceDomain.ts`)
 
@@ -91,7 +91,7 @@ A **sensor** reports a physical value such as temperature, pressure, flow, or he
 
 **What you see on screen.**
 1. KPI cards show **Simulator state running**, **Scenario demo-full**, **Speed 1×**, **Elapsed hours 2.4 h**, **Ticks 1759**, and **Active incidents 2**. (`apps\analytics-mfe\src\components\screens\DeviceSimulator.tsx`; `services\bff-api\src\bff_api\device_adapter.py`)
-2. The control panel shows state **running**, simulated clock **Jul 25, 2024, 10:26 AM**, elapsed **2.4 h**, **1,759** ticks, **16** devices, and **86** sensors. This is the full four-site simulator, not just Luxembourg. (`docs\data\synthetic-data-and-simulators.md`; `apps\analytics-mfe\src\components\devices\SimulatorControls.tsx`)
+2. The control panel shows state **running**, simulated clock **Jul 25, 2024, 10:26 AM**, elapsed **2.4 h**, **1,759** ticks, **17** devices, and **91** sensors. This is the full four-site simulator, not just Luxembourg. (`docs\data\synthetic-data-and-simulators.md`; `apps\analytics-mfe\src\components\devices\SimulatorControls.tsx`)
 3. Controls include **Scenario demo-full**, **Speed 1×**, seed **240726**, and **Start**, **Pause**, **Resume**, **Stop**, **Reset** buttons. Buttons depend on simulator state and `Platform.Capacity.Manage` permission. (`apps\analytics-mfe\src\components\devices\SimulatorControls.tsx`; `services\bff-api\src\bff_api\routes.py`)
 4. **Active incidents** lists **Accelerated hearth lining wear** on **LUX-BF-01** with high severity and about **3 min remaining**, plus **Day-ahead energy price spike** on **LUX-UTIL-01** with medium severity and about **18 min remaining**. (`apps\analytics-mfe\src\components\devices\IncidentPanel.tsx`; `docs\data\synthetic-data-and-simulators.md`)
 5. **Available incidents** cards show the seven catalogued incidents: lining wear, cooling water loss, sensor drift, sensor dropout, energy price spike, quality drift, and edge outage/recovery. (`apps\analytics-mfe\src\api\deviceFixtures.ts`; `docs\data\synthetic-data-and-simulators.md`)

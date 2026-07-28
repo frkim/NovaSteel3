@@ -474,11 +474,11 @@ Response: list envelope of device objects.
 }
 ```
 
-`status` is one of `healthy | degraded | fault | offline`. The `site` query parameter is optional and defaults to `all`. Two filters apply in order: rows outside the caller's `plant_scope` are removed first (an authorisation boundary), then, when `site != "all"`, the remainder is narrowed to that single site (a presentation filter). The fleet spans 16 devices across the four demo sites.
+`status` is one of `healthy | degraded | fault | offline`. The `site` query parameter is optional and defaults to `all`. Two filters apply in order: rows outside the caller's `plant_scope` are removed first (an authorisation boundary), then, when `site != "all"`, the remainder is narrowed to that single site (a presentation filter). The fleet spans 17 devices across the four demo sites.
 
 **`GET /v1/devices/{deviceId}`** — reader role. Returns the same shape as a single list item plus an array of current sensor snapshots. Returns `403 FORBIDDEN_SCOPE` if the device's site is outside the caller's plant scope.
 
-**`GET /v1/devices/sensors?deviceId=&site=&status=`** — reader role. Returns a list envelope of sensor snapshot objects. Sensors carry no `site` field of their own, so both the plant-scope filter and the `site` selection resolve each row's parent `deviceId` through the device catalog. The full estate is 86 sensors.
+**`GET /v1/devices/sensors?deviceId=&site=&status=`** — reader role. Returns a list envelope of sensor snapshot objects. Sensors carry no `site` field of their own, so both the plant-scope filter and the `site` selection resolve each row's parent `deviceId` through the device catalog. The full estate is 91 sensors.
 
 ```json
 {

@@ -63,7 +63,8 @@ const DEVICES: CatalogDevice[] = [
   { deviceId: 'DE-LF-01', area: 'Steelmaking', description: 'Ladle furnace' },
   { deviceId: 'DE-BCM-01', area: 'Casting', description: 'Billet caster' },
   { deviceId: 'DE-UTIL-01', area: 'Utilities', description: 'Energy system' },
-  // BE — Cold rolling and coating
+  // BE — EAF melt shop, cold rolling and coating
+  { deviceId: 'BE-EAF-01', area: 'Steelmaking', description: 'Electric arc furnace' },
   { deviceId: 'BE-CRM-01', area: 'Rolling', description: 'Cold rolling mill' },
   { deviceId: 'BE-GAL-01', area: 'Coating', description: 'Hot-dip galvanizing line' },
   { deviceId: 'BE-UTIL-01', area: 'Utilities', description: 'Energy system' },
@@ -152,6 +153,12 @@ const SIGNALS: CatalogSignal[] = [
   signal('compressed_air_pressure', 'bar', 6, 8.5, 2_000, 'DE-UTIL-01', true),
   signal('spot_price', 'EUR/MWh', -10, 380, 900_000, 'DE-UTIL-01', true),
   signal('grid_carbon_intensity', 'gCO2/kWh', 60, 520, 900_000, 'DE-UTIL-01', true),
+  // BE-EAF-01 (5)
+  signal('arc_current', 'kA', 30, 80, 1_000, 'BE-EAF-01', true),
+  signal('bath_temperature', 'Cel', 1550, 1680, 10_000, 'BE-EAF-01', true),
+  signal('heat_active_power', 'MW', 80, 150, 1_000, 'BE-EAF-01', true),
+  signal('power_on_time', 'min', 35, 65, 60_000, 'BE-EAF-01', true),
+  signal('tap_to_tap_time', 'min', 45, 75, 60_000, 'BE-EAF-01', true),
   // BE-CRM-01 (5)
   signal('strip_tension', 'kN', 20, 180, 1_000, 'BE-CRM-01', true),
   signal('roll_force', 'MN', 2, 18, 1_000, 'BE-CRM-01', true),

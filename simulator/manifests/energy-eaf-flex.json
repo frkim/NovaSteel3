@@ -1,7 +1,7 @@
 {
   "scenario_id": "energy-eaf-flex",
   "schema_version": 1,
-  "description": "EAF flexible load scheduling at the Belgium Meuse Melt Shop (NS-DEMO-BE-01). Demonstrates batch-level load-shifting of 80-150 MW electric arc furnace heats away from an evening scarcity spike, with a wider shift window than reheat batches (6 h vs 3 h) reflecting genuine tap-to-tap deferability.",
+  "description": "EAF flexible load scheduling at the Belgium Liège Melt & Rolling Works (NS-DEMO-BE-01). Demonstrates batch-level load-shifting of 80-150 MW electric arc furnace heats away from an evening scarcity spike, with a wider shift window than reheat batches (6 h vs 3 h) reflecting genuine tap-to-tap deferability.",
   "root_seed": 240730,
   "plant_id": "NS-DEMO-BE-01",
   "primary_asset_id": "BE-EAF-01",

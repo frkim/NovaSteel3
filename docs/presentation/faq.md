@@ -68,7 +68,10 @@ The requirement asked for a C# presentation layer; the analytics needs MUI/D3 de
 **Q14. Why Event Hubs + a relay instead of Fabric's native Event Hubs source?**
 Fabric's documented basic Event Hubs connector uses a Shared Access Key, and our security policy forbids standing secrets. So the canonical route is Event Hubs as a buffer plus a managed-identity relay to an Eventstream Custom Endpoint over Entra ID (ADR-005). We accept the Custom Endpoint's Contributor-role requirement but isolate that publisher in an ingress-only workspace. Native SAS is rejected unless the CISO grants a documented exception.
 
-**Q15. Why not let the AI act autonomously to capture more value faster?**
+**Q14b. Why Event Hubs rather than Azure IoT Hub for telemetry ingestion?**
+Because IoT Hub's differentiators are cloud-to-device: per-device provisioning, twins, direct methods, and jobs. Our non-negotiable boundary is advisory-only — no cloud→OT write path (ADR-007). Adopting IoT Hub would add an inbound control plane that we would then have to disable and prove disabled, expanding the attack surface in precisely the dimension the architecture promises not to have. It would also cost us the no-standing-secret property: Event Hubs runs with `disableLocalAuth: true` and per-plant Entra RBAC scoped to a single hub, while IoT Hub device authentication is per-device SAS keys or X.509, and Fabric's IoT Hub source connector is key-based. Finally, the senders are four plant gateways, not a device fleet — device-level identity already lives in the event envelope and in the Device Operations registry. If the OT edge itself ever comes into scope, the 2026 strategic path is Azure IoT Operations (Arc-enabled MQTT broker plus OPC UA connector), not IoT Hub. See ADR-016.
+
+
 Because a wrong autonomous action here can damage a furnace or breach a delivery/ETS commitment. ADR-007 requires an explicit human approval event for every safety-adjacent or financial decision, and Phase 0 has no real write connector at all. Any proposal for automatic schedule/CMMS/OT action triggers security, legal, OT, and RAI-board review plus a threat-model update.
 
 ---

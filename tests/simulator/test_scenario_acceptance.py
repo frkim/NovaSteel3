@@ -117,7 +117,7 @@ class FullDemoNarrativeTests(unittest.TestCase):
 
 
 class EafFlexScenarioAssertionTests(unittest.TestCase):
-    """seed 240730: EAF flexible load scheduling at the Belgium Meuse Melt Shop.
+    """seed 240730: EAF flexible load scheduling at the Belgium Liège Melt & Rolling Works.
     Optimized schedule costs less than baseline with equal tonnage and zero
     hard-constraint violations."""
 

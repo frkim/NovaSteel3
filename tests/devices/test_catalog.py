@@ -25,7 +25,7 @@ from device_simulator.catalog import (
 
 
 def test_catalog_has_6_devices():
-    assert len(CATALOG_ASSETS) == 16
+    assert len(CATALOG_ASSETS) == 17
 
 
 def test_catalog_has_exactly_18_core_signals():
@@ -33,19 +33,19 @@ def test_catalog_has_exactly_18_core_signals():
 
 
 def test_catalog_has_34_total_signals():
-    """18 core + 68 extended = 86 total sensors across 16 devices."""
-    assert len(CATALOG_SIGNALS) == 86
+    """18 core + 73 extended = 91 total sensors across 17 devices."""
+    assert len(CATALOG_SIGNALS) == 91
 
 
-def test_catalog_has_16_extended_signals():
-    assert len(_EXTENDED_SIGNALS) == 68
+def test_catalog_has_73_extended_signals():
+    assert len(_EXTENDED_SIGNALS) == 73
 
 
 def test_all_expected_asset_ids_present():
     expected = {
         "LUX-BF-01", "LUX-BOF-01", "LUX-CC-01", "LUX-RHF-01", "LUX-HSM-01", "LUX-UTIL-01",
         "DE-EAF-01", "DE-LF-01", "DE-BCM-01", "DE-UTIL-01",
-        "BE-CRM-01", "BE-GAL-01", "BE-UTIL-01",
+        "BE-EAF-01", "BE-CRM-01", "BE-GAL-01", "BE-UTIL-01",
         "ES-EAF-01", "ES-WRM-01", "ES-UTIL-01",
     }
     assert set(CATALOG_ASSETS.keys()) == expected

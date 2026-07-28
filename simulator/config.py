@@ -49,12 +49,12 @@ PLANTS = {
     for p in [
         Plant("NS-DEMO-LUX-01", "Moselle Integrated Works", "Luxembourg",
               "Europe/Luxembourg", "Blast furnace, basic oxygen furnace, hot strip mill"),
-        Plant("NS-DEMO-DE-01", "Rhine Flat Products", "Germany",
-              "Europe/Berlin", "Reheat furnace, hot/cold rolling, galvanizing"),
-        Plant("NS-DEMO-BE-01", "Meuse Melt Shop", "Belgium",
-              "Europe/Brussels", "Electric arc furnace, caster"),
-        Plant("NS-DEMO-ES-01", "Ebro Long Products", "Spain",
-              "Europe/Madrid", "Electric arc furnace, billet caster, bar mill"),
+        Plant("NS-DEMO-DE-01", "Saarbrücken Steelworks", "Germany",
+              "Europe/Berlin", "Electric arc furnace, ladle furnace, billet caster"),
+        Plant("NS-DEMO-BE-01", "Liège Melt & Rolling Works", "Belgium",
+              "Europe/Brussels", "Electric arc furnace, caster, cold rolling, galvanizing"),
+        Plant("NS-DEMO-ES-01", "Asturias Long Products", "Spain",
+              "Europe/Madrid", "Electric arc furnace, billet caster, wire rod mill"),
     ]
 }
 

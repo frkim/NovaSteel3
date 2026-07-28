@@ -20,7 +20,7 @@
 1. Le shell affiche site, persona, recherche, capacité Fabric, mode démo et langue ; la bannière violette rappelle que les données sont synthétiques et non opérationnelles (`apps\portal-shell\README.md`; `docs\README.md`).
 2. L'en-tête nomme Isabelle Moreau — Executive, responsable de la lecture portefeuille (`docs\personas\personas-and-journeys.md`).
 3. Les cartes KPI montrent **Energy / t −14%**, **CO₂ −22%**, **High-grade yield +8%**, **Advance warning 21 d** et **Failures prevented 1**. Les infobulles indiquent ce qui est cible ou modélisé (`ExecutiveOverview.tsx`; `proofCatalog.ts`).
-4. Le graphique **Site comparison** compare énergie, CO₂ et rendement pour Moselle, Bremen, Ghent et Bilbao, issus de `executiveSites()` (`ExecutiveOverview.tsx`; `apps\analytics-mfe\src\api\fixtures.ts`).
+4. Le graphique **Site comparison** compare énergie, CO₂ et rendement pour Moselle, Saarbrücken, Liège et Asturias, issus de `executiveSites()` (`ExecutiveOverview.tsx`; `apps\analytics-mfe\src\api\fixtures.ts`).
 5. **Target vs actual** affiche 92 %, 88 %, 96 % et 100 %. Ce sont des progrès synthétiques vers cible, pas un audit industriel (`ExecutiveOverview.tsx`).
 6. La table **Site scorecard** liste site, delta énergie, delta CO₂, delta rendement et alertes ouvertes (`ExecutiveOverview.tsx`; `docs\ux\dashboard-specification.md`).
 7. Les contrôles de panneaux viennent de l'espace Dockview commun (`apps\analytics-mfe\src\components\screens\common.tsx`).

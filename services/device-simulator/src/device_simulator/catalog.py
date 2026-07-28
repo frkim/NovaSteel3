@@ -90,7 +90,8 @@ CATALOG_ASSETS: dict[str, CatalogAsset] = {
         CatalogAsset("DE-LF-01", SITE_IDS["de"], "Steelmaking", "Ladle furnace"),
         CatalogAsset("DE-BCM-01", SITE_IDS["de"], "Casting", "Billet caster"),
         CatalogAsset("DE-UTIL-01", SITE_IDS["de"], "Utilities", "Energy system"),
-        # --- BE: Cold rolling + galvanizing line
+        # --- BE: EAF melt shop + cold rolling + galvanizing line
+        CatalogAsset("BE-EAF-01", SITE_IDS["be"], "Steelmaking", "Electric arc furnace"),
         CatalogAsset("BE-CRM-01", SITE_IDS["be"], "Rolling", "Cold rolling mill"),
         CatalogAsset("BE-GAL-01", SITE_IDS["be"], "Coating", "Hot-dip galvanizing line"),
         CatalogAsset("BE-UTIL-01", SITE_IDS["be"], "Utilities", "Energy system"),
@@ -177,6 +178,14 @@ _EXTENDED_SIGNALS: list[CatalogSignal] = [
     CatalogSignal("compressed_air_pressure", "bar", 6.0, 8.5, 2_000, "DE-UTIL-01", extended=True),
     CatalogSignal("spot_price", "EUR/MWh", -10.0, 380.0, 900_000, "DE-UTIL-01", extended=True),
     CatalogSignal("grid_carbon_intensity", "gCO2/kWh", 60.0, 520.0, 900_000, "DE-UTIL-01", extended=True),
+    # --- BE-EAF-01: Electric arc furnace, the flexible load of the energy-eaf-flex
+    # scenario (simulator/manifests/energy-eaf-flex.json). Five signals, so every
+    # site keeps a distinct sensor count (LUX 34, DE 22, BE 21, ES 14).
+    CatalogSignal("arc_current", "kA", 30.0, 80.0, 1_000, "BE-EAF-01", extended=True),
+    CatalogSignal("bath_temperature", "Cel", 1550.0, 1680.0, 10_000, "BE-EAF-01", extended=True),
+    CatalogSignal("heat_active_power", "MW", 80.0, 150.0, 1_000, "BE-EAF-01", extended=True),
+    CatalogSignal("power_on_time", "min", 35.0, 65.0, 60_000, "BE-EAF-01", extended=True),
+    CatalogSignal("tap_to_tap_time", "min", 45.0, 75.0, 60_000, "BE-EAF-01", extended=True),
     # --- BE-CRM-01: Cold rolling mill (5 signals)
     CatalogSignal("strip_tension", "kN", 20.0, 180.0, 1_000, "BE-CRM-01", extended=True),
     CatalogSignal("roll_force", "MN", 2.0, 18.0, 1_000, "BE-CRM-01", extended=True),

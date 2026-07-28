@@ -198,7 +198,7 @@ export function CommandCenter() {
     const definitions = [
       { code: 'lu', label: 'LU', name: 'Moselle Integrated Works' },
       { code: 'de', label: 'DE', name: 'Saarbrücken Steelworks' },
-      { code: 'be', label: 'BE', name: 'Liège Rolling Mill' },
+      { code: 'be', label: 'BE', name: 'Liège Melt & Rolling Works' },
       { code: 'es', label: 'ES', name: 'Asturias Long Products' },
     ]
     return definitions.map((entry) => {

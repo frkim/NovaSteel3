@@ -48,7 +48,7 @@ def _items(client: TestClient, path: str, headers: dict[str, str]) -> list[dict]
 def test_device_fleet_spans_every_demo_site(client: TestClient) -> None:
     rows = _items(client, "/v1/devices?size=100", HEADERS)
 
-    assert len(rows) == 16
+    assert len(rows) == 17
     assert sorted({row["site"] for row in rows}) == [
         "NS-DEMO-BE-01",
         "NS-DEMO-DE-01",
@@ -69,7 +69,7 @@ def test_sensor_site_filter_follows_the_parent_device(client: TestClient) -> Non
     every = _items(client, "/v1/devices/sensors?site=all&size=200", HEADERS)
     lux = _items(client, "/v1/devices/sensors?site=NS-DEMO-LUX-01&size=200", HEADERS)
 
-    assert len(every) == 86
+    assert len(every) == 91
     assert 0 < len(lux) < len(every)
     lux_devices = {
         row["deviceId"]

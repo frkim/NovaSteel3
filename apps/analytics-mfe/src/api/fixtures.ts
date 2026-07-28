@@ -790,8 +790,8 @@ export function telemetry(): TelemetryRow[] {
 export function executiveSites(): Array<{ site: string; energyDeltaPct: number; co2DeltaPct: number; yieldDeltaPct: number; alerts: number }> {
   return [
     { site: 'Moselle (LU)', energyDeltaPct: -14.2, co2DeltaPct: -22.4, yieldDeltaPct: 8.1, alerts: 3 },
-    { site: 'Bremen (DE)', energyDeltaPct: -11.8, co2DeltaPct: -18.6, yieldDeltaPct: 6.4, alerts: 2 },
-    { site: 'Ghent (BE)', energyDeltaPct: -13.1, co2DeltaPct: -20.2, yieldDeltaPct: 7.2, alerts: 1 },
-    { site: 'Bilbao (ES)', energyDeltaPct: -12.5, co2DeltaPct: -19.4, yieldDeltaPct: 7.9, alerts: 2 },
+    { site: 'Saarbrücken (DE)', energyDeltaPct: -11.8, co2DeltaPct: -18.6, yieldDeltaPct: 6.4, alerts: 2 },
+    { site: 'Liège (BE)', energyDeltaPct: -13.1, co2DeltaPct: -20.2, yieldDeltaPct: 7.2, alerts: 1 },
+    { site: 'Asturias (ES)', energyDeltaPct: -12.5, co2DeltaPct: -19.4, yieldDeltaPct: 7.9, alerts: 2 },
   ]
 }

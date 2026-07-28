@@ -145,7 +145,7 @@ def test_engine_devices_list_returns_correct_key_structure():
     for _ in range(5):
         eng.tick()
     devices = eng.devices()
-    assert len(devices) == 16
+    assert len(devices) == 17
     for d in devices:
         assert sorted(d.keys()) == _DEVICE_KEYS
 

@@ -6,9 +6,9 @@
 |------|------------------|---------|---------|--------------------------------------|
 | LUX  | NS-DEMO-LUX-01   | 6       | 34      | Integrated works (BF+BOF+CC+Rolling) |
 | DE   | NS-DEMO-DE-01    | 4       | 22      | EAF steelmaking + ladle + billet     |
-| BE   | NS-DEMO-BE-01    | 3       | 16      | Cold rolling + galvanizing           |
+| BE   | NS-DEMO-BE-01    | 4       | 21      | EAF melt shop + cold rolling + galv. |
 | ES   | NS-DEMO-ES-01    | 3       | 14      | EAF mini-mill + wire rod             |
-| **Total** |              | **16**  | **86**  |                                      |
+| **Total** |              | **17**  | **91**  |                                      |
 
 Scenarios: 6 (unchanged), Seed: 240726.
 

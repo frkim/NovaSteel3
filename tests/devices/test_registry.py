@@ -11,12 +11,12 @@ from device_simulator.registry import DEVICES, SENSORS, build_registry
 
 def test_build_registry_returns_all_devices():
     devices, _ = build_registry()
-    assert len(devices) == 16
+    assert len(devices) == 17
 
 
 def test_build_registry_returns_all_sensors():
     _, sensors = build_registry()
-    assert len(sensors) == 86
+    assert len(sensors) == 91
 
 
 def test_sensor_id_format():
@@ -60,7 +60,7 @@ def test_different_sites_return_different_device_sets():
     es_devices = [d for d in DEVICES.values() if d.site == "NS-DEMO-ES-01"]
     assert len(lux_devices) == 6
     assert len(de_devices) == 4
-    assert len(be_devices) == 3
+    assert len(be_devices) == 4
     assert len(es_devices) == 3
     lux_ids = {d.deviceId for d in lux_devices}
     de_ids = {d.deviceId for d in de_devices}
