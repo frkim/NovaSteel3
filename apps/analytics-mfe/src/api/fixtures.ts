@@ -34,6 +34,11 @@ function iso(hour: number, minute = 0): string {
   return `${DAY}T${h}:${m}:00Z`
 }
 
+/** Currency rounding that matches the BFF's two-decimal euro amounts. */
+function round2(value: number): number {
+  return Math.round(value * 100) / 100
+}
+
 /** Smooth day-ahead price curve peaking at the 280 €/MWh evening scarcity cue. */
 function priceAt(slot: number): number {
   const hour = slot * 0.25
@@ -78,32 +83,61 @@ export function energyIntervals(): EnergyIntervalRow[] {
   return rows
 }
 
-const FLEXIBLE_BATCHES: Array<{ id: string; grade: string; urgent: boolean; planned: number; tonnage: number; mwh: number }> = [
-  { id: 'REHEAT-BATCH-11', grade: 'NS-AUTO-DP780', urgent: true, planned: 74, tonnage: 240, mwh: 61 },
-  { id: 'REHEAT-BATCH-12', grade: 'NS-STRUCT-S355', urgent: false, planned: 73, tonnage: 240, mwh: 58 },
-  { id: 'REHEAT-BATCH-13', grade: 'NS-STRUCT-S355', urgent: false, planned: 75, tonnage: 240, mwh: 59 },
-  { id: 'REHEAT-BATCH-14', grade: 'NS-AUTO-DP780', urgent: false, planned: 72, tonnage: 240, mwh: 60 },
+/**
+ * The Luxembourg dispatch exactly as the BFF optimiser returns it
+ * (`energy-dispatch-deterministic`, MILP_CBC, 8 reheat batches of 120 t).
+ * Offline mode is the runbook's "cached deterministic result" rung, so these
+ * rows are transcribed from the recorded response rather than re-derived: an
+ * offline walkthrough must quote the same 7.25% / €2,688.7 as the live path
+ * and the slide deck, never a second set of numbers.
+ * Slots are 15 minutes; baseline slot 75 is the 280 €/MWh evening scarcity hour.
+ */
+const CACHED_BATCHES: Array<{
+  id: string
+  grade: string
+  urgent: boolean
+  baselineSlot: number
+  optimizedSlot: number
+  baselinePrice: number
+  optimizedPrice: number
+  baselineCost: number
+  optimizedCost: number
+}> = [
+  { id: 'REHEAT-BATCH-00', grade: 'NS-AUTO-DP780', urgent: false, baselineSlot: 1, optimizedSlot: 9, baselinePrice: 54.59, optimizedPrice: 62.46, baselineCost: 764.26, optimizedCost: 874.44 },
+  { id: 'REHEAT-BATCH-01', grade: 'NS-LONG-B500', urgent: false, baselineSlot: 15, optimizedSlot: 9, baselinePrice: 68.13, optimizedPrice: 62.46, baselineCost: 953.82, optimizedCost: 874.44 },
+  { id: 'REHEAT-BATCH-02', grade: 'NS-AUTO-HSLA420', urgent: false, baselineSlot: 26, optimizedSlot: 25, baselinePrice: 90.3, optimizedPrice: 84.78, baselineCost: 1264.2, optimizedCost: 1186.92 },
+  { id: 'REHEAT-BATCH-03', grade: 'NS-AUTO-HSLA420', urgent: true, baselineSlot: 39, optimizedSlot: 39, baselinePrice: 110.92, optimizedPrice: 110.92, baselineCost: 1552.88, optimizedCost: 1552.88 },
+  { id: 'REHEAT-BATCH-04', grade: 'NS-AUTO-HSLA420', urgent: false, baselineSlot: 48, optimizedSlot: 46, baselinePrice: 112.64, optimizedPrice: 111.91, baselineCost: 1576.96, optimizedCost: 1566.74 },
+  { id: 'REHEAT-BATCH-05', grade: 'NS-AUTO-DP780', urgent: false, baselineSlot: 60, optimizedSlot: 58, baselinePrice: 103.9, optimizedPrice: 106.88, baselineCost: 1454.6, optimizedCost: 1496.32 },
+  { id: 'REHEAT-BATCH-06', grade: 'NS-AUTO-HSLA420', urgent: false, baselineSlot: 75, optimizedSlot: 67, baselinePrice: 280.0, optimizedPrice: 97.24, baselineCost: 3920.0, optimizedCost: 1361.36 },
+  { id: 'REHEAT-BATCH-07', grade: 'NS-LONG-B500', urgent: false, baselineSlot: 86, optimizedSlot: 94, baselinePrice: 63.07, optimizedPrice: 54.85, baselineCost: 882.98, optimizedCost: 767.9 },
 ]
 
+/** Fixed (non-shiftable) plant load, priced identically in both schedules. */
+const FIXED_LOAD_COST_EUR = 24739.4
+
+function slotIso(slot: number): string {
+  return iso(Math.floor(slot * 0.25), (slot % 4) * 15)
+}
+
 function scheduleRows(optimized: boolean): EnergyScheduleRow[] {
-  return FLEXIBLE_BATCHES.map((batch, index) => {
-    const slot = optimized && !batch.urgent ? Math.max(8, batch.planned - 60 - index * 2) : batch.planned
-    const price = priceAt(slot)
-    const shiftMinutes = (slot - batch.planned) * 15
+  return CACHED_BATCHES.map((batch) => {
+    const slot = optimized ? batch.optimizedSlot : batch.baselineSlot
+    const shiftMinutes = optimized ? (batch.optimizedSlot - batch.baselineSlot) * 15 : 0
     return {
       batchId: batch.id,
       grade: batch.grade,
       urgent: batch.urgent,
       slot,
-      plannedAt: iso(Math.floor(batch.planned * 0.25), (batch.planned % 4) * 15),
-      scheduledAt: iso(Math.floor(slot * 0.25), (slot % 4) * 15),
+      plannedAt: slotIso(batch.baselineSlot),
+      scheduledAt: slotIso(slot),
       shiftMinutes,
-      soakMinutes: 45,
+      soakMinutes: 60,
       holdMinutes: Math.abs(shiftMinutes),
-      tonnage: batch.tonnage,
-      energyMwh: batch.mwh,
-      priceEurMwh: price,
-      costEur: Math.round(batch.mwh * price * 100) / 100,
+      tonnage: 120,
+      energyMwh: 14,
+      priceEurMwh: optimized ? batch.optimizedPrice : batch.baselinePrice,
+      costEur: optimized ? batch.optimizedCost : batch.baselineCost,
       processType: 'REHEAT',
       assetId: 'LUX-RHF-01',
     }
@@ -113,33 +147,35 @@ function scheduleRows(optimized: boolean): EnergyScheduleRow[] {
 export function energyRecommendation(): EnergyRecommendation {
   const baseline = scheduleRows(false)
   const optimized = scheduleRows(true)
-  const baselineFlexible = baseline.reduce((sum, row) => sum + row.costEur, 0)
-  const optimizedFlexible = optimized.reduce((sum, row) => sum + row.costEur, 0)
-  const fixedLoad = 96762.4
-  const baselineCost = Math.round((baselineFlexible + fixedLoad) * 100) / 100
-  const optimizedCost = Math.round((optimizedFlexible + fixedLoad) * 100) / 100
+  const baselineFlexible = round2(baseline.reduce((sum, row) => sum + row.costEur, 0))
+  const optimizedFlexible = round2(optimized.reduce((sum, row) => sum + row.costEur, 0))
+  const baselineCost = round2(baselineFlexible + FIXED_LOAD_COST_EUR)
+  const optimizedCost = round2(optimizedFlexible + FIXED_LOAD_COST_EUR)
+  const costEur = round2(baselineCost - optimizedCost)
   return {
     recommendationId: 'REC-DEMO-LUX-240725',
     version: 1,
     status: 'PENDING_APPROVAL',
-    modelVersion: 'energy-dispatch-milp/1.2.0-demo',
+    modelVersion: 'energy-dispatch-deterministic:2.1.0',
     site: FIXTURE_SITE,
     scenario: 'demo-full',
-    baseline: { costEur: baselineCost, peakDemandMw: 51.81, tonnage: 960, schedule: baseline },
-    optimized: { costEur: optimizedCost, peakDemandMw: 40.0, tonnage: 960, schedule: optimized },
+    baseline: { costEur: baselineCost, peakDemandMw: 56.0, tonnage: 960, schedule: baseline },
+    optimized: { costEur: optimizedCost, peakDemandMw: 51.58, tonnage: 960, schedule: optimized },
     constraintReport: [
-      { name: 'soakTimePreserved', status: 'SATISFIED' },
-      { name: 'deliveryCommitments', status: 'SATISFIED' },
-      { name: 'equipmentCapacity', status: 'SATISFIED' },
-      { name: 'plannedTonnage', status: 'SATISFIED' },
-      { name: 'urgentBatchFixed', status: 'SATISFIED' },
+      { name: 'equal_planned_tonnage', status: 'SATISFIED', detail: '960.00 == 960.00' },
+      { name: 'urgent_batch_fixed', status: 'SATISFIED' },
+      { name: 'minimum_soak_time', status: 'SATISFIED' },
+      { name: 'maximum_hold_time', status: 'SATISFIED' },
+      { name: 'equipment_capacity', status: 'SATISFIED' },
     ],
     hardConstraintViolations: 0,
     savings: {
-      costPct: Math.round(((baselineFlexible - optimizedFlexible) / baselineFlexible) * 1000) / 10,
-      costEur: Math.round((baselineCost - optimizedCost) * 100) / 100,
-      peakPct: 22.8,
-      co2Pct: 8.7,
+      // Whole-dispatch basis, as the API contract requires. The flexible-only
+      // figure (21.74%) is deliberately not surfaced as the headline.
+      costPct: round2((costEur / baselineCost) * 100),
+      costEur,
+      peakPct: -7.89,
+      co2Pct: 3.29,
     },
   }
 }

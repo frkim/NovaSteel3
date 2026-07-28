@@ -74,6 +74,35 @@ describe('DataClient offline fixture fallback', () => {
     expect(peak).toBeGreaterThan(250)
   })
 
+  it('quotes the same dispatch cue sheet offline as the live optimiser', async () => {
+    const result = await client.simulateEnergy({ maxShiftMinutes: 120, maxConcurrentBatches: 2 })
+    const rec = result.value
+    expect(result.source).toBe('fixture')
+    // Whole-dispatch basis, matching docs/implementation/api-contracts.md and
+    // the runbook. An offline walkthrough must never quote a second number.
+    expect(rec.savings.costPct).toBe(7.25)
+    expect(rec.savings.costEur).toBe(2688.7)
+    expect(rec.savings.peakPct).toBe(-7.89)
+    expect(rec.savings.co2Pct).toBe(3.29)
+    expect(rec.baseline.costEur).toBe(37109.1)
+    expect(rec.optimized.costEur).toBe(34420.4)
+    expect(rec.baseline.peakDemandMw).toBe(56.0)
+    expect(rec.optimized.peakDemandMw).toBe(51.58)
+    // Tonnage is conserved and no hard constraint is violated.
+    expect(rec.baseline.tonnage).toBe(960)
+    expect(rec.optimized.tonnage).toBe(960)
+    expect(rec.hardConstraintViolations).toBe(0)
+    const tonnes = (rows: { tonnage: number }[]) => rows.reduce((sum, row) => sum + row.tonnage, 0)
+    expect(tonnes(rec.optimized.schedule)).toBe(tonnes(rec.baseline.schedule))
+    // The urgent batch is pinned; the 280 EUR/MWh batch is the one that moves.
+    const urgent = rec.optimized.schedule.find((row) => row.urgent)
+    expect(urgent?.shiftMinutes).toBe(0)
+    const peakBatch = rec.baseline.schedule.find((row) => row.priceEurMwh === 280)
+    expect(peakBatch).toBeDefined()
+    expect(rec.optimized.schedule.find((row) => row.batchId === peakBatch?.batchId)?.priceEurMwh)
+      .toBeLessThan(280)
+  })
+
   it('targets the concrete demo plant for energy simulation', () => {
     expect(energySimulationBody({ maxShiftMinutes: 180, maxConcurrentBatches: 2 })).toEqual({
       site: 'NS-DEMO-LUX-01',
