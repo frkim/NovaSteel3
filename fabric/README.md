@@ -4,6 +4,10 @@ This folder contains the source-controlled Microsoft Fabric data-plane assets fo
 NovaSteel. The default configuration is synthetic-only and follows the
 architecture in `docs/architecture/solution-architecture.md`.
 
+For a mapping of these assets to Fabric-Brain agents and a three-phase
+deployment sequence, see
+[`docs/architecture/fabric-brain-mapping.md`](../docs/architecture/fabric-brain-mapping.md).
+
 ## Supported deployment boundary
 
 | Asset | Automation in this repository | Required tenant/manual gate |
