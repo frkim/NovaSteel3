@@ -51,6 +51,7 @@ export function EnergySpotSchedule() {
 
   const scheduleColumns: DataTableColumn<EnergyScheduleRow>[] = [
     { key: 'batchId', label: 'Process', type: 'text' },
+    { key: 'processType', label: 'Type', type: 'enum' },
     { key: 'grade', label: 'Grade', type: 'enum' },
     { key: 'scheduledAt', label: 'Window', type: 'date', render: (row) => formatTime(row.scheduledAt, locale) },
     { key: 'tonnage', label: 'Tonnage', type: 'number', align: 'right' },

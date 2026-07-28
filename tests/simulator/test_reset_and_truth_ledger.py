@@ -28,7 +28,7 @@ class ResetControlTests(unittest.TestCase):
         self.assertEqual(manifests_before, manifests_after)
         self.assertEqual(set(list_scenarios()),
                           {"healthy-baseline", "lining-degradation-21d", "energy-price-spike",
-                           "quality-drift", "demo-full"})
+                           "quality-drift", "demo-full", "energy-eaf-flex"})
 
     def test_reset_on_missing_directory_is_a_no_op(self):
         missing_dir = MANIFEST_DIR.parent / "definitely-does-not-exist-12345"

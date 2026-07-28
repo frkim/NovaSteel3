@@ -5,8 +5,13 @@
     "state": "Paused",
     "sku": "F2",
     "demoModeSimulated": true,
-    "stale": false
+    "stale": false,
+    "skuOptions": [
+      "F2",
+      "F4",
+      "F8"
+    ]
   },
-  "asOf": "2026-07-25T05:38:09.445720Z",
-  "correlationId": "cf546f9d-f66f-4dff-b598-131ebb9b1a3a"
+  "asOf": "2026-07-27T23:56:20.347537Z",
+  "correlationId": "238271ea-0090-4792-8086-33c22d05dd64"
 }

@@ -116,5 +116,47 @@ class FullDemoNarrativeTests(unittest.TestCase):
             self.assertTrue(physics_report.ok, msg="\n".join(physics_report.errors))
 
 
+class EafFlexScenarioAssertionTests(unittest.TestCase):
+    """seed 240730: EAF flexible load scheduling at the Belgium Meuse Melt Shop.
+    Optimized schedule costs less than baseline with equal tonnage and zero
+    hard-constraint violations."""
+
+    def test_eaf_flex_optimizer_reduces_cost_without_violations(self):
+        manifest = load_manifest("energy-eaf-flex")
+        self.assertEqual(manifest.root_seed, 240730)
+        with scratch_dir("eaf-flex-assert-") as out_dir:
+            result = generate_run(manifest, out_dir=out_dir, fast=True)
+            summary = result.summary
+
+            self.assertLess(summary["energy_optimized_cost_eur"], summary["energy_baseline_cost_eur"])
+            self.assertEqual(summary["energy_tonnage_before"], summary["energy_tonnage_after"])
+            self.assertEqual(summary["energy_hard_constraint_violations"], 0)
+
+            report = validate_scenario(summary, manifest.expected_assertions)
+            self.assertTrue(report.ok, msg="\n".join(report.errors))
+
+    def test_eaf_flex_determinism(self):
+        """Two generation runs produce identical results."""
+        manifest = load_manifest("energy-eaf-flex")
+        with scratch_dir("eaf-flex-det-a-") as dir_a, scratch_dir("eaf-flex-det-b-") as dir_b:
+            result_a = generate_run(manifest, out_dir=dir_a, fast=True)
+            result_b = generate_run(manifest, out_dir=dir_b, fast=True)
+            self.assertEqual(result_a.checksums, result_b.checksums)
+
+    def test_eaf_flex_heat_batch_payloads(self):
+        """EAF heat batches carry tonnage and energyMwh in the payload."""
+        manifest = load_manifest("energy-eaf-flex")
+        with scratch_dir("eaf-flex-payload-") as out_dir:
+            result = generate_run(manifest, out_dir=out_dir, fast=True)
+            for record in result.datasets["heat_batch"]:
+                payload = record["payload"]
+                self.assertTrue(payload["operation_id"].startswith("EAF-"))
+                self.assertIn("tonnage", payload)
+                self.assertIn("energyMwh", payload)
+                self.assertGreaterEqual(payload["tonnage"], 100.0)
+                self.assertLessEqual(payload["tonnage"], 140.0)
+                self.assertGreater(payload["energyMwh"], 14.0)  # much larger than reheat batches
+
+
 if __name__ == "__main__":
     unittest.main()

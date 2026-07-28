@@ -23,7 +23,7 @@
       "scope2KgCo2e": 165879.67,
       "qualityPredictedFirstPassYieldPct": 88.0,
       "liningRulDaysP50": 21.0,
-      "openAlerts": 1
+      "openAlerts": 8
     },
     "scenario": {
       "id": "demo-full",
@@ -31,6 +31,6 @@
       "source": "simulator-fixture:demo-full"
     }
   },
-  "asOf": "2026-07-25T05:38:09.305307Z",
-  "correlationId": "9711e021-1dfb-4d59-be3d-b1159829aba4"
+  "asOf": "2026-07-27T23:56:20.024890Z",
+  "correlationId": "9fe4608f-c005-4516-9ca3-d2e9bdcf222d"
 }

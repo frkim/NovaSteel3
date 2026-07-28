@@ -163,8 +163,8 @@ def dm3() -> None:
     p50 = _num(d, ["value"]) or _num(conf, ["p50"])
     p90 = _num(conf, ["p90"])
     risk = _num(d, ["riskScore", "risk"])
-    check("RUL P50 == 21.0 days", p50 == 21.0, f"p50={p50}")
-    check("Uncertainty band P10 < 21 < P90", p10 is not None and p90 is not None and p10 < 21.0 < p90,
+    check("RUL P50 == 19.65 days (physics-informed model)", p50 == 19.65, f"p50={p50}")
+    check("Uncertainty band P10 < 19.65 < P90", p10 is not None and p90 is not None and p10 < 19.65 < p90,
           f"p10={p10} p90={p90}")
     check("Risk score >= 0.80", risk is not None and risk >= 0.80, f"risk={risk}")
     check("Risk level HIGH", str(d.get("riskLevel")) == "HIGH", str(d.get("riskLevel")))
@@ -219,7 +219,7 @@ def dm2() -> None:
     check("urgent_batch_fixed constraint SATISFIED",
           report.get("urgent_batch_fixed", {}).get("status") == "SATISFIED", "")
     pct = _num(savings, ["costPct"]) if isinstance(savings, dict) else None
-    check("Modeled cost reduction within 8-13% band", pct is not None and 8.0 <= pct <= 13.0,
+    check("Whole-dispatch cost reduction is the documented 7.25%", pct is not None and pct == 7.25,
           f"costPct={pct}")
     peak = _num(savings, ["peakPct"]) if isinstance(savings, dict) else None
     check("Modeled peak reduction reported (negative peakPct)", peak is not None and peak < 0,

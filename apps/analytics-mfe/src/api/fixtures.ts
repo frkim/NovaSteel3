@@ -104,6 +104,8 @@ function scheduleRows(optimized: boolean): EnergyScheduleRow[] {
       energyMwh: batch.mwh,
       priceEurMwh: price,
       costEur: Math.round(batch.mwh * price * 100) / 100,
+      processType: 'REHEAT',
+      assetId: 'LUX-RHF-01',
     }
   })
 }

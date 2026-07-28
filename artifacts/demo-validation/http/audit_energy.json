@@ -1,14 +1,14 @@
 {
   "items": [
     {
-      "auditId": "3c884b66-dca9-470d-9cb2-87a602ac68ca",
+      "auditId": "d964abcc-fd94-415f-8f94-8221b919a53c",
       "domain": "energy",
-      "entityId": "REC-EB7A0DEDE29F",
-      "correlationId": "cd6bdc76-d988-4b11-ae7c-bc6e6565c45f",
+      "entityId": "REC-B503C1D47E4D",
+      "correlationId": "29eecc08-595b-42e6-8189-e1a4b8fdfa5a",
       "action": "energy.approve",
       "actor": "demo-energy",
-      "inputSnapshotRef": "recommendation:REC-EB7A0DEDE29F",
-      "modelVersion": "energy-dispatch-deterministic:1.0.0",
+      "inputSnapshotRef": "recommendation:REC-B503C1D47E4D",
+      "modelVersion": "energy-dispatch-deterministic:2.1.0",
       "output": {
         "status": "SIMULATED_APPROVED"
       },
@@ -17,40 +17,42 @@
         "reason": "Shadow approval for demo; preserves delivery + tonnage"
       },
       "outcome": null,
-      "recordedAt": "2026-07-25T05:38:09.382786Z",
-      "previousHash": "d744d95410072f47f8678d5673efa5653860db6633e1bcf7af46077ef52bf32c",
-      "recordHash": "d8cb12db1c3f1f717d7cc6bb56215432c7a6f2b599058dffa9fd68d751caf1cb"
+      "recordedAt": "2026-07-27T23:56:20.295661Z",
+      "previousHash": "475a1aeac82f6c58edfd0619b3575ddc5795ea83db748f40f8d24e4c5f91e536",
+      "recordHash": "d8abfc4ba9c4cefc74b4fe7d48cf31154dbbf59acb2977be33627ba2805407d5"
     },
     {
-      "auditId": "32dfa3b3-427f-41e3-9201-2d60a96374f8",
+      "auditId": "a2ca18f2-5e39-4057-84df-ad201676d6a2",
       "domain": "energy",
-      "entityId": "REC-EB7A0DEDE29F",
-      "correlationId": "80edf349-a586-47d0-8ae2-b4525653e201",
+      "entityId": "REC-B503C1D47E4D",
+      "correlationId": "ea4c517f-2de9-44e6-bcbb-ea62e9b85841",
       "action": "energy.simulate",
       "actor": "demo-energy",
       "inputSnapshotRef": "simulator:simulator-fixture:demo-full",
-      "modelVersion": "energy-dispatch-deterministic:1.0.0",
+      "modelVersion": "energy-dispatch-deterministic:2.1.0",
       "output": {
         "savings": {
-          "costPct": 9.94,
-          "costEur": 3689.98,
-          "peakPct": -5.16,
-          "co2Pct": 8.35,
-          "rawFlexibleCostPct": 29.83,
-          "rawCarbonArbitragePct": -4.98
+          "costPct": 7.25,
+          "costEur": 2688.7,
+          "peakPct": -7.89,
+          "co2Pct": 3.29,
+          "co2KgBaseline": 169268.99,
+          "co2KgOptimized": 163705.39,
+          "rawFlexibleCostPct": 21.74,
+          "rawFlexibleCo2Pct": 31.71
         },
         "hardConstraintViolations": 0
       },
       "humanAction": null,
       "outcome": null,
-      "recordedAt": "2026-07-25T05:38:09.372354Z",
-      "previousHash": "2a446846379e1301c3bf595245956a3df6dd4601d8323a021f0c3d64a34019ee",
-      "recordHash": "d744d95410072f47f8678d5673efa5653860db6633e1bcf7af46077ef52bf32c"
+      "recordedAt": "2026-07-27T23:56:20.285109Z",
+      "previousHash": "955af23614c35f5441e9f3c0a9a70c66c0f382f93961b8671d417513759fbfaf",
+      "recordHash": "475a1aeac82f6c58edfd0619b3575ddc5795ea83db748f40f8d24e4c5f91e536"
     }
   ],
   "total": 2,
   "page": 1,
   "size": 50,
-  "asOf": "2026-07-25T05:38:09.441696Z",
-  "correlationId": "2bb55037-6d6f-462e-8e0c-4f9baec9a9db"
+  "asOf": "2026-07-27T23:56:20.343981Z",
+  "correlationId": "abf5a1fb-8610-4f10-8996-9f318a01e590"
 }

@@ -234,3 +234,114 @@ class TestResponseContractPreserved:
         result = _simulate_default()
         assert "solver" in result
         assert result["solver"] in ("MILP_CBC", "DETERMINISTIC_HEURISTIC")
+
+
+# --- EAF mixed-batch tests ---
+
+def _eaf_intervals() -> list[dict]:
+    """Synthetic 96-slot energy intervals with a scarcity spike at slots 68-80."""
+    intervals = []
+    for i in range(96):
+        import math
+        hour = i / 4.0
+        diurnal = (math.sin((hour - 6.0) / 24.0 * 2 * math.pi) + 1.0) / 2.0
+        price = 55.0 + 60.0 * diurnal
+        if 68 <= i < 80:
+            price = 280.0
+        intervals.append({
+            "payload": {
+                "interval_start": f"2026-06-10T{int(hour):02d}:{(i % 4) * 15:02d}:00.000Z",
+                "price": round(price, 2),
+                "demand": 120.0,
+                "baseline_demand_mw": 120.0,
+                "grid_carbon_intensity_kgco2e_per_mwh": 150.0,
+            }
+        })
+    return intervals
+
+
+def _eaf_batches() -> list[dict]:
+    """Mix of REHEAT and EAF batches, some overlapping with the spike."""
+    return [
+        {"payload": {"operation_id": "REHEAT-BATCH-01", "planned_ts": "2026-06-10T05:00:00.000Z",
+                     "urgent": False, "grade_code": "NS-AUTO-DP780", "tonnage": 120.0, "energyMwh": 14.0}},
+        {"payload": {"operation_id": "REHEAT-BATCH-02", "planned_ts": "2026-06-10T18:00:00.000Z",
+                     "urgent": False, "grade_code": "NS-AUTO-DP780", "tonnage": 120.0, "energyMwh": 14.0}},
+        {"payload": {"operation_id": "EAF-HEAT-01", "planned_ts": "2026-06-10T17:30:00.000Z",
+                     "urgent": False, "grade_code": "NS-LONG-B500", "tonnage": 130.0, "energyMwh": 97.5},
+         "asset_id": "BE-EAF-01"},
+        {"payload": {"operation_id": "EAF-HEAT-02", "planned_ts": "2026-06-10T19:00:00.000Z",
+                     "urgent": True, "grade_code": "NS-LONG-B500", "tonnage": 125.0, "energyMwh": 93.75},
+         "asset_id": "BE-EAF-01"},
+        {"payload": {"operation_id": "EAF-HEAT-03", "planned_ts": "2026-06-10T10:00:00.000Z",
+                     "urgent": False, "grade_code": "NS-LONG-B500", "tonnage": 110.0, "energyMwh": 82.5},
+         "asset_id": "BE-EAF-01"},
+    ]
+
+
+def _simulate_eaf_mix(**extra_constraints: int) -> dict:
+    constraints = {"maxShiftMinutesByProcess": {"EAF": 360, "REHEAT": 120}}
+    constraints.update(extra_constraints)
+    return EnergyDispatchOptimizer().simulate(
+        site="NS-DEMO-BE-01",
+        horizon_hours=24,
+        scenario="energy-eaf-flex",
+        energy_intervals=_eaf_intervals(),
+        batches=_eaf_batches(),
+        constraints=constraints,
+    )
+
+
+class TestEafMixedBatchScheduling:
+    """EAF mixed batch list produces a feasible schedule."""
+
+    def test_zero_hard_violations(self) -> None:
+        result = _simulate_eaf_mix()
+        assert result["hardConstraintViolations"] == 0
+
+    def test_equal_tonnage(self) -> None:
+        result = _simulate_eaf_mix()
+        assert result["baseline"]["tonnage"] == result["optimized"]["tonnage"]
+
+    def test_milp_solver_used(self) -> None:
+        result = _simulate_eaf_mix()
+        assert result["solver"] == "MILP_CBC"
+
+    def test_determinism_across_runs(self) -> None:
+        first = _simulate_eaf_mix()
+        second = _simulate_eaf_mix()
+        assert first == second
+
+    def test_process_type_in_schedule_rows(self) -> None:
+        result = _simulate_eaf_mix()
+        for row in result["optimized"]["schedule"]:
+            assert "processType" in row
+            assert row["processType"] in ("REHEAT", "EAF")
+
+    def test_eaf_wider_shift_window(self) -> None:
+        """EAF batches can shift up to 360 min (24 slots) while REHEAT limited to 120 min (8 slots)."""
+        result = _simulate_eaf_mix()
+        for row in result["optimized"]["schedule"]:
+            if row["processType"] == "REHEAT":
+                assert abs(row["shiftMinutes"]) <= 120
+            elif row["processType"] == "EAF":
+                assert abs(row["shiftMinutes"]) <= 360
+
+    def test_urgent_eaf_batch_stays_fixed(self) -> None:
+        result = _simulate_eaf_mix()
+        for row in result["optimized"]["schedule"]:
+            if row["urgent"]:
+                assert row["shiftMinutes"] == 0
+
+    def test_heuristic_fallback_respects_per_process_shift(self) -> None:
+        """Heuristic fallback also respects per-process-type shift windows."""
+        with patch.dict("sys.modules", {"pulp": None}):
+            result = _simulate_eaf_mix()
+        assert result["solver"] == "DETERMINISTIC_HEURISTIC"
+        assert result["hardConstraintViolations"] == 0
+        assert result["baseline"]["tonnage"] == result["optimized"]["tonnage"]
+        for row in result["optimized"]["schedule"]:
+            if row["processType"] == "REHEAT":
+                assert abs(row["shiftMinutes"]) <= 120
+            elif row["processType"] == "EAF":
+                assert abs(row["shiftMinutes"]) <= 360

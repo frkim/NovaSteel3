@@ -8,7 +8,7 @@
       "scope2KgCo2e": 165879.67,
       "qualityPredictedFirstPassYieldPct": 88.0,
       "liningRulDaysP50": 21.0,
-      "openAlerts": 1
+      "openAlerts": 8
     },
     "freshness": {
       "energy": {
@@ -26,6 +26,6 @@
     },
     "syntheticBanner": "Synthetic demo data — not for operational control"
   },
-  "asOf": "2026-07-25T05:38:09.313942Z",
-  "correlationId": "e8f947ef-2a57-41f9-8ac8-5a029ce4312a"
+  "asOf": "2026-07-27T23:56:20.033412Z",
+  "correlationId": "02e438c4-5243-40ee-982c-feef8168780e"
 }

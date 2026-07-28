@@ -23,6 +23,7 @@ SCENARIO_SEEDS = {
     "quality-drift": 240728,
     "edge-outage-recovery": 240729,
     "demo-full": 240725,
+    "energy-eaf-flex": 240730,
 }
 
 
@@ -68,6 +69,8 @@ ASSETS = {
         Asset("LUX-RHF-01", "NS-DEMO-LUX-01", "Rolling", "Reheat furnace"),
         Asset("LUX-HSM-01", "NS-DEMO-LUX-01", "Rolling", "Hot strip mill"),
         Asset("LUX-UTIL-01", "NS-DEMO-LUX-01", "Utilities", "Energy system"),
+        Asset("BE-EAF-01", "NS-DEMO-BE-01", "Steelmaking", "Electric arc furnace"),
+        Asset("BE-UTIL-01", "NS-DEMO-BE-01", "Utilities", "Energy system"),
     ]
 }
 

@@ -99,6 +99,8 @@ export interface EnergyScheduleRow {
   energyMwh: number
   priceEurMwh: number
   costEur: number
+  processType?: string
+  assetId?: string
 }
 
 export interface EnergyRecommendation {

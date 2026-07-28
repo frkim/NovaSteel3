@@ -35,6 +35,7 @@ class _BatchInfo:
     grade: str
     tonnage: float
     energy_mwh: float
+    max_shift_slots: int | None = None  # per-batch override; None → use global
 
 
 def solve_milp(
@@ -69,12 +70,14 @@ def solve_milp(
     feasible_slots: list[list[int]] = []
 
     for b_idx, batch in enumerate(batches):
+        # Per-batch shift override takes precedence over global max_shift_slots.
+        batch_shift = batch.max_shift_slots if batch.max_shift_slots is not None else max_shift_slots
         if batch.urgent:
             # Urgent batches are pinned to their planned slot.
             slots = [batch.planned_slot]
         else:
-            lo = max(0, batch.planned_slot - max_shift_slots)
-            hi = min(n_slots - 1, batch.planned_slot + max_shift_slots)
+            lo = max(0, batch.planned_slot - batch_shift)
+            hi = min(n_slots - 1, batch.planned_slot + batch_shift)
             slots = [
                 s for s in range(lo, hi + 1)
                 if abs(s - batch.planned_slot) * 15 <= max_hold_minutes

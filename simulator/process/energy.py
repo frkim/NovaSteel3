@@ -10,8 +10,12 @@ tonnage, zero hard-constraint violations), not be a production scheduler.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Union
 
 INTERVALS_PER_DAY = 96  # 15-minute intervals
+
+# Union type for any flexible batch (ReheatBatch or EafHeat).
+FlexibleBatch = Union["ReheatBatch", "EafHeat"]
 
 
 def baseline_price_curve(rng, *, low: float = 55.0, high: float = 115.0) -> list[float]:
@@ -48,7 +52,25 @@ class ReheatBatch:
     max_shift_intervals: int = 12
 
 
-def demand_profile(batches: list[ReheatBatch], base_load_mw: float = 40.0) -> list[float]:
+@dataclass
+class EafHeat:
+    """A single EAF tap (heat) as a schedulable flexible load.
+
+    EAF heats are genuinely deferrable within a shift window because the
+    furnace is idle between taps — unlike reheat batches which are coupled to
+    the rolling schedule.  max_shift_intervals is therefore wider (up to 24
+    slots = 6 h) reflecting a full production shift.
+    """
+    batch_id: str
+    planned_interval: int
+    duration_intervals: int  # 3–4 slots (45–60 min tap-to-tap)
+    demand_mw: float         # 80–150 MW per heat
+    tonnage: float           # 100–140 t liquid steel per tap
+    urgent: bool = False
+    max_shift_intervals: int = 24  # 6 h — full shift deferral window
+
+
+def demand_profile(batches: list[FlexibleBatch], base_load_mw: float = 40.0) -> list[float]:
     profile = [base_load_mw] * INTERVALS_PER_DAY
     for batch in batches:
         for i in range(batch.planned_interval, batch.planned_interval + batch.duration_intervals):
@@ -57,8 +79,8 @@ def demand_profile(batches: list[ReheatBatch], base_load_mw: float = 40.0) -> li
     return profile
 
 
-def optimize_schedule(batches: list[ReheatBatch], prices: list[float],
-                       spike_start_interval: int, spike_end_interval: int) -> tuple[list[ReheatBatch], dict]:
+def optimize_schedule(batches: list[FlexibleBatch], prices: list[float],
+                       spike_start_interval: int, spike_end_interval: int) -> tuple[list[FlexibleBatch], dict]:
     """Shift eligible (non-urgent) batches whose planned window overlaps the
     scarcity interval to the cheapest nearby slot within their
     ``max_shift_intervals`` hold-time limit.
@@ -67,7 +89,7 @@ def optimize_schedule(batches: list[ReheatBatch], prices: list[float],
     number of shifted batches and whether any hard constraint (hold-time
     or urgent-batch immutability) was violated.
     """
-    optimized: list[ReheatBatch] = []
+    optimized: list[FlexibleBatch] = []
     shifted = 0
     violations = 0
     for batch in batches:
@@ -100,12 +122,18 @@ def optimize_schedule(batches: list[ReheatBatch], prices: list[float],
             shifted += 1
             if abs(best_interval - batch.planned_interval) > batch.max_shift_intervals:
                 violations += 1
-        optimized.append(ReheatBatch(batch.batch_id, best_interval, batch.duration_intervals,
-                                      batch.demand_mw, batch.urgent, batch.max_shift_intervals))
+
+        # Reconstruct the batch at the new interval preserving its type.
+        if isinstance(batch, EafHeat):
+            optimized.append(EafHeat(batch.batch_id, best_interval, batch.duration_intervals,
+                                     batch.demand_mw, batch.tonnage, batch.urgent, batch.max_shift_intervals))
+        else:
+            optimized.append(ReheatBatch(batch.batch_id, best_interval, batch.duration_intervals,
+                                          batch.demand_mw, batch.urgent, batch.max_shift_intervals))
     return optimized, {"shifted_batches": shifted, "hard_constraint_violations": violations}
 
 
-def _batch_cost(batch: ReheatBatch, prices: list[float], start_interval: int) -> float:
+def _batch_cost(batch: FlexibleBatch, prices: list[float], start_interval: int) -> float:
     cost = 0.0
     for i in range(start_interval, start_interval + batch.duration_intervals):
         if 0 <= i < len(prices):
@@ -113,10 +141,21 @@ def _batch_cost(batch: ReheatBatch, prices: list[float], start_interval: int) ->
     return cost
 
 
-def schedule_cost(batches: list[ReheatBatch], prices: list[float], base_load_mw: float = 40.0) -> float:
+def schedule_cost(batches: list[FlexibleBatch], prices: list[float], base_load_mw: float = 40.0) -> float:
     profile = demand_profile(batches, base_load_mw)
     return sum(mw * 0.25 * price for mw, price in zip(profile, prices))
 
 
-def planned_tonnage(batches: list[ReheatBatch], tonnes_per_batch: float = 120.0) -> float:
-    return len(batches) * tonnes_per_batch
+def planned_tonnage(batches: list[FlexibleBatch], tonnes_per_batch: float = 120.0) -> float:
+    """Total tonnage across all batches.
+
+    For EafHeat instances the per-heat tonnage field is used directly;
+    for ReheatBatch the fallback ``tonnes_per_batch`` is applied (backward-compatible).
+    """
+    total = 0.0
+    for batch in batches:
+        if isinstance(batch, EafHeat):
+            total += batch.tonnage
+        else:
+            total += tonnes_per_batch
+    return total

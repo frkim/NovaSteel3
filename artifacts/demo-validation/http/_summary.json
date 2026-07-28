@@ -4,42 +4,42 @@
     {
       "moment": "DM-1",
       "title": "Command center + persona switch",
-      "seconds": 0.048
+      "seconds": 0.04
     },
     {
       "moment": "TELEMETRY",
       "title": "Live/historical telemetry and alert",
-      "seconds": 0.027
+      "seconds": 0.025
     },
     {
       "moment": "DM-3",
       "title": "Furnace RUL 21-day + uncertainty + work order",
-      "seconds": 0.021
+      "seconds": 0.017
     },
     {
       "moment": "DM-2",
       "title": "Energy dispatch optimization (equal tonnage, zero violations)",
-      "seconds": 0.021
+      "seconds": 0.221
     },
     {
       "moment": "DM-4",
       "title": "Quality genealogy + what-if + yield evidence",
-      "seconds": 0.013
+      "seconds": 0.012
     },
     {
       "moment": "DM-6",
       "title": "Sustainability / CO2 / ETS",
-      "seconds": 0.009
+      "seconds": 0.007
     },
     {
       "moment": "DM-5",
       "title": "Operator interview / STT / Foundry knowledge workflow",
-      "seconds": 0.028
+      "seconds": 0.022
     },
     {
       "moment": "AUDIT",
       "title": "Append-only audit evidence",
-      "seconds": 0.008
+      "seconds": 0.007
     },
     {
       "moment": "CAPACITY",
@@ -49,15 +49,15 @@
     {
       "moment": "TABLES",
       "title": "Table search / filter / sort / pagination semantics",
-      "seconds": 0.109
+      "seconds": 0.124
     },
     {
       "moment": "AUTHZ",
       "title": "Server-side authorization boundaries",
-      "seconds": 0.008
+      "seconds": 0.005
     }
   ],
-  "totalSeconds": 0.309,
+  "totalSeconds": 0.497,
   "checks": [
     {
       "label": "Persona switch yields distinct persona identities",
@@ -105,19 +105,19 @@
       "detail": ""
     },
     {
-      "label": "RUL P50 == 21.0 days",
+      "label": "RUL P50 == 19.65 days (physics-informed model)",
       "ok": true,
-      "detail": "p50=21.0"
+      "detail": "p50=19.65"
     },
     {
-      "label": "Uncertainty band P10 < 21 < P90",
+      "label": "Uncertainty band P10 < 19.65 < P90",
       "ok": true,
-      "detail": "p10=16.8 p90=27.5"
+      "detail": "p10=18.69 p90=20.61"
     },
     {
       "label": "Risk score >= 0.80",
       "ok": true,
-      "detail": "risk=0.87"
+      "detail": "risk=0.8995"
     },
     {
       "label": "Risk level HIGH",
@@ -127,7 +127,7 @@
     {
       "label": "Forecast carries an audit reference",
       "ok": true,
-      "detail": "5badce33-c95e-46b5-a5d8-a5ae487fdd50"
+      "detail": "667214b6-f2ed-4d00-9e3b-7815b8fb2721"
     },
     {
       "label": "Synthetic work order created",
@@ -152,7 +152,7 @@
     {
       "label": "Optimization produced a recommendation",
       "ok": true,
-      "detail": "REC-EB7A0DEDE29F"
+      "detail": "REC-B503C1D47E4D"
     },
     {
       "label": "Zero hard-constraint violations",
@@ -175,14 +175,14 @@
       "detail": ""
     },
     {
-      "label": "Modeled cost reduction within 8-13% band",
+      "label": "Whole-dispatch cost reduction is the documented 7.25%",
       "ok": true,
-      "detail": "costPct=9.94"
+      "detail": "costPct=7.25"
     },
     {
       "label": "Modeled peak reduction reported (negative peakPct)",
       "ok": true,
-      "detail": "peakPct=-5.16"
+      "detail": "peakPct=-7.89"
     },
     {
       "label": "Evening scarcity peak price 280 EUR/MWh present",
@@ -197,7 +197,7 @@
     {
       "label": "Approval recorded an audit reference",
       "ok": true,
-      "detail": "3c884b66-dca9-470d-9cb2-87a602ac68ca"
+      "detail": "d964abcc-fd94-415f-8f94-8221b919a53c"
     },
     {
       "label": "Quality batches table returns rows",
@@ -232,7 +232,7 @@
     {
       "label": "What-if carries an audit reference",
       "ok": true,
-      "detail": "d31850c7-394e-40d0-88b2-92f3bc3c5727"
+      "detail": "6e8b4fcc-9bee-4b02-b738-740caea2a477"
     },
     {
       "label": "Yield evidence available (manifest predicted 0.88 -> 0.95)",

@@ -1043,7 +1043,7 @@ crashing.
 
 - `lining-rul-piml:1.3.0-demo` — `rul_model.py`
 - `quality-risk:1.0.0-demo` — `service.py` (scoring worker)
-- `energy-dispatch-deterministic:2.0.0` — `service.py` (optimizer worker)
+- `energy-dispatch-deterministic:2.1.0` — `service.py` (optimizer worker)
 
 The Foundry deployment names and API version are configurable via environment
 variables (`FOUNDRY_CHAT_DEPLOYMENT`, `FOUNDRY_REASONING_DEPLOYMENT`,
@@ -1077,7 +1077,7 @@ per-case results, supporting the model-governance evidence discipline.
 - `services/scoring-worker/src/scoring_worker/service.py`
   — `lining_model_version`, `quality_model_version`.
 - `services/optimizer-worker/src/optimizer_worker/service.py`
-  — `model_version = "energy-dispatch-deterministic:2.0.0"`.
+  — `model_version = "energy-dispatch-deterministic:2.1.0"`.
 - `infra/bicep/modules/containerapps.bicep`
   — `foundryEndpoint`, `foundryChatDeployment`, `foundryEmbedDeployment`
   wired as environment variables.

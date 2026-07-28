@@ -2,45 +2,54 @@
   "data": {
     "assetId": "LUX-BF-01",
     "componentId": "HEARTH-SECTOR-07",
-    "value": 21.0,
+    "value": 19.65,
     "unit": "d",
     "confidence": {
-      "p10": 16.8,
-      "p50": 21.0,
-      "p90": 27.5
+      "p10": 18.69,
+      "p50": 19.65,
+      "p90": 20.61
     },
-    "riskScore": 0.87,
+    "riskScore": 0.8995,
     "riskLevel": "HIGH",
     "estimatedMinimumLiningMm": 300.0,
     "modelVersion": "lining-rul-piml:1.3.0-demo",
     "scoredAt": "2026-06-11T00:00:00.000Z",
     "drivers": [
       {
-        "name": "heat_flux_6h_slope",
-        "contribution": 0.29
+        "name": "refractory_thickness_slope",
+        "contribution": 0.25
       },
       {
-        "name": "sector_to_ring_temp_delta",
-        "contribution": 0.24
+        "name": "heat_flux_trend",
+        "contribution": 0.21
       },
       {
-        "name": "cooling_efficiency_residual",
-        "contribution": 0.18
+        "name": "normalized_health_index",
+        "contribution": 0.15
+      },
+      {
+        "name": "cooling_efficiency",
+        "contribution": 0.39
       }
     ],
     "featureSnapshot": {
       "liningThicknessMm": 363.0,
+      "thicknessSlopeMmPerDay": -3.2064,
+      "thicknessRSquared": 0.8792,
       "coolingDeltaC": 37.4,
       "coolingFlowM3h": 211.5,
       "heatFluxKwM2": 3073.0,
+      "heatFluxSlopePerDay": 2684.28,
       "waterHeatProxyKw": 919.945,
-      "apparentThermalResistance": 0.3352
+      "apparentThermalResistance": 0.3352,
+      "normalizedHealthIndex": 0.63
     },
     "sourceRefs": [
       "simulator:simulator-fixture:demo-full"
     ],
-    "auditRef": "5badce33-c95e-46b5-a5d8-a5ae487fdd50"
+    "modelConfidence": 0.7846,
+    "auditRef": "667214b6-f2ed-4d00-9e3b-7815b8fb2721"
   },
-  "asOf": "2026-07-25T05:38:09.352798Z",
-  "correlationId": "7b6289d9-8a70-48a1-9396-4151f2a16ac1"
+  "asOf": "2026-07-27T23:56:20.067884Z",
+  "correlationId": "62fe797b-4a1c-4a8b-bf06-e631f127c627"
 }

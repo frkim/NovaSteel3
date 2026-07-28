@@ -1,16 +1,17 @@
 {
   "data": {
-    "recommendationId": "REC-EB7A0DEDE29F",
+    "recommendationId": "REC-B503C1D47E4D",
     "version": 1,
     "status": "PENDING_APPROVAL",
-    "modelVersion": "energy-dispatch-deterministic:1.0.0",
+    "modelVersion": "energy-dispatch-deterministic:2.1.0",
+    "solver": "MILP_CBC",
     "site": "NS-DEMO-LUX-01",
     "scenario": "evening-scarcity",
     "baseline": {
       "costEur": 37109.1,
       "flexibleCostEur": 12369.7,
       "fixedLoadCostEur": 24739.4,
-      "peakDemandMw": 51.58,
+      "peakDemandMw": 56.0,
       "tonnage": 960.0,
       "schedule": [
         {
@@ -26,7 +27,9 @@
           "tonnage": 120.0,
           "energyMwh": 14.0,
           "priceEurMwh": 54.59,
-          "costEur": 764.26
+          "costEur": 764.26,
+          "processType": "REHEAT",
+          "assetId": "LUX-RHF-01"
         },
         {
           "batchId": "REHEAT-BATCH-01",
@@ -41,7 +44,9 @@
           "tonnage": 120.0,
           "energyMwh": 14.0,
           "priceEurMwh": 68.13,
-          "costEur": 953.82
+          "costEur": 953.82,
+          "processType": "REHEAT",
+          "assetId": "LUX-RHF-01"
         },
         {
           "batchId": "REHEAT-BATCH-02",
@@ -56,7 +61,9 @@
           "tonnage": 120.0,
           "energyMwh": 14.0,
           "priceEurMwh": 90.3,
-          "costEur": 1264.2
+          "costEur": 1264.2,
+          "processType": "REHEAT",
+          "assetId": "LUX-RHF-01"
         },
         {
           "batchId": "REHEAT-BATCH-03",
@@ -71,7 +78,9 @@
           "tonnage": 120.0,
           "energyMwh": 14.0,
           "priceEurMwh": 110.92,
-          "costEur": 1552.88
+          "costEur": 1552.88,
+          "processType": "REHEAT",
+          "assetId": "LUX-RHF-01"
         },
         {
           "batchId": "REHEAT-BATCH-04",
@@ -86,7 +95,9 @@
           "tonnage": 120.0,
           "energyMwh": 14.0,
           "priceEurMwh": 112.64,
-          "costEur": 1576.96
+          "costEur": 1576.96,
+          "processType": "REHEAT",
+          "assetId": "LUX-RHF-01"
         },
         {
           "batchId": "REHEAT-BATCH-05",
@@ -101,7 +112,9 @@
           "tonnage": 120.0,
           "energyMwh": 14.0,
           "priceEurMwh": 103.9,
-          "costEur": 1454.6
+          "costEur": 1454.6,
+          "processType": "REHEAT",
+          "assetId": "LUX-RHF-01"
         },
         {
           "batchId": "REHEAT-BATCH-06",
@@ -116,7 +129,9 @@
           "tonnage": 120.0,
           "energyMwh": 14.0,
           "priceEurMwh": 280.0,
-          "costEur": 3920.0
+          "costEur": 3920.0,
+          "processType": "REHEAT",
+          "assetId": "LUX-RHF-01"
         },
         {
           "batchId": "REHEAT-BATCH-07",
@@ -131,61 +146,69 @@
           "tonnage": 120.0,
           "energyMwh": 14.0,
           "priceEurMwh": 63.07,
-          "costEur": 882.98
+          "costEur": 882.98,
+          "processType": "REHEAT",
+          "assetId": "LUX-RHF-01"
         }
       ]
     },
     "optimized": {
-      "costEur": 33419.12,
-      "flexibleCostEur": 8679.72,
+      "costEur": 34420.4,
+      "flexibleCostEur": 9681.0,
       "fixedLoadCostEur": 24739.4,
-      "peakDemandMw": 48.92,
+      "peakDemandMw": 51.58,
       "tonnage": 960.0,
       "schedule": [
         {
           "batchId": "REHEAT-BATCH-00",
           "grade": "NS-AUTO-DP780",
           "urgent": false,
-          "slot": 2,
+          "slot": 9,
           "plannedAt": "2026-06-10T00:15:00.000Z",
-          "scheduledAt": "2026-06-10T00:30:00.000Z",
-          "shiftMinutes": 15,
+          "scheduledAt": "2026-06-10T02:15:00.000Z",
+          "shiftMinutes": 120,
           "soakMinutes": 60,
-          "holdMinutes": 15,
+          "holdMinutes": 120,
           "tonnage": 120.0,
           "energyMwh": 14.0,
-          "priceEurMwh": 52.35,
-          "costEur": 732.9
+          "priceEurMwh": 62.46,
+          "costEur": 874.44,
+          "processType": "REHEAT",
+          "assetId": "LUX-RHF-01"
         },
         {
           "batchId": "REHEAT-BATCH-01",
           "grade": "NS-LONG-B500",
           "urgent": false,
-          "slot": 7,
+          "slot": 9,
           "plannedAt": "2026-06-10T03:45:00.000Z",
-          "scheduledAt": "2026-06-10T01:45:00.000Z",
-          "shiftMinutes": -120,
+          "scheduledAt": "2026-06-10T02:15:00.000Z",
+          "shiftMinutes": -90,
           "soakMinutes": 60,
-          "holdMinutes": 120,
+          "holdMinutes": 90,
           "tonnage": 120.0,
           "energyMwh": 14.0,
-          "priceEurMwh": 57.43,
-          "costEur": 804.02
+          "priceEurMwh": 62.46,
+          "costEur": 874.44,
+          "processType": "REHEAT",
+          "assetId": "LUX-RHF-01"
         },
         {
           "batchId": "REHEAT-BATCH-02",
           "grade": "NS-AUTO-HSLA420",
           "urgent": false,
-          "slot": 18,
+          "slot": 25,
           "plannedAt": "2026-06-10T06:30:00.000Z",
-          "scheduledAt": "2026-06-10T04:30:00.000Z",
-          "shiftMinutes": -120,
+          "scheduledAt": "2026-06-10T06:15:00.000Z",
+          "shiftMinutes": -15,
           "soakMinutes": 60,
-          "holdMinutes": 120,
+          "holdMinutes": 15,
           "tonnage": 120.0,
           "energyMwh": 14.0,
-          "priceEurMwh": 73.19,
-          "costEur": 1024.66
+          "priceEurMwh": 84.78,
+          "costEur": 1186.92,
+          "processType": "REHEAT",
+          "assetId": "LUX-RHF-01"
         },
         {
           "batchId": "REHEAT-BATCH-03",
@@ -200,67 +223,77 @@
           "tonnage": 120.0,
           "energyMwh": 14.0,
           "priceEurMwh": 110.92,
-          "costEur": 1552.88
+          "costEur": 1552.88,
+          "processType": "REHEAT",
+          "assetId": "LUX-RHF-01"
         },
         {
           "batchId": "REHEAT-BATCH-04",
           "grade": "NS-AUTO-HSLA420",
           "urgent": false,
-          "slot": 55,
+          "slot": 46,
           "plannedAt": "2026-06-10T12:00:00.000Z",
-          "scheduledAt": "2026-06-10T13:45:00.000Z",
-          "shiftMinutes": 105,
+          "scheduledAt": "2026-06-10T11:30:00.000Z",
+          "shiftMinutes": -30,
           "soakMinutes": 60,
-          "holdMinutes": 105,
+          "holdMinutes": 30,
           "tonnage": 120.0,
           "energyMwh": 14.0,
-          "priceEurMwh": 109.24,
-          "costEur": 1529.36
+          "priceEurMwh": 111.91,
+          "costEur": 1566.74,
+          "processType": "REHEAT",
+          "assetId": "LUX-RHF-01"
         },
         {
           "batchId": "REHEAT-BATCH-05",
           "grade": "NS-AUTO-DP780",
           "urgent": false,
-          "slot": 67,
+          "slot": 58,
           "plannedAt": "2026-06-10T15:00:00.000Z",
-          "scheduledAt": "2026-06-10T16:45:00.000Z",
-          "shiftMinutes": 105,
+          "scheduledAt": "2026-06-10T14:30:00.000Z",
+          "shiftMinutes": -30,
           "soakMinutes": 60,
-          "holdMinutes": 105,
+          "holdMinutes": 30,
           "tonnage": 120.0,
           "energyMwh": 14.0,
-          "priceEurMwh": 97.24,
-          "costEur": 1361.36
+          "priceEurMwh": 106.88,
+          "costEur": 1496.32,
+          "processType": "REHEAT",
+          "assetId": "LUX-RHF-01"
         },
         {
           "batchId": "REHEAT-BATCH-06",
           "grade": "NS-AUTO-HSLA420",
           "urgent": false,
-          "slot": 83,
+          "slot": 67,
           "plannedAt": "2026-06-10T18:45:00.000Z",
-          "scheduledAt": "2026-06-10T20:45:00.000Z",
-          "shiftMinutes": 120,
+          "scheduledAt": "2026-06-10T16:45:00.000Z",
+          "shiftMinutes": -120,
           "soakMinutes": 60,
           "holdMinutes": 120,
           "tonnage": 120.0,
           "energyMwh": 14.0,
-          "priceEurMwh": 65.86,
-          "costEur": 922.04
+          "priceEurMwh": 97.24,
+          "costEur": 1361.36,
+          "processType": "REHEAT",
+          "assetId": "LUX-RHF-01"
         },
         {
           "batchId": "REHEAT-BATCH-07",
           "grade": "NS-LONG-B500",
           "urgent": false,
-          "slot": 93,
+          "slot": 94,
           "plannedAt": "2026-06-10T21:30:00.000Z",
-          "scheduledAt": "2026-06-10T23:15:00.000Z",
-          "shiftMinutes": 105,
+          "scheduledAt": "2026-06-10T23:30:00.000Z",
+          "shiftMinutes": 120,
           "soakMinutes": 60,
-          "holdMinutes": 105,
+          "holdMinutes": 120,
           "tonnage": 120.0,
           "energyMwh": 14.0,
-          "priceEurMwh": 53.75,
-          "costEur": 752.5
+          "priceEurMwh": 54.85,
+          "costEur": 767.9,
+          "processType": "REHEAT",
+          "assetId": "LUX-RHF-01"
         }
       ]
     },
@@ -294,15 +327,17 @@
     ],
     "hardConstraintViolations": 0,
     "savings": {
-      "costPct": 9.94,
-      "costEur": 3689.98,
-      "peakPct": -5.16,
-      "co2Pct": 8.35,
-      "rawFlexibleCostPct": 29.83,
-      "rawCarbonArbitragePct": -4.98
+      "costPct": 7.25,
+      "costEur": 2688.7,
+      "peakPct": -7.89,
+      "co2Pct": 3.29,
+      "co2KgBaseline": 169268.99,
+      "co2KgOptimized": 163705.39,
+      "rawFlexibleCostPct": 21.74,
+      "rawFlexibleCo2Pct": 31.71
     },
-    "auditRef": "32dfa3b3-427f-41e3-9201-2d60a96374f8"
+    "auditRef": "a2ca18f2-5e39-4057-84df-ad201676d6a2"
   },
-  "asOf": "2026-07-25T05:38:09.372460Z",
-  "correlationId": "80edf349-a586-47d0-8ae2-b4525653e201"
+  "asOf": "2026-07-27T23:56:20.285315Z",
+  "correlationId": "ea4c517f-2de9-44e6-bcbb-ea62e9b85841"
 }

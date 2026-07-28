@@ -38,6 +38,8 @@ class _Batch:
     grade: str
     tonnage: float
     energy_mwh: float
+    asset_id: str = ""
+    process_type: str = "REHEAT"
 
 
 class EnergyDispatchOptimizer:
@@ -47,7 +49,7 @@ class EnergyDispatchOptimizer:
     falls back to DETERMINISTIC_HEURISTIC if PuLP/CBC is unavailable.
     """
 
-    model_version = "energy-dispatch-deterministic:2.0.0"
+    model_version = "energy-dispatch-deterministic:2.1.0"
 
     def simulate(
         self,
@@ -67,6 +69,16 @@ class EnergyDispatchOptimizer:
 
         max_shift_minutes = int(constraints.get("maxShiftMinutes", 120))
         max_shift_slots = max_shift_minutes // 15
+        # Per-process-type shift allowance: EAF heats get a wider window by default.
+        shift_by_process: dict[str, int] = dict(constraints.get("maxShiftMinutesByProcess", {}))
+        # Default EAF shift: 360 min (6 h) — full shift deferral reflecting idle furnace between taps.
+        eaf_shift_minutes = int(shift_by_process.get("EAF", 360))
+        reheat_shift_minutes = int(shift_by_process.get("REHEAT", max_shift_minutes))
+        # Build per-batch shift slots.
+        per_batch_shift_slots = [
+            (eaf_shift_minutes // 15 if b.process_type == "EAF" else reheat_shift_minutes // 15)
+            for b in batch_models
+        ]
         max_concurrent = int(constraints.get("maxConcurrentBatches", 2))
         min_soak_minutes = int(constraints.get("minSoakMinutes", 60))
         max_hold_minutes = int(constraints.get("maxHoldMinutes", 180))
@@ -81,7 +93,8 @@ class EnergyDispatchOptimizer:
 
         # Strategy: attempt MILP, fall back to heuristic.
         optimized, solver_used = self._solve(
-            batch_models, intervals, max_shift_slots, max_concurrent, max_hold_minutes, min_soak_minutes
+            batch_models, intervals, max_shift_slots, max_concurrent, max_hold_minutes, min_soak_minutes,
+            per_batch_shift_slots,
         )
 
         flexible_baseline_cost = round(sum(row["costEur"] for row in baseline), 2)
@@ -243,18 +256,21 @@ class EnergyDispatchOptimizer:
         max_concurrent: int,
         max_hold_minutes: int,
         min_soak_minutes: int,
+        per_batch_shift_slots: list[int] | None = None,
     ) -> tuple[list[dict[str, Any]], str]:
         """Strategy dispatcher: MILP_CBC → DETERMINISTIC_HEURISTIC."""
+        if per_batch_shift_slots is None:
+            per_batch_shift_slots = [max_shift_slots] * len(batch_models)
         try:
             return self._solve_milp(
                 batch_models, intervals, max_shift_slots, max_concurrent,
-                max_hold_minutes, min_soak_minutes,
+                max_hold_minutes, min_soak_minutes, per_batch_shift_slots,
             ), "MILP_CBC"
         except Exception as exc:  # noqa: BLE001 — any solver failure triggers fallback
             logger.warning("MILP solver unavailable, falling back to heuristic: %s", exc)
             return self._solve_heuristic(
                 batch_models, intervals, max_shift_slots, max_concurrent,
-                max_hold_minutes, min_soak_minutes,
+                max_hold_minutes, min_soak_minutes, per_batch_shift_slots,
             ), "DETERMINISTIC_HEURISTIC"
 
     def _solve_milp(
@@ -265,9 +281,13 @@ class EnergyDispatchOptimizer:
         max_concurrent: int,
         max_hold_minutes: int,
         min_soak_minutes: int,
+        per_batch_shift_slots: list[int] | None = None,
     ) -> list[dict[str, Any]]:
         """Delegate to the PuLP/CBC MILP solver."""
         from .milp import SolverUnavailableError, _BatchInfo, _SlotInfo, solve_milp
+
+        if per_batch_shift_slots is None:
+            per_batch_shift_slots = [max_shift_slots] * len(batch_models)
 
         slot_infos = [
             _SlotInfo(index=i, price=iv.price, carbon=iv.carbon,
@@ -277,8 +297,9 @@ class EnergyDispatchOptimizer:
         batch_infos = [
             _BatchInfo(batch_id=b.batch_id, planned_slot=b.planned_slot,
                        urgent=b.urgent, grade=b.grade, tonnage=b.tonnage,
-                       energy_mwh=b.energy_mwh)
-            for b in batch_models
+                       energy_mwh=b.energy_mwh,
+                       max_shift_slots=per_batch_shift_slots[i])
+            for i, b in enumerate(batch_models)
         ]
         assignments = solve_milp(
             intervals=slot_infos,
@@ -301,13 +322,17 @@ class EnergyDispatchOptimizer:
         max_concurrent: int,
         max_hold_minutes: int,
         min_soak_minutes: int,
+        per_batch_shift_slots: list[int] | None = None,
     ) -> list[dict[str, Any]]:
         """Bounded-enumeration greedy heuristic (deterministic fallback)."""
+        if per_batch_shift_slots is None:
+            per_batch_shift_slots = [max_shift_slots] * len(batch_models)
         scheduled_slots: dict[int, int] = {}
         optimized: list[dict[str, Any]] = []
-        for batch in batch_models:
+        for idx, batch in enumerate(batch_models):
+            batch_max_shift = per_batch_shift_slots[idx]
             candidate_slots = [batch.planned_slot] if batch.urgent else self._candidate_slots(
-                batch.planned_slot, max_shift_slots, len(intervals)
+                batch.planned_slot, batch_max_shift, len(intervals)
             )
             feasible = [
                 slot
@@ -385,16 +410,26 @@ class EnergyDispatchOptimizer:
                     index * max(len(intervals) // max(len(source_rows), 1), 1),
                     len(intervals) - 1,
                 )
+            operation_id = str(
+                payload.get("operation_id", payload.get("operationId", f"BATCH-{index:02d}"))
+            )
+            # Infer process_type from operation_id prefix or explicit field.
+            process_type = str(
+                payload.get("process_type", payload.get("processType", ""))
+            )
+            if not process_type:
+                process_type = "EAF" if operation_id.startswith("EAF-") else "REHEAT"
+            asset_id = str(payload.get("asset_id", item.get("asset_id", "")))
             out.append(
                 _Batch(
-                    batch_id=str(
-                        payload.get("operation_id", payload.get("operationId", f"BATCH-{index:02d}"))
-                    ),
+                    batch_id=operation_id,
                     planned_slot=slot,
                     urgent=bool(payload.get("urgent", False)),
                     grade=str(payload.get("grade_code", payload.get("grade", "UNSPECIFIED"))),
                     tonnage=float(payload.get("tonnage", 120.0)),
-                    energy_mwh=float(payload.get("energyMwh", 14.0)),
+                    energy_mwh=float(payload.get("energyMwh", payload.get("energy_mwh", 14.0))),
+                    asset_id=asset_id,
+                    process_type=process_type,
                 )
             )
         return out
@@ -439,6 +474,8 @@ class EnergyDispatchOptimizer:
             "energyMwh": batch.energy_mwh,
             "priceEurMwh": interval.price,
             "costEur": round(batch.energy_mwh * interval.price, 2),
+            "processType": batch.process_type,
+            "assetId": batch.asset_id,
         }
 
     @staticmethod

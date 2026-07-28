@@ -17,9 +17,135 @@
         "sourceRef": "event:019eb3fa-8400-76ec-9cd7-c1ae5beb5258",
         "correlationId": "run-demo-full-240725"
       }
+    },
+    {
+      "id": "00000002",
+      "type": "alert.created",
+      "data": {
+        "alertId": "ALERT-ENERGY-SCARCITY-1830",
+        "site": "NS-DEMO-LUX-01",
+        "assetId": "LUX-UTIL-01",
+        "componentId": "GRID",
+        "severity": "WARNING",
+        "status": "OPEN",
+        "message": "Evening scarcity spike to 280 EUR/MWh forecast for 18:30-19:00.",
+        "confidence": 0.74,
+        "createdAt": "2026-06-10T18:00:00Z",
+        "updatedAt": "2026-06-10T18:00:00Z",
+        "sourceRef": "demo:supplementary-alert:ALERT-ENERGY-SCARCITY-1830",
+        "correlationId": "demo-alert-deck-240725"
+      }
+    },
+    {
+      "id": "00000003",
+      "type": "alert.created",
+      "data": {
+        "alertId": "ALERT-ETS-ALLOWANCE-Q3",
+        "site": "NS-DEMO-LUX-01",
+        "assetId": "LUX-SITE-01",
+        "componentId": "ETS-LEDGER",
+        "severity": "WARNING",
+        "status": "OPEN",
+        "message": "Q3 EU ETS allowance headroom down to 6.2% at current emission intensity.",
+        "confidence": 0.71,
+        "createdAt": "2026-06-10T15:00:00Z",
+        "updatedAt": "2026-06-10T15:00:00Z",
+        "sourceRef": "demo:supplementary-alert:ALERT-ETS-ALLOWANCE-Q3",
+        "correlationId": "demo-alert-deck-240725"
+      }
+    },
+    {
+      "id": "00000004",
+      "type": "alert.created",
+      "data": {
+        "alertId": "ALERT-STOVE-04-DOME-TEMP",
+        "site": "NS-DEMO-LUX-01",
+        "assetId": "LUX-BF-01",
+        "componentId": "STOVE-04",
+        "severity": "WARNING",
+        "status": "OPEN",
+        "message": "Hot blast stove 04 dome temperature 24 C below setpoint over three cycles.",
+        "confidence": 0.66,
+        "createdAt": "2026-06-10T12:00:00Z",
+        "updatedAt": "2026-06-10T12:00:00Z",
+        "sourceRef": "demo:supplementary-alert:ALERT-STOVE-04-DOME-TEMP",
+        "correlationId": "demo-alert-deck-240725"
+      }
+    },
+    {
+      "id": "00000005",
+      "type": "alert.created",
+      "data": {
+        "alertId": "ALERT-SENSOR-DRIFT-TC-114",
+        "site": "NS-DEMO-LUX-01",
+        "assetId": "LUX-BF-01",
+        "componentId": "TC-114",
+        "severity": "WARNING",
+        "status": "ACKNOWLEDGED",
+        "message": "Thermocouple TC-114 drifting 1.8 C/h against neighbouring sensors; calibration due.",
+        "confidence": 0.63,
+        "createdAt": "2026-06-10T09:00:00Z",
+        "updatedAt": "2026-06-10T09:00:00Z",
+        "sourceRef": "demo:supplementary-alert:ALERT-SENSOR-DRIFT-TC-114",
+        "correlationId": "demo-alert-deck-240725"
+      }
+    },
+    {
+      "id": "00000006",
+      "type": "alert.created",
+      "data": {
+        "alertId": "ALERT-LADLE-12-CYCLE-COUNT",
+        "site": "NS-DEMO-LUX-01",
+        "assetId": "LUX-BOF-01",
+        "componentId": "LADLE-12",
+        "severity": "INFO",
+        "status": "OPEN",
+        "message": "Ladle 12 reached 88 of 110 refractory heats; schedule relining window.",
+        "confidence": 0.58,
+        "createdAt": "2026-06-10T06:00:00Z",
+        "updatedAt": "2026-06-10T06:00:00Z",
+        "sourceRef": "demo:supplementary-alert:ALERT-LADLE-12-CYCLE-COUNT",
+        "correlationId": "demo-alert-deck-240725"
+      }
+    },
+    {
+      "id": "00000007",
+      "type": "alert.created",
+      "data": {
+        "alertId": "ALERT-PPA-WIND-SURPLUS",
+        "site": "NS-DEMO-LUX-01",
+        "assetId": "LUX-UTIL-01",
+        "componentId": "PPA-WIND",
+        "severity": "INFO",
+        "status": "OPEN",
+        "message": "Wind PPA surplus 12 MWh forecast 02:00-05:00; candidate window for reheat pre-charge.",
+        "confidence": 0.61,
+        "createdAt": "2026-06-10T03:00:00Z",
+        "updatedAt": "2026-06-10T03:00:00Z",
+        "sourceRef": "demo:supplementary-alert:ALERT-PPA-WIND-SURPLUS",
+        "correlationId": "demo-alert-deck-240725"
+      }
+    },
+    {
+      "id": "00000008",
+      "type": "alert.created",
+      "data": {
+        "alertId": "ALERT-KNOWLEDGE-REVIEW-QUEUE",
+        "site": "NS-DEMO-LUX-01",
+        "assetId": "LUX-SITE-01",
+        "componentId": "KNOWLEDGE-HUB",
+        "severity": "INFO",
+        "status": "OPEN",
+        "message": "Three captured procedures awaiting expert review beyond the 5-day SLA.",
+        "confidence": 0.55,
+        "createdAt": "2026-06-10T00:00:00Z",
+        "updatedAt": "2026-06-10T00:00:00Z",
+        "sourceRef": "demo:supplementary-alert:ALERT-KNOWLEDGE-REVIEW-QUEUE",
+        "correlationId": "demo-alert-deck-240725"
+      }
     }
   ],
-  "asOf": "2026-07-25T05:38:09.337653Z",
+  "asOf": "2026-07-27T23:56:20.053948Z",
   "stale": false,
-  "correlationId": "9ead352b-a126-4aeb-b08c-3547e335425a"
+  "correlationId": "ea879517-8ee6-402e-8f6b-ec733c537b29"
 }

@@ -359,6 +359,9 @@ def _generate_rolling_telemetry(manifest, window_hours, interval_seconds, anomal
 
 def _generate_energy_dataset(manifest, anomaly_controller, gateway, correlation_id, source_id):
     plant_id = manifest.plant_id
+    # Dispatch to the EAF-specific generator for the Belgium melt shop.
+    if plant_id == "NS-DEMO-BE-01":
+        return _generate_eaf_energy_dataset(manifest, anomaly_controller, gateway, correlation_id, source_id)
     asset_id = "LUX-UTIL-01"
     start_time = manifest.start_time
     energy_cfg = manifest.energy
@@ -456,11 +459,144 @@ def _generate_energy_dataset(manifest, anomaly_controller, gateway, correlation_
     return records, summary
 
 
+def _generate_eaf_energy_dataset(manifest, anomaly_controller, gateway, correlation_id, source_id):
+    """Generate energy interval and EAF heat batch data for the Belgium melt shop (NS-DEMO-BE-01).
+
+    Mirrors the structure of the Luxembourg energy dataset but uses EafHeat
+    batches with physically defensible EAF parameters (80–150 MW, 45–60 min
+    tap-to-tap, 100–140 t per heat, 6 h shift deferral window).
+    """
+    plant_id = manifest.plant_id
+    asset_id = "BE-UTIL-01"
+    start_time = manifest.start_time
+    energy_cfg = manifest.energy
+    price_rng = child_random(manifest.root_seed, manifest.scenario_id, plant_id, asset_id, "price")
+    prices = energy_model.baseline_price_curve(price_rng)
+
+    spike_active = any(s.anomaly_type == "price_spike" for s in anomaly_controller.specs)
+    spike_start_interval = spike_end_interval = None
+    if spike_active:
+        spike = next(s for s in anomaly_controller.specs if s.anomaly_type == "price_spike")
+        spike_start_interval = int(float(spike.start_hours) * 4)
+        spike_end_interval = int(float(spike.end_hours) * 4)
+        prices = energy_model.apply_scarcity_spike(
+            prices, spike_start_interval=spike_start_interval, spike_end_interval=spike_end_interval,
+            spike_price=float(spike.params.get("spike_price_eur_mwh", 280.0)),
+        )
+
+    batch_rng = child_random(manifest.root_seed, manifest.scenario_id, plant_id, "BE-EAF-01", "batches")
+    num_batches = energy_cfg.get("num_batches", 6)
+    urgent_index = energy_cfg.get("urgent_batch_index", -1)
+    base_load_mw = energy_cfg.get("base_load_mw", 15.0)
+    spread = 96 // max(num_batches, 1)
+    batches = [
+        energy_model.EafHeat(
+            batch_id=f"EAF-HEAT-{i:02d}",
+            planned_interval=min(i * spread + batch_rng.randint(0, 3), 95),
+            duration_intervals=batch_rng.randint(3, 4),  # 45–60 min tap-to-tap
+            demand_mw=round(batch_rng.uniform(80.0, 150.0), 1),  # typical EAF arc power
+            tonnage=round(batch_rng.uniform(100.0, 140.0), 1),  # liquid steel per tap
+            urgent=(i == urgent_index),
+        )
+        for i in range(num_batches)
+    ]
+
+    baseline_cost = energy_model.schedule_cost(batches, prices, base_load_mw)
+    optimized_batches, diagnostics = (batches, {"shifted_batches": 0, "hard_constraint_violations": 0})
+    if spike_active:
+        optimized_batches, diagnostics = energy_model.optimize_schedule(
+            batches, prices, spike_start_interval, spike_end_interval,
+        )
+    optimized_cost = energy_model.schedule_cost(optimized_batches, prices, base_load_mw)
+    baseline_profile = energy_model.demand_profile(batches, base_load_mw)
+    optimized_profile = energy_model.demand_profile(optimized_batches, base_load_mw)
+
+    records = []
+    for i, price in enumerate(prices):
+        interval_start = start_time + timedelta(minutes=15 * i)
+        interval_end = interval_start + timedelta(minutes=15)
+        signal_rng = child_random(manifest.root_seed, manifest.scenario_id, plant_id, asset_id, f"interval-{i}")
+        ingest_ts = interval_start + timedelta(milliseconds=gateway.jitter_ms())
+        demand_mw = optimized_profile[i]
+        is_spike_interval = spike_active and spike_start_interval <= i < spike_end_interval
+        carbon_intensity = signal_rng.uniform(90.0, 220.0) + (signal_rng.uniform(50.0, 150.0) if is_spike_interval else 0.0)
+        envelope = build_envelope(
+            schema_name="novasteel.energy-interval.v1", event_ts=interval_start, ingest_ts=ingest_ts,
+            sequence=gateway.next_sequence(), source_id=source_id, plant_id=plant_id, asset_id=asset_id,
+            scenario_id=manifest.scenario_id, correlation_id=correlation_id, seed=manifest.root_seed,
+            rng=signal_rng,
+            payload={
+                "type": "energy.interval",
+                "meter_id": f"{asset_id}-ELEC-01",
+                "interval_start": iso(interval_start),
+                "interval_end": iso(interval_end),
+                "price": price,
+                "price_unit": "EUR/MWh",
+                "demand": round(demand_mw, 2),
+                "demand_unit": "MW",
+                "consumption_mwh": round(demand_mw * 0.25, 4),
+                "grid_carbon_intensity_kgco2e_per_mwh": round(carbon_intensity, 1),
+                "baseline_demand_mw": round(baseline_profile[i], 2),
+                "scenario": manifest.scenario_id,
+            },
+        )
+        records.append(envelope)
+
+    spike_slice = slice(spike_start_interval, spike_end_interval) if spike_active else slice(0, 0)
+    peak_during_spike_before = max(baseline_profile[spike_slice], default=0.0)
+    peak_during_spike_after = max(optimized_profile[spike_slice], default=0.0)
+
+    summary = {
+        "energy_baseline_cost_eur": round(baseline_cost, 2),
+        "energy_optimized_cost_eur": round(optimized_cost, 2),
+        "energy_tonnage_before": energy_model.planned_tonnage(batches),
+        "energy_tonnage_after": energy_model.planned_tonnage(optimized_batches),
+        "energy_hard_constraint_violations": diagnostics["hard_constraint_violations"],
+        "energy_shifted_batches": diagnostics["shifted_batches"],
+        "energy_peak_demand_before_mw": round(max(baseline_profile), 2),
+        "energy_peak_demand_after_mw": round(max(optimized_profile), 2),
+        "energy_peak_demand_during_spike_before_mw": round(peak_during_spike_before, 2),
+        "energy_peak_demand_during_spike_after_mw": round(peak_during_spike_after, 2),
+        "energy_schedule_optimality_gap": round(
+            (optimized_cost - baseline_cost) / baseline_cost if baseline_cost else 0.0, 6),
+        "_batches": batches,
+        "_optimized_batches": optimized_batches,
+    }
+    return records, summary
+
+
 def _generate_heat_batch_dataset(manifest, energy_summary, correlation_id, source_id) -> list[dict]:
     plant_id = manifest.plant_id
     start_time = manifest.start_time
     records = []
     grade_codes = list(config.GRADES)
+
+    # Dispatch based on plant: EAF heats for Belgium, reheat batches for Luxembourg.
+    if plant_id == "NS-DEMO-BE-01":
+        rng = child_random(manifest.root_seed, manifest.scenario_id, plant_id, "BE-EAF-01", "heat-batch")
+        for i, batch in enumerate(energy_summary.get("_batches", [])):
+            heat_id = f"H-BE-{start_time:%y%m%d}-{i:04d}"
+            planned_ts = start_time + timedelta(minutes=15 * batch.planned_interval)
+            energy_mwh = round(batch.demand_mw * batch.duration_intervals * 0.25, 2)
+            envelope = build_envelope(
+                schema_name="novasteel.heat-batch.v1", event_ts=planned_ts, ingest_ts=planned_ts,
+                sequence=i + 1, source_id=source_id, plant_id=plant_id, asset_id="BE-EAF-01",
+                scenario_id=manifest.scenario_id, correlation_id=correlation_id, seed=manifest.root_seed,
+                rng=rng,
+                payload={
+                    "material_id": f"BILLET-BE-{start_time:%y%m%d}-{i:03d}",
+                    "heat_id": heat_id,
+                    "operation_id": f"EAF-{batch.batch_id}",
+                    "grade_code": rng.choice(grade_codes),
+                    "planned_ts": iso(planned_ts),
+                    "urgent": batch.urgent,
+                    "tonnage": batch.tonnage,
+                    "energyMwh": energy_mwh,
+                },
+            )
+            records.append(envelope)
+        return records
+
     rng = child_random(manifest.root_seed, manifest.scenario_id, plant_id, "LUX-CC-01", "heat-batch")
     for i, batch in enumerate(energy_summary.get("_batches", [])):
         heat_id = f"H-LUX-{start_time:%y%m%d}-{i:04d}"
