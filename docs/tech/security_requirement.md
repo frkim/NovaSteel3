@@ -19,6 +19,9 @@ Prohibition list only — never use as a configuration template:
 | --- | --- |
 | PyPI | `packagefeedproxy.microsoft.io/pypi/simple` |
 | NuGet | `packagefeedproxy.microsoft.io/nuget/v3/index.json` |
+| npm | `packagefeedproxy.microsoft.io/npm/` |
+
+> The CISO blocklist above covers PyPI and NuGet. npm is not centrally blocked today, but this repository standardises on the protected npm feed anyway: `package-lock.json` resolves every tarball through it, and CI enforces it via the "Require an approved npm registry" gate.
 
 ## Impact
 

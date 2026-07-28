@@ -14,7 +14,9 @@ group and these non-secret GitHub variables:
 - `AZURE_SUBSCRIPTION_ID`
 - `CONTAINER_RESOURCE_GROUP` and the applicable `*_CONTAINER_APP` variables
 - `FABRIC_PARAMETER_FILE` for the Fabric item synchronization workflow
-- `NPM_PROTECTED_REGISTRY` for React CI
+- `NPM_PROTECTED_REGISTRY` (optional) to override the npm feed for React CI; when
+  unset, the workflow falls back to the protected default
+  `https://packagefeedproxy.microsoft.io/npm/`
 
 The federation subject must match the exact repository and environment. No
 client-secret JSON, static cloud credential, or broad subscription role is

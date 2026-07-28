@@ -44,7 +44,7 @@ jobs:
       ingest-relay: ${{ steps.filter.outputs.ingest-relay }}
       knowledge-orchestrator: ${{ steps.filter.outputs.knowledge-orchestrator }}
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.2.2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -95,7 +95,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.2.2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
       - uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
@@ -108,7 +108,7 @@ jobs:
       - name: ACR login
         run: az acr login --name "${REGISTRY%%.*}"
       - name: Build and push bff-api
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198f0a48d24ad5 # v6.18.0
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         with:
           context: services/bff-api
           build-contexts: |
@@ -130,7 +130,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.2.2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
       - uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
@@ -143,7 +143,7 @@ jobs:
       - name: ACR login
         run: az acr login --name "${REGISTRY%%.*}"
       - name: Build and push optimizer-worker
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198f0a48d24ad5 # v6.18.0
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         with:
           context: services/optimizer-worker
           push: ${{ github.event_name != 'pull_request' }}
@@ -161,7 +161,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.2.2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
       - uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
@@ -174,7 +174,7 @@ jobs:
       - name: ACR login
         run: az acr login --name "${REGISTRY%%.*}"
       - name: Build and push scoring-worker
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198f0a48d24ad5 # v6.18.0
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         with:
           context: services/scoring-worker
           push: ${{ github.event_name != 'pull_request' }}
@@ -192,7 +192,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.2.2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
       - uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
@@ -205,7 +205,7 @@ jobs:
       - name: ACR login
         run: az acr login --name "${REGISTRY%%.*}"
       - name: Build and push ingest-relay
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198f0a48d24ad5 # v6.18.0
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         with:
           context: services/ingest-relay
           push: ${{ github.event_name != 'pull_request' }}
@@ -223,7 +223,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.2.2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
       - uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
@@ -236,7 +236,7 @@ jobs:
       - name: ACR login
         run: az acr login --name "${REGISTRY%%.*}"
       - name: Build and push knowledge-orchestrator
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198f0a48d24ad5 # v6.18.0
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         with:
           context: services/knowledge-orchestrator
           push: ${{ github.event_name != 'pull_request' }}

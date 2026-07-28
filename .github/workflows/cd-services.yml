@@ -39,7 +39,7 @@ jobs:
     name: Validate release input and repository policy
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.2.2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
       - name: Verify protected package-feed policy
@@ -79,7 +79,7 @@ jobs:
       INGEST_RELAY_CONTAINER_APP: ${{ vars.INGEST_RELAY_CONTAINER_APP }}
       KNOWLEDGE_CONTAINER_APP: ${{ vars.KNOWLEDGE_CONTAINER_APP }}
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.2.2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
       - name: Restrict production deployment to main
