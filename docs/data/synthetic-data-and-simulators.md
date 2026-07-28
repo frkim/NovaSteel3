@@ -25,6 +25,24 @@ Rules:
 - Synthetic data is not a safety system and must not be used to set equipment controls.
 - All timestamps are UTC ISO 8601; plant local time is a derived presentation field with the plant time zone.
 
+The committed local fixture pack is checksum-protected and is not rewritten for
+each demo day. When the BFF loads it in local demo mode, it can rebase fixture
+timestamps in memory by a whole number of days so the newest synthetic event
+lands within the last 24 hours while preserving hour-of-day patterns. Set
+`DEMO_CLOCK_REBASE=false` to serve the byte-faithful fixture timestamps for
+contract tests or forensic replay.
+
+The analytics micro-frontend keeps its own offline fixture pack for the
+zero-network fallback rung, and it is anchored the same way:
+`apps\analytics-mfe\src\utils\demoClock.ts` resolves the authored fixture day
+onto the most recent 18:45 UTC snapshot at or before now, and every offline
+timestamp, the device `asOf` marker, the maintenance-planner Gantt baseline and
+the lining-inspection dates are derived from it. Neither side regenerates or
+reseeds anything — both shift an authored dataset by whole days so a predicted
+failure date or a planned work order never lands in the past. The anchors are
+resolved at module load, so a browser tab left open across midnight keeps the
+previous day until it is reloaded.
+
 ## 2. Demonstration estate
 
 ### 2.1 Plants

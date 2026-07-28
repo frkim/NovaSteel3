@@ -58,6 +58,7 @@ class MetaData(WireModel):
     service: str
     environment: str
     demo_mode: bool = Field(alias="demoMode")
+    demo_clock_shift_days: int = Field(alias="demoClockShiftDays")
     auth_mode: str = Field(alias="authMode")
     data_namespace: str = Field(alias="dataNamespace")
     bridge_contract_version: str = Field(alias="bridgeContractVersion")

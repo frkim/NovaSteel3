@@ -337,7 +337,12 @@ export function DeviceFleet() {
           <FreshnessBadge asOf={devicesState.asOf ?? null} source={devicesState.source} />
         }
       >
-        <StateBoundary state={devicesState} isEmpty={(rows) => rows.length === 0}>
+        <StateBoundary
+          state={devicesState}
+          isEmpty={(rows) => rows.length === 0}
+          loadingVariant="gauge"
+          loadingCaption={t('device.loading.caption')}
+        >
           {() => (
             <DataTable
               caption="Device fleet — click a row to inspect sensors"

@@ -13,7 +13,7 @@
     "riskLevel": "HIGH",
     "estimatedMinimumLiningMm": 300.0,
     "modelVersion": "lining-rul-piml:1.3.0-demo",
-    "scoredAt": "2026-06-11T00:00:00.000Z",
+    "scoredAt": "2026-07-28T00:00:00.000Z",
     "drivers": [
       {
         "name": "refractory_thickness_slope",
@@ -48,8 +48,8 @@
       "simulator:simulator-fixture:demo-full"
     ],
     "modelConfidence": 0.7846,
-    "auditRef": "03de266b-846d-4ce2-a4f5-99dd0347c264"
+    "auditRef": "7d26b24d-439d-415c-bad6-4cd988b37931"
   },
-  "asOf": "2026-07-28T00:49:50.762687Z",
-  "correlationId": "700fa338-6b51-4bf6-bf07-e6af5e8f9ae5"
+  "asOf": "2026-07-28T11:02:52.184423Z",
+  "correlationId": "69546547-01fd-41f6-8bc6-186159fcae86"
 }

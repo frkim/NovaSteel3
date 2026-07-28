@@ -14,6 +14,10 @@
 - Every mutating request (`POST`/`PATCH`/`PUT`/`DELETE`) requires an `Idempotency-Key` header (§7).
 - Every response uses the shared error envelope (§3) on failure.
 - Dates/times are UTC ISO 8601 everywhere on the wire; plant-local time is a presentation-only derived field, never a stored or transmitted value (`synthetic-data-and-simulators.md` §1).
+- In local demo mode, checksum-verified fixture timestamps are rebased in memory
+  by whole days unless `DEMO_CLOCK_REBASE=false`. `/v1/meta` exposes
+  `demoClockShiftDays` so clients and presenters can state honestly that the
+  synthetic pack is presentation-time shifted, not live plant data.
 
 ---
 

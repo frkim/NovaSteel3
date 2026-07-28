@@ -12,6 +12,7 @@ import { LineChart } from '../charts/LineChart'
 import { ChartContainer } from '../charts/ChartContainer'
 import { KpiBand, PanelCard, SectionStack, TwoColumn, revealPanel } from './common'
 import { formatDateTime, formatNumber } from '../../utils/format'
+import { utcDaysAgo } from '../../utils/demoClock'
 import type { KpiCardModel } from '../primitives/KpiCard'
 import { ProofBadges } from '../primitives/ProofBadge'
 
@@ -90,7 +91,7 @@ export function FurnaceLiningForecast() {
         risk: isPrimary && forecast ? Math.round(forecast.riskScore * 100) : furnace.health === 'WATCH' ? 34 : 12,
         daysLeft: isPrimary && forecast ? forecast.value : 120,
         confidence: isPrimary && forecast ? Math.round((1 - (forecast.confidence.p90 - forecast.confidence.p10) / forecast.confidence.p50 / 2) * 100) : 82,
-        lastInspection: isPrimary ? '2026-06-02' : '2026-07-01',
+        lastInspection: isPrimary ? utcDaysAgo(53) : utcDaysAgo(24),
         openWorkOrders: isPrimary ? 1 : 0,
         health: furnace.health,
       }

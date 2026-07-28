@@ -1183,6 +1183,7 @@ Every data surface (card, chart, table, panel) implements all four, plus success
 | State | ID | Visual | Behavior | A11y |
 | --- | --- | --- | --- | --- |
 | Loading | `STATE-LOAD` | Skeleton shimmer matching final layout (never spinners-only for content) | Show within 100 ms; preserve layout to avoid shift | `aria-busy="true"`, polite "Loading …" |
+| Loading (slow fetch) | `STATE-LOAD-GAUGE` | Animated gauge with a "Loading in progress…" headline, a live elapsed-seconds counter and a one-line caption naming what is being fetched | Opt-in variant (`loadingVariant="gauge"`) for surfaces whose first cloud fetch genuinely takes seconds — Device Operations fleet, sensors and simulator. Deliberately indeterminate: a synthetic percentage would be an unsupportable claim, so the elapsed counter is the only progress signal shown | `role="status"`, `aria-busy="true"`, `aria-live="polite"` |
 | Empty | `STATE-EMPTY` | Illustration + one-line reason + primary CTA (e.g., "Clear filters", "Start capture") | Distinguish "no data yet" vs "no match for filters" | Text alternative, actionable button focusable |
 | Error | `STATE-ERROR` | Inline error card: what failed, correlation id, **Retry** | Retry re-issues request; don't wipe good neighboring data | `role="alert"`, focus moved to error, human-readable message |
 | Stale | `STATE-STALE` | Amber ribbon "Data as of HH:MM — refreshing" + `color.status.stale` | Auto-retry; manual refresh; keep last-good data visible | Announced politely; not color-only (icon+text) |

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Mapping
 
 from fastapi import Request
@@ -105,23 +105,49 @@ def _matches(value: Any, expression: str, value_type: str) -> bool:
     return expression.lower() in str(value).lower()
 
 
+def _instant(value: str) -> datetime | None:
+    """Parse an ISO-8601 instant, defaulting a missing offset to UTC."""
+    try:
+        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+
+
 def _date_range(
     rows: list[dict[str, Any]], start: str | None, end: str | None, field: str
 ) -> list[dict[str, Any]]:
+    bounds: dict[str, datetime | None] = {"from": None, "to": None}
     for value, name in ((start, "from"), (end, "to")):
         if value:
-            try:
-                datetime.fromisoformat(value.replace("Z", "+00:00"))
-            except ValueError as exc:
+            parsed = _instant(value)
+            if parsed is None:
                 raise ApiError(
                     400, ErrorCode.VALIDATION_ERROR, f"{name} must be an ISO-8601 timestamp."
-                ) from exc
-    return [
-        row
-        for row in rows
-        if (not start or str(row.get(field, "")) >= start)
-        and (not end or str(row.get(field, "")) <= end)
-    ]
+                )
+            bounds[name] = parsed
+
+    lower, upper = bounds["from"], bounds["to"]
+    if lower is None and upper is None:
+        return rows
+
+    kept: list[dict[str, Any]] = []
+    for row in rows:
+        raw = str(row.get(field, ""))
+        # Compare instants, not strings: "…T00:00:00.000Z" sorts *below*
+        # "…T00:00:00Z" lexicographically, which would silently drop rows that
+        # carry milliseconds at an exact boundary.
+        moment = _instant(raw) if raw else None
+        if moment is None:
+            if (not start or raw >= start) and (not end or raw <= end):
+                kept.append(row)
+            continue
+        if lower is not None and moment < lower:
+            continue
+        if upper is not None and moment > upper:
+            continue
+        kept.append(row)
+    return kept
 
 
 def _parse_sort(value: str, columns: Mapping[str, str]) -> tuple[str, str]:

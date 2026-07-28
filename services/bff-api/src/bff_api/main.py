@@ -191,6 +191,7 @@ def create_app(
                 service=runtime_settings.service_name,
                 environment=runtime_settings.environment,
                 demo_mode=runtime_settings.is_demo_mode,
+                demo_clock_shift_days=app.state.services.repository.demo_clock_shift_days,
                 auth_mode=runtime_settings.auth_mode,
                 data_namespace=runtime_settings.data_namespace,
                 bridge_contract_version="1.0",

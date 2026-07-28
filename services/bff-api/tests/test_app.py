@@ -30,7 +30,9 @@ def test_metadata_exposes_demo_safe_context() -> None:
     response = make_client().get("/v1/meta")
 
     assert response.status_code == 200
-    assert response.json()["data"] == {
+    data = response.json()["data"]
+    assert data.pop("demoClockShiftDays") >= 0
+    assert data == {
         "apiVersion": "v1",
         "service": "test-bff",
         "environment": "demo",
@@ -75,3 +77,11 @@ def test_local_demo_rejects_non_demo_namespace(monkeypatch: pytest.MonkeyPatch) 
 
     with pytest.raises(ConfigurationError, match="NS-DEMO"):
         Settings.from_environment()
+
+
+def test_demo_clock_rebase_can_be_disabled_from_environment(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("DEMO_CLOCK_REBASE", "false")
+
+    assert Settings.from_environment().demo_clock_rebase is False

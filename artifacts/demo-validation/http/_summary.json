@@ -4,42 +4,42 @@
     {
       "moment": "DM-1",
       "title": "Command center + persona switch",
-      "seconds": 0.078
+      "seconds": 0.048
     },
     {
       "moment": "TELEMETRY",
       "title": "Live/historical telemetry and alert",
-      "seconds": 0.028
+      "seconds": 0.027
     },
     {
       "moment": "DM-3",
       "title": "Furnace RUL 21-day + uncertainty + work order",
-      "seconds": 0.023
+      "seconds": 0.045
     },
     {
       "moment": "DM-2",
       "title": "Energy dispatch optimization (equal tonnage, zero violations)",
-      "seconds": 0.303
+      "seconds": 0.275
     },
     {
       "moment": "DM-4",
       "title": "Quality genealogy + what-if + yield evidence",
-      "seconds": 0.013
+      "seconds": 0.014
     },
     {
       "moment": "DM-6",
       "title": "Sustainability / CO2 / ETS",
-      "seconds": 0.007
+      "seconds": 0.009
     },
     {
       "moment": "DM-5",
       "title": "Operator interview / STT / Foundry knowledge workflow",
-      "seconds": 0.026
+      "seconds": 0.031
     },
     {
       "moment": "AUDIT",
       "title": "Append-only audit evidence",
-      "seconds": 0.007
+      "seconds": 0.009
     },
     {
       "moment": "CAPACITY",
@@ -49,15 +49,15 @@
     {
       "moment": "TABLES",
       "title": "Table search / filter / sort / pagination semantics",
-      "seconds": 0.116
+      "seconds": 0.131
     },
     {
       "moment": "AUTHZ",
       "title": "Server-side authorization boundaries",
-      "seconds": 0.006
+      "seconds": 0.008
     }
   ],
-  "totalSeconds": 0.623,
+  "totalSeconds": 0.613,
   "checks": [
     {
       "label": "Persona switch yields distinct persona identities",
@@ -127,7 +127,7 @@
     {
       "label": "Forecast carries an audit reference",
       "ok": true,
-      "detail": "03de266b-846d-4ce2-a4f5-99dd0347c264"
+      "detail": "7d26b24d-439d-415c-bad6-4cd988b37931"
     },
     {
       "label": "Synthetic work order created",
@@ -152,7 +152,7 @@
     {
       "label": "Optimization produced a recommendation",
       "ok": true,
-      "detail": "REC-B503C1D47E4D"
+      "detail": "REC-530B3520077C"
     },
     {
       "label": "Dispatch solved by the MILP solver, not the fallback heuristic",
@@ -202,7 +202,7 @@
     {
       "label": "Approval recorded an audit reference",
       "ok": true,
-      "detail": "4f97c5dc-8f54-4e08-9240-f9c1f38ba5a6"
+      "detail": "a8503f40-1fc1-4c51-9a8d-945961d1ba7d"
     },
     {
       "label": "Quality batches table returns rows",
@@ -237,7 +237,7 @@
     {
       "label": "What-if carries an audit reference",
       "ok": true,
-      "detail": "1063f30a-9ca4-45d9-a97a-b7a31d46e72a"
+      "detail": "0c5b1dce-fd5c-4200-adbb-fc4205b42aaf"
     },
     {
       "label": "Yield evidence available (manifest predicted 0.88 -> 0.95)",
@@ -360,9 +360,9 @@
       "detail": "total=2110"
     },
     {
-      "label": "Date range filter applied",
+      "label": "Date range filter narrows to a single rebased day",
       "ok": true,
-      "detail": "total=516"
+      "detail": "day=2026-07-28 total=46 of 2110"
     },
     {
       "label": "Invalid sort rejected with 400",

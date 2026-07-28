@@ -16,6 +16,7 @@ import type {
   SeriesPoint,
   SimulatorStatus,
 } from './deviceDomain'
+import { fixtureAsOf } from '../utils/demoClock'
 
 export const DEVICE_FIXTURE_SITE = 'NS-DEMO-LUX-01'
 
@@ -31,7 +32,7 @@ function siteOfDevice(deviceId: string): string {
   return SITE_FOR_DEVICE[prefix] ?? DEVICE_FIXTURE_SITE
 }
 
-const CLOCK = '2026-07-25T18:45:00Z'
+const CLOCK = fixtureAsOf()
 const CLOCK_MS = Date.parse(CLOCK)
 
 interface CatalogDevice {
@@ -456,7 +457,7 @@ export function fixtureSimulatorStatus(
     activeIncidents,
     availableScenarios: SCENARIOS,
     availableIncidents: INCIDENT_CATALOG,
-    startedAt: '2026-07-25T12:45:00Z',
+    startedAt: new Date(CLOCK_MS - 6 * 3_600_000).toISOString(),
     ...overrides,
   }
 }

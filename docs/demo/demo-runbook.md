@@ -65,6 +65,11 @@ Ideally, install nothing on demo day.
 
 - Set scenario `demo-full`, root seed `240725`, speed `60x`.
 - Confirm control status: `history=loaded`, `stream=paused`, `alert=armed`, `fallbacks=ready`.
+- Open `/v1/meta` and note `demoClockShiftDays`: local fixtures are
+  checksum-verified and rebased in memory by whole days so synthetic event times
+  look current. If you need exact original fixture dates for a forensic replay,
+  restart the BFF with `DEMO_CLOCK_REBASE=false` and say that timestamps are
+  pinned to the fixture pack.
 - Put the AxelorMetal website home tab on screen; keep the Plant Manager route ready for the handoff.
 - Start a visible 15-minute presenter timer.
 - Have the reset operator and presenter agree on the hand signal for switching to fallback.

@@ -425,10 +425,18 @@ def tables() -> None:
     check("Pagination returns disjoint pages with stable total",
           p1["total"] == p2["total"] and ids1.isdisjoint(ids2) and len(p1["items"]) == 2,
           f"total={p1['total']}")
-    # Date range.
-    q_range = call("GET", "/v1/telemetry?from=2026-06-10T00:00:00Z&to=2026-06-10T06:00:00Z&size=5", EXEC).json()
+    # Date range. The fixture clock is rebased onto the current day at load time,
+    # so the window is derived from a returned event rather than hard-coded.
+    range_day = p1["items"][0]["eventTs"][:10]
+    q_range = call(
+        "GET",
+        f"/v1/telemetry?from={range_day}T00:00:00Z&to={range_day}T23:59:59Z&size=5",
+        EXEC,
+    ).json()
     save("tables_date_range", q_range)
-    check("Date range filter applied", q_range["total"] > 0, f"total={q_range['total']}")
+    check("Date range filter narrows to a single rebased day",
+          0 < q_range["total"] < p1["total"],
+          f"day={range_day} total={q_range['total']} of {p1['total']}")
     # Invalid sort -> 400.
     bad = call("GET", "/v1/telemetry?sort=nope:asc", EXEC, expect=400)
     check("Invalid sort rejected with 400", bad.status_code == 400, bad.text[:80])

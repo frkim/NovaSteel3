@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import json
 import hashlib
+import re
 from copy import deepcopy
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
@@ -15,6 +16,15 @@ from .config import Settings
 
 _ROOT = Path(__file__).resolve().parents[4]
 _DEFAULT_FIXTURE = _ROOT / "services" / "bff-api" / "fixtures" / "demo-full"
+_ISO_INSTANT_RE = re.compile(
+    r"^(?P<date>\d{4}-\d{2}-\d{2})T"
+    r"(?P<hour>\d{2}):(?P<minute>\d{2}):(?P<second>\d{2})"
+    r"(?P<fraction>\.\d{1,6})?(?P<tz>Z|[+-]\d{2}:\d{2})$"
+)
+_DATE_ONLY_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+_COMPACT_INSTANT_RE = re.compile(
+    r"(?<!\d)(?P<stamp>\d{8}T\d{4}(?:\d{2})?Z)(?!\d)"
+)
 
 
 @dataclass
@@ -26,6 +36,7 @@ class DemoRepository:
     source: str
     alerts: dict[str, dict[str, Any]] = field(default_factory=dict)
     workorders: dict[str, dict[str, Any]] = field(default_factory=dict)
+    demo_clock_shift_days: int = 0
 
     @classmethod
     def load(cls, settings: Settings) -> "DemoRepository":
@@ -47,17 +58,29 @@ class DemoRepository:
                     (candidate / "manifest.json").read_text(encoding="utf-8")
                 )
                 cls._ensure_local_safe(datasets)
+                shift_days = 0
+                if settings.demo_clock_rebase:
+                    datasets, manifest, shift_days = _rebase_demo_clock(
+                        datasets, manifest
+                    )
                 repository = cls(
                     datasets=datasets,
                     manifest=manifest,
                     source=f"simulator-fixture:{candidate.name}",
+                    demo_clock_shift_days=shift_days,
                 )
                 repository._hydrate_mutable_projections()
                 return repository
+        datasets = _fallback_datasets()
+        manifest = _fallback_manifest()
+        shift_days = 0
+        if settings.demo_clock_rebase:
+            datasets, manifest, shift_days = _rebase_demo_clock(datasets, manifest)
         repository = cls(
-            datasets=_fallback_datasets(),
-            manifest=_fallback_manifest(),
+            datasets=datasets,
+            manifest=manifest,
             source="built-in-fallback",
+            demo_clock_shift_days=shift_days,
         )
         repository._hydrate_mutable_projections()
         return repository
@@ -639,6 +662,108 @@ def _verify_checksums(directory: Path) -> None:
             raise ValueError(f"Checksum verification failed for local demo fixture '{filename}'.")
 
 
+def _rebase_demo_clock(
+    datasets: dict[str, list[dict[str, Any]]],
+    manifest: dict[str, Any],
+    *,
+    now: datetime | None = None,
+) -> tuple[dict[str, list[dict[str, Any]]], dict[str, Any], int]:
+    anchor = _parse_iso_instant(_anchor_timestamp(manifest))
+    if anchor is None:
+        return datasets, manifest, 0
+
+    now_utc = now or datetime.now(timezone.utc)
+    if now_utc.tzinfo is None:
+        now_utc = now_utc.replace(tzinfo=timezone.utc)
+    shift_days = int(
+        (now_utc.astimezone(timezone.utc) - anchor.astimezone(timezone.utc))
+        // timedelta(days=1)
+    )
+    if shift_days <= 0:
+        return datasets, manifest, 0
+
+    shifted_datasets = {
+        name: [_rebase_value(record, shift_days) for record in records]
+        for name, records in datasets.items()
+    }
+    shifted_manifest = _rebase_value(manifest, shift_days)
+    return shifted_datasets, shifted_manifest, shift_days
+
+
+def _rebase_value(value: Any, shift_days: int, key: str | None = None) -> Any:
+    if isinstance(value, dict):
+        return {
+            item_key: _rebase_value(item_value, shift_days, str(item_key))
+            for item_key, item_value in value.items()
+        }
+    if isinstance(value, list):
+        return [_rebase_value(item, shift_days, key) for item in value]
+    if not isinstance(value, str):
+        return value
+
+    shifted = _shift_timestamp_string(value, shift_days)
+    if shifted != value:
+        return shifted
+    if key is not None and _is_identifier_field(key):
+        return _shift_compact_identifier_timestamps(value, shift_days)
+    return value
+
+
+def _shift_timestamp_string(value: str, shift_days: int) -> str:
+    instant_match = _ISO_INSTANT_RE.match(value)
+    if instant_match:
+        parsed = _parse_iso_instant(value)
+        if parsed is None:
+            return value
+        shifted = parsed + timedelta(days=shift_days)
+        fraction = instant_match.group("fraction") or ""
+        if fraction:
+            digits = len(fraction) - 1
+            fraction = f".{shifted.microsecond:06d}"[: digits + 1]
+        return (
+            f"{shifted:%Y-%m-%dT%H:%M:%S}"
+            f"{fraction}{instant_match.group('tz')}"
+        )
+
+    if _DATE_ONLY_RE.match(value):
+        try:
+            return (date.fromisoformat(value) + timedelta(days=shift_days)).isoformat()
+        except ValueError:
+            return value
+    return value
+
+
+def _parse_iso_instant(value: str) -> datetime | None:
+    if not _ISO_INSTANT_RE.match(value):
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed
+
+
+def _is_identifier_field(key: str) -> bool:
+    normalized = key.lower()
+    return normalized == "id" or normalized.endswith("_id") or normalized.endswith("id")
+
+
+def _shift_compact_identifier_timestamps(value: str, shift_days: int) -> str:
+    def replace(match: re.Match[str]) -> str:
+        stamp = match.group("stamp")
+        fmt = "%Y%m%dT%H%M%SZ" if len(stamp) == 16 else "%Y%m%dT%H%MZ"
+        try:
+            parsed = datetime.strptime(stamp, fmt).replace(tzinfo=timezone.utc)
+        except ValueError:
+            return stamp
+        shifted = parsed + timedelta(days=shift_days)
+        return shifted.strftime(fmt)
+
+    return _COMPACT_INSTANT_RE.sub(replace, value)
+
+
 def _public_batch_id(raw: str) -> str:
     """Keep the documented demo coil identifier stable across generated snapshots."""
     return raw.replace("260610", "260725")
@@ -672,6 +797,12 @@ def _fallback_manifest() -> dict[str, Any]:
         "scenario_id": "demo-full",
         "root_seed": 240725,
         "plant_id": "NS-DEMO-LUX-01",
+        "start_time": "2026-07-25T08:30:00Z",
+        "end_time": "2026-07-25T08:30:00Z",
+        "min_max_event_ts": {
+            "min": "2026-07-25T08:30:00Z",
+            "max": "2026-07-25T08:30:00Z",
+        },
         "summary": {
             "energy_tonnage_before": 960.0,
             "quality_predicted_yield_before": 0.88,

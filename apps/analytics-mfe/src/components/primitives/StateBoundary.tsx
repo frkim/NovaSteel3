@@ -4,6 +4,7 @@ import ReplayIcon from '@mui/icons-material/Replay'
 import InboxIcon from '@mui/icons-material/Inbox'
 import type { ResourceState } from '../../hooks/useResource'
 import { useAnalytics } from '../../context/analytics'
+import { LoadingGauge } from './LoadingGauge'
 
 export interface StateBoundaryProps<T> {
   state: ResourceState<T>
@@ -13,6 +14,12 @@ export interface StateBoundaryProps<T> {
   onReset?: () => void
   skeleton?: ReactNode
   skeletonRows?: number
+  /**
+   * `gauge` swaps the skeleton rows for an animated gauge with a progress
+   * message — used where a first load can genuinely take seconds (cloud mode).
+   */
+  loadingVariant?: 'skeleton' | 'gauge'
+  loadingCaption?: string
   /**
    * Tab label when this boundary becomes a dock panel. A render-function child
    * cannot be inspected statically, so a boundary that wraps its screen's
@@ -31,6 +38,8 @@ export function StateBoundary<T>({
   onReset,
   skeleton,
   skeletonRows = 4,
+  loadingVariant = 'skeleton',
+  loadingCaption,
   dockTitle,
   dockId,
 }: StateBoundaryProps<T>) {
@@ -42,13 +51,16 @@ export function StateBoundary<T>({
     return (
       <Box aria-busy="true" aria-live="polite">
         <span className="ns-visually-hidden">{t('state.loading')}</span>
-        {skeleton ?? (
-          <Stack spacing={1}>
-            {Array.from({ length: skeletonRows }).map((_, index) => (
-              <Skeleton key={index} variant="rounded" height={index === 0 ? 48 : 32} animation="wave" />
-            ))}
-          </Stack>
-        )}
+        {skeleton ??
+          (loadingVariant === 'gauge' ? (
+            <LoadingGauge caption={loadingCaption} />
+          ) : (
+            <Stack spacing={1}>
+              {Array.from({ length: skeletonRows }).map((_, index) => (
+                <Skeleton key={index} variant="rounded" height={index === 0 ? 48 : 32} animation="wave" />
+              ))}
+            </Stack>
+          ))}
       </Box>
     )
   }

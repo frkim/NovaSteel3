@@ -10,6 +10,7 @@ import { GanttChart, type GanttTask } from '../charts/GanttChart'
 import { ChartContainer } from '../charts/ChartContainer'
 import { KpiBand, PanelCard, SectionStack, revealPanel } from './common'
 import { formatDateTime } from '../../utils/format'
+import { startOfUtcDay } from '../../utils/demoClock'
 import type { KpiCardModel } from '../primitives/KpiCard'
 
 const DAY_MS = 86400000
@@ -20,7 +21,7 @@ export function FurnaceMaintenance() {
   const workOrdersState = useResource(() => client.getWorkOrders(), [client])
 
   const tasks = useMemo<GanttTask[]>(() => {
-    const base = Date.parse('2026-07-25T00:00:00Z')
+    const base = startOfUtcDay()
     return [
       { id: 'WO-1042', label: 'BF-01 hearth inspection', start: base + 1 * DAY_MS, end: base + 4 * DAY_MS, color: tokens.status.critical, urgent: true },
       { id: 'WO-1043', label: 'RHF-01 zone 03 watch', start: base + 2 * DAY_MS, end: base + 3 * DAY_MS, color: tokens.status.warning },

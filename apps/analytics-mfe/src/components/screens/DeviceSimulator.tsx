@@ -71,7 +71,13 @@ export function DeviceSimulator() {
     <SectionStack>
       {metrics.length > 0 && <KpiBand metrics={metrics} />}
 
-      <StateBoundary state={simulatorState} dockId="simulator-controls" dockTitle="Simulator controls & incidents">
+      <StateBoundary
+        state={simulatorState}
+        dockId="simulator-controls"
+        dockTitle="Simulator controls & incidents"
+        loadingVariant="gauge"
+        loadingCaption={t('device.loading.caption')}
+      >
         {(sim) => (
           <>
             <PanelCard

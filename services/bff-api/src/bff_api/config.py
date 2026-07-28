@@ -44,6 +44,18 @@ def _split_origins(raw_origins: str) -> tuple[str, ...]:
     return origins
 
 
+def _env_bool(name: str, default: bool) -> bool:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    value = raw.strip().lower()
+    if value in {"1", "true", "yes", "on"}:
+        return True
+    if value in {"0", "false", "no", "off"}:
+        return False
+    raise ConfigurationError(f"{name} must be a boolean value.")
+
+
 @dataclass(frozen=True, slots=True)
 class Settings:
     """Runtime settings with local fixtures and explicit cloud trust boundaries."""
@@ -62,6 +74,7 @@ class Settings:
     capacity_mode: str = "local"
     capacity_allowlist: tuple[str, ...] = ("cap-novasteel-demo-sc",)
     capacity_sku_allowlist: tuple[str, ...] = ("F2", "F4", "F8")
+    demo_clock_rebase: bool = True
 
     @property
     def is_demo_mode(self) -> bool:
@@ -165,4 +178,5 @@ class Settings:
                 ).split(",")
                 if value.strip()
             ),
+            demo_clock_rebase=_env_bool("DEMO_CLOCK_REBASE", True),
         )

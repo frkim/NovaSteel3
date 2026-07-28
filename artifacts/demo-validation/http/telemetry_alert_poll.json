@@ -12,8 +12,8 @@
         "status": "OPEN",
         "message": "Demo synthetic warning: HEARTH-SECTOR-07 predicted RUL P50 21.0 days (risk 0.8706).",
         "confidence": 0.8706,
-        "createdAt": "2026-06-11T00:00:00.000Z",
-        "updatedAt": "2026-06-11T00:00:00.000Z",
+        "createdAt": "2026-07-28T00:00:00.000Z",
+        "updatedAt": "2026-07-28T00:00:00.000Z",
         "sourceRef": "event:019eb3fa-8400-76ec-9cd7-c1ae5beb5258",
         "correlationId": "run-demo-full-240725"
       }
@@ -30,8 +30,8 @@
         "status": "OPEN",
         "message": "Evening scarcity spike to 280 EUR/MWh forecast for 18:30-19:00.",
         "confidence": 0.74,
-        "createdAt": "2026-06-10T18:00:00Z",
-        "updatedAt": "2026-06-10T18:00:00Z",
+        "createdAt": "2026-07-27T18:00:00Z",
+        "updatedAt": "2026-07-27T18:00:00Z",
         "sourceRef": "demo:supplementary-alert:ALERT-ENERGY-SCARCITY-1830",
         "correlationId": "demo-alert-deck-240725"
       }
@@ -48,8 +48,8 @@
         "status": "OPEN",
         "message": "Q3 EU ETS allowance headroom down to 6.2% at current emission intensity.",
         "confidence": 0.71,
-        "createdAt": "2026-06-10T15:00:00Z",
-        "updatedAt": "2026-06-10T15:00:00Z",
+        "createdAt": "2026-07-27T15:00:00Z",
+        "updatedAt": "2026-07-27T15:00:00Z",
         "sourceRef": "demo:supplementary-alert:ALERT-ETS-ALLOWANCE-Q3",
         "correlationId": "demo-alert-deck-240725"
       }
@@ -66,8 +66,8 @@
         "status": "OPEN",
         "message": "Hot blast stove 04 dome temperature 24 C below setpoint over three cycles.",
         "confidence": 0.66,
-        "createdAt": "2026-06-10T12:00:00Z",
-        "updatedAt": "2026-06-10T12:00:00Z",
+        "createdAt": "2026-07-27T12:00:00Z",
+        "updatedAt": "2026-07-27T12:00:00Z",
         "sourceRef": "demo:supplementary-alert:ALERT-STOVE-04-DOME-TEMP",
         "correlationId": "demo-alert-deck-240725"
       }
@@ -84,8 +84,8 @@
         "status": "ACKNOWLEDGED",
         "message": "Thermocouple TC-114 drifting 1.8 C/h against neighbouring sensors; calibration due.",
         "confidence": 0.63,
-        "createdAt": "2026-06-10T09:00:00Z",
-        "updatedAt": "2026-06-10T09:00:00Z",
+        "createdAt": "2026-07-27T09:00:00Z",
+        "updatedAt": "2026-07-27T09:00:00Z",
         "sourceRef": "demo:supplementary-alert:ALERT-SENSOR-DRIFT-TC-114",
         "correlationId": "demo-alert-deck-240725"
       }
@@ -102,8 +102,8 @@
         "status": "OPEN",
         "message": "Ladle 12 reached 88 of 110 refractory heats; schedule relining window.",
         "confidence": 0.58,
-        "createdAt": "2026-06-10T06:00:00Z",
-        "updatedAt": "2026-06-10T06:00:00Z",
+        "createdAt": "2026-07-27T06:00:00Z",
+        "updatedAt": "2026-07-27T06:00:00Z",
         "sourceRef": "demo:supplementary-alert:ALERT-LADLE-12-CYCLE-COUNT",
         "correlationId": "demo-alert-deck-240725"
       }
@@ -120,8 +120,8 @@
         "status": "OPEN",
         "message": "Wind PPA surplus 12 MWh forecast 02:00-05:00; candidate window for reheat pre-charge.",
         "confidence": 0.61,
-        "createdAt": "2026-06-10T03:00:00Z",
-        "updatedAt": "2026-06-10T03:00:00Z",
+        "createdAt": "2026-07-27T03:00:00Z",
+        "updatedAt": "2026-07-27T03:00:00Z",
         "sourceRef": "demo:supplementary-alert:ALERT-PPA-WIND-SURPLUS",
         "correlationId": "demo-alert-deck-240725"
       }
@@ -138,14 +138,14 @@
         "status": "OPEN",
         "message": "Three captured procedures awaiting expert review beyond the 5-day SLA.",
         "confidence": 0.55,
-        "createdAt": "2026-06-10T00:00:00Z",
-        "updatedAt": "2026-06-10T00:00:00Z",
+        "createdAt": "2026-07-27T00:00:00Z",
+        "updatedAt": "2026-07-27T00:00:00Z",
         "sourceRef": "demo:supplementary-alert:ALERT-KNOWLEDGE-REVIEW-QUEUE",
         "correlationId": "demo-alert-deck-240725"
       }
     }
   ],
-  "asOf": "2026-07-28T00:49:50.746040Z",
+  "asOf": "2026-07-28T11:02:52.143165Z",
   "stale": false,
-  "correlationId": "44e5d777-2c6c-4140-9657-14f5c8f5e226"
+  "correlationId": "37723d50-4acb-4a48-a62a-ac069fb3e708"
 }

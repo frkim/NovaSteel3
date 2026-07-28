@@ -17,15 +17,19 @@ import type {
   TelemetryRow,
   WorkOrderRow,
 } from './domain'
+import { fixtureDay } from '../utils/demoClock'
 
 /**
  * Deterministic synthetic fixtures for resilient offline fallback (UX §20, demo
  * runbook §6 fallback ladder). Values intentionally match the runbook cue sheet
  * so an offline walkthrough tells the same story as the live BFF.
+ *
+ * The authored day is rebased onto the current date at load (see demoClock), so
+ * an offline walkthrough never shows timestamps from a past month.
  */
 
 export const FIXTURE_SITE = 'NS-DEMO-LUX-01'
-const DAY = '2026-07-25'
+const DAY = fixtureDay()
 export const FIXTURE_AS_OF = `${DAY}T18:45:00Z`
 
 function iso(hour: number, minute = 0): string {

@@ -4,15 +4,15 @@
     "syntheticBanner": "Synthetic demo data — not for operational control",
     "freshness": {
       "energy": {
-        "asOf": "2026-06-10T23:45:00.000Z",
+        "asOf": "2026-07-27T23:45:00.000Z",
         "stale": false
       },
       "furnace": {
-        "asOf": "2026-06-11T00:00:00.000Z",
+        "asOf": "2026-07-28T00:00:00.000Z",
         "stale": false
       },
       "quality": {
-        "asOf": "2026-06-10T22:48:00.000Z",
+        "asOf": "2026-07-27T22:48:00.000Z",
         "stale": false
       }
     },
@@ -31,6 +31,6 @@
       "source": "simulator-fixture:demo-full"
     }
   },
-  "asOf": "2026-07-28T00:49:50.710843Z",
-  "correlationId": "2b029e66-07ae-4a87-a907-376c9cff56eb"
+  "asOf": "2026-07-28T11:02:52.111773Z",
+  "correlationId": "95595b6c-c140-45bf-b9ce-38282249aa7d"
 }

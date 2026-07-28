@@ -22,6 +22,7 @@ export type Catalog = Record<string, string>
 const EN: Catalog = {
   'app.synthetic': 'Synthetic demo data — not for operational control',
   'state.loading': 'Loading…',
+  'state.loading.progress': 'Loading in progress…',
   'state.empty.title': 'Nothing to show',
   'state.empty.filters': 'No rows match the current filters.',
   'state.empty.reset': 'Clear filters',
@@ -74,6 +75,7 @@ const EN: Catalog = {
 const FR: Catalog = {
   'app.synthetic': 'Données de démonstration synthétiques — pas pour le contrôle opérationnel',
   'state.loading': 'Chargement…',
+  'state.loading.progress': 'Chargement en cours…',
   'state.empty.title': 'Rien à afficher',
   'state.empty.filters': 'Aucune ligne ne correspond aux filtres actuels.',
   'state.empty.reset': 'Effacer les filtres',
@@ -126,6 +128,7 @@ const FR: Catalog = {
 const DE: Catalog = {
   'app.synthetic': 'Synthetische Demodaten — nicht für die Betriebssteuerung',
   'state.loading': 'Wird geladen…',
+  'state.loading.progress': 'Ladevorgang läuft…',
   'state.empty.title': 'Nichts anzuzeigen',
   'state.empty.filters': 'Keine Zeilen entsprechen den aktuellen Filtern.',
   'state.empty.reset': 'Filter löschen',
@@ -178,6 +181,7 @@ const DE: Catalog = {
 const NL: Catalog = {
   'app.synthetic': 'Synthetische demogegevens — niet voor operationele besturing',
   'state.loading': 'Laden…',
+  'state.loading.progress': 'Bezig met laden…',
   'state.empty.title': 'Niets om te tonen',
   'state.empty.filters': 'Geen rijen komen overeen met de huidige filters.',
   'state.empty.reset': 'Filters wissen',
@@ -230,6 +234,7 @@ const NL: Catalog = {
 const ES: Catalog = {
   'app.synthetic': 'Datos de demostración sintéticos — no para control operativo',
   'state.loading': 'Cargando…',
+  'state.loading.progress': 'Carga en curso…',
   'state.empty.title': 'Nada que mostrar',
   'state.empty.filters': 'Ninguna fila coincide con los filtros actuales.',
   'state.empty.reset': 'Borrar filtros',

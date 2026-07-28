@@ -15,8 +15,9 @@ import type {
   TriggerIncidentRequest,
 } from './deviceDomain'
 import * as deviceFixtures from './deviceFixtures'
+import { fixtureAsOf } from '../utils/demoClock'
 
-const FIXTURE_AS_OF = '2026-07-25T18:45:00Z'
+const FIXTURE_AS_OF = fixtureAsOf()
 const FULL_PAGE = 200
 
 function loaded<T>(value: T, source: DataSource, asOf: string): Loaded<T> {

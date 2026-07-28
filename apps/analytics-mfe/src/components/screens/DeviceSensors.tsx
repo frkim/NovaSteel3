@@ -210,7 +210,12 @@ export function DeviceSensors() {
           </FormControl>
         </Stack>
 
-        <StateBoundary state={sensorsState} isEmpty={(rows) => rows.length === 0}>
+        <StateBoundary
+          state={sensorsState}
+          isEmpty={(rows) => rows.length === 0}
+          loadingVariant="gauge"
+          loadingCaption={t('device.loading.caption')}
+        >
           {() => (
             <DataTable
               caption="Sensor explorer — click a row to chart its time series"

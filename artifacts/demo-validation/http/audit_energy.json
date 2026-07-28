@@ -1,13 +1,13 @@
 {
   "items": [
     {
-      "auditId": "4f97c5dc-8f54-4e08-9240-f9c1f38ba5a6",
+      "auditId": "a8503f40-1fc1-4c51-9a8d-945961d1ba7d",
       "domain": "energy",
-      "entityId": "REC-B503C1D47E4D",
-      "correlationId": "665ac260-f4bd-4623-92b2-62b7d07f22d9",
+      "entityId": "REC-530B3520077C",
+      "correlationId": "e1fc8ee7-0dc8-4b66-a0e3-2961200fc9df",
       "action": "energy.approve",
       "actor": "demo-energy",
-      "inputSnapshotRef": "recommendation:REC-B503C1D47E4D",
+      "inputSnapshotRef": "recommendation:REC-530B3520077C",
       "modelVersion": "energy-dispatch-deterministic:2.1.0",
       "output": {
         "status": "SIMULATED_APPROVED"
@@ -17,15 +17,15 @@
         "reason": "Shadow approval for demo; preserves delivery + tonnage"
       },
       "outcome": null,
-      "recordedAt": "2026-07-28T00:49:51.075814Z",
-      "previousHash": "f4a4ad1b751f7b2c587ef5f536c8dbe01cfc875a29f161fd204bc981fa6767d4",
-      "recordHash": "2fe7b6a7edfdfd4766b062bfa55ed8dfb7f579b94c245358abc24a3a8510fc9b"
+      "recordedAt": "2026-07-28T11:02:52.467575Z",
+      "previousHash": "06bebbac9e8116399d9b7b148d4ccd33aef7e89e484e28845e055acc5df53eef",
+      "recordHash": "61daaa21bb05801e4f12e47a6fc9400e426cd3f206ed0a0c0168f96f5e14326c"
     },
     {
-      "auditId": "410a2d27-6418-4706-a28c-e6c93cd11cbe",
+      "auditId": "ef93ac7b-de90-4038-8013-320826d79be4",
       "domain": "energy",
-      "entityId": "REC-B503C1D47E4D",
-      "correlationId": "05c7d79c-7f35-4496-b7d0-033effdf1907",
+      "entityId": "REC-530B3520077C",
+      "correlationId": "c3f22fe6-0206-4778-89ed-d12c5f92df6f",
       "action": "energy.simulate",
       "actor": "demo-energy",
       "inputSnapshotRef": "simulator:simulator-fixture:demo-full",
@@ -45,14 +45,14 @@
       },
       "humanAction": null,
       "outcome": null,
-      "recordedAt": "2026-07-28T00:49:51.066533Z",
-      "previousHash": "f4730ede8388dca88fff44ad3b021e2db467d175ab78ae97cbd84bc6e25e6ce6",
-      "recordHash": "f4a4ad1b751f7b2c587ef5f536c8dbe01cfc875a29f161fd204bc981fa6767d4"
+      "recordedAt": "2026-07-28T11:02:52.456414Z",
+      "previousHash": "ba350a1ff73fed1791593db6768840f077755b98537735ff07ab57a9eb2ce907",
+      "recordHash": "06bebbac9e8116399d9b7b148d4ccd33aef7e89e484e28845e055acc5df53eef"
     }
   ],
   "total": 2,
   "page": 1,
   "size": 50,
-  "asOf": "2026-07-28T00:49:51.128917Z",
-  "correlationId": "3c58b31b-3534-44f9-815d-196d4fdeaf6e"
+  "asOf": "2026-07-28T11:02:52.530218Z",
+  "correlationId": "7524035d-5629-4f9c-bff8-a81152e243fc"
 }

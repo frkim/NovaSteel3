@@ -1,10 +1,10 @@
 {
   "items": [
     {
-      "auditId": "e7dcaa4e-ddd5-4dd6-a0b3-98d30cd4f4c6",
+      "auditId": "d8fc8ddd-ca50-43b9-84ec-7bd9e319cf2e",
       "domain": "knowledge",
       "entityId": "PROC-IV-00001",
-      "correlationId": "336b97d0-f7be-4297-bd8b-06fc38695640",
+      "correlationId": "04869b70-12ca-44f2-b1a6-06a9983408ce",
       "action": "knowledge.procedure.approve",
       "actor": "demo-knowledge",
       "inputSnapshotRef": "procedure:PROC-IV-00001",
@@ -17,15 +17,15 @@
         "decision": "APPROVED"
       },
       "outcome": null,
-      "recordedAt": "2026-07-28T00:49:51.119083Z",
-      "previousHash": "8406adff02730c0451b46b32d7907e69d40d47a078e945df94c11d850c623ca0",
-      "recordHash": "9739108746b1990d19af3dbd2f496185e7315dd067a4f3b4bb0457e2c9952ced"
+      "recordedAt": "2026-07-28T11:02:52.517037Z",
+      "previousHash": "13b8371a8f70bf2ca3dadcdef6d912981aa42fdd7c9d441a12591e8093a16d8e",
+      "recordHash": "d7579f26cc7516e31845038bbed004621a75dafc60c1720c8517bca41cf63d98"
     },
     {
-      "auditId": "e67cdb93-21ea-4c09-a2ba-af9a5ee0e022",
+      "auditId": "e61e8ee1-7cfe-47cd-9e49-5f1b69e8d0e2",
       "domain": "knowledge",
       "entityId": "IV-00003",
-      "correlationId": "59a12d08-f64f-4019-b179-1c7823c8f140",
+      "correlationId": "51d66b0f-9bbc-4615-a800-8aa6d0c5820f",
       "action": "knowledge.interview.create",
       "actor": "demo-knowledge",
       "inputSnapshotRef": "consent:knowledge-capture",
@@ -35,15 +35,15 @@
       },
       "humanAction": null,
       "outcome": null,
-      "recordedAt": "2026-07-28T00:49:51.102578Z",
-      "previousHash": "209541c08eae3f7790150f9ac83f4b36add32f7aea13516ec7915272e0e50174",
-      "recordHash": "8406adff02730c0451b46b32d7907e69d40d47a078e945df94c11d850c623ca0"
+      "recordedAt": "2026-07-28T11:02:52.496785Z",
+      "previousHash": "ad6e26b9694cf6b01e37570fe1252ad8ea024d9ec491aa0acfa017efaa65062d",
+      "recordHash": "13b8371a8f70bf2ca3dadcdef6d912981aa42fdd7c9d441a12591e8093a16d8e"
     },
     {
-      "auditId": "1063f30a-9ca4-45d9-a97a-b7a31d46e72a",
+      "auditId": "0c5b1dce-fd5c-4200-adbb-fc4205b42aaf",
       "domain": "quality",
       "entityId": "COIL-LUX-260725-019",
-      "correlationId": "9c4253fd-35ec-42fa-b5f9-331bbe92c214",
+      "correlationId": "15ab5bf9-b164-4f5f-837e-a28a86e398a8",
       "action": "quality.what_if",
       "actor": "demo-quality",
       "inputSnapshotRef": "event:019eb3b8-9900-7ab9-afea-745d2182010b",
@@ -54,18 +54,18 @@
       },
       "humanAction": null,
       "outcome": null,
-      "recordedAt": "2026-07-28T00:49:51.089269Z",
-      "previousHash": "2fe7b6a7edfdfd4766b062bfa55ed8dfb7f579b94c245358abc24a3a8510fc9b",
-      "recordHash": "209541c08eae3f7790150f9ac83f4b36add32f7aea13516ec7915272e0e50174"
+      "recordedAt": "2026-07-28T11:02:52.481382Z",
+      "previousHash": "61daaa21bb05801e4f12e47a6fc9400e426cd3f206ed0a0c0168f96f5e14326c",
+      "recordHash": "ad6e26b9694cf6b01e37570fe1252ad8ea024d9ec491aa0acfa017efaa65062d"
     },
     {
-      "auditId": "4f97c5dc-8f54-4e08-9240-f9c1f38ba5a6",
+      "auditId": "a8503f40-1fc1-4c51-9a8d-945961d1ba7d",
       "domain": "energy",
-      "entityId": "REC-B503C1D47E4D",
-      "correlationId": "665ac260-f4bd-4623-92b2-62b7d07f22d9",
+      "entityId": "REC-530B3520077C",
+      "correlationId": "e1fc8ee7-0dc8-4b66-a0e3-2961200fc9df",
       "action": "energy.approve",
       "actor": "demo-energy",
-      "inputSnapshotRef": "recommendation:REC-B503C1D47E4D",
+      "inputSnapshotRef": "recommendation:REC-530B3520077C",
       "modelVersion": "energy-dispatch-deterministic:2.1.0",
       "output": {
         "status": "SIMULATED_APPROVED"
@@ -75,15 +75,15 @@
         "reason": "Shadow approval for demo; preserves delivery + tonnage"
       },
       "outcome": null,
-      "recordedAt": "2026-07-28T00:49:51.075814Z",
-      "previousHash": "f4a4ad1b751f7b2c587ef5f536c8dbe01cfc875a29f161fd204bc981fa6767d4",
-      "recordHash": "2fe7b6a7edfdfd4766b062bfa55ed8dfb7f579b94c245358abc24a3a8510fc9b"
+      "recordedAt": "2026-07-28T11:02:52.467575Z",
+      "previousHash": "06bebbac9e8116399d9b7b148d4ccd33aef7e89e484e28845e055acc5df53eef",
+      "recordHash": "61daaa21bb05801e4f12e47a6fc9400e426cd3f206ed0a0c0168f96f5e14326c"
     },
     {
-      "auditId": "410a2d27-6418-4706-a28c-e6c93cd11cbe",
+      "auditId": "ef93ac7b-de90-4038-8013-320826d79be4",
       "domain": "energy",
-      "entityId": "REC-B503C1D47E4D",
-      "correlationId": "05c7d79c-7f35-4496-b7d0-033effdf1907",
+      "entityId": "REC-530B3520077C",
+      "correlationId": "c3f22fe6-0206-4778-89ed-d12c5f92df6f",
       "action": "energy.simulate",
       "actor": "demo-energy",
       "inputSnapshotRef": "simulator:simulator-fixture:demo-full",
@@ -103,15 +103,15 @@
       },
       "humanAction": null,
       "outcome": null,
-      "recordedAt": "2026-07-28T00:49:51.066533Z",
-      "previousHash": "f4730ede8388dca88fff44ad3b021e2db467d175ab78ae97cbd84bc6e25e6ce6",
-      "recordHash": "f4a4ad1b751f7b2c587ef5f536c8dbe01cfc875a29f161fd204bc981fa6767d4"
+      "recordedAt": "2026-07-28T11:02:52.456414Z",
+      "previousHash": "ba350a1ff73fed1791593db6768840f077755b98537735ff07ab57a9eb2ce907",
+      "recordHash": "06bebbac9e8116399d9b7b148d4ccd33aef7e89e484e28845e055acc5df53eef"
     },
     {
-      "auditId": "6f7d270e-6b3c-46b7-a6d3-1a6668afe539",
+      "auditId": "3c8749bd-c256-40b8-8774-41f130c2fe0e",
       "domain": "furnace",
       "entityId": "WO-DEMO-LUX-1042",
-      "correlationId": "4a1eb187-b7d6-4760-a0fe-1f138df2cf98",
+      "correlationId": "4ce62eaa-af86-4c42-bd3c-107401dd5653",
       "action": "workorder.create",
       "actor": "demo-reliability",
       "inputSnapshotRef": "asset:LUX-BF-01",
@@ -123,15 +123,15 @@
         "decision": "CREATE_SYNTHETIC_WORK_ORDER"
       },
       "outcome": null,
-      "recordedAt": "2026-07-28T00:49:50.768525Z",
-      "previousHash": "18de36443b69dc3d8ec3404691053fb621e0b8b595b2522bc5a169faa83de197",
-      "recordHash": "f4730ede8388dca88fff44ad3b021e2db467d175ab78ae97cbd84bc6e25e6ce6"
+      "recordedAt": "2026-07-28T11:02:52.190019Z",
+      "previousHash": "9a2b11a35197a7f4fb4d6a41f6a189d2c001903d33d520b347151475b54b5e0b",
+      "recordHash": "ba350a1ff73fed1791593db6768840f077755b98537735ff07ab57a9eb2ce907"
     },
     {
-      "auditId": "03de266b-846d-4ce2-a4f5-99dd0347c264",
+      "auditId": "7d26b24d-439d-415c-bad6-4cd988b37931",
       "domain": "furnace",
       "entityId": "LUX-BF-01",
-      "correlationId": "700fa338-6b51-4bf6-bf07-e6af5e8f9ae5",
+      "correlationId": "69546547-01fd-41f6-8bc6-186159fcae86",
       "action": "lining.score",
       "actor": "scoring-worker",
       "inputSnapshotRef": "simulator:simulator-fixture:demo-full",
@@ -148,14 +148,14 @@
       },
       "humanAction": null,
       "outcome": null,
-      "recordedAt": "2026-07-28T00:49:50.762544Z",
+      "recordedAt": "2026-07-28T11:02:52.184268Z",
       "previousHash": "0000000000000000000000000000000000000000000000000000000000000000",
-      "recordHash": "18de36443b69dc3d8ec3404691053fb621e0b8b595b2522bc5a169faa83de197"
+      "recordHash": "9a2b11a35197a7f4fb4d6a41f6a189d2c001903d33d520b347151475b54b5e0b"
     }
   ],
   "total": 7,
   "page": 1,
   "size": 50,
-  "asOf": "2026-07-28T00:49:51.125797Z",
-  "correlationId": "9867fffe-f036-434d-806e-93ac64bc4874"
+  "asOf": "2026-07-28T11:02:52.526078Z",
+  "correlationId": "f5e75f55-7d3e-4443-864e-3602d4feb6cd"
 }

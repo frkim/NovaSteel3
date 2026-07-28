@@ -3,10 +3,10 @@
     "operationId": "cap-local-00001",
     "state": "Running",
     "armStatus": "SimulatedSucceeded",
-    "startedAt": "2026-07-28T00:49:51.136569Z",
+    "startedAt": "2026-07-28T11:02:52.539335Z",
     "reason": "Demo warm-up (simulated)",
     "simulated": true
   },
-  "asOf": "2026-07-28T00:49:51.140270Z",
-  "correlationId": "89a2ed23-0c21-4e78-a267-6d6980720867"
+  "asOf": "2026-07-28T11:02:52.543475Z",
+  "correlationId": "4c157a59-5291-4936-a1a9-e08cae368931"
 }
