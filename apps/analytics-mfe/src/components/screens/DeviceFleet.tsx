@@ -39,6 +39,7 @@ export function DeviceFleet() {
   const [areaFilter, setAreaFilter] = useState<string | null>(null)
 
   const devices = devicesState.data ?? []
+  const metricsPending = devicesState.data === null
 
   const totalDevices = devices.length
   const healthyCount = devices.filter((d) => d.status === 'healthy').length
@@ -247,7 +248,7 @@ export function DeviceFleet() {
 
   return (
     <SectionStack>
-      <KpiBand metrics={metrics} />
+      <KpiBand metrics={metrics} pending={metricsPending} />
 
       {/* Filter toolbar */}
       <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', alignItems: 'center' }}>

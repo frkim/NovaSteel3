@@ -8,11 +8,28 @@ import { collectDockPanels } from '../dock/dockPanels'
 import { revealDockPanel } from '../dock/dockCommands'
 import { DockedContext, useDocked } from '../dock/dockContext'
 
+const KPI_PENDING_VALUE = '—'
+
+/**
+ * Strips every derived signal from a KPI tile so an in-flight fetch never renders a
+ * computed zero (which would read as a real, healthy measurement).
+ */
+export function toPendingMetrics(metrics: KpiCardModel[]): KpiCardModel[] {
+  return metrics.map((metric) => ({
+    id: metric.id,
+    label: metric.label,
+    value: KPI_PENDING_VALUE,
+    tooltip: metric.tooltip,
+    status: 'neutral',
+  }))
+}
+
 export function KpiBand({
   metrics,
   minWidth = 190,
   id,
   title,
+  pending = false,
 }: {
   metrics: KpiCardModel[]
   minWidth?: number
@@ -20,20 +37,24 @@ export function KpiBand({
   id?: string
   /** Dock tab label; read by the panel collector, not by this component. */
   title?: string
+  /** True while the first fetch is in flight: tiles show a placeholder instead of derived zeros. */
+  pending?: boolean
 }) {
   void id
   void title
+  const shown = pending ? toPendingMetrics(metrics) : metrics
   return (
     <Box
       component="section"
       aria-label="Key performance indicators"
+      aria-busy={pending || undefined}
       sx={{
         display: 'grid',
         gap: 2,
         gridTemplateColumns: `repeat(auto-fit, minmax(${minWidth}px, 1fr))`,
       }}
     >
-      {metrics.map((metric) => (
+      {shown.map((metric) => (
         <KpiCard key={metric.id} metric={metric} />
       ))}
     </Box>
