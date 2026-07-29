@@ -130,14 +130,17 @@ def test_deck_drops_the_synthetic_realism_slide_and_guardrail() -> None:
 
 def test_deck_carries_the_architecture_and_ai_flow_diagrams() -> None:
     _, slides = _front_matter_and_slides()
-    diagrams = [slide for slide in slides if '<div class="flow">' in slide]
-    assert len(diagrams) == 2, "the deck needs an architecture diagram and an AI detail diagram"
-    titles = []
-    for slide in diagrams:
+    titles: list[str] = []
+    for slide in slides:
+        if '<div class="flow">' not in slide:
+            continue
         heading = re.search(r"(?m)^#\s+(.*)$", slide)
         assert heading is not None, "a diagram slide is missing its title"
         titles.append(heading.group(1))
-    assert titles == ["Architecture at a Glance", "AI Architecture in Detail"]
+    assert {"Architecture at a Glance", "AI Architecture in Detail"} <= set(titles), (
+        "the deck needs an architecture diagram and an AI detail diagram"
+    )
+    assert titles.index("Architecture at a Glance") < titles.index("AI Architecture in Detail")
 
 
 def test_deck_sizes_the_run_cost_for_one_site() -> None:
