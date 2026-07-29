@@ -11,6 +11,7 @@ the PDF (with and without speaker notes) and the PowerPoint package.
 | `marp.config.mjs` | Renders emoji as text so the build never depends on the Twemoji CDN. |
 | `scripts/sync-images.mjs` | Copies brand assets and UI screenshots into `images/` from their canonical repository locations. |
 | `scripts/format-pptx-notes.mjs` | Rewrites the Marp `.pptx` so each speaker-note line becomes its own PowerPoint paragraph. |
+| `scripts/strip-notes.mjs` | Writes `slides.pages.md` without speaker notes for the public GitHub Pages deck. |
 | `scripts/verify-build.mjs` | Checks that HTML, both PDFs and the PPTX carry every slide and its speaker notes. |
 | `dist/` | Build output (git-ignored). |
 | `images/` | Build output (git-ignored) — regenerate with `npm run images`. |

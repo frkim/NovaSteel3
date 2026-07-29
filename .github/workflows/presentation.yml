@@ -99,7 +99,7 @@ jobs:
           CHROME_PATH: /usr/bin/google-chrome
         run: |
           set -euo pipefail
-          node -e "const fs=require('fs');const s=fs.readFileSync('slides.md','utf8').replace(/<!--(?!\s*_)[\s\S]*?-->/g,'');fs.writeFileSync('slides.pages.md',s);"
+          node scripts/strip-notes.mjs
           npx marp --theme theme.css --html --allow-local-files slides.pages.md -o ../_site/deck/index.html
           mkdir -p ../_site/deck/images
           cp images/* ../_site/deck/images/
