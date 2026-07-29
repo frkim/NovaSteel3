@@ -42,7 +42,9 @@ whole build output — `index.html`, `NovaSteel-Oral-Defense.pdf`,
 `NovaSteel-Oral-Defense-notes.pdf` and `NovaSteel-Oral-Defense.pptx` — as the
 `novasteel-presentation-<run id>` workflow artifact (90-day retention). The run summary
 lists each file with its size. On `main` it also publishes the HTML deck to GitHub Pages
-under `/deck/`. The Pages copy is generated from a stripped `slides.pages.md` so speaker
+at the site root — <https://frkim.github.io/NovaSteel3/> — with the PDF and PPTX next to
+it (`NovaSteel-Oral-Defense.pdf`, `NovaSteel-Oral-Defense.pptx`); the older `/deck/` URL
+redirects there. The Pages copy is generated from a stripped `slides.pages.md` so speaker
 notes are never published on the web.
 
 Publishing requires GitHub Pages to be enabled once, by a repository admin, under

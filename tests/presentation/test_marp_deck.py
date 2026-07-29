@@ -190,6 +190,22 @@ def test_presentation_workflow_publishes_every_built_document_as_an_artifact() -
     assert "if:" not in upload, "deck artifacts must also be published on pull requests"
 
 
+def test_presentation_workflow_publishes_the_deck_at_the_pages_root() -> None:
+    """The Pages site root must serve the deck itself; publishing only under
+    ``/deck/`` leaves https://<owner>.github.io/<repo>/ empty."""
+
+    workflow = _read(ROOT / ".github" / "workflows" / "presentation.yml")
+    assemble = workflow.split("- name: Assemble the Pages site", 1)[1]
+    assemble = assemble.split("- name: Configure Pages", 1)[0]
+
+    assert "-o ../_site/index.html" in assemble
+    assert "cp images/* ../_site/images/" in assemble
+    assert "dist/NovaSteel-Oral-Defense.pptx ../_site/" in assemble
+    assert "../_site/.nojekyll" in assemble
+    assert "../_site/deck/index.html" in assemble, "keep the old /deck/ URL working"
+    assert "path: _site" in workflow
+
+
 def test_presentation_workflow_never_bootstraps_github_pages() -> None:
     """``enablement: true`` needs ``administration: write``, which GITHUB_TOKEN
     cannot have, so Pages must be enabled once in the repository settings and the

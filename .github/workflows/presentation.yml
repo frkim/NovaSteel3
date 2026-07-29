@@ -124,10 +124,23 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/strip-notes.mjs
-          npx marp --theme theme.css --html --allow-local-files slides.pages.md -o ../_site/deck/index.html
-          mkdir -p ../_site/deck/images
-          cp images/* ../_site/deck/images/
-          cp dist/NovaSteel-Oral-Defense.pdf dist/NovaSteel-Oral-Defense.pptx ../_site/deck/
+          # The deck is the site: it must land on _site/index.html, otherwise the
+          # Pages root (https://<owner>.github.io/<repo>/) serves nothing.
+          npx marp --theme theme.css --html --allow-local-files slides.pages.md -o ../_site/index.html
+          mkdir -p ../_site/images ../_site/deck
+          cp images/* ../_site/images/
+          cp dist/NovaSteel-Oral-Defense.pdf dist/NovaSteel-Oral-Defense.pptx ../_site/
+          # Pages serves the tree verbatim; without this Jekyll would try to build it.
+          touch ../_site/.nojekyll
+          # Keep the previously published /deck/ URL working.
+          printf '%s\n' \
+            '<!doctype html>' \
+            '<html lang="en"><head><meta charset="utf-8">' \
+            '<title>NovaSteel oral-defense deck</title>' \
+            '<meta http-equiv="refresh" content="0; url=../">' \
+            '<link rel="canonical" href="../"></head>' \
+            '<body><p>The deck moved to <a href="../">the site root</a>.</p></body></html>' \
+            > ../_site/deck/index.html
       # Pages must be enabled once in Settings -> Pages with "GitHub Actions" as the
       # source: GITHUB_TOKEN cannot create the Pages site itself (that needs
       # administration: write), so asking the action to bootstrap Pages fails with
