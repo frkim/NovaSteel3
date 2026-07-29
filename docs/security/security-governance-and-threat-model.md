@@ -30,8 +30,8 @@ The business and architecture documents are now aligned. This security model use
 |---|---|---|
 | Plant Manager | Cross-domain site decisions | Plant-scoped read/approval projection; no Platform Admin or OT-control capability |
 | Furnace Operator | Views furnace health, acknowledges alerts, contributes knowledge | `Operator.Read`; no model, recipe, or setpoint mutation |
-| Energy Manager | Reviews dispatch proposals | `EnergyPlanner.Approve`; Phase 0/1 approval is simulated/shadow only |
-| Maintenance/Reliability Engineer | Assesses RUL and plans interventions | `MaintenanceEngineer.Read`; synthetic work-order path only in Phase 0 |
+| Energy Manager | Reviews dispatch proposals | `EnergyPlanner.Approve`; demonstration/pilot approval is simulated/shadow only |
+| Maintenance/Reliability Engineer | Assesses RUL and plans interventions | `MaintenanceEngineer.Read`; synthetic work-order path only in the demonstration |
 | Quality Engineer | Reviews quality risk and what-if results | `ProcessEngineer.Contribute`; no recipe/setpoint write |
 | Sustainability Officer | Reviews emissions, ETS, and report evidence | Scoped reporting/audit projection; no operational action |
 | Knowledge Engineer/Admin | Reviews and publishes approved procedures | `Knowledge.Publisher`; explicit consent-session scope for any transcript review |

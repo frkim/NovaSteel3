@@ -100,7 +100,7 @@ Every screen is documented with the same seven blocks, so you always know where 
 | Requirement catalog (source of truth) | `apps/analytics-mfe/src/proof/proofCatalog.ts` |
 | Use-case brief | `docs/usecase/usecase.md` |
 | Proof-of-execution document | `docs/presentation/proof_of_execution.md` |
-| Demo runbook (15-minute script) | `docs/demo/demo-runbook.md` |
+| Demo runbook (10-minute script) | `docs/demo/demo-runbook.md` |
 | Front-end source | `apps/portal-shell/` (Blazor shell), `apps/analytics-mfe/` (React) |
 | Back-end source | `services/bff-api/`, `services/optimizer-worker/`, `services/scoring-worker/`, `services/knowledge-orchestrator/` |
 

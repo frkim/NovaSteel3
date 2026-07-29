@@ -126,15 +126,16 @@ See [the rehearsal report](../artifacts/demo-validation/rehearsal-report.md),
 | Product owner | [Requirements](specs/solution-requirements.md) | [Personas](personas/personas-and-journeys.md), [UX specification](ux/dashboard-specification.md) |
 | Solution/data architect | [Solution architecture](architecture/solution-architecture.md) | [Deployment topology](architecture/deployment-topology.md), [Fabric assets](../fabric/README.md) |
 | Application engineer | [Root quick start](../README.md) | [API contracts](implementation/api-contracts.md), [implementation guide](implementation/implementation-guide.md) |
-| Security, DPO, OT, platform engineer | [Security governance](security/security-governance-and-threat-model.md) | [Operations](operations/operations-and-cost.md), [deployment topology](architecture/deployment-topology.md) |
+| Security, DPO, OT, platform engineer | [Security governance](security/security-governance-and-threat-model.md) | [Operations](operations/operations-and-cost.md), [deployment topology](architecture/deployment-topology.md), [compliance analyses](business/compliance/README.md) |
+| Programme manager / delivery lead | [Implementation process](business/project/implementation-process.md) | [Agentic development and SDLC](business/project/agentic-development.md), [compliance roadmap](business/compliance/compliance-roadmap.md) |
 | Data/simulator engineer | [Synthetic-data specification](data/synthetic-data-and-simulators.md) | [Simulator README](../simulator/README.md), [contracts](../contracts) |
 
 ## Defense clock and assets
 
 | Clock | Segment | Asset |
 |---|---|---|
-| 00:00–30:00 | 20-slide architecture and value narrative | [Plan](presentation/oral-defense-and-slide-plan.md) and `presentation\NovaSteel-Oral-Defense.pptx` |
-| 30:00–45:00 | Six-moment deterministic persona demo | [Runbook](demo/demo-runbook.md) and `..\artifacts\demo-validation\drive_demo.py` |
+| 00:00–35:00 | Architecture, value and compliance narrative | [Plan](presentation/oral-defense-and-slide-plan.md) and `presentation\NovaSteel-Oral-Defense.pptx` |
+| 35:00–45:00 | Six-moment deterministic persona demo | [Runbook](demo/demo-runbook.md) and `..\artifacts\demo-validation\drive_demo.py` |
 | 45:00–60:00 | Moderated FAQ / validation-gate discussion | [FAQ](presentation/faq.md), [proof of execution](presentation/proof_of_execution.md) and [technical analysis](tech/technical-analysis.md) |
 
 The PowerPoint has 28 slides: 20 primary narrative/demo-handoff slides and eight
@@ -146,6 +147,8 @@ alignment to the demo transitions.
 | Area | Primary artifacts |
 |---|---|
 | Business | [Use case](usecase/usecase.md), [requirements](specs/solution-requirements.md), [personas](personas/personas-and-journeys.md) |
+| Business & compliance | [Regulatory compliance analyses](business/compliance/README.md) — [EU AI Act](business/compliance/eu-ai-act.md), [EU ETS](business/compliance/eu-ets.md), [IEC 62443](business/compliance/iec-62443.md), [other regulations](business/compliance/other-regulations.md), [roadmap](business/compliance/compliance-roadmap.md) |
+| Delivery method | [Implementation process](business/project/implementation-process.md), [agentic development and SDLC](business/project/agentic-development.md) |
 | Architecture | [Solution architecture](architecture/solution-architecture.md), [deployment topology](architecture/deployment-topology.md), [editable diagrams](diagrams/README.md) |
 | Implementation | [Root quick start](../README.md), [implementation guide](implementation/implementation-guide.md), [API contracts](implementation/api-contracts.md) |
 | Data/Fabric | [Synthetic data](data/synthetic-data-and-simulators.md), [Fabric README](../fabric/README.md), [Fabric research](research/fabric-platform.md), [Fabric-Brain mapping](architecture/fabric-brain-mapping.md) |
@@ -166,7 +169,8 @@ deployment or any non-synthetic pilot, clear the following:
 3. Foundry model/deployment/Agent Service/Speech availability, quota, identity,
    evaluation, and private-network behavior.
 4. Entra, Fabric workspace/OneLake/item-level authorization and Power BI RLS.
-5. DPO/Legal/DPIA, retention/deletion, data residency, and EU AI Act decisions.
+5. DPO/Legal/DPIA, retention/deletion, data residency, and EU AI Act decisions —
+   see the [compliance roadmap](business/compliance/compliance-roadmap.md).
 6. OT vendor/site approval for each DMZ protocol, source, rate, and boundary.
 7. Market-data licensing/freshness, immutable service images, DR/performance/
    accessibility testing, and a live-cloud fallback rehearsal.

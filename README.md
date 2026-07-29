@@ -263,12 +263,15 @@ Other frequently used entry points:
 | Architecture and ADRs | [`docs\architecture\solution-architecture.md`](docs/architecture/solution-architecture.md) |
 | Screen-by-screen UX specification | [`docs\ux\dashboard-specification.md`](docs/ux/dashboard-specification.md) |
 | Demo runbook | [`docs\demo\demo-runbook.md`](docs/demo/demo-runbook.md) |
+| Regulatory compliance analyses | [`docs\business\compliance\README.md`](docs/business/compliance/README.md) |
+| Implementation process | [`docs\business\project\implementation-process.md`](docs/business/project/implementation-process.md) |
+| Agentic development and SDLC | [`docs\business\project\agentic-development.md`](docs/business/project/agentic-development.md) |
 | Package-feed security policy | [`docs\tech\security_requirement.md`](docs/tech/security_requirement.md) |
 
-## Oral-defense handoff — 30 + 15 + 15 minutes
+## Oral-defense handoff — 35 + 10 + 15 minutes
 
-1. **00:00–30:00:** architecture/value story (20 primary slides).
-2. **30:00–45:00:** deterministic six-moment persona demonstration.
+1. **00:00–35:00:** architecture/value story (primary slides, closing on compliance).
+2. **35:00–45:00:** deterministic six-moment persona demonstration.
 3. **45:00–60:00:** moderated FAQ and production-gate discussion.
 
 Open `docs\presentation\NovaSteel-Oral-Defense.pptx` for the final 26-slide
