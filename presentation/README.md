@@ -52,7 +52,7 @@ published on the web.
   stay outside the speaking budget.
 - Keep the honesty contract of the project: 🎯 TARGET (projected outcome) versus
   🔬 EVIDENCE (reproducible synthetic-scenario result), and the persistent footer
-  `Phase 0 · Synthetic demonstration · Not for operational control.`
+  `Phase 0 · Real architecture, synthetic data · AI advises, humans decide`
 - Only reference images that `scripts/sync-images.mjs` provides; the test suite
   checks every `images/…` reference against that manifest.
 - [`docs/presentation/oral-defense-and-slide-plan.md`](../docs/presentation/oral-defense-and-slide-plan.md)

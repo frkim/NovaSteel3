@@ -59,7 +59,7 @@ def test_front_matter_declares_the_novasteel_marp_theme() -> None:
     assert "marp: true" in front_matter
     assert "theme: novasteel" in front_matter
     assert "paginate: true" in front_matter
-    assert "Phase 0 · Synthetic demonstration · Not for operational control." in front_matter
+    assert "Phase 0 · Real architecture, synthetic data · AI advises, humans decide" in front_matter
 
 
 def test_deck_has_twenty_main_slides_and_six_backup_slides() -> None:

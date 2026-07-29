@@ -3,7 +3,7 @@ marp: true
 theme: novasteel
 paginate: true
 header: 'NovaSteel · AI-Powered Steel Production Optimization'
-footer: 'Phase 0 · Synthetic demonstration · Not for operational control.'
+footer: 'Phase 0 · Real architecture, synthetic data · AI advises, humans decide'
 ---
 
 <!-- _class: lead -->
