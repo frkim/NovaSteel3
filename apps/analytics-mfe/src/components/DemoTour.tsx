@@ -24,7 +24,7 @@ interface TourStep {
   headline: string
 }
 
-/** Steps follow the 15-minute demo runbook moments (DM-1..DM-6). */
+/** Steps follow the 10-minute demo runbook moments (DM-1..DM-6). */
 const STEPS: TourStep[] = [
   {
     title: 'Plant Manager — fleet & targets',

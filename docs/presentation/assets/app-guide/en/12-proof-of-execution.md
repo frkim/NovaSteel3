@@ -156,7 +156,7 @@
 
 | Ref | What is honestly missing |
 |---|---|
-| `TR-DEV-01` | Some Fabric artefacts (notebooks, Activator rules, the Real-Time Intelligence eventstream) are provisioned as templates and demonstrated from captured output rather than executed live inside the 15-minute demo window. |
+| `TR-DEV-01` | Some Fabric artefacts (notebooks, Activator rules, the Real-Time Intelligence eventstream) are provisioned as templates and demonstrated from captured output rather than executed live inside the 10-minute demo window. |
 | `TR-DEV-02` | Manufacturing Execution System (MES) and batch-historian integrations are specified in the architecture but not implemented; the demo reads a synthetic feed in their place. |
 | `TR-AI-02` | There is no model registry artefact, training notebook or automated evaluation gate in the repository. Model versioning is a constant in code and the physics model is fitted analytically rather than trained, so the lifecycle is described in documentation rather than enforced by tooling. |
 | `TR-ARC-01` | No load-test results, no published Service Level Objective / Agreement targets, and no circuit-breaker middleware in code. The reliability claims rest on infrastructure configuration and design intent rather than on measured behaviour under load. |

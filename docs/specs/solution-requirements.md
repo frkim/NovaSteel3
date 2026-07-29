@@ -16,14 +16,14 @@
 | Industry | Heavy Industry & Metals (integrated steel: blast furnace + rolling mills) |
 | Sites in scope | Luxembourg (HQ), Germany, Belgium, Spain |
 | Regulatory context | GDPR, EU AI Act, sector-specific EU directives (EU ETS, Industrial Emissions Directive) |
-| Presentation format constraint | 1-hour defense: 30-minute slides, 15-minute live demo, 15-minute FAQ (see §19) |
+| Presentation format constraint | 1-hour defense: 35-minute slides, 10-minute live demo, 15-minute FAQ (see §19) |
 | Revision | v1.0 |
 
 ---
 
 ## 1. Purpose & Reading Guide
 
-This specification translates the NovaSteel use case into an implementation-ready set of business and solution requirements. It is the contract that the architecture, data/demo, UX, and security workstreams must satisfy, and the basis on which the 1-hour defense and 15-minute demo are scripted and judged.
+This specification translates the NovaSteel use case into an implementation-ready set of business and solution requirements. It is the contract that the architecture, data/demo, UX, and security workstreams must satisfy, and the basis on which the 1-hour defense and 10-minute demo are scripted and judged.
 
 Requirement IDs use the pattern `FR-<AREA>-<NN>` (functional) and `NFR-<AREA>-<NN>` (non-functional). KPIs use `KPI-<AREA>-<NN>`. All IDs are stable identifiers — do not renumber; append new IDs at the end of a group if scope grows.
 
@@ -91,7 +91,7 @@ These are not independent problems: energy, quality, and asset‑health decision
 - **S5** — Cross-site, role-based dashboards and copilots for the 8 personas defined in `docs\personas\personas-and-journeys.md`.
 - **S6** — Auditable recommendation-and-decision trail for every AI-generated recommendation (energy dispatch, maintenance, quality, knowledge content) and the human decision taken on it.
 - **S7** — KPI/ESG reporting surface for EU ETS exposure and CO₂ trajectory, at site and portfolio (4-country) level.
-- **S8** — A 15-minute, reliably repeatable demo built on synthetic data illustrating all four outcome areas end-to-end (see §19).
+- **S8** — A 10-minute, reliably repeatable demo built on synthetic data illustrating all four outcome areas end-to-end (see §19).
 
 ### 5.2 Out of Scope (explicitly, for this engagement/phase)
 
@@ -115,7 +115,7 @@ These are not independent problems: energy, quality, and asset‑health decision
 | A4 | Baseline metrics in §4.2 are illustrative; real baselines will be established during discovery via a data audit of the last 12–24 months of historian/ERP data. | KPI targets in production must be re-baselined; demo KPI targets remain as stated for illustration. |
 | A5 | The four target outcomes (§4.1) are portfolio-wide (all 4 sites), not per-site; site-level targets will be apportioned during rollout planning. | Reporting cadence and attribution logic must support roll-up and drill-down. |
 | A6 | A furnace lining reline can be rescheduled with ≥21 days' notice without breaching other maintenance/production constraints. | RUL model usefulness is bounded by planning lead-time flexibility, not just model accuracy. |
-| A7 | The 1-hour defense audience includes both business and technical evaluators; the 15-minute demo must be self-contained and not depend on live external services (spot price API, live sensors) for reliability. | Demo must run against a deterministic synthetic dataset with recorded fallback (video) — see §19. |
+| A7 | The 1-hour defense audience includes both business and technical evaluators; the 10-minute demo must be self-contained and not depend on live external services (spot price API, live sensors) for reliability. | Demo must run against a deterministic synthetic dataset with recorded fallback (video) — see §19. |
 | A8 | The EU AI Act risk classification of these AI systems (furnace lining prediction touching safety, energy dispatch touching critical infrastructure) requires legal confirmation; this document assumes a "high-risk-adjacent" posture (human oversight, logging, transparency) pending formal classification. | If confirmed high-risk, additional conformity assessment, technical documentation, and post-market monitoring obligations apply (owned by `security-spec`). |
 
 ---
@@ -138,7 +138,7 @@ Legend: **Primary user** = persona(s) most responsible for acting on the require
 | FR-ENE-02 | The platform shall forecast energy demand of schedulable, energy-intensive processes (e.g., EAF melting, rolling campaigns) over a rolling 24–48h horizon. | Energy Manager | DM-2 |
 | FR-ENE-03 | The platform shall generate a recommended process schedule that minimizes energy cost and/or emissions subject to production, safety, and contractual constraints (min/max run windows, maintenance blackout periods). | Energy Manager | DM-2 |
 | FR-ENE-04 | Every schedule recommendation shall be presented with a plain-language rationale (expected € saved, expected CO₂ avoided, constraints considered) before any action is taken. | Energy Manager, Plant Manager | DM-2 |
-| FR-ENE-05 | The Energy Manager shall be able to accept, modify, or reject a recommendation; rejections shall require a reason code. In Phase 0/1 this is a simulated/shadow decision record, not an operational schedule write. | Energy Manager | DM-2 |
+| FR-ENE-05 | The Energy Manager shall be able to accept, modify, or reject a recommendation; rejections shall require a reason code. In the demonstration and pilot phases this is a simulated/shadow decision record, not an operational schedule write. | Energy Manager | DM-2 |
 | FR-ENE-06 | The platform shall track realized savings (recommended vs. as-run) and reconcile against forecast, producing an auditable "savings ledger." | Energy Manager, Executive | DM-6 |
 | FR-ENE-07 | The platform shall support configurable approval guardrails for future, separately approved write-back connectors. Through Phase 1, recommendations remain simulated or shadow-only; autonomous execution is out of scope (see O1, §18). | Energy Manager | — |
 
@@ -228,9 +228,9 @@ Legend: **Primary user** = persona(s) most responsible for acting on the require
 |---|---|---|
 | NFR-PERF-01 | Performance | Furnace lining RUL inference shall complete within a time budget that supports at least daily re-scoring per furnace (near-real-time is a stretch goal, not an MVP requirement). |
 | NFR-PERF-02 | Performance | Energy dispatch recommendations shall be available with enough lead time to act before day-ahead market gate-closure (site/country-specific). |
-| NFR-PERF-03 | Performance | Dashboards shall load primary KPI views within industry-acceptable interactive latency for a live demo audience (target: perceptibly instant during the 15-minute demo). |
+| NFR-PERF-03 | Performance | Dashboards shall load primary KPI views within industry-acceptable interactive latency for a live demo audience (target: perceptibly instant during the 10-minute demo). |
 | NFR-AVAIL-01 | Availability | The platform's core dashboards and alerting shall target high availability commensurate with a production-monitoring tool (final SLO owned by `solution-architecture`). |
-| NFR-AVAIL-02 | Resilience | The 15-minute demo shall not depend on live external services (spot-price API, live OT feed); it must run fully against synthetic/cached data with a recorded-video fallback. |
+| NFR-AVAIL-02 | Resilience | The 10-minute demo shall not depend on live external services (spot-price API, live OT feed); it must run fully against synthetic/cached data with a recorded-video fallback. |
 | NFR-SCALE-01 | Scalability | The data layer shall support 4 sites/countries today with a clear path to additional sites/lines without architectural rework. |
 | NFR-SEC-01 | Security | All data in transit and at rest shall be encrypted; access shall be governed by RBAC and, for sensitive actions (e.g., accepting an energy dispatch recommendation with real financial impact), by an auditable approval step. |
 | NFR-SEC-02 | Security | Personal data collected for knowledge capture (operator voice/video/text) shall be processed under documented GDPR lawful basis, with data minimization, retention limits, and data-subject rights support. |
@@ -323,7 +323,7 @@ Legend: **Primary user** = persona(s) most responsible for acting on the require
 
 | ID | Constraint | Type |
 |---|---|---|
-| C-01 | Solution must fit a **1-hour defense: 30-minute slides, 15-minute live demo, 15-minute FAQ** (see §19). Architecture and demo scripting must respect this timebox. | Program/process |
+| C-01 | Solution must fit a **1-hour defense: 35-minute slides, 10-minute live demo, 15-minute FAQ** (see §19). Architecture and demo scripting must respect this timebox. | Program/process |
 | C-02 | Demo must run on **synthetic/simulated data only**; no production OT/IT connectivity is assumed or required for the defense (O7). | Technical |
 | C-03 | All data processing must remain within the EU (data residency) given the LU/DE/BE/ES footprint and GDPR. | Regulatory |
 | C-04 | No AI system may autonomously execute a safety-relevant or high-financial-impact action without human approval in this phase (O1, AI-05). | Regulatory/Safety |
@@ -336,7 +336,7 @@ Legend: **Primary user** = persona(s) most responsible for acting on the require
 
 ## 15. Traceability Matrix (Requirements ↔ Demo Moments ↔ Personas ↔ KPIs)
 
-The 15-minute demo (detailed script in §19 and in the personas document) is organized into six demo moments (`DM-1` … `DM-6`). This matrix is the authoritative cross-reference for defense reviewers and downstream workstreams.
+The 10-minute demo (detailed script in §19 and in the personas document) is organized into six demo moments (`DM-1` … `DM-6`). This matrix is the authoritative cross-reference for defense reviewers and downstream workstreams.
 
 | Demo Moment | Duration | Persona(s) | Requirements demonstrated | KPI(s) evidenced |
 |---|---|---|---|---|
@@ -375,7 +375,7 @@ Total scripted time: ~14 minutes + 1 minute transitions/buffer = **15 minutes**.
 
 ### 16.2 MVP/Demo-Level Acceptance Criteria
 
-- **AC-01**: The full 15-minute demo (DM-1…DM-6) runs end-to-end on synthetic data without manual data patching, in ≤15 minutes, at least twice consecutively without failure (dress-rehearsal standard).
+- **AC-01**: The full 10-minute demo (DM-1…DM-6) runs end-to-end on synthetic data without manual data patching, in ≤10 minutes, at least twice consecutively without failure (dress-rehearsal standard).
 - **AC-02**: All 8 personas defined in the companion document are represented on-screen at least once during the demo or explicitly referenced in the narration with their cockpit shown.
 - **AC-03**: All four use-case outcome metrics (§4.1) are visibly displayed with baseline vs. target vs. "as achieved in simulation" values during DM-1 and/or DM-6.
 - **AC-04**: A recorded video fallback of the full demo exists and is verified to play, satisfying NFR-AVAIL-02/A7 in case of live environment failure during the defense.
@@ -396,7 +396,7 @@ Total scripted time: ~14 minutes + 1 minute transitions/buffer = **15 minutes**.
 | R-06 | Physics-informed furnace model produces false negatives (missed failure) given synthetic/limited training data. | Medium | High (safety) | Conservative alert thresholds, explicit confidence bands (AI-08), human escalation path (FR-FUR-07), clearly scope MVP as decision-support only. |
 | R-07 | Energy market data licensing/access is not finalized in time for production rollout. | Medium | Medium | Demo uses simulated price series (C-02); production dependency flagged (A2) for early procurement engagement. |
 | R-08 | Cross-country data residency/localization adds integration complexity across LU/DE/BE/ES. | Medium | Medium | EU-only hosting assumed from the outset (NFR-SEC-03); architecture workstream to confirm regional data handling. |
-| R-09 | Scope creep during architecture/UX design threatens the 15-minute demo timebox. | Medium | Medium | §15 traceability matrix and §19 agenda are binding; any new capability must map to an existing DM slot or be deferred to §18 roadmap. |
+| R-09 | Scope creep during architecture/UX design threatens the 10-minute demo timebox. | Medium | Medium | §15 traceability matrix and §19 agenda are binding; any new capability must map to an existing DM slot or be deferred to §18 roadmap. |
 | R-10 | Quality/root-cause model requires deeper genealogy data than available in synthetic dataset, weakening DM-4. | Low-Medium | Medium | Coordinate early with `data-demo-spec` to ensure genealogy fields are modeled in synthetic data generation. |
 
 ---
@@ -405,12 +405,12 @@ Total scripted time: ~14 minutes + 1 minute transitions/buffer = **15 minutes**.
 
 | Phase | Scope | Data | Automation posture |
 |---|---|---|---|
-| **Phase 0 — Defense/Demo (this engagement)** | All four capability areas demonstrated end-to-end (S1–S8); single simulated "portfolio" spanning 4 illustrative sites. | 100% synthetic/simulated (C-02, O7). | Decision-support only; no live execution. |
+| **Demonstration — Defense/Demo (this engagement)** | All four capability areas demonstrated end-to-end (S1–S8); single simulated "portfolio" spanning 4 illustrative sites. | 100% synthetic/simulated (C-02, O7). | Decision-support only; no live execution. |
 | **Phase 1 — Pilot (0–6 months post-approval)** | One real site, read-only integration to historian/energy/quality/CMMS data; AI runs in **shadow mode** (recommendations logged, not required to be acted on) to validate accuracy against real outcomes. | Real data (read-only), GDPR consent process live for any real interviews (C-05). | Shadow mode; human fully in control; audit trail live (FR-GOV-01). |
 | **Phase 2 — Scale (6–18 months)** | Roll out to remaining 3 sites; enable guarded, human-approved execution of energy dispatch recommendations and maintenance work-order creation; knowledge library reaches critical-topic coverage target. | Real data, bi-directional integration (write-back to CMMS/MES where approved). | Human-approved execution (guardrails per FR-ENE-07); AI Act conformity documentation finalized (C-08). |
 | **Phase 3 — Steady State (18+ months)** | Cross-plant benchmarking, continuous model retraining pipeline, optional supervised automation for lower-risk, high-confidence recommendation classes only (re-evaluated per risk framework); ETS exposure forecasting feeding finance/trading workflows (still O3-compliant: report, not trade). | Full production data lineage, long-term audit retention (§10.2 DQ-06). | Selective, governed automation with continuous human oversight audit (FR-GOV-05). |
 
-This phasing directly supports the "in scope / out of scope" boundaries in §5: everything in §5.1 is demonstrated in Phase 0; everything in §5.2 (O1–O7) is either explicitly deferred to a later phase (O1, O3, O7) or remains permanently out of scope for this platform (O2, O4, O5, O6).
+This phasing directly supports the "in scope / out of scope" boundaries in §5: everything in §5.1 is demonstrated in the defense demonstration; everything in §5.2 (O1–O7) is either explicitly deferred to a later phase (O1, O3, O7) or remains permanently out of scope for this platform (O2, O4, O5, O6).
 
 ---
 
@@ -418,19 +418,19 @@ This phasing directly supports the "in scope / out of scope" boundaries in §5: 
 
 ### 19.1 Constraint
 
-Per the assignment format, the solution is presented in a **1-hour defense**: **30 minutes of slides**, a **15-minute live demo**, and **15 minutes of FAQ**. All content in this specification (and the architecture/UX/data workstreams built on it) must fit this constraint without truncating the four core outcome areas.
+Per the assignment format, the solution is presented in a **1-hour defense**: **35 minutes of slides**, a **10-minute live demo**, and **15 minutes of FAQ**. All content in this specification (and the architecture/UX/data workstreams built on it) must fit this constraint without truncating the four core outcome areas.
 
 ### 19.2 Suggested 60-Minute Defense Agenda
 
 | Segment | Duration | Content |
 |---|---|---|
-| Slides: problem, personas, architecture, Fabric, AI, governance, data, deployment | 30 min | [Oral-defense plan](../presentation/oral-defense-and-slide-plan.md), slides 1–20 |
-| **Live demo** | **15 min** | DM-1 → DM-6 per §15/§19.3 |
+| Slides: problem, personas, architecture, Fabric, AI, governance, data, deployment | 35 min | [Oral-defense plan](../presentation/oral-defense-and-slide-plan.md), slides 1–20 |
+| **Live demo** | **10 min** | DM-1 → DM-6 per §15/§19.3 |
 | FAQ / defense | 15 min | [Oral-defense FAQ](../presentation/faq.md); validation gates and follow-ups |
 
-### 19.3 15-Minute Demo Script (binding reference)
+### 19.3 10-Minute Demo Script (binding reference)
 
-Follows §15 exactly: DM-1 (2 min) → DM-2 (2.5 min) → DM-3 (2.5 min) → DM-4 (2.5 min) → DM-5 (2.5 min) → DM-6 (2 min) = 14 min + 1 min transition buffer. Full narrative script, screen-by-screen walkthrough, and persona framing for each moment are provided in [personas and journeys](../personas/personas-and-journeys.md).
+Follows §15 exactly: DM-1 (1.5 min) → DM-2 (1.5 min) → DM-3 (2 min) → DM-4 (1.5 min) → DM-5 (1.5 min) → DM-6 (1.5 min) = 9.5 min + 0.5 min recap/buffer = 10 min. Full narrative script, screen-by-screen walkthrough, and persona framing for each moment are provided in [personas and journeys](../personas/personas-and-journeys.md).
 
 ### 19.4 Reliability Requirements for the Demo
 

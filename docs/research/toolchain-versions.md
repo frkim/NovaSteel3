@@ -31,7 +31,7 @@ The exact protected-feed configuration and CI enforcement live in the [implement
 
 ## Frontend boundary
 
-The shell and MFE are one Phase 0 release unit to prevent host/bridge skew:
+The shell and MFE are one demonstration release unit to prevent host/bridge skew:
 
 - The **Blazor WASM shell** owns Entra sign-in, routing, global chrome, theme, locale, and token brokering.
 - The **React MFE** owns MUI components, D3 charts, accessible virtualized tables, and the optional internal Power BI surface.

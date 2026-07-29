@@ -180,7 +180,7 @@ function addFooter(slide, index, dark = false) {
   const footerText = dark ? C.mist : C.graphite;
   rect(slide, 0, 7.09, W, 0.41, footerFill, footerFill);
   roundRect(slide, 0.42, 7.16, 3.88, 0.2, dark ? C.graphite : C.white, dark ? C.graphite : C.mist, { lineWidth: 0.25 });
-  tx(slide, "PHASE 0  |  SYNTHETIC DEMONSTRATION  |  NOT FOR OPERATIONAL CONTROL", 0.56, 7.205, 3.6, 0.08, {
+  tx(slide, "SYNTHETIC DEMONSTRATION  |  NOT FOR OPERATIONAL CONTROL", 0.56, 7.205, 3.6, 0.08, {
     fontSize: 6.25, color: footerText, bold: true, charSpacing: 0.65,
   });
   tx(slide, index <= 20 ? `ORAL DEFENSE  •  ${String(index).padStart(2, "0")} / 20` : `FAQ & VALIDATION BACKUP  •  ${String(index - 20).padStart(2, "0")} / ${String(BACKUP_SLIDES).padStart(2, "0")}`, 9.55, 7.205, 3.3, 0.08, {
@@ -308,7 +308,7 @@ function addThermalLegend(slide, x, y) {
   tx(slide, "ONE GOVERNED DATA CORE\nFOR A FOUR-COUNTRY STEEL ESTATE", 0.58, 1.85, 6.45, 1.35, {
     fontFace: F.head, fontSize: 30.5, color: C.white, bold: true, valign: "top",
   });
-  tx(slide, "30 min architecture & value  |  15 min deterministic demo  |  15 min hard questions", 0.58, 3.36, 6.45, 0.25, {
+  tx(slide, "35 min architecture & value  |  10 min deterministic demo  |  15 min hard questions", 0.58, 3.36, 6.45, 0.25, {
     fontSize: 12.5, color: C.mist, bold: true,
   });
   roundRect(slide, 0.58, 3.94, 5.18, 1.02, C.coal, C.graphite, { lineWidth: 0.7 });
@@ -317,11 +317,11 @@ function addThermalLegend(slide, x, y) {
     fontSize: 11.2, color: C.white, bold: true, valign: "top",
   });
   addSmallFactory(slide, 8.68, 5.64, 1.16, true);
-  tx(slide, "MICROSOFT FABRIC–CENTERED  |  PHASE 0", 0.58, 5.98, 5.2, 0.17, { fontSize: 8.7, color: C.steel, bold: true, charSpacing: 1.15 });
+  tx(slide, "MICROSOFT FABRIC–CENTERED  |  SYNTHETIC DEMONSTRATION", 0.58, 5.98, 5.2, 0.17, { fontSize: 8.7, color: C.steel, bold: true, charSpacing: 1.15 });
   finish(
     slide,
     1,
-    "Good morning. In the next hour I will defend NovaSteel: 30 minutes of architecture and value, a 15-minute live demonstration on fully synthetic data, and 15 minutes for hard questions.\nThe ground rule is visible from the first slide: I will distinguish a business target from evidence we can reproduce. The demo proves mechanics on synthetic data; it does not claim banked savings.",
+    "Good morning. In the next hour I will defend NovaSteel: 35 minutes of architecture and value, a 10-minute live demonstration on fully synthetic data, and 15 minutes for hard questions.\nThe ground rule is visible from the first slide: I will distinguish a business target from evidence we can reproduce. The demo proves mechanics on synthetic data; it does not claim banked savings.",
     "Source cue | solution-architecture.md §1.1  •  demo-runbook.md §1",
     true,
   );
@@ -329,7 +329,7 @@ function addThermalLegend(slide, x, y) {
 
 // 02 — business challenge
 {
-  const slide = newSlide(2, "The business case", "A steel estate under pressure on five fronts", "00:45–02:15");
+  const slide = newSlide(2, "The business case", "A steel estate under pressure on five fronts", "00:45–02:25");
   badge(slide, 0.5, 1.31, "Context", "context");
   roundRect(slide, 0.5, 1.7, 4.15, 4.56, C.coal, C.coal);
   tx(slide, "FOUR-COUNTRY\nSTEEL ESTATE", 0.78, 1.98, 2.3, 0.4, { fontFace: F.head, fontSize: 20, color: C.white, bold: true });
@@ -372,7 +372,7 @@ function addThermalLegend(slide, x, y) {
 
 // 03 — cost of standing still
 {
-  const slide = newSlide(3, "Executive urgency", "Doing nothing is not a neutral option", "02:15–03:30", { dark: true, texture: true });
+  const slide = newSlide(3, "Executive urgency", "Doing nothing is not a neutral option", "02:25–03:50", { dark: true, texture: true });
   badge(slide, 0.5, 1.3, "Illustrative exposure", "context");
   tx(slide, "REACTIVE OPERATIONS\nPAY THE MAXIMUM ON EVERY AXIS.", 0.52, 1.74, 5.1, 0.68, {
     fontFace: F.head, fontSize: 23.5, color: C.white, bold: true, valign: "top",
@@ -408,7 +408,7 @@ function addThermalLegend(slide, x, y) {
 
 // 04 — transformation targets
 {
-  const slide = newSlide(4, "Transformation objective", "Four falsifiable targets — not demo claims", "03:30–05:00");
+  const slide = newSlide(4, "Transformation objective", "Four falsifiable targets — not demo claims", "03:50–05:30");
   badge(slide, 0.5, 1.3, "Targets", "target");
   tx(slide, "Every headline target carries a baseline. The demonstration shows mechanics, not realized production outcomes.", 2.04, 1.36, 8.1, 0.15, { fontSize: 9.6, color: C.muted, bold: true });
   const cards = [
@@ -436,7 +436,7 @@ function addThermalLegend(slide, x, y) {
 
 // 05 — one governed platform
 {
-  const slide = newSlide(5, "Solution overview", "One governed platform: signals → intelligence → accountable decisions", "05:00–06:30", { dark: true, texture: true });
+  const slide = newSlide(5, "Solution overview", "One governed platform: signals → intelligence → accountable decisions", "05:30–07:10", { dark: true, texture: true });
   const nodes = [
     { x: 0.75, y: 2.18, d: 1.35, title: "PLANT\nSIGNALS", sub: "OT / MES / market", color: C.rust },
     { x: 3.25, y: 2.18, d: 1.6, title: "FABRIC\nCORE", sub: "governed data spine", color: C.teal },
@@ -464,11 +464,11 @@ function addThermalLegend(slide, x, y) {
 
 // 06 — guardrails
 {
-  const slide = newSlide(6, "Safety and trust", "Five guardrails we will not trade away", "06:30–08:00");
+  const slide = newSlide(6, "Safety and trust", "Five guardrails we will not trade away", "07:10–08:55");
   badge(slide, 0.5, 1.3, "Non-negotiable", "guardrail");
   const locks = [
     ["01", "Decision support\nnot control", "No PLC, interlock, furnace, or setpoint write", C.rust],
-    ["02", "Synthetic-only\nPhase 0", "Isolated NS-DEMO-* data, identities, capacity", C.amber],
+    ["02", "Synthetic-only\ndemonstration", "Isolated demo data, identities, capacity", C.amber],
     ["03", "EU-only\nposture", "Sweden Central primary; Data Zone (EU)", C.teal],
     ["04", "Append-only\naudit", "Inputs, version, confidence, decision, outcome", C.green],
     ["05", "No standing\nsecrets", "Entra managed identities by workload", C.graphite],
@@ -485,16 +485,16 @@ function addThermalLegend(slide, x, y) {
     tx(slide, l[2], x + 0.22, 4.47, 1.72, 0.4, { fontSize: 8.2, color: C.muted, align: "center", valign: "top" });
   });
   roundRect(slide, 0.5, 6.05, 12.05, 0.46, C.coal, C.coal);
-  tx(slide, "If a proposed feature weakens any one of these, it is outside the Phase 0 contract.", 0.75, 6.2, 11.55, 0.12, { fontSize: 10, color: C.white, bold: true, align: "center" });
+  tx(slide, "If a proposed feature weakens any one of these, it is outside the demonstration contract.", 0.75, 6.2, 11.55, 0.12, { fontSize: 10, color: C.white, bold: true, align: "center" });
   finish(slide, 6,
-    "Five guardrails constrain the solution. First and most important, this is decision support; nothing writes to a control system. Phase 0 is synthetic and isolated. Processing is EU-only. Every consequential output is auditable. And there are no standing application secrets.\nThese are not ambitions. They are acceptance boundaries.",
+    "Five guardrails constrain the solution. First and most important, this is decision support; nothing writes to a control system. The demonstration is synthetic and isolated. Processing is EU-only. Every consequential output is auditable. And there are no standing application secrets.\nThese are not ambitions. They are acceptance boundaries.",
     "Source cue | solution-architecture.md §1.1, ADR-007/008  •  security-governance-and-threat-model.md",
   );
 }
 
 // 07 — personas
 {
-  const slide = newSlide(7, "Value by role", "Eight personas, one operating story", "08:00–09:30");
+  const slide = newSlide(7, "Value by role", "Eight personas, one operating story", "08:55–10:35");
   badge(slide, 0.5, 1.3, "Persona journeys", "context");
   const people = [
     ["PM", "Plant Manager", "Site Command Center", C.rust],
@@ -535,7 +535,7 @@ function addThermalLegend(slide, x, y) {
 
 // 08 — architecture
 {
-  const slide = newSlide(8, "Architecture map", "From plant signal to governed persona experience", "09:30–11:30", { dark: true, texture: true });
+  const slide = newSlide(8, "Architecture map", "From plant signal to governed persona experience", "10:35–12:55", { dark: true, texture: true });
   badge(slide, 0.5, 1.3, "Sweden Central + EU", "context");
   const cols = [
     { x: 0.52, w: 2.1, title: "SITES", detail: "Purdue L3.5\nOT gateway\noutbound only", c: C.rust },
@@ -571,7 +571,7 @@ function addThermalLegend(slide, x, y) {
 
 // 09 — Fabric centrality
 {
-  const slide = newSlide(9, "Architecture decision ADR-001/002", "Why Fabric is the center of gravity", "11:30–13:30");
+  const slide = newSlide(9, "Architecture decision ADR-001/002", "Why Fabric is the center of gravity", "12:55–15:10");
   badge(slide, 0.5, 1.3, "Fabric spine", "context");
   circle(slide, 4.75, 2.18, 3.12, C.coal, C.teal, { lineWidth: 2.4 });
   circle(slide, 5.52, 2.95, 1.58, C.teal, C.teal);
@@ -602,7 +602,7 @@ function addThermalLegend(slide, x, y) {
 
 // 10 — trusted data
 {
-  const slide = newSlide(10, "Trustworthy data", "The path from OT signal to governed fact", "13:30–15:15");
+  const slide = newSlide(10, "Trustworthy data", "The path from OT signal to governed fact", "15:10–17:10");
   badge(slide, 0.5, 1.3, "Architecture fact", "context");
   const pipeline = [
     ["DMZ\nGATEWAY", "schema + allow list", C.rust],
@@ -636,7 +636,7 @@ function addThermalLegend(slide, x, y) {
 
 // 11 — four AI
 {
-  const slide = newSlide(11, "Intelligence with boundaries", "Four AI capabilities — Python decides; Foundry explains", "15:15–16:15", { dark: true, texture: true });
+  const slide = newSlide(11, "Intelligence with boundaries", "Four AI capabilities — Python decides; Foundry explains", "17:10–18:20", { dark: true, texture: true });
   const abilities = [
     ["RUL", "Lining remaining life", "physics-informed Python\nsilver thermal features", C.rust],
     ["ENE", "Energy dispatch", "deterministic optimizer\nhard constraints preserved", C.amber],
@@ -664,7 +664,7 @@ function addThermalLegend(slide, x, y) {
 
 // 12 — RUL
 {
-  const slide = newSlide(12, "AI deep dive 01", "Furnace lining remaining-useful-life: show uncertainty, retain the human", "16:15–18:15");
+  const slide = newSlide(12, "AI deep dive 01", "Furnace lining remaining-useful-life: show uncertainty, retain the human", "18:20–20:35");
   badge(slide, 0.5, 1.3, "Synthetic evidence", "evidence");
   slide.addImage({ path: thermalMap, x: 0.55, y: 1.82, w: 5.38, h: 3.14 });
   addThermalLegend(slide, 1.05, 5.15);
@@ -709,7 +709,7 @@ function addThermalLegend(slide, x, y) {
 
 // 13 — energy dispatch
 {
-  const slide = newSlide(13, "AI deep dive 02", "Energy dispatch: feasible value, bounded by production reality", "18:15–19:45");
+  const slide = newSlide(13, "AI deep dive 02", "Energy dispatch: feasible value, bounded by production reality", "20:35–22:20");
   badge(slide, 0.5, 1.3, "Synthetic evidence", "evidence");
   card(slide, 0.5, 1.85, 5.55, 3.72, { fill: C.white, border: C.mist, bar: C.amber });
   label(slide, 0.8, 2.12, "Day-ahead price signal", C.amber, 2);
@@ -752,7 +752,7 @@ function addThermalLegend(slide, x, y) {
 
 // 14 — quality
 {
-  const slide = newSlide(14, "AI deep dive 03", "Quality: see drift early, keep the recipe under human control", "19:45–21:00");
+  const slide = newSlide(14, "AI deep dive 03", "Quality: see drift early, keep the recipe under human control", "22:20–23:50");
   badge(slide, 0.5, 1.3, "Synthetic evidence", "evidence");
   label(slide, 0.55, 1.86, "Full genealogy", C.teal, 2);
   const genealogy = [
@@ -789,7 +789,7 @@ function addThermalLegend(slide, x, y) {
 
 // 15 — knowledge
 {
-  const slide = newSlide(15, "AI deep dive 04", "Knowledge capture: preserve expertise without publishing a hallucination", "21:00–22:30", { dark: true, texture: true });
+  const slide = newSlide(15, "AI deep dive 04", "Knowledge capture: preserve expertise without publishing a hallucination", "23:50–25:35", { dark: true, texture: true });
   badge(slide, 0.5, 1.3, "Consent-aware workflow", "guardrail");
   const steps = [
     ["1", "CONSENT", "fictional / consented\nsynthetic persona", C.rust],
@@ -817,7 +817,7 @@ function addThermalLegend(slide, x, y) {
 
 // 16 — Responsible AI
 {
-  const slide = newSlide(16, "Governance by design", "Responsible AI: enforceable controls, not a policy poster", "22:30–24:30");
+  const slide = newSlide(16, "Governance by design", "Responsible AI: enforceable controls, not a policy poster", "25:35–27:55");
   badge(slide, 0.5, 1.3, "High-risk-adjacent posture", "guardrail");
   const stack = [
     ["Legal classification", "EU AI Act gate before non-synthetic processing", C.rust],
@@ -856,7 +856,7 @@ function addThermalLegend(slide, x, y) {
 
 // 17 — Security, identity, residency
 {
-  const slide = newSlide(17, "Security and residency", "Zero Trust across identities, data classes, and EU placement", "24:30–26:15", { dark: true, texture: true });
+  const slide = newSlide(17, "Security and residency", "Zero Trust across identities, data classes, and EU placement", "27:55–30:00", { dark: true, texture: true });
   badge(slide, 0.5, 1.3, "No standing secrets", "guardrail");
   circle(slide, 4.8, 2.38, 2.26, C.coal, C.teal, { lineWidth: 2.3 });
   circle(slide, 5.42, 3.0, 1.02, C.teal, C.teal);
@@ -893,7 +893,7 @@ function addThermalLegend(slide, x, y) {
 
 // 18 — synthetic realism
 {
-  const slide = newSlide(18, "Evidence discipline", "Synthetic data: deterministic, physics-first, visibly labeled", "26:15–27:45");
+  const slide = newSlide(18, "Evidence discipline", "Synthetic data: deterministic, physics-first, visibly labeled", "30:00–31:45");
   badge(slide, 0.5, 1.3, "Synthetic evidence", "evidence");
   const flow = [
     ["SIGNED\nMANIFEST", "root seed 240725\nchecksum", C.graphite],
@@ -931,10 +931,10 @@ function addThermalLegend(slide, x, y) {
 
 // 19 — cost and scale
 {
-  const slide = newSlide(19, "Delivery posture", "Start small, measure honestly, scale only after gates", "27:45–29:15");
+  const slide = newSlide(19, "Delivery posture", "Start small, measure honestly, scale only after gates", "31:45–33:30");
   badge(slide, 0.5, 1.3, "Cost + region + scale", "context");
   const phases = [
-    ["PHASE 0", "Synthetic defense", "F2 baseline\nreproducible demo", C.graphite],
+    ["DEMO", "Synthetic defense", "F2 baseline\nreproducible demo", C.graphite],
     ["PHASE 1", "One-site shadow pilot", "read-only real feeds\nmeasure outcomes", C.teal],
     ["PHASE 2+", "Four-site production scale", "human-approved writes\nafter gates", C.rust],
   ];
@@ -965,20 +965,20 @@ function addThermalLegend(slide, x, y) {
 
 // 20 — demo handoff
 {
-  const slide = newSlide(20, "Demo handoff", "Now the proof: a 15-minute deterministic persona journey", "29:15–30:00", { dark: true, texture: true });
+  const slide = newSlide(20, "Demo handoff", "Now the proof: a 10-minute deterministic persona journey", "33:30–35:00", { dark: true, texture: true });
   badge(slide, 0.5, 1.3, "Live demo next", "evidence");
   tx(slide, "SYNTHETIC DEMO DATA — NOT FOR OPERATIONAL CONTROL", 0.5, 1.86, 12.25, 0.32, { fontFace: F.head, fontSize: 18.5, color: C.white, bold: true, align: "center" });
   roundRect(slide, 5.45, 2.45, 2.43, 1.2, C.rust, C.rust);
-  tx(slide, "15:00", 5.58, 2.67, 2.17, 0.39, { fontFace: F.head, fontSize: 28, color: C.white, bold: true, align: "center" });
+  tx(slide, "10:00", 5.58, 2.67, 2.17, 0.39, { fontFace: F.head, fontSize: 28, color: C.white, bold: true, align: "center" });
   tx(slide, "presenter timer", 5.58, 3.19, 2.17, 0.12, { fontSize: 8, color: C.paleRust, bold: true, align: "center" });
   const tabs = [
     ["Fleet", "00:00", C.rust],
-    ["Fabric core", "01:00", C.teal],
-    ["Energy", "02:00", C.amber],
-    ["RUL", "04:30", C.rust],
-    ["Quality", "07:00", C.teal],
-    ["Knowledge", "09:30", C.green],
-    ["Audit", "12:00", C.graphite],
+    ["Fabric core", "00:40", C.teal],
+    ["Energy", "01:20", C.amber],
+    ["RUL", "03:00", C.rust],
+    ["Quality", "04:40", C.teal],
+    ["Knowledge", "06:20", C.green],
+    ["Audit", "08:00", C.graphite],
   ];
   tabs.forEach((t, i) => {
     const x = 0.5 + i * 1.78;
@@ -987,7 +987,7 @@ function addThermalLegend(slide, x, y) {
   });
   tx(slide, "Seed 240725  |  60× accelerated clock  |  every screen synthetic  |  fallback after 10 seconds", 1.18, 5.9, 10.95, 0.15, { fontSize: 9.1, color: C.steel, bold: true, align: "center" });
   finish(slide, 20,
-    "Now I will show the platform live. The scenario is deterministic: seed 240725, a 60-times accelerated clock, and synthetic labels on every screen. We move through fleet, Fabric core, energy, lining, quality, knowledge, and audit.\nIf a live element hesitates, I will use a cached deterministic result rather than debug in front of you. Start the 15-minute timer and switch to the Plant Manager tab.",
+    "Now I will show the platform live. The scenario is deterministic: seed 240725, a 60-times accelerated clock, and synthetic labels on every screen. We move through fleet, Fabric core, energy, lining, quality, knowledge, and audit.\nIf a live element hesitates, I will use a cached deterministic result rather than debug in front of you. Start the 10-minute timer and switch to the Plant Manager tab.",
     "Source cue | demo-runbook.md §3–4  •  oral-defense-and-slide-plan.md §3",
     true,
   );

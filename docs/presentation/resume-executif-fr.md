@@ -82,7 +82,7 @@ AxelorMetal déploie **NovaSteel**, une plateforme unique d'optimisation de la p
 
 ## La démonstration — ce que le jury verra
 
-Une démonstration **déterministe de 15 minutes** sur données entièrement synthétiques (graine `240725`) :
+Une démonstration **déterministe de 10 minutes** sur données entièrement synthétiques (graine `240725`) :
 
 - Tableau de bord usine → cœur Fabric → pilotage énergétique → alerte RUL → qualité → capture du savoir → audit et gouvernance.
 - Chaque écran porte le bandeau **« Données synthétiques — pas pour le contrôle opérationnel »**.

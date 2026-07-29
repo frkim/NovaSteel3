@@ -204,7 +204,7 @@ Response `data`: `{ "baseline": {"peakDemandMw": 56.0, ...}, "optimized": {"peak
 
 **`POST /v1/energy/recommendations/{id}:approve`** — `EnergyPlanner.Approve` + policy gate.
 
-Request body: `{ "reason": "Evening scarcity peak avoidance", "approvalContext": {"reviewedConstraints": true} }`. Requires `Idempotency-Key`. Phase 0/1 response is always a simulated/shadow state (`{"status": "SIMULATED_APPROVED"}`); Phase 2 additionally validates a separately approved write connector before ever returning `{"status": "COMMITTED"}` — no code path may skip this distinction (`implementation-guide.md` §15 item 3).
+Request body: `{ "reason": "Evening scarcity peak avoidance", "approvalContext": {"reviewedConstraints": true} }`. Requires `Idempotency-Key`. The demonstration and pilot response is always a simulated/shadow state (`{"status": "SIMULATED_APPROVED"}`); Phase 2 additionally validates a separately approved write connector before ever returning `{"status": "COMMITTED"}` — no code path may skip this distinction (`implementation-guide.md` §15 item 3).
 
 **`POST /v1/energy/recommendations/{id}:reject`** — `EnergyPlanner.Approve`.
 

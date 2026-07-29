@@ -3,19 +3,25 @@ marp: true
 theme: novasteel
 paginate: true
 header: 'NovaSteel · AI-Powered Steel Production Optimization'
-footer: 'Phase 0 · Synthetic demonstration · Not for operational control.'
+footer: 'AI advises, humans decide'
 ---
 
 <!-- _class: lead -->
 <!-- _paginate: false -->
 
-<div class="tag">Phase 0 · Oral Defense</div>
+<div class="tag">Oral Defense</div>
 
 # NovaSteel — AI-Powered <span class="grad">Steel Production</span> Optimization
 
 <div class="hero-line"></div>
 
 Microsoft Fabric–centered architecture · AxelorMetal · 4 EU countries
+
+<div class="brandbar">
+<img src="images/novasteel-logo.png" alt="NovaSteel" onerror="this.remove()">
+<img src="images/ama-logo.png" alt="AxelorMetal" onerror="this.remove()">
+<img src="images/microsoft-logo.png" alt="Microsoft" onerror="this.remove()">
+</div>
 
 <div class="herostats">
 <div class="s"><b>−14%</b><span>energy per ton · target</span></div>
@@ -25,7 +31,7 @@ Microsoft Fabric–centered architecture · AxelorMetal · 4 EU countries
 </div>
 
 <!-- ⏱ 0:45 · Good morning.
-In the next hour I'll defend the NovaSteel platform: thirty minutes of architecture and value, a fifteen-minute live demonstration on fully synthetic data, and fifteen minutes for your hardest questions.
+In the next hour I'll defend the NovaSteel platform: thirty-five minutes of architecture and value, a ten-minute live demonstration on fully synthetic data, and fifteen minutes for your hardest questions.
 One ground rule I'll repeat throughout: I will always tell you whether a number is a target we're aiming for or evidence you're watching us reproduce.
 Today's demo proves the mechanics on synthetic data — it does not claim realized savings. -->
 
@@ -79,7 +85,7 @@ This is a heavy-industry, safety-sensitive, EU-regulated context — which shape
 </div>
 </div>
 
-<!-- ⏱ 1:15 · Doing nothing isn't neutral — it's the most expensive option.
+<!-- ⏱ 1:10 · Doing nothing isn't neutral — it's the most expensive option.
 Every axis compounds: energy bought at peak, carbon paid at penalty, failures paid at eight million a time, and knowledge lost permanently.
 I'm deliberately not putting a single made-up total savings number here — you'll see me refuse round numbers all morning.
 The point is direction and materiality, which the board already feels. -->
@@ -122,7 +128,7 @@ Today's demo will show the platform producing these kinds of outputs on syntheti
 </div>
 </div>
 
-<!-- ⏱ 1:30 · Here is the entire platform in one picture.
+<!-- ⏱ 1:25 · Here is the entire platform in one picture.
 Live plant signals flow into a single Microsoft Fabric data core. On top of that governed core sit four AI capabilities. Those feed persona-specific experiences for eight roles. A human always makes the consequential decision, and every decision is audited.
 The center of gravity is Fabric — I'll spend real time defending why that's the right center, because it's the question this room should press hardest on. -->
 
@@ -130,20 +136,20 @@ The center of gravity is Fabric — I'll spend real time defending why that's th
 
 # Non-Negotiable Guardrails
 
-<div class="cards">
-<div class="card teal"><div class="card-num">01</div><h3>Decision support only</h3><p>No write to PLC, interlock, furnace, or setpoint</p></div>
-<div class="card orange"><div class="card-num">02</div><h3>Synthetic-only Phase 0</h3><p>Isolated NS-DEMO-*; no production path</p></div>
-<div class="card purple"><div class="card-num">03</div><h3>EU-only processing</h3><p>Sweden Central; Foundry Data Zone (EU)</p></div>
+<div class="cards four">
+<div class="card teal"><div class="card-num">01</div><h3>Decision support only</h3><p>No write to PLC, interlock, furnace, or setpoint (ADR-007)</p></div>
+<div class="card purple"><div class="card-num">02</div><h3>EU-only processing</h3><p>Sweden Central; Foundry Data Zone (EU) — ADR-003</p></div>
+<div class="card green"><div class="card-num">03</div><h3>Append-only audit</h3><p>Every consequential AI output is replayable</p></div>
+<div class="card orange"><div class="card-num">04</div><h3>No standing secrets</h3><p>Entra managed identities everywhere</p></div>
 </div>
 
-- **04** Every consequential AI output is append-only auditable
-- **05** No standing secrets — Entra managed identities everywhere
+> Existing OT safety-instrumented systems stay authoritative. The platform advises; a human decides.
 
-<!-- ⏱ 1:30 · Five guardrails are non-negotiable and they constrain everything else.
-First and most important: this is decision support. No application, agent, rule, pipeline, or demo control writes to a PLC, a safety interlock, a furnace, or a production setpoint — existing OT safety systems stay authoritative.
-Second, Phase 0 is one-hundred-percent synthetic and physically isolated from production.
-Third, EU-only processing. Fourth, every consequential AI output is auditable end to end.
-Fifth, no standing secrets — Entra managed identities throughout.
+<!-- ⏱ 1:30 · Four guardrails are non-negotiable and they constrain everything else.
+First and most important: this is decision support. No application, agent, rule, pipeline, or demo control writes to a PLC, a safety interlock, a furnace, or a production setpoint — existing OT safety systems stay authoritative. That is ADR-007.
+Second, EU-only processing: Sweden Central, with Foundry in the EU Data Zone.
+Third, every consequential AI output is auditable end to end — inputs, model version, confidence, rationale, the human decision, and the outcome, append-only.
+Fourth, no standing secrets — Entra managed identities throughout.
 If any of these is a problem for you, stop me now, because I won't trade them away. -->
 
 ---
@@ -161,7 +167,7 @@ If any of these is a problem for you, stop me now, because I won't trade them aw
 | Executive | Value & ROI Cockpit | Board-level KPI visibility |
 | Furnace Operator | Health Monitor + Knowledge | Daily decision context |
 
-<!-- ⏱ 1:30 · The platform serves eight roles, not one.
+<!-- ⏱ 1:25 · The platform serves eight roles, not one.
 The Plant Manager wants everything on one page she can defend. The Reliability Engineer wants an eight-million-euro failure turned into a planned intervention. The Energy Manager wants to move flexible load off price peaks. The Quality Engineer wants to catch drift before it ships and prove genealogy heat-by-heat.
 The Sustainability Officer owns the twenty-two-percent carbon target and ETS exposure. The Knowledge Engineer wants a retiring expert's judgment captured before it's gone.
 In the demo I'll walk these as tabs, in the order a real operating day would touch them. -->
@@ -174,20 +180,42 @@ In the demo I'll walk these as tabs, in the order a real operating day would tou
 
 # Architecture at a Glance
 
-![w:960](images/command-center-overview.png)
+<div class="flow">
+<div class="lane"><div class="lane-tag">Sites<br>LU · DE · BE · ES</div><div class="nodes">
+<div class="node"><b>PLC · SCADA · historian</b><span>Purdue L0–L2 · no cloud inbound path</span></div>
+<div class="node"><b>Industrial DMZ gateway</b><span>Purdue L3.5 · schema-validating · outbound only</span></div>
+</div></div>
+<div class="arrow">▼ OPC UA · MQTT · historian export → AMQP/TLS, allow-listed egress</div>
+<div class="lane blue"><div class="lane-tag">Azure ingress<br>Sweden Central</div><div class="nodes">
+<div class="node blue"><b>Event Hubs</b><span>raw replay buffer</span></div>
+<div class="node blue"><b>Identity-based relay</b><span>Container App · Entra workload identity, no SAS (ADR-005)</span></div>
+<div class="node blue"><b>MES · ERP · LIMS · CMMS</b><span>Fabric pipelines / copy jobs</span></div>
+</div></div>
+<div class="arrow">▼ Eventstream Custom Endpoint · Entra ID, no shared key</div>
+<div class="lane teal"><div class="lane-tag">Microsoft Fabric<br>data core</div><div class="nodes">
+<div class="node teal"><b>Eventstream</b><span>es-ns-telemetry-v1</span></div>
+<div class="node teal"><b>Eventhouse / KQL</b><span>hot telemetry · alarms · Activator notify</span></div>
+<div class="node teal"><b>OneLake Lakehouse</b><span>bronze → silver → gold · quarantine</span></div>
+<div class="node teal"><b>Direct Lake model</b><span>one semantic layer → Power BI</span></div>
+</div></div>
+<div class="arrow">▲▼ features & labels ▲▼ predictions, recommendations, audit facts</div>
+<div class="lane purple"><div class="lane-tag">AI & app<br>services</div><div class="nodes">
+<div class="node purple"><b>Python FastAPI BFF</b><span>domain APIs · read-only adapters to KQL + gold</span></div>
+<div class="node purple"><b>Scoring / optimizer workers</b><span>RUL · MILP dispatch · quality risk</span></div>
+<div class="node purple"><b>Foundry (EU) + Speech</b><span>explain & transcribe · restricted OpenAPI tools</span></div>
+</div></div>
+<div class="arrow">▼ HTTPS + Entra access token — the browser never holds a workload credential</div>
+<div class="lane orange"><div class="lane-tag">Experience<br>browser</div><div class="nodes">
+<div class="node orange"><b>Blazor WASM shell (C#)</b><span>MSAL · navigation · host (ADR-004)</span></div>
+<div class="node orange"><b>React / TypeScript MFE</b><span>MUI + D3 + embedded Power BI</span></div>
+</div></div>
+</div>
 
-| Layer | Components |
-|---|---|
-| Sites (OT/DMZ) | Per-plant gateway, Purdue L3.5, outbound only |
-| Azure ingress | Event Hubs buffer → managed-identity relay (no SAS) |
-| Fabric core | Eventstream → Eventhouse/KQL + OneLake Lakehouse → Direct Lake → Power BI |
-| AI & app services | Python FastAPI BFF + workers · Foundry (EU) + Speech |
-| Experience | Blazor WASM C# shell + React/TS (MUI/D3) microfrontend |
-
-<!-- ⏱ 2:00 · This is the whole system on one slide; I'll return to it three times.
-Read it left to right. At each site, a gateway in an industrial DMZ terminates OT protocols and only ever emits outbound, schema-validated telemetry — no cloud system ever reaches down into the plant.
-Azure Event Hubs buffers, a managed-identity relay publishes to Fabric's Eventstream over Entra ID with no shared key. From there Fabric is the core: hot data in KQL, governed history in OneLake, one Direct Lake semantic model, Power BI, and Activator strictly for notifications.
-Around it: Python services do the math, Foundry and Speech handle language, and the browser is a Blazor shell hosting a React analytics microfrontend. -->
+<!-- ⏱ 2:20 · This is the whole system on one slide; I'll return to it three times.
+Read it top to bottom. At each site, a gateway in an industrial DMZ terminates OT protocols and only ever emits outbound, schema-validated telemetry — no cloud system ever reaches down into the plant.
+Azure Event Hubs buffers, and a managed-identity relay publishes to Fabric's Eventstream over Entra ID with no shared key; batch systems — MES, ERP, LIMS, CMMS — land on the same contract through Fabric pipelines.
+From there Fabric is the core: hot data in KQL, governed bronze-silver-gold history in OneLake, one Direct Lake semantic model, Power BI, and Activator strictly for notifications.
+Around it: Python services do the math and read Fabric read-only, Foundry and Speech handle language, and the browser is a Blazor shell hosting a React analytics microfrontend that only ever holds a user token. -->
 
 ---
 
@@ -259,9 +287,50 @@ On identity: Fabric's Event Hubs connector uses a shared key, which our security
 
 **ADR-006:** Python is authoritative for math · Foundry explains/retrieves, never decides or commits
 
-<!-- ⏱ 1:00 · Four capabilities, one principle that I'll defend hard: the deterministic, testable Python services compute the answer — remaining useful life, feasible dispatch, quality risk.
+<!-- ⏱ 1:10 · Four capabilities, one principle that I'll defend hard: the deterministic, testable Python services compute the answer — remaining useful life, feasible dispatch, quality risk.
 The generative agent explains, retrieves, and orchestrates approved tool calls; it never invents a schedule, relaxes a constraint, or makes a commitment.
 That's ADR-006, and it's why a language model being confidently wrong can't hurt a furnace here. -->
+
+---
+
+<!-- _class: tight -->
+<!-- _header: '' -->
+<!-- _footer: '' -->
+
+# AI Architecture in Detail
+
+<div class="flow">
+<div class="lane teal"><div class="lane-tag">Features<br>governed gold</div><div class="nodes">
+<div class="node teal"><b>Thermal & cooling</b><span>heat-flux slope, spatial contrast, cooling residual</span></div>
+<div class="node teal"><b>Dispatch inputs</b><span>day-ahead price, grid carbon, production & maintenance constraints</span></div>
+<div class="node teal"><b>Genealogy</b><span>heat → slab → coil → sample → shipment</span></div>
+<div class="node teal"><b>Consented transcripts</b><span>PII auto-redacted to <code>[REDACTED:{KIND}]</code></span></div>
+</div></div>
+<div class="arrow">▼ Direct Lake / read-only adapters — features and labels, never raw OT credentials</div>
+<div class="lane purple"><div class="lane-tag">Deterministic core<br>Python decides</div><div class="nodes">
+<div class="node purple"><b>Lining RUL</b><span>physics-informed regression → P10/P50/P90 + confidence · daily scoring</span></div>
+<div class="node purple"><b>Energy dispatch</b><span>MILP (PuLP + CBC) → feasible schedule · greedy fallback, labelled in UI</span></div>
+<div class="node purple"><b>Quality risk</b><span>genealogy model → spec probability + bounded what-if</span></div>
+</div></div>
+<div class="arrow">▼ recommendation object: value, drivers, confidence, model version, constraints honoured</div>
+<div class="lane orange"><div class="lane-tag">Language layer<br>Foundry explains</div><div class="nodes">
+<div class="node orange"><b>Speech Fast Transcription</b><span>consent state machine · speaker separation</span></div>
+<div class="node orange"><b>Foundry Agent Service (EU)</b><span>drafts procedure trigger → action → rationale → risk, cited to transcript segments</span></div>
+<div class="node orange"><b>Grounding & guardrails</b><span>Prompt Shields (direct + indirect) · read/simulate tool allow-list · Copilot chat has no tools (ADR-011)</span></div>
+</div></div>
+<div class="arrow">▼ a model response is never authorization</div>
+<div class="lane green"><div class="lane-tag">Human gate<br>& audit</div><div class="nodes">
+<div class="node green"><b>Accept · modify · reject</b><span>with a reason code, per recommendation</span></div>
+<div class="node green"><b>Commit endpoint</b><span>separately policy-gated · work order, approved dispatch, published procedure</span></div>
+<div class="node green"><b>Append-only trail</b><span>inputs, model version, confidence, rationale, decision, outcome</span></div>
+</div></div>
+</div>
+
+<!-- ⏱ 2:05 · Now the same picture for the AI, because "we use AI" is not an architecture.
+Bottom layer up: every model reads governed gold features — thermal and cooling signals, dispatch inputs, the full heat-slab-coil genealogy, and consented, PII-redacted transcripts. No model gets a raw OT credential.
+The deterministic core is Python and it is the only thing that decides. Lining life is a physics-informed regression that emits P10, P50 and P90 with a confidence. Dispatch is a mixed-integer linear program solved with PuLP and CBC, with a deterministic greedy heuristic as a labelled fallback — never a silent one. Quality risk is a model over genealogy features.
+Only then does language enter: Speech transcribes under an explicit consent state machine, and the Foundry agent in the EU Data Zone drafts and explains, with every claim cited to a transcript segment, behind Prompt Shields and a read-or-simulate tool allow-list.
+And nothing leaves that stack without a human accepting, modifying, or rejecting it with a reason code, written to an append-only trail. That is the whole trust argument in one diagram. -->
 
 ---
 
@@ -296,10 +365,9 @@ That's ADR-006, and it's why a language model being confidently wrong can't hurt
 </div>
 </div>
 
-<!-- ⏱ 2:00 · This is the capability that turns an eight-million-euro surprise into a planned intervention.
-The model is physics-informed — constrained by heat-flux and cooling physics, not a black box fitting noise. On our synthetic warning scenario it estimates a P50 remaining life of about twenty days with a tight band — P10 about nineteen, P90 about twenty-one — and it explains itself with three drivers.
-The model confidence is zero-point-seven-eight from an r-squared of zero-point-eight-eight. The engineer stays accountable: they acknowledge the alert and it links to a CMMS work order recommending inspection.
-The platform does not touch the furnace. And note the honesty: pilot scoring is daily; I'm not promising real-time inference as an MVP feature. -->
+<!-- ⏱ 1:45 · This is the capability that turns an eight-million-euro surprise into a planned intervention.
+The model is physics-informed — constrained by heat-flux and cooling physics, not a black box fitting noise. On our warning scenario it estimates a P50 remaining life of about twenty days with a tight band — P10 nineteen, P90 twenty-one — a confidence of zero-point-seven-eight from an r-squared of zero-point-eight-eight, and three named drivers.
+The engineer stays accountable: they acknowledge the alert and it links to a CMMS work order. The platform does not touch the furnace, and pilot scoring is daily — I'm not promising real-time inference as an MVP feature. -->
 
 ---
 
@@ -334,7 +402,7 @@ The platform does not touch the furnace. And note the honesty: pilot scoring is 
 </div>
 </div>
 
-<!-- ⏱ 1:30 · Energy is the fastest payback. Tomorrow evening has a scarcity peak at two-hundred-eighty euros per megawatt-hour.
+<!-- ⏱ 1:45 · Energy is the fastest payback. Tomorrow evening has a scarcity peak at two-hundred-eighty euros per megawatt-hour.
 The optimizer shifts one eligible reheat batch — the urgent automotive coil stays fixed — and never silently relaxes a hard production constraint.
 On this synthetic horizon that's a seven-point-two-five-percent modeled energy-cost reduction, peak down from fifty-six to fifty-one-point-six megawatts, three-point-three-percent CO₂ reduction — all on the whole-dispatch basis with identical planned tonnage at nine-sixty tonnes and zero hard-constraint violations.
 Those are single-scenario evidence, not banked savings — realized savings are tracked separately in an auditable ledger, which is how the fourteen-percent annual target eventually gets proven rather than asserted. -->
@@ -367,7 +435,7 @@ Those are single-scenario evidence, not banked savings — realized savings are 
 </div>
 </div>
 
-<!-- ⏱ 1:15 · Quality value is twofold: catch drift early, and prove traceability.
+<!-- ⏱ 1:25 · Quality value is twofold: catch drift early, and prove traceability.
 Here coiling temperature and force balance drift together before any off-spec lab result, and the model traces the affected heat, slab, and coil. A bounded what-if correction lifts predicted first-pass yield from about eighty-eight to ninety-five percent on this synthetic coil — roughly the eight-percent relative target — without changing the grade recipe.
 That distinction matters: this is a what-if recommendation, not an automatic write-back to process control. -->
 
@@ -432,8 +500,8 @@ This is where generative AI adds real value and where it's most tightly governed
 > A model response is never authorization.
 
 <!-- ⏱ 2:00 · We adopt a conservative high-risk-adjacent posture while Legal determines the formal EU AI Act classification. The knowledge system is at minimum under transparency obligations.
-If a capability is classified high-risk, we apply the full control set — risk management, documentation, human oversight, robustness, and conformity assessment. Nothing reaches production without a cross-functional Responsible AI board sign-off.
-On the generative side: we treat every retrieved document and market payload as untrusted — Prompt Shields for direct and indirect injection, instructions separated from data, narrow tool allow-lists, full tool-call logging, and human approval on any write.
+If a capability is classified high-risk, we apply the full control set — risk management, documentation, human oversight, robustness, and conformity assessment. Nothing reaches production without the cross-functional board's sign-off.
+On the generative side we treat every retrieved document and market payload as untrusted: Prompt Shields for direct and indirect injection, instructions separated from data, narrow tool allow-lists, full tool-call logging, and human approval on any write.
 A model response is never authorization. -->
 
 ---
@@ -462,7 +530,7 @@ A model response is never authorization. -->
 </div>
 </div>
 
-<!-- ⏱ 1:45 · Security is Zero-Trust and least-privilege by construction.
+<!-- ⏱ 1:50 · Security is Zero-Trust and least-privilege by construction.
 There are no standing secrets — every workload uses its own Entra managed identity, and Azure RBAC, Fabric roles, Foundry RBAC, and application roles are four separate planes: holding one grants nothing in another.
 The per-plant gateway can produce to its own Event Hub and nothing else. The browser never receives a workload credential.
 Data is classified, and operator audio is Highly Confidential with DLP and deletion workflows.
@@ -471,66 +539,111 @@ The software supply chain is locked to Microsoft-protected feeds — public PyPI
 
 ---
 
-# Synthetic Data & OT Realism
+# What It Costs to Run One Site
+
+<span class="pill orange">🎯 TARGET</span> Illustrative Azure run cost, EU consumption pricing — not a quote
 
 <div class="split">
 <div>
 
-- Deterministic: root seed **240725**
-- Child seeds: `SHA-256(root|scenario|plant|asset|signal)`
-- Generator: `novasteel-sim/1.0.0`
-- **Physics-first:** process state simulated, then sensors observe it
+| Tier · one site | Shape | Fabric | Azure run €/yr |
+|---|---|:-:|--:|
+| **Mini** — demo / shadow | 1 line, replay + shadow scoring | F2, paused 18 h/day | **≈ €40k–€90k** |
+| **Medium** — pilot ~0.3 Mt | 1 site read-only, live ingest | F2 → F4 on contention | **≈ €340k–€710k** |
+| **Large** — full site ~1.0 Mt | full plant, 4 AI capabilities | F4 → F8 measured | **≈ €1.0M–€2.1M** |
+
+<p class="legend">Today's isolated demo estate measures <b>&lt; €100/month</b> — 🔬 EVIDENCE, and deliberately not the production cost model.</p>
 
 </div>
 <div>
 
-- Mass/energy balance enforced; lining thickness monotonic
-- **Truth ledger** holds hidden state & injected anomalies
-- Named scenarios: warning (`240726`), spike (`240727`), drift (`240728`), outage (`240729`)
-- 4 synthetic plants (LUX/DE/BE/ES) · all `SYNTHETIC`
+| Cost line (medium tier) | Indicative €/yr |
+|---|--:|
+| Fabric capacity + OneLake | €120k–€220k |
+| Event Hubs ingestion | €40k–€80k |
+| AI/ML train & score | €90k–€180k |
+| Foundry + Speech (GenAI) | €30k–€90k |
+| Apps, Power BI Pro/PPU | €20k–€50k |
+| Security & governance | €30k–€60k |
+| Networking | €10k–€30k |
 
 </div>
 </div>
 
-<!-- ⏱ 1:30 · You should push on "it's synthetic." Here's why it's credible.
-It's deterministic — one root seed, child seeds hashed per signal — so any result I show regenerates bit-for-bit.
-It's physics-first: we simulate the true process state and then let modeled sensors observe it, so signals can't contradict each other and physical invariants are enforced — lining thickness can't spontaneously increase, remaining life can't go negative, energy and mass must balance.
-A truth ledger records hidden state and the anomalies we inject, so we score predictions against ground truth.
-These are exactly the properties real OT data lacks and that let us defend the mechanics honestly without touching a real furnace. -->
+<!-- ⏱ 1:50 · Now the question every CFO asks: what does one site cost to run?
+We size it in three tiers, same code and same guardrails, only the capacity changes. Mini is a demo or shadow footprint on the smallest Fabric SKU, paused eighteen hours a day — roughly forty to ninety thousand euros a year. Medium is a real one-site pilot at about three hundred thousand tonnes, live ingestion, three hundred forty to seven hundred ten thousand. Large is a full one-million-tonne site with all four capabilities running, one to two-point-one million.
+The shape matters more than the number: capacity, ingestion, and model compute dominate, and every one of them is right-sizable — reservations, autoscale, batch-scheduled training, and a nightly pause on anything non-production.
+The honest caveat: these are modelled ranges on EU consumption pricing, not a quote. The number I can actually measure today is the isolated demo estate, which runs under one hundred euros a month. -->
 
 ---
 
-# Deployment, Capacity, Cost & Scale
+# The Business Case for One Site
 
 <div class="split">
 <div>
 
-- Capacity: **F2** baseline; **F4** only on measured contention
-- Cost control: 01:00 Logic App pause (non-prod); ARM suspend/resume
-- Production **never** auto-paused
-- No €/hour claim — needs measured pilot load
+<div class="stat"><div class="big">&lt; 12 mo</div><div class="label">payback, conservative case · &lt; 9 base · &lt; 6 optimistic</div></div>
+
+- Build (one-off): **€0.6M–€1.1M** — foundation, three AI workloads, experience, DPIA & AI Act file
+- Run: **€0.34M–€0.71M/yr** at pilot scale
 
 </div>
 <div>
 
-| Phase | Scope |
-|---|---|
-| **Phase 0** | Synthetic defense (today) |
-| **Phase 1** | One-site shadow pilot (read-only) |
-| **Phase 2+** | Human-approved write-back after gates |
+| Value lever | Basis | €/yr at ~1.0 Mt |
+|---|---|--:|
+| Energy (O1) | 1.0 Mt × €175/t × 14% | **~€24.5M** |
+| Avoided reline (O3) | €8M × 1 / 2.5 yr | **~€3.2M** |
+| ETS avoidance (O2) | tonnage × tCO₂/t × €70 × 22% | several M |
+| High-grade yield (O4) | premium tonnage × margin × 8% | several M |
 
-- Scale: same event/API contract for **4 countries**
-- Region: Sweden Central primary; West Europe = tested contingency
+<span class="pill orange">🎯 TARGET</span> Every figure above is modelled, not banked
 
 </div>
 </div>
 
-<!-- ⏱ 1:30 · How does it run and what does it cost?
-We start on the smallest Fabric SKU, F2, and move to F4 only if measured contention demands it — we do not buy F64 just for viewer licensing; consumers sit on Pro or PPU.
-Cost is actively controlled: a nightly one-a.m. Logic App safely pauses non-production capacity using the official ARM suspend operation, and production is never auto-paused.
-Scaling to four countries is a capacity and per-plant-relay decision, not a redesign — event and API contracts are stable.
-We phase it honestly: today synthetic, then a one-site shadow pilot that only reads, then — only after DPO, OT, security, and RAI gates — human-approved write-back.
-I'm deliberately not quoting a euro-per-hour price — it's region-specific, and I won't invent it. -->
+<!-- ⏱ 1:25 · Put the run cost next to the value and the case is not close.
+Build is between six hundred thousand and one-point-one million one-off. Run is under seven hundred and ten thousand a year at pilot scale.
+Against that, the energy lever alone is roughly twenty-four and a half million a year at a one-million-tonne site — because fourteen percent of thirty-five percent of a five-hundred-euro-per-tonne cost base is a structural number, not a rounding error. Avoided relines add about three point two million expected. Carbon and yield add several million more.
+So payback is well under a year even after large conservative haircuts. But I will not leave you with one number: the sensitivity table in the appendix shows what happens if the percentages come in lower, and the answer is that the case shrinks and stays comfortably positive. The pilot proves the real percentage before anyone commits at scale. -->
+
+---
+
+# Compliance
+
+<div class="split">
+<div>
+
+| Regulation | Duty that binds us | Where it lands |
+|---|---|---|
+| **EU AI Act** (EU) 2024/1689 | Art. 12–15 · logging, oversight, robustness | Append-only audit chain · RAI board gate |
+| **EU ETS** 2003/87/EC · MRV 2018/2066 | Monitored, verifiable CO₂ lineage | Emission-factor lineage · allowance cost in dispatch |
+| **IEC 62443** ‑3‑2 / ‑3‑3 | Zones, conduits, target SL | Outbound-only DMZ · no write-back |
+| **NIS2** (EU) 2022/2555 | Art. 21 measures · Art. 23 24 h / 72 h | Sev-1 path · runbooks · registration |
+| **GDPR** (EU) 2016/679 | Art. 17 · 22 · 32 · 35 | Erasure · human decision · DPIA |
+
+</div>
+<div>
+
+- **CBAM** definitive period from 2026 — fed by the same emission lineage
+- **Machinery Reg. (EU) 2023/1230** out of scope while advisory-only
+- **IEC 61511** safety instrumented system stays fully independent
+- **CSRD / ESRS E1** still moving — we produce the data, not the assurance
+- **ISO/IEC 27001 · 42001** as the management-system frame
+
+<span class="pill orange">🎯 OPEN GATES</span> Accredited ETS verifier · DPIA · Legal's AI Act classification
+
+</div>
+</div>
+
+> We produce audit-grade **management information**, not a regulated filing. Full analysis: `docs/business/compliance/`
+
+<!-- ⏱ 2:00 · Compliance is not a slide we bolt on at the end; five regulatory regimes shaped the architecture itself.
+The EU AI Act drove the append-only audit chain — inputs, model version, confidence, rationale, the human decision and the outcome — and the Responsible AI board as a hard promotion gate.
+The Emissions Trading System drove emission-factor lineage: every tonne of CO₂ we report can be traced back to the meter reading and the factor version that produced it, and the allowance price sits inside the dispatch objective rather than in a spreadsheet next to it.
+IEC 62443 drove the zone-and-conduit design: the plant is a zone, the conduit is outbound-only, and there is no return path to a controller. That single decision is what keeps the Machinery Regulation and IEC 61511 out of scope — we are not a safety component, and the safety instrumented system remains completely independent of us.
+NIS2 applies because manufacture of basic metals is an important entity: twenty-four-hour early warning, seventy-two-hour notification, and management liability. GDPR applies to the operator data in the knowledge capture, so erasure, the Article 22 human-decision guarantee, and a DPIA are all in scope.
+Be clear about what we are not claiming. We produce audit-grade management information. An accredited verifier, a completed DPIA, and Legal's formal AI Act classification are open gates, and I will not pretend otherwise. -->
 
 ---
 
@@ -542,7 +655,7 @@ I'm deliberately not quoting a euro-per-hour price — it's region-specific, and
 - Live, deterministic, synthetic — seed `240725`
 - Accelerated 60× clock
 - Every screen labeled synthetic
-- 15-minute demonstration
+- 10-minute demonstration
 
 </div>
 <div>
@@ -561,9 +674,9 @@ I'm deliberately not quoting a euro-per-hour price — it's region-specific, and
 
 > Targets are 14 / 22 / 21 / 8 — the demo proves the mechanics, not the savings.
 
-<!-- ⏱ 0:30 · Now I'll show it live. Everything is synthetic and deterministic — seed two-four-oh-seven-two-five, an accelerated clock so forty-five days compress into seconds.
+<!-- ⏱ 0:40 · Now I'll show it live. Everything is synthetic and deterministic — seed two-four-oh-seven-two-five, an accelerated clock so forty-five days compress into seconds.
 I'll move through seven tabs in the order an operating day touches them, and I'll call out target versus evidence as we go.
-Fifteen minutes, starting now. -->
+Ten minutes, starting now. -->
 
 ---
 
@@ -704,7 +817,7 @@ Not writing is **designed, not missing**:
 
 - Setpoints and interlocks at Purdue L0–L2 under IEC 61511
 - Outbound-only IEC 62443 zone boundary
-- EU AI Act high-risk duties cannot be evidenced in Phase 0
+- EU AI Act high-risk duties cannot be evidenced on synthetic data
 
 </div>
 <div>
@@ -751,3 +864,229 @@ Phase 2: guarded write-back to CMMS/MES — human-approved, bounded, reversible.
 </div>
 
 <!-- ⏱ 0:00 · Backup slide. We name limitations unprompted: synthetic-only data, daily not real-time scoring, Contributor role mitigated by isolation, no automatic BCDR, no cost figure, and real accuracy needs pilot validation. This honesty discipline is the trustworthiness — a vendor who converts every synthetic result into banked savings is the one to distrust. -->
+
+---
+
+<!-- _class: tight backup -->
+
+# Appendix — Architecture Decision Records
+
+<div class="split">
+<div>
+
+| ADR | Decision |
+|---|---|
+| 001 | Fabric is the data and analytics core — **no parallel data lake** |
+| 002 | Separate hot KQL from governed Delta |
+| 003 | Sweden Central primary, EU-zone-aware AI |
+| 004 | Blazor shell plus React/MUI/D3 microfrontend |
+| 005 | Identity-based Custom Endpoint ingress — **no SAS key** |
+| 006 | Python is authoritative for optimization/scoring; Foundry is not the controller |
+| 007 | Human approval and **no direct OT action** |
+| 008 | Demo is a separate deterministic product slice *(amended by 017)* |
+
+</div>
+<div>
+
+| ADR | Decision |
+|---|---|
+| 009 | No guessed runtime versions |
+| 010 | Internal Power BI embedding is user-owned data |
+| 011 | The Copilot chat explains; it does not retrieve operational values |
+| 012 | Conversations are in-process, never persisted to Fabric |
+| 013 | Device simulator runs in-process inside the BFF |
+| 014 | Two-level Dockview workspace with JSX-derived panels |
+| 015 | The Help Assistant resolves topics from the DOM |
+| 016 | Event Hubs, not IoT Hub, is the telemetry ingress buffer |
+| 017 | One data path — honesty is unconditional, **not a toggle** |
+| 018 | Two data streams into Fabric: governed analytical and real-time |
+
+</div>
+</div>
+
+<!-- ⏱ 0:00 · Appendix slide. Eighteen recorded architecture decisions, each with a rationale and a rejected-alternatives section in docs/architecture/solution-architecture.md section 10. Anything I assert on stage traces back to one of these; ADR-001, 005, 006 and 007 are the four that carry the most weight. ADR-017 is the one to reach for if anyone asks why there is no demo-versus-live switch: the synthetic-data banner is unconditional because honesty was never something to put behind a toggle. -->
+
+---
+
+<!-- _class: tight backup -->
+
+# Appendix — Cost Model & Sensitivity
+
+<div class="split">
+<div>
+
+**Assumptions to challenge first**
+
+| # | Assumption | Value |
+|---|---|--:|
+| A1 | Annual production, in-scope site | ~1.0 Mt/yr |
+| A1b | Pilot line (Phase 1) | ~0.3 Mt/yr |
+| A2 | Production cost | ~€500/t |
+| A3 | Energy share | 35% → ~€175/t |
+| A5 | EU ETS carbon price | ~€70/tCO₂ |
+| A7 | Furnace failure cost | ~€8M/event |
+| A8 | Failure frequency (pilot line) | 1 per 2–3 yr |
+
+</div>
+<div>
+
+**What changes the answer**
+
+| Driver | If lower than assumed | Mitigation |
+|---|---|---|
+| Energy saving < 14% | Benefit shrinks, stays large | Pilot proves the real % first |
+| CO₂ reduction < 22% | Smaller ETS avoidance | Validate by shadow scoring |
+| Failures less frequent | O3 benefit smaller | Treat O3 as upside, not base case |
+| Yield uplift < 8% | O4 smaller | Prove via SPC before crediting |
+| Azure cost higher | Run cost up | Reservations, right-sizing, FinOps cadence |
+
+</div>
+</div>
+
+<!-- ⏱ 0:00 · Appendix slide. Every euro on the business-case slide derives from these seven assumptions, and each is meant to be replaced by AxelorMetal actuals in a design workshop. The right-hand table is the honest downside: if the percentages come in lower, the case shrinks and stays positive, and no lever is load-bearing on its own. -->
+
+---
+
+<!-- _class: tight backup -->
+
+# Appendix — Phased Delivery Roadmap
+
+| Dimension | Demonstration — defense | Phase 1 — one-site pilot | Phase 2+ — production |
+|---|---|---|---|
+| Sources | Simulator + approved replay | One site: historian, MES, CMMS, market feed — read-only | Four sites, approved integrations |
+| Ingestion | Eventstream from simulator | OT gateway → Event Hubs → relay → Eventstream | Same contract, per-plant relay |
+| AI | Cached / replayable scoring | Shadow scoring, fully logged, no operational effect | Human-approved write-back only |
+| Capacity | F2 (F4 on measured need) | Measured from real workload | Sized per SLOs |
+| Operational action | Simulated acknowledge, CMMS link | Read-only / shadow | Explicit human approval — never autonomous OT |
+| Gate to exit | Defense passed | DPO, OT/ICS, security and RAI board sign-off | Conformity assessment on any high-risk capability |
+
+<!-- ⏱ 0:00 · Appendix slide. Three phases, and each boundary is a gate rather than a date. Phase 1 reads a single site and changes nothing. Only after the Data Protection Officer, the OT engineers, security, and the Responsible AI board sign off does any human-approved write-back reach a CMMS or MES — and never a setpoint. -->
+
+---
+
+<!-- _class: tight backup -->
+
+# Appendix — Deployment, Capacity & Scale
+
+<div class="split">
+<div>
+
+- Capacity: **F2** baseline; **F4** only on measured contention; **F8** pre-approved burst
+- Cost control: 01:00 Logic App pause (non-prod); ARM suspend/resume
+- Production **never** auto-paused
+- Consumers on **Pro/PPU** — we never buy F64 for licensing
+
+</div>
+<div>
+
+| Stage | Scope |
+|---|---|
+| **Demonstration** | Defense demonstration (today) |
+| **Phase 1** | One-site shadow pilot (read-only) |
+| **Phase 2+** | Human-approved write-back after gates |
+
+- Scale: same event/API contract for **4 countries**
+- Region: Sweden Central primary; West Europe = tested contingency
+
+</div>
+</div>
+
+<!-- ⏱ 0:00 · Appendix slide. We start on the smallest Fabric SKU, F2, move to F4 only if measured contention demands it, and keep F8 pre-approved as a demo-day burst — each step doubles the hourly rate, so the portal dialog demands a reason and writes it to the audit trail. We do not buy F64 just for viewer licensing; consumers sit on Pro or PPU. A nightly one-a.m. Logic App safely pauses non-production capacity using the official ARM suspend operation, and production is never auto-paused. Scaling to four countries is a capacity and per-plant-relay decision, not a redesign. -->
+
+---
+
+<!-- _class: tight backup -->
+
+# Appendix — Who Is Accountable
+
+| Activity | CISO org | Platform admin | Data scientist | OT/ICS engineer | DPO | RAI board |
+|---|:-:|:-:|:-:|:-:|:-:|:-:|
+| Entra & Conditional Access policy | A | **R** | I | I | C | I |
+| Key Vault / customer-managed keys | C | **R/A** | I | I | I | I |
+| Fabric & OneLake role administration | C | **R/A** | C | I | C | I |
+| Purview classification and lineage | C | C | **R** | I | **A** | I |
+| OT network segmentation | A | C | I | **R** | I | I |
+| Model promotion to production | I | I | **R** | C | C | **A** |
+| Agent tool-scope changes | C | **R** | **R** | I | I | **A** |
+| Incident response command | **A** | **R** | I | R (OT) | C | I |
+| Package feed policy | A | **R** | I | I | I | I |
+
+<span class="pill gray">R responsible · A accountable · C consulted · I informed</span>
+
+<!-- ⏱ 0:00 · Appendix slide. Governance only works if a name sits behind each control. Two rows matter most: model promotion and agent tool-scope changes are both accountable to the Responsible AI board, not to the team that wants to ship. OT network segmentation stays with the OT engineers, who can veto. -->
+
+---
+
+<!-- _class: tight backup -->
+
+# Appendix — Service Levels & Incident Response
+
+<div class="split">
+<div>
+
+| SLO | Target | Window |
+|---|---|---|
+| BFF-API availability | 99.5% | 30-day rolling |
+| BFF-API p95 read latency | < 800 ms | 7-day |
+| Alert delivery (SSE) | < 5 s | per incident |
+| Data freshness (hot KQL) | < 5 s | continuous |
+| Bronze→silver→gold reconciliation | 100% or explicit quarantine | per run |
+| Optimizer response (cached fallback) | ≤ 5 s | per request |
+
+</div>
+<div>
+
+| Severity | Example | Triage |
+|---|---|---|
+| **Sev-1** | Confirmed Highly Confidential breach; OT compromise | 15 min |
+| **Sev-2** | Compromised identity; freshness stale > 60 s | 1 hour |
+| **Sev-3** | Repeated prompt-injection attempts; quarantine spike | 4 hours |
+| **Sev-4** | Policy drift; expired certificate | Next business day |
+
+Burned error budget triggers a change freeze until root cause is addressed.
+
+</div>
+</div>
+
+<!-- ⏱ 0:00 · Appendix slide. Availability, latency, freshness, and reconciliation are all measured with an error budget, and a burned budget freezes change until the root cause is fixed. Note that a data-freshness breach is a Sev-2 alongside a compromised identity — stale data on an advisory screen is a safety concern, not a cosmetic one. -->
+
+---
+
+<!-- _class: tight backup -->
+
+# Appendix — Reproducible Demonstration Evidence
+
+<div class="split">
+<div>
+
+**Expected values — one 24 h scenario, seed `240725`**
+
+| Output | Expected |
+|---|---|
+| RUL P50 / P10 / P90 | 19.65 / 18.69 / 20.61 d |
+| Risk · confidence | 0.90 · 0.78 (r² 0.88) |
+| Energy-cost cut | −7.25% |
+| Peak | 56.0 → 51.58 MW (−7.89%) |
+| CO₂ | −3.29% |
+| Planned tonnage | 960 t · zero violations |
+| Quality what-if | ~88% → ~95% first-pass |
+
+</div>
+<div>
+
+**Named scenarios**
+
+`240726` lining warning · `240727` energy spike · `240728` quality drift · `240729` outage & recovery
+
+**Five-level fallback ladder**
+
+1. Cloud live
+2. Local deterministic replay
+3. Cached interactive
+4. Recorded 90-second flow
+5. Static proof pack — screenshots, JSON, transcripts
+
+</div>
+</div>
+
+<!-- ⏱ 0:00 · Appendix slide. Every number I quote on stage is pinned to a seed and reproducible bit-for-bit, so you can regenerate the run yourself. If the live environment misbehaves, there are five rehearsed fallback levels down to a static proof pack, and I will always tell you which level you are watching. -->

@@ -63,7 +63,7 @@ guard is removed.
 | `NS-DEMO-BE-01` | Liège Melt & Rolling Works | Belgium | Europe/Brussels | Electric arc furnace, caster, cold rolling, galvanizing | 1.5 Mt |
 | `NS-DEMO-ES-01` | Asturias Long Products | Spain | Europe/Madrid | Electric arc furnace, billet caster, wire rod mill | 1.1 Mt |
 
-The default 15-minute demo focuses on `NS-DEMO-LUX-01`. The other plants provide fleet comparisons and enough history for cross-site analytics.
+The default 10-minute demo focuses on `NS-DEMO-LUX-01`. The other plants provide fleet comparisons and enough history for cross-site analytics.
 
 ### 2.2 Asset hierarchy
 

@@ -80,7 +80,7 @@ The brief mentions "C# for front." Below is the UX-scoped recommendation. It con
 
 | Option | Verdict | Rationale |
 | --- | --- | --- |
-| **Blazor shell + React/MUI microfrontend** (accepted) | ✅ | Satisfies "C# for front" for shell/identity/routing while giving data-dense surfaces the MUI + D3 ecosystem the brief requires. The bundle is versioned and released with the shell during Phase 0 to prevent bridge skew. |
+| **Blazor shell + React/MUI microfrontend** (accepted) | ✅ | Satisfies "C# for front" for shell/identity/routing while giving data-dense surfaces the MUI + D3 ecosystem the brief requires. The bundle is versioned and released with the shell during the demonstration to prevent bridge skew. |
 | Pure Blazor (MudBlazor + Blazor charts) | ⚠️ Acceptable, not preferred | Keeps one language, but the brief explicitly centers Material UI (React) and D3.js; Blazor charting/table virtualization is less mature for this data density. |
 | Pure React/MUI SPA (drop C#) | ⚠️ Possible | Best pure DX for the described UI, but ignores the "C# for front" intent for the shell; acceptable only if the team explicitly waives C# for presentation. |
 | Server-rendered MVC/Razor + React islands | ❌ | Heavier, weaker SPA-grade interactivity for a live command center. |
@@ -708,7 +708,7 @@ Each section reuses `TBL-STD` (§13), the chart catalog (§14), and `STATE-*` (�
 +-------------------------------------------------------------------------------+
 ```
 
-- **Load-Shift Simulator (S-06):** scenario controls (drag windows / sliders); before/after C-BAR of cost and CO₂; “Simulate schedule” and Phase 0/1 “Record simulated approval” actions (role-gated). No UI action writes an operational schedule.
+- **Load-Shift Simulator (S-06):** scenario controls (drag windows / sliders); before/after C-BAR of cost and CO₂; “Simulate schedule” and demonstration/pilot “Record simulated approval” actions (role-gated). No UI action writes an operational schedule.
 - **KPI cards:** current price, projected savings, CO₂ intensity, shiftable capacity.
 - **Charts:** C-LINE (price) + C-AREA (scheduled load) overlay; C-BAR before/after.
 - **Bindings:** `POST /v1/energy/schedules:simulate`, `POST /v1/energy/recommendations/{id}:approve`, and read projections supplied by the BFF.
@@ -1211,8 +1211,8 @@ The UI binds to a **BFF (Backend-for-Frontend)** whose contracts are owned by `s
 | --- | --- | --- |
 | S-00 Command Center | `/v1/command-center/summary`, `/v1/realtime/alerts` | SSE with poll fallback |
 | S-01 Operations | `/v1/realtime/alerts`, BFF read projections | Live data is visibly stale when degraded |
-| S-02/03/04 Furnace | `/v1/furnaces/{assetId}/lining-forecast`, `/v1/workorders` | Forecast is an AI payload; work order is synthetic in Phase 0 |
-| S-05/06 Energy | `POST /v1/energy/schedules:simulate`, `POST /v1/energy/recommendations/{id}:approve` | Simulate/propose; Phase 0/1 approval remains simulated/shadow |
+| S-02/03/04 Furnace | `/v1/furnaces/{assetId}/lining-forecast`, `/v1/workorders` | Forecast is an AI payload; work order is synthetic in the demonstration |
+| S-05/06 Energy | `POST /v1/energy/schedules:simulate`, `POST /v1/energy/recommendations/{id}:approve` | Simulate/propose; demonstration/pilot approval remains simulated/shadow |
 | S-07/08 Quality | `/v1/quality/batches`, `/v1/quality/batches/{batchId}/genealogy`, `POST /v1/quality/what-if` | No recipe/setpoint write |
 | S-09/10/11 Sustainability | `/v1/audit/decisions` plus BFF sustainability read projections | Export-heavy, authorization-scoped |
 | S-12 Knowledge | `/v1/knowledge/search`, `/v1/knowledge/procedures`, `/v1/knowledge/interviews` | Search only approved procedures |

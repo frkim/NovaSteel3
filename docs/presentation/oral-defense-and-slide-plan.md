@@ -15,8 +15,8 @@ This is the presenter's authoritative script for a **60-minute oral defense**:
 
 | Segment | Duration | Running clock | Artifact |
 |---|---|---|---|
-| **Slides** | 30 min | 00:00 → 30:00 | §2 slide-by-slide plan (20 slides) |
-| **Live demo** | 15 min | 30:00 → 45:00 | [demo-runbook.md](../demo/demo-runbook.md), handoff in §3 |
+| **Slides** | 35 min | 00:00 → 35:00 | §2 slide-by-slide plan (20 slides) |
+| **Live demo** | 10 min | 35:00 → 45:00 | [demo-runbook.md](../demo/demo-runbook.md), handoff in §3 |
 | **FAQ** | 15 min | 45:00 → 60:00 | [faq.md](faq.md), moderation in §5 |
 
 **The single most important discipline in this defense:** every number is labeled as either **DEMONSTRATION EVIDENCE** (a deterministic synthetic-scenario result you can reproduce on screen) or a **PROJECTED BUSINESS OUTCOME / TARGET** (a transformation goal that is *not* proven by the demo). The four headline targets — **14% energy reduction, 22% CO₂ reduction, 21-day lining warning, 8% high-grade-yield improvement** — are **targets**. What the audience sees live is **synthetic scenario evidence** that the platform mechanics work end to end. Never let those two categories blur. A single overclaim will cost more credibility than any missing feature.
@@ -42,21 +42,21 @@ Legend used throughout:
 4. **Every AI output on a slide shows its uncertainty and its human approver.** No lonely point estimates.
 5. **The demo is the payoff, not a tangent.** Slides 12–15 pre-load exactly what the demo will show, so the demo confirms rather than introduces.
 
-**Timing envelope:** 20 content slides total **29:45** of speech with **~15 s** of built-in buffer to land the demo handoff exactly at **30:00**. Rehearsal checkpoints (§4) are at **10:00, 18:00, 26:00, 30:00**.
+**Timing envelope:** 20 content slides total **34:45** of speech with **~15 s** of built-in buffer to land the demo handoff exactly at **35:00**. Rehearsal checkpoints (§4) are at **10:00, 18:00, 25:30, 35:00**.
 
 ---
 
-## 2. Slide-by-slide plan (30 minutes, 20 slides)
+## 2. Slide-by-slide plan (35 minutes, 20 slides)
 
 ### Slide 1 — Title & framing
 - **Duration:** 0:45 · **Running clock:** 00:00 → 00:45
 - **Purpose:** Set identity, scope, and the honesty contract before any claim is made.
-- **Visual:** NovaSteel wordmark over a muted blast-furnace image; a persistent footer chip that will appear on *every* slide: **"Phase 0 · Synthetic demonstration · Not for operational control."**
+- **Visual:** NovaSteel wordmark over a muted blast-furnace image; a persistent footer chip that will appear on *every* slide: **"AI advises, humans decide"**
 - **On-slide content:**
   - NovaSteel — AI-Powered Steel Production Optimization Platform
-  - Phase 0 oral defense · Microsoft Fabric–centered architecture
+  - Oral defense · Microsoft Fabric–centered architecture
   - Presenter name/role · date
-- **Speaker notes:** "Good morning. In the next hour I'll defend the NovaSteel platform: 30 minutes of architecture and value, a 15-minute live demonstration on fully synthetic data, and 15 minutes for your hardest questions. One ground rule I'll repeat: I will always tell you whether a number is a **target** we're aiming for or **evidence** you're watching us reproduce. Today's demo proves the mechanics on synthetic data — it does not claim realized savings."
+- **Speaker notes:** "Good morning. In the next hour I'll defend the NovaSteel platform: 35 minutes of architecture and value, a 10-minute live demonstration on fully synthetic data, and 15 minutes for your hardest questions. One ground rule I'll repeat: I will always tell you whether a number is a **target** we're aiming for or **evidence** you're watching us reproduce. Today's demo proves the mechanics on synthetic data — it does not claim realized savings."
 - 🛈 **SOURCE CUE:** solution-architecture.md §1.1 (non-negotiable boundaries); demo-runbook.md §1.
 - ⛑ **FALLBACK:** none needed; static slide.
 
@@ -90,7 +90,7 @@ Legend used throughout:
 - ⛑ **FALLBACK:** none; static.
 
 ### Slide 4 — Transformation objective & the four targets
-- **Duration:** 1:30 · **Running clock:** 03:30 → 05:00
+- **Duration:** 1:45 · **Running clock:** 03:30 → 05:15
 - **Purpose:** State the ambition precisely and label it honestly as target, not proof.
 - **Visual:** Four target cards, each stamped 🎯 **TARGET**, with the baseline assumption shown beneath.
 - **On-slide content:**
@@ -104,7 +104,7 @@ Legend used throughout:
 - ⛑ **FALLBACK:** none; static.
 
 ### Slide 5 — Solution overview: one governed platform
-- **Duration:** 1:30 · **Running clock:** 05:00 → 06:30
+- **Duration:** 1:45 · **Running clock:** 05:15 → 07:00
 - **Purpose:** Give the whole answer in one breath before decomposing it.
 - **Visual:** A single ring diagram: live plant signals → Fabric data core → four AI capabilities → persona experiences → human decisions → audited outcomes. Fabric at the center.
 - **On-slide content:**
@@ -117,21 +117,21 @@ Legend used throughout:
 - ⛑ **FALLBACK:** none; static.
 
 ### Slide 6 — Non-negotiable guardrails
-- **Duration:** 1:30 · **Running clock:** 06:30 → 08:00
+- **Duration:** 1:30 · **Running clock:** 07:00 → 08:30
 - **Purpose:** Pre-empt the safety, control, and residency objections early, in the executive frame, so the rest of the talk inherits that trust.
 - **Visual:** Five "lock" chips.
 - **On-slide content:**
   - 1. **Decision support, not a control system** — no write to PLC, interlock, furnace, or setpoint
-  - 2. **Phase 0 is synthetic-only** — isolated `NS-DEMO-*`; never shares a table, path, or credential with production
+  - 2. **Synthetic-only demonstration** — isolated `NS-DEMO-*`; never shares a table, path, or credential with production
   - 3. **EU-only processing** — Sweden Central primary; Foundry Data Zone (EU)
   - 4. **Every consequential AI output is append-only auditable** — inputs, version, confidence, rationale, human decision, outcome
   - 5. **No standing secrets** — Entra managed identities everywhere
-- **Speaker notes:** "Five guardrails are non-negotiable and they constrain everything else. First and most important: this is decision *support*. No application, agent, rule, pipeline, or demo control writes to a PLC, a safety interlock, a furnace, or a production setpoint — existing OT safety systems stay authoritative. Second, Phase 0 is one-hundred-percent synthetic and physically isolated from production. Third, EU-only processing. Fourth, every consequential AI output is auditable end to end. Fifth, no standing secrets — Entra managed identities throughout. If any of these is a problem for you, stop me now, because I won't trade them away."
+- **Speaker notes:** "Five guardrails are non-negotiable and they constrain everything else. First and most important: this is decision *support*. No application, agent, rule, pipeline, or demo control writes to a PLC, a safety interlock, a furnace, or a production setpoint — existing OT safety systems stay authoritative. Second, the demonstration is one-hundred-percent synthetic and physically isolated from production. Third, EU-only processing. Fourth, every consequential AI output is auditable end to end. Fifth, no standing secrets — Entra managed identities throughout. If any of these is a problem for you, stop me now, because I won't trade them away."
 - 🛈 **SOURCE CUE:** solution-architecture.md §1.1, ADR-007, ADR-008; security-governance-and-threat-model.md (OT boundary, no standing secrets).
 - ⛑ **FALLBACK:** none; static.
 
 ### Slide 7 — Who benefits: personas & journeys
-- **Duration:** 1:30 · **Running clock:** 08:00 → 09:30
+- **Duration:** 1:30 · **Running clock:** 08:30 → 10:00
 - **Purpose:** Make the value human and multi-stakeholder; set up the demo's tab-by-tab structure.
 - **Visual:** Eight persona tiles, each with one job-to-be-done and the demo cockpit they map to.
 - **On-slide content:**
@@ -144,7 +144,7 @@ Legend used throughout:
 - ⛑ **FALLBACK:** none; static.
 
 ### Slide 8 — Architecture at a glance
-- **Duration:** 2:00 · **Running clock:** 09:30 → 11:30
+- **Duration:** 2:15 · **Running clock:** 10:00 → 12:15
 - **Purpose:** Present the reference architecture as the map the rest of the deck annotates.
 - **Visual:** The solution-architecture §3 flowchart, simplified into four bands: **Sites (OT/DMZ) → Azure ingress (Event Hubs + relay) → Microsoft Fabric core → AI & application services → Browser experience**. Everything EU/Sweden Central.
 - **On-slide content:**
@@ -158,7 +158,7 @@ Legend used throughout:
 - ⛑ **FALLBACK:** none; static (this diagram also serves as the demo's Fabric-Core backup image).
 
 ### Slide 9 — Why Microsoft Fabric is the center of gravity
-- **Duration:** 2:00 · **Running clock:** 11:30 → 13:30
+- **Duration:** 2:30 · **Running clock:** 12:15 → 14:45
 - **Purpose:** Defend the central architectural bet — this is the slide the panel will probe.
 - **Visual:** Fabric "one core, many workloads" diagram: RTI (Eventstream/Eventhouse) for hot, OneLake/Lakehouse for governed history, Direct Lake for one semantic truth, Power BI for reporting — with a callout "one governed copy, one lineage."
 - **On-slide content:**
@@ -174,7 +174,7 @@ Legend used throughout:
 - ⛑ **FALLBACK:** none; static.
 
 ### Slide 10 — From OT signal to trustworthy data
-- **Duration:** 1:45 · **Running clock:** 13:30 → 15:15
+- **Duration:** 2:00 · **Running clock:** 14:45 → 16:45
 - **Purpose:** Prove the data is honest — ingestion, identity, and quarantine — because the whole credibility rests here.
 - **Visual:** The §4.1 sequence: gateway → Event Hubs → relay → Eventstream → KQL + bronze → silver (dedup/normalize) → gold. Highlight the quarantine branch.
 - **On-slide content:**
@@ -189,7 +189,7 @@ Legend used throughout:
 - ⛑ **FALLBACK:** none; static (doubles as demo Fabric-Core lineage backup).
 
 ### Slide 11 — The four AI capabilities
-- **Duration:** 1:00 · **Running clock:** 15:15 → 16:15
+- **Duration:** 1:15 · **Running clock:** 16:45 → 18:00
 - **Purpose:** Transition from platform to intelligence; set the frame that Python computes and Foundry explains.
 - **Visual:** Four columns (Lining RUL · Energy Dispatch · Quality Risk · Knowledge Capture), each with input → model → human-approved output.
 - **On-slide content:**
@@ -203,7 +203,7 @@ Legend used throughout:
 - ⛑ **FALLBACK:** none; static.
 
 ### Slide 12 — Deep dive: furnace lining remaining-useful-life
-- **Duration:** 2:00 · **Running clock:** 16:15 → 18:15
+- **Duration:** 2:30 · **Running clock:** 18:00 → 20:30
 - **Purpose:** Show the flagship safety-adjacent capability and pre-load the demo's centerpiece.
 - **Visual:** Hearth thermal map with sector 07 warming; a P10/P50/P90 RUL fan chart; a driver bar (heat-flux slope, spatial contrast, cooling residual).
 - **On-slide content:**
@@ -218,7 +218,7 @@ Legend used throughout:
 - ⛑ **FALLBACK:** none on slide; the *demo* equivalent falls back to saved alert JSON (ensure risk ≥ 0.80, confidence ≥ 0.70, P50 ≈ 19.65).
 
 ### Slide 13 — Deep dive: energy dispatch optimization
-- **Duration:** 1:30 · **Running clock:** 18:15 → 19:45
+- **Duration:** 1:45 · **Running clock:** 20:30 → 22:15
 - **Purpose:** Show the clearest ROI story and the constraint-safety discipline.
 - **Visual:** Day-ahead price curve with an evening scarcity peak; baseline vs optimized Gantt; a savings/constraint panel.
 - **On-slide content:**
@@ -231,7 +231,7 @@ Legend used throughout:
 - ⛑ **FALLBACK:** demo reveals cached feasible result after ≤5 s; never leave a solver spinner visible.
 
 ### Slide 14 — Deep dive: in-line quality prediction
-- **Duration:** 1:15 · **Running clock:** 19:45 → 21:00
+- **Duration:** 1:30 · **Running clock:** 22:15 → 23:45
 - **Purpose:** Show yield/traceability value and the "no automatic recipe write" boundary.
 - **Visual:** Coil genealogy tree (heat→slab→coil) + a drift panel (coiling temperature & force balance drifting together) + predicted-vs-measured toggle.
 - **On-slide content:**
@@ -244,7 +244,7 @@ Legend used throughout:
 - ⛑ **FALLBACK:** demo uses cached what-if result; never imply automatic control write-back.
 
 ### Slide 15 — Deep dive: GenAI knowledge capture
-- **Duration:** 1:30 · **Running clock:** 21:00 → 22:30
+- **Duration:** 1:45 · **Running clock:** 23:45 → 25:30
 - **Purpose:** Show the "capture retiring expertise" capability and its privacy/consent discipline.
 - **Visual:** Interview → Azure Speech transcript (speaker + confidence) → extracted fact card (trigger / observation / recommended check / rationale / safety boundary / citations) → DRAFT status.
 - **On-slide content:**
@@ -257,7 +257,7 @@ Legend used throughout:
 - ⛑ **FALLBACK:** demo plays approved WAV; if audio fails, paste approved transcript ("replay mode").
 
 ### Slide 16 — Responsible AI & EU AI Act governance
-- **Duration:** 2:00 · **Running clock:** 22:30 → 24:30
+- **Duration:** 3:00 · **Running clock:** 25:30 → 28:30
 - **Purpose:** Defend AI governance head-on — the compliance and risk reviewers live here.
 - **Visual:** Governance stack: EU AI Act classification → RAI review board → human-in-the-loop → auditable evidence; plus a prompt-injection defense mini-stack.
 - **On-slide content:**
@@ -272,7 +272,7 @@ Legend used throughout:
 - ⛑ **FALLBACK:** none; static.
 
 ### Slide 17 — Security, identity & EU data residency
-- **Duration:** 1:45 · **Running clock:** 24:30 → 26:15
+- **Duration:** 2:15 · **Running clock:** 28:30 → 30:45
 - **Purpose:** Defend the security posture and residency, closing the CISO/DPO objections.
 - **Visual:** Zero-Trust identity matrix (human, per-plant gateway MI, relay MI, BFF MI, worker MI, Foundry agent identity, capacity MI, GitHub OIDC) + a "no standing secrets" and "EU-only" banner.
 - **On-slide content:**
@@ -286,7 +286,7 @@ Legend used throughout:
 - ⛑ **FALLBACK:** none; static.
 
 ### Slide 18 — Synthetic data & OT realism
-- **Duration:** 1:30 · **Running clock:** 26:15 → 27:45
+- **Duration:** 1:30 · **Running clock:** 30:45 → 32:15
 - **Purpose:** Pre-empt "it's just fake data" — show determinism, physics, and honest boundaries.
 - **Visual:** Simulator pipeline: signed manifest (root seed) → process/truth-ledger simulation → contract+physics+scenario validator → publish/replay; named-scenario chips.
 - **On-slide content:**
@@ -299,55 +299,72 @@ Legend used throughout:
 - 🛈 **SOURCE CUE:** synthetic-data-and-simulators.md §1, §4.1, §6.1–6.2, §8, §9.2; solution-architecture.md §4.1.1.
 - ⛑ **FALLBACK:** none; static.
 
-### Slide 19 — Deployment, capacity, cost & scale
-- **Duration:** 1:30 · **Running clock:** 27:45 → 29:15
+### Slide 19 — Compliance
+- **Duration:** 2:00 · **Running clock:** 32:15 → 34:15
+- **Purpose:** Meet the regulatory reviewers head-on — name each instrument and show exactly where the architecture already evidences it, and where an honest gate remains open.
+- **Visual:** Regulation-to-control map: each named regulation on the left, the concrete platform control it maps to on the right, with amber chips on the three open gates.
+- **On-slide content:**
+  - **EU AI Act (EU) 2024/1689** Art. 12–15 → append-only, hash-chained audit trail (input features, model version, confidence, human decision, reason code) + **RAI board sign-off gate** before production
+  - **EU ETS 2003/87/EC** + **MRV Regulation (EU) 2018/2066** → emission-factor **lineage** and allowance cost carried **inside the dispatch objective**, not bolted on
+  - **IEC 62443-3-2 / -3-3** → zones & conduits, **outbound-only DMZ**, no control write-back across the boundary
+  - **NIS2 (EU) 2022/2555** Art. 21 + Art. 23 (**24 h** early warning / **72 h** notification) → Sev-1 incident path and runbooks
+  - **GDPR (EU) 2016/679** Art. 17 / 22 / 32 / 35 → erasure workflow, human-in-the-loop decision, DPIA on interview audio
+  - Horizon: **CBAM** definitive period from **2026** fed by the same emission lineage; **Machinery Regulation (EU) 2023/1230** out of scope while advisory-only; **IEC 61511** safety-instrumented system stays independent; **CSRD / ESRS E1** still moving; **ISO/IEC 27001** and **42001** as the management-system frame
+  - **Open gates (named, not hidden):** accredited ETS verifier, DPIA sign-off, Legal's formal AI Act classification
+- **Speaker notes:** "This is the slide the compliance seat is waiting for, so I'll name instruments, not adjectives. The **EU AI Act**, articles twelve to fifteen — record-keeping, transparency, human oversight, accuracy and robustness — maps to our append-only, hash-chained decision trail and the Responsible-AI board gate; every consequential output carries its inputs, model version, confidence, the human decision and a reason code. **ETS** and the **MRV regulation** are why emission factors are lineage-tracked and the allowance cost sits *inside* the dispatch objective rather than being a cosmetic afterthought. **IEC 62443** zones and conduits are the reason the DMZ is outbound-only and nothing writes back across the boundary. **NIS2** — articles twenty-one and twenty-three — gives us the twenty-four-hour early-warning and seventy-two-hour notification path wired into the Sev-1 runbooks. **GDPR** articles seventeen, twenty-two, thirty-two and thirty-five drive erasure, the human decision, and the DPIA on operator interview audio. Looking ahead: **CBAM**'s definitive period starts in 2026 off the same emission lineage; the **Machinery Regulation** stays out of scope while we're advisory-only; the **IEC 61511** safety-instrumented system remains independent of this platform; **CSRD/ESRS E1** is still moving; and **ISO 27001** and **42001** are the management-system frame around all of it. I'll also name what is *not* done: we still need an accredited ETS verifier, a signed DPIA, and Legal's formal AI Act classification. And the honest boundary — **we produce audit-grade management information, not a regulated filing.** The full mapping lives in `docs/business/compliance/`."
+- 🛈 **SOURCE CUE:** [compliance overview](../business/compliance/README.md) — [EU AI Act](../business/compliance/eu-ai-act.md), [EU ETS](../business/compliance/eu-ets.md), [IEC 62443](../business/compliance/iec-62443.md), [other regulations](../business/compliance/other-regulations.md); security-governance-and-threat-model.md §12/§15/§16; solution-architecture.md ADR-006/007.
+- **Anticipated objection:** *"Are you claiming regulatory compliance?"* → "No — I'm claiming a design that is *conformance-ready* and *audit-grade*, with the open gates named. It informs a regulated filing; it is not itself one."
+- ⛑ **FALLBACK:** none; static. *(Capacity, cost and scale moved to the backup slide "Appendix — Deployment, Capacity & Scale"; pull it up if the panel probes deployment economics.)*
+
+### Slide 20 — What you'll see next (demo handoff)
+- **Duration:** 0:30 · **Running clock:** 34:15 → 34:45 *(→ 35:00 buffer)*
+- **Purpose:** Transition cleanly into the 10-minute live demo with expectations set.
+- **Visual:** The seven demo tabs in order + a big "Synthetic demo data — not for operational control" banner + a 10:00 timer icon.
+- **On-slide content:**
+  - Live, deterministic, synthetic — seed `240725`, accelerated 60× clock
+  - You'll watch: fleet → Fabric core → energy dispatch → lining alert → quality → knowledge → sustainability/audit → recap
+  - Everything reproducible; every screen labeled synthetic
+- **Speaker notes:** "Now I'll show it live. Everything is synthetic and deterministic — seed two-four-oh-seven-two-five, an accelerated clock so forty-five days compress into seconds. I'll move through seven tabs in the order an operating day touches them, and I'll call out target versus evidence as we go. If anything hesitates, I'll switch to a cached deterministic result rather than debug in front of you — that's a rehearsed choice, not a failure. Ten minutes, starting now." *(Start the 10:00 timer; switch to Plant Manager tab.)*
+- 🛈 **SOURCE CUE:** demo-runbook.md §3.3, §4.
+- ⛑ **FALLBACK:** if the live environment is already known-degraded, open on the cached fleet-overview screenshot and narrate from the fallback pack (§3 below).
+
+### Backup slide — Appendix: Deployment, Capacity & Scale
+- **Status:** Backup / appendix — **off the 35-minute budget.** Moved here when the main-deck slot was reallocated to the **Compliance** slide; pull it up only if the panel probes deployment, capacity, cost or scale.
 - **Purpose:** Close the CFO/operations loop: how it runs, what it costs, how it grows.
-- **Visual:** Phase ladder (Phase 0 defense → Phase 1 one-site pilot → Phase 2+ four-site production) + capacity lifecycle chip (F2→F4, pause/resume).
+- **Visual:** Phase ladder (Defense demonstration → Phase 1 one-site pilot → Phase 2+ four-site production) + capacity lifecycle chip (F2→F4, pause/resume).
 - **On-slide content:**
   - Capacity: **F2** demo baseline; **F4** only on measured contention; **not F64** merely for viewer licensing (consumers on Pro/PPU/trial)
   - Cost control: 01:00 Europe/Luxembourg Logic App **pause** check (non-prod only); ARM `2023-11-01` suspend/resume (202 async); production **never auto-paused**
   - Scale: same event/API contract for **4 countries**; per-plant relay & measured capacity
-  - Phases: Phase 0 synthetic → Phase 1 shadow-scoring pilot (read-only) → Phase 2+ human-approved write-back after gates
+  - Phases: Demonstration (synthetic) → Phase 1 shadow-scoring pilot (read-only) → Phase 2+ human-approved write-back after gates
   - Region posture: Sweden Central primary; West Europe = **tested** EU contingency, not automatic failover
 - **Speaker notes:** "How does it run and what does it cost? We start on the smallest Fabric SKU, F2, and only move to F4 if measured contention demands it — we do *not* buy the big F64 tier just to give viewers free licenses; consumers sit on Pro or PPU. Cost is actively controlled: a nightly one-a.m. Logic App safely pauses non-production capacity using the official ARM suspend operation, and production is *never* auto-paused. Scaling to four countries is a capacity and per-plant-relay decision, not a redesign — the event and API contracts are stable. And we phase it honestly: today synthetic; then a one-site shadow pilot that only *reads*; then, only after DPO, OT, security, and RAI gates, human-approved write-back. I'm deliberately not quoting a euro-per-hour price — it's region-, currency-, and offer-specific, and I won't invent it."
 - 🛈 **SOURCE CUE:** deployment-topology.md §2.1, §4.1, §5, §6; solution-architecture.md §1.2, ADR-003; fabric-platform.md (F SKUs, pause/resume).
 - **Anticipated objection:** *"What will production cost?"* → "A sizing decision after pilot load measurement, not an assumed architecture fact. I can give the cost *drivers* and controls today; a credible euro figure needs measured CU consumption."
 - ⛑ **FALLBACK:** none; static.
 
-### Slide 20 — What you'll see next (demo handoff)
-- **Duration:** 0:30 · **Running clock:** 29:15 → 29:45 *(→ 30:00 buffer)*
-- **Purpose:** Transition cleanly into the 15-minute live demo with expectations set.
-- **Visual:** The seven demo tabs in order + a big "Synthetic demo data — not for operational control" banner + a 15:00 timer icon.
-- **On-slide content:**
-  - Live, deterministic, synthetic — seed `240725`, accelerated 60× clock
-  - You'll watch: fleet → Fabric core → energy dispatch → lining alert → quality → knowledge → sustainability/audit → recap
-  - Everything reproducible; every screen labeled synthetic
-- **Speaker notes:** "Now I'll show it live. Everything is synthetic and deterministic — seed two-four-oh-seven-two-five, an accelerated clock so forty-five days compress into seconds. I'll move through seven tabs in the order an operating day touches them, and I'll call out target versus evidence as we go. If anything hesitates, I'll switch to a cached deterministic result rather than debug in front of you — that's a rehearsed choice, not a failure. Fifteen minutes, starting now." *(Start the 15:00 timer; switch to Plant Manager tab.)*
-- 🛈 **SOURCE CUE:** demo-runbook.md §3.3, §4.
-- ⛑ **FALLBACK:** if the live environment is already known-degraded, open on the cached fleet-overview screenshot and narrate from the fallback pack (§3 below).
-
 ---
 
-## 3. Demo handoff script (30:00 → 45:00)
+## 3. Demo handoff script (35:00 → 45:00)
 
 The demo is executed strictly per [demo-runbook.md](../demo/demo-runbook.md) §4 (minute-by-minute). This section is the **presenter's bridge language and the slide↔demo contract** — what each slide promised and where the demo confirms it.
 
 ### 3.1 Entry checklist (say nothing until all true)
 - Control status reads `history=loaded`, `stream=paused`, `alert=armed`, `fallbacks=ready` (runbook §3.3).
 - Every tab shows the synthetic banner; freshness is green.
-- The visible 15:00 presenter timer is started.
+- The visible 10:00 presenter timer is started.
 - Presenter and reset operator have agreed the hand signal for switching to fallback.
 
 ### 3.2 Bridge lines (slide promise → demo proof)
 | Demo minute (runbook §4) | Tab / action | Bridge line connecting to the slides |
 |---|---|---|
-| 00:00–02:00 | Plant Manager → Fabric Core | "Slide 8's map, now live: one fleet view, and behind it the Fabric core with bronze-silver-gold lineage from Slide 10." |
-| 02:00–04:30 | Demo Control → Energy Manager | "We're accelerating *time*, not fabricating UI. Slide 13: only eligible loads move; seven-point-two-five-percent modeled cost cut; peak down from fifty-six to fifty-one-point-six megawatts; tonnage conserved; zero hard-constraint violations; no production schedule write." |
-| 04:30–07:00 | Reliability Engineer → RUL alert and synthetic work order | "This is Slide 12 live. Watch the band: P50 about twenty days, P10 nineteen, P90 twenty-one — a tight, confident prediction. Advisory only; no furnace actuation." |
-| 07:00–09:30 | Quality Engineer → what-if | "Slide 14: genealogy heat-by-heat, predicted yield eighty-eight to ninety-five percent, no recipe write-back." |
-| 09:30–12:00 | Operator Knowledge | "Slide 15: consented synthetic interview, cited draft, stays DRAFT until a human approves." |
-| 12:00–14:00 | Plant Manager / Sustainability / Executive → ETS, ROI, audit | "The targets are not banked savings; this is the semantic-model and audit evidence that makes them measurable." |
-| 14:00–15:00 | Plant Manager → Fabric Core recap | "Back to one core: targets are 14/22/21/8; what you just saw is synthetic scenario *evidence* the mechanics work." |
+| 00:00–01:20 | Plant Manager → Fabric Core | "Slide 8's map, now live: one fleet view, and behind it the Fabric core with bronze-silver-gold lineage from Slide 10." |
+| 01:20–03:00 | Demo Control → Energy Manager | "We're accelerating *time*, not fabricating UI. Slide 13: only eligible loads move; seven-point-two-five-percent modeled cost cut; peak down from fifty-six to fifty-one-point-six megawatts; tonnage conserved; zero hard-constraint violations; no production schedule write." |
+| 03:00–04:50 | Reliability Engineer → RUL alert and synthetic work order | "This is Slide 12 live. Watch the band: P50 about twenty days, P10 nineteen, P90 twenty-one — a tight, confident prediction. Advisory only; no furnace actuation." |
+| 04:50–06:10 | Quality Engineer → what-if | "Slide 14: genealogy heat-by-heat, predicted yield eighty-eight to ninety-five percent, no recipe write-back." |
+| 06:10–07:50 | Operator Knowledge | "Slide 15: consented synthetic interview, cited draft, stays DRAFT until a human approves." |
+| 07:50–09:30 | Plant Manager / Sustainability / Executive → ETS, ROI, audit | "The targets are not banked savings; this is the semantic-model and audit evidence that makes them measurable." |
+| 09:30–10:00 | Plant Manager → Fabric Core recap | "Back to one core: targets are 14/22/21/8; what you just saw is synthetic scenario *evidence* the mechanics work." |
 
 ### 3.3 Backup / fallback transitions during the demo
 Use the runbook's binding fallback ladder — **live cloud → local deterministic replay → cached interactive → recorded flow → static proof pack** — and **never diagnose for more than 10 seconds** on screen (runbook §6, §8). Spoken bridges (memorize):
@@ -370,15 +387,15 @@ Rehearse against these hard gates; if a checkpoint slips by more than ~30 s, cut
 
 | Checkpoint | Target clock | Must be true | Recovery if behind |
 |---|---|---|---|
-| **CP-1** end of Slide 7 | **09:30** | Business case, targets, guardrails, personas all landed | Compress Slide 3 and Slide 7 to titles + one line each |
-| **CP-2** end of Slide 11 | **16:15** | Architecture, Fabric-centrality, ingestion, "Python decides/Foundry explains" landed | Merge Slides 10 narration into Slide 9; keep the quarantine point |
-| **CP-3** end of Slide 15 | **22:30** | All four AI deep-dives done with target-vs-evidence labels intact | Shorten Quality (14) and Knowledge (15) to the guardrail line each |
-| **CP-4** end of Slide 19 | **29:15** | RAI, security/residency, synthetic realism, cost/scale defended | Collapse Slide 18 to the determinism + physics bullet only |
-| **CP-5** demo handoff | **30:00** | Timer started, Plant Manager tab up, entry checklist green | If env degraded, open on cached fleet screenshot and narrate fallback |
+| **CP-1** end of Slide 7 | **10:00** | Business case, targets, guardrails, personas all landed | Compress Slide 3 and Slide 7 to titles + one line each |
+| **CP-2** end of Slide 11 | **18:00** | Architecture, Fabric-centrality, ingestion, "Python decides/Foundry explains" landed | Merge Slides 10 narration into Slide 9; keep the quarantine point |
+| **CP-3** end of Slide 15 | **25:30** | All four AI deep-dives done with target-vs-evidence labels intact | Shorten Quality (14) and Knowledge (15) to the guardrail line each |
+| **CP-4** end of Slide 19 | **34:15** | RAI, security/residency, synthetic realism, and compliance (AI Act / ETS / IEC 62443 / NIS2 / GDPR) defended | Collapse Slide 18 to the determinism + physics bullet only; keep the AI Act + audit-chain line on Slide 19 |
+| **CP-5** demo handoff | **35:00** | Timer started, Plant Manager tab up, entry checklist green | If env degraded, open on cached fleet screenshot and narrate fallback |
 | **CP-6** demo end | **45:00** | Recap sentence delivered; target-vs-evidence restated | Stop at 45:00 regardless; do not debug live |
 | **CP-7** FAQ close | **60:00** | ≥ 8–10 questions answered; unknowns logged as follow-ups | Offer written follow-up for anything requiring measurement |
 
-**Full-run rehearsal requirements (from runbook §3.1):** rehearse once online and once with the network disabled; verify two consecutive clean 15-minute demo runs; confirm the presenter can finish the entire story offline.
+**Full-run rehearsal requirements (from runbook §3.1):** rehearse once online and once with the network disabled; verify two consecutive clean 10-minute demo runs; confirm the presenter can finish the entire story offline.
 
 ---
 
@@ -402,6 +419,8 @@ Rehearse against these hard gates; if a checkpoint slips by more than ~30 s, cut
 | Ingestion, identity, quarantine | solution-architecture.md §4.1, ADR-005; deployment-topology.md §3 | Architecture facts |
 | Live scenario numbers (RUL ~20/18.7/20.6, energy 7.25%, CO₂ 3.29%, peak 7.89%, quality 88→95%) | demo-runbook.md §5; synthetic-data-and-simulators.md §8 | Always **EVIDENCE** (synthetic, reproducible) |
 | RAI / EU AI Act / Prompt Shields | security-governance-and-threat-model.md §12, §15, §16 | Governance posture |
+| Compliance mapping (AI Act, ETS/MRV, IEC 62443, NIS2, GDPR, CBAM) | [compliance/](../business/compliance/README.md): eu-ai-act.md, eu-ets.md, iec-62443.md, other-regulations.md | Conformance-ready posture; open gates named (verifier, DPIA, AI Act classification) |
+| Delivery / implementation process & phases | [project/implementation-process.md](../business/project/implementation-process.md) | Demonstration → one-site pilot → production |
 | Security / identity / residency | solution-architecture.md §8; deployment-topology.md §2; security doc §1/§3/§6/§16/§19/§20 | Architecture + policy |
 | Synthetic determinism & physics | synthetic-data-and-simulators.md §1/§4/§6/§9 | Method credibility |
 | Capacity / cost / pause-resume / scale | deployment-topology.md §4/§5/§6; fabric-platform.md | No euro price is asserted |
