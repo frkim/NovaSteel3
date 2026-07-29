@@ -1,0 +1,82 @@
+{
+  "scenario_id": "analytical-programme-24m",
+  "schema_version": 1,
+  "kind": "analytical-gold",
+  "description": "24-month deterministic analytical programme across the four NovaSteel synthetic plants. Emits gold-grain star-schema facts (contracts/data/gold.v2.json) at daily/shift grain with an explicit efficiency-programme rollout boundary, so the headline improvements -- energy per ton -14%, specific CO2 -22%, high-grade first-pass yield +8pp, and a 21-day furnace-lining advance warning -- are computed from rows rather than asserted. Loads into lh_novasteelv3_core.",
+  "root_seed": 240801,
+  "end_date": "2026-07-29",
+  "months": 24,
+  "fast_months": 4,
+  "rollout_date": "2025-07-15",
+  "fast_rollout_offset_days": 60,
+  "plants": ["NS-DEMO-LUX-01", "NS-DEMO-DE-01", "NS-DEMO-BE-01", "NS-DEMO-ES-01"],
+  "grades": [
+    {"grade_code": "NS-AUTO-DP780", "grade_family": "automotive", "high_grade": true, "allocation": 0.35},
+    {"grade_code": "NS-AUTO-HSLA420", "grade_family": "automotive", "high_grade": true, "allocation": 0.25},
+    {"grade_code": "NS-LONG-B500", "grade_family": "long", "high_grade": false, "allocation": 0.40}
+  ],
+  "plant_baselines": {
+    "NS-DEMO-LUX-01": {"route": "BF-BOF", "line_id": "LUX-HSM-01", "shift_rate_tph": 340.0, "sec0_gj_per_t": 20.5, "co2_0_t_per_t": 2.20, "scope1_fraction": 0.86, "electric_fraction": 0.16},
+    "NS-DEMO-DE-01": {"route": "EAF", "line_id": "DE-BCC-01", "shift_rate_tph": 150.0, "sec0_gj_per_t": 5.6, "co2_0_t_per_t": 0.56, "scope1_fraction": 0.22, "electric_fraction": 0.90},
+    "NS-DEMO-BE-01": {"route": "EAF", "line_id": "BE-CRM-01", "shift_rate_tph": 132.0, "sec0_gj_per_t": 6.0, "co2_0_t_per_t": 0.60, "scope1_fraction": 0.25, "electric_fraction": 0.88},
+    "NS-DEMO-ES-01": {"route": "EAF", "line_id": "ES-WRM-01", "shift_rate_tph": 138.0, "sec0_gj_per_t": 5.8, "co2_0_t_per_t": 0.58, "scope1_fraction": 0.23, "electric_fraction": 0.89}
+  },
+  "kpi_targets": {
+    "energy_intensity_reduction": 0.14,
+    "co2_intensity_reduction": 0.22,
+    "high_grade_yield_gain_pp": 0.08,
+    "lining_warning_days": 21
+  },
+  "kpi_tolerances": {
+    "energy_intensity_reduction": 0.01,
+    "co2_intensity_reduction": 0.01,
+    "high_grade_yield_gain_pp": 0.01,
+    "lining_warning_days": 0
+  },
+  "quality_yield": {
+    "high_grade_fpy_before": 0.87,
+    "high_grade_fpy_after": 0.95,
+    "low_grade_fpy": 0.965
+  },
+  "furnace_campaigns": [
+    {
+      "asset_id": "LUX-BF-01",
+      "plant_id": "NS-DEMO-LUX-01",
+      "component_id": "HEARTH-SECTOR-07",
+      "campaign_days": 540,
+      "demonstration_reline_date": "2026-05-18",
+      "primary": true
+    },
+    {
+      "asset_id": "LUX-RHF-01",
+      "plant_id": "NS-DEMO-LUX-01",
+      "component_id": "REHEAT-ZONE-03",
+      "campaign_days": 300,
+      "demonstration_reline_date": "2026-06-30",
+      "primary": false
+    },
+    {
+      "asset_id": "BE-EAF-01",
+      "plant_id": "NS-DEMO-BE-01",
+      "component_id": "EAF-DELTA-ROOF",
+      "campaign_days": 210,
+      "demonstration_reline_date": "2026-07-10",
+      "primary": false
+    }
+  ],
+  "dispatch": {
+    "saving_before": 0.012,
+    "saving_after": 0.052,
+    "adoption_before": 0.15,
+    "adoption_after": 0.86
+  },
+  "model_versions": {
+    "energy": "novasteel-energy-calc/1.0.0",
+    "emissions": "novasteel-emissions-calc/1.0.0",
+    "production": "novasteel-production-calc/1.0.0",
+    "quality": "novasteel-quality-calc/1.0.0",
+    "furnace_rul": "novasteel-furnace-rul/1.0.0",
+    "dispatch": "novasteel-dispatch-milp/1.0.0",
+    "audit": "novasteel-gold/1.0.0"
+  }
+}

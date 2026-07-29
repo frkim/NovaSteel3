@@ -13,7 +13,6 @@ export function testShellContext(overrides: Partial<ShellContext> = {}): ShellCo
     locale: 'en-LU',
     activePersona: 'PlantManager',
     site: 'de',
-    demoMode: true,
     tokenRef: 'test-reference',
     bridgeVersion: '1.0',
     navigation: { section: 'command-center', subView: null, site: 'de' },
@@ -34,7 +33,6 @@ export function testAnalyticsValue(
     site: context.site,
     unitSystem: 'metric',
     t: createTranslator(context.locale),
-    demoMode: context.demoMode,
     can: () => true,
     ...overrides,
   }

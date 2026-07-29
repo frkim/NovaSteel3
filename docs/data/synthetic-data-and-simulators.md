@@ -561,6 +561,28 @@ The logical Fabric core is:
 
 Partition historical data by `event_date`, `plant_id`, and dataset; do not over-partition by sensor. Streaming and batch paths must converge on the same silver contract and deduplication keys.
 
+### 11.1 The two streams, and why there are exactly two
+
+Fabric receives synthetic data through two paths that differ in *cadence and purpose*, not in fidelity. Both are synthetic; neither is closer to being "real" than the other.
+
+| | **Static / analytical stream** | **Dynamic / real-time stream** |
+|---|---|---|
+| Producer | `simulator/analytics.py` (`generate-analytics`) | `simulator` edge emitters → `fabric/scripts/publish_to_eventstream.py` |
+| Cadence | Regenerated on demand; static between loads | Continuous while the emitter runs |
+| Span | 24 months ending today | Minutes to hours |
+| Lands in | `lh_novasteelv3_core` Delta tables | `es-ns-telemetry-v1` → KQL hot tables + bronze Delta |
+| Serves | Direct Lake semantic model, Power BI, KPI trends | Device Operations live tiles, alarms, gateway health |
+| Determinism | Fixed seed (`240801`) — byte-identical across runs | Seeded per emitter, but wall-clock ordered |
+
+Two *grains* live side by side in `lh_novasteelv3_core`, and conflating them is the easiest mistake to make here:
+
+- eight `fact_*` **gold tables** — the analytical grain, consumed by the semantic model;
+- nine **operational envelope tables** (`telemetry`, `energy_interval`, `heat_batch`, `quality_measurement`, `model_inference`, `alarm_event`, `maintenance_event`, `operator_knowledge`, `truth_ledger`) plus `manifest` — the application grain, read by the BFF when `BFF_DATA_SOURCE=fabric`.
+
+The envelope tables exist because the BFF reads whole envelopes, not star-schema rows. Loading only the gold tables would leave the BFF finding nothing and falling back to fixtures — silently, and forever. `tests/integration/test_fabric_operational_round_trip.py` pins this down by asserting that Fabric-sourced datasets equal fixture-sourced ones, so the demo tells the same story whether the capacity is awake or paused.
+
+Because the analytical span **ends on the generation date**, it needs no demo-clock rebasing: the 21-day lining warning is genuinely 21 days away from today, computed from the rows rather than asserted alongside them.
+
 ## 12. Package-feed-safe implementation commands
 
 No package installation is required to read or validate this specification. If a future Python simulator implementation requires dependencies on a Microsoft-managed device, use the approved protected feed explicitly and never point commands at public PyPI:

@@ -54,13 +54,13 @@ Transverse signifie « non limité à un seul écran métier ». Ces fonctions r
 
 **Ce que c'est.** Une visite pour présenter la démo de manière fiable.
 
-**Ce que vous voyez.** `Start guided demo` en mode démo, avec numéro d'étape, titre, récit, headline, Next/Back et auto-advance.
+**Ce que vous voyez.** `Start guided demo` est toujours disponible dans le dock, avec numéro d'étape, titre, récit, headline, Next/Back et auto-advance.
 
 **Pourquoi.** La soutenance doit raconter la même histoire sans dépendre de données réelles.
 
 **Exigence servie.** Les étapes relient les quatre résultats et les points IA; la première répète −14 % énergie, −22 % CO₂, +8 % rendement et alerte 21 jours (`apps\analytics-mfe\src\components\DemoTour.tsx:27-70`).
 
-**Preuve.** Le bouton s'affiche seulement si `context.demoMode` est vrai (`apps\analytics-mfe\src\components\AnalyticsDashboard.tsx:183-192`). `DemoTour` navigue par `nav.intent` et utilise des étapes déterministes (`apps\analytics-mfe\src\components\DemoTour.tsx:82-108`, `apps\analytics-mfe\src\components\DemoTour.tsx:116-168`).
+**Preuve.** Le tableau de bord affiche le bouton sans condition (`apps\analytics-mfe\src\components\AnalyticsDashboard.tsx:189-196`) et monte `DemoTour` sur chaque écran (`apps\analytics-mfe\src\components\AnalyticsDashboard.tsx:241`). `DemoTour` navigue par `nav.intent` et utilise des étapes déterministes (`apps\analytics-mfe\src\components\DemoTour.tsx:82-108`, `apps\analytics-mfe\src\components\DemoTour.tsx:116-168`).
 
 ## 5. Panneau Fabric capacity
 
@@ -82,13 +82,13 @@ Transverse signifie « non limité à un seul écran métier ». Ces fonctions r
 
 **Ce que c'est.** Modale pour apparence, langue, mode de données, URL BFF et aide bilingue.
 
-**Ce que vous voyez.** `Light`, `Dark`, `System`; locale; `Demo mode (synthetic data)`; BFF URL; aide bilingue.
+**Ce que vous voyez.** `Light`, `Dark`, `System`; locale; URL BFF en lecture seule; aide bilingue.
 
 **Pourquoi.** Ces préférences affectent toutes les pages et doivent vivre dans le shell.
 
 **Exigence servie.** Accessibilité et opération multilingue (`docs\ux\dashboard-specification.md:14-16`, `docs\usecase\usecase.md:7-10`).
 
-**Preuve.** `SettingsDialog` définit ces sections (`apps\portal-shell\Components\SettingsDialog.razor:17-72`). Il gère focus, Escape et focus trap (`apps\portal-shell\Components\SettingsDialog.razor:103-160`). L'état correspond à `ThemeMode`, `Locale`, `DemoMode`, `HelpBilingual` (`apps\portal-shell\Services\ShellState.cs:64-83`).
+**Preuve.** `SettingsDialog` définit ces sections (`apps\portal-shell\Components\SettingsDialog.razor:17-72`). Il gère focus, Escape et focus trap (`apps\portal-shell\Components\SettingsDialog.razor:103-160`). L'état correspond à `ThemeMode`, `Locale` et `HelpBilingual` (`apps\portal-shell\Services\ShellState.cs`).
 
 ## 7. Thème et mode sombre
 

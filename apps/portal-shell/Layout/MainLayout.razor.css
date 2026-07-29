@@ -67,8 +67,7 @@
 }
 
 .topbar-field select,
-.icon-button,
-.demo-button {
+.icon-button {
     background: var(--ns-color-surface-alt);
     border: 1px solid transparent;
     border-radius: var(--ns-radius-s);
@@ -79,8 +78,7 @@
     max-width: 240px;
 }
 
-.icon-button,
-.demo-button {
+.icon-button {
     cursor: pointer;
 }
 
@@ -159,13 +157,35 @@
     padding: 0 4px;
 }
 
-.demo-button {
-    background: var(--ns-color-demo);
-    color: var(--ns-color-demo-text);
-    font-weight: 700;
+.bff-pill {
+    align-items: center;
+    background: transparent;
+    border: 1px solid var(--ns-color-text-secondary);
+    border-radius: var(--ns-radius-pill);
+    color: var(--ns-color-text-secondary);
+    cursor: pointer;
+    display: inline-flex;
+    font: inherit;
     font-size: 0.75rem;
+    font-weight: 600;
+    gap: 4px;
+    padding: 2px 8px;
     min-height: 26px;
-    padding: 0 8px;
+}
+
+.bff-pill-online {
+    border-color: var(--ns-color-success);
+    color: var(--ns-color-success);
+}
+
+.bff-pill-offline {
+    border-color: var(--ns-color-warning);
+    color: var(--ns-color-warning);
+}
+
+.bff-pill-probing {
+    border-color: var(--ns-color-brand-primary);
+    color: var(--ns-color-brand-primary);
 }
 
 .user-context {

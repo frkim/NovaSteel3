@@ -95,6 +95,7 @@
       "required": [
         "eventhouseOperations",
         "kqlOperations",
+        "eventstreamTelemetry",
         "landingLakehouse",
         "coreLakehouse",
         "notebookInitialize",
@@ -109,6 +110,7 @@
       "properties": {
         "eventhouseOperations": { "$ref": "#/$defs/namedResource" },
         "kqlOperations": { "$ref": "#/$defs/namedResource" },
+        "eventstreamTelemetry": { "$ref": "#/$defs/namedResource" },
         "landingLakehouse": { "$ref": "#/$defs/namedResource" },
         "coreLakehouse": { "$ref": "#/$defs/namedResource" },
         "notebookInitialize": { "$ref": "#/$defs/namedResource" },
@@ -141,11 +143,11 @@
         "quarantineHot"
       ],
       "properties": {
-        "telemetryHot": { "type": "string", "pattern": "^[1-9][0-9]*d$" },
-        "alarmHot": { "type": "string", "pattern": "^[1-9][0-9]*d$" },
-        "gatewayHealthHot": { "type": "string", "pattern": "^[1-9][0-9]*d$" },
-        "modelInferenceHot": { "type": "string", "pattern": "^[1-9][0-9]*d$" },
-        "quarantineHot": { "type": "string", "pattern": "^[1-9][0-9]*d$" }
+        "telemetryHot": { "$ref": "#/$defs/retentionPeriod" },
+        "alarmHot": { "$ref": "#/$defs/retentionPeriod" },
+        "gatewayHealthHot": { "$ref": "#/$defs/retentionPeriod" },
+        "modelInferenceHot": { "$ref": "#/$defs/retentionPeriod" },
+        "quarantineHot": { "$ref": "#/$defs/retentionPeriod" }
       }
     },
     "bindings": {
@@ -198,6 +200,11 @@
         "displayName": { "type": "string" },
         "id": { "type": "string" }
       }
+    },
+    "retentionPeriod": {
+      "type": "string",
+      "description": "Kusto SoftDeletePeriod. The .NET timespan form 'd.hh:mm:ss' is what the KQL retention policy JSON expects; the 'Nd' shorthand is accepted for readability.",
+      "pattern": "^([1-9][0-9]*d|[0-9]+\\.[0-9]{2}:[0-9]{2}:[0-9]{2})$"
     }
   }
 }

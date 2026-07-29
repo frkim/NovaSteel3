@@ -75,6 +75,11 @@ class Settings:
     capacity_allowlist: tuple[str, ...] = ("cap-novasteel-demo-sc",)
     capacity_sku_allowlist: tuple[str, ...] = ("F2", "F4", "F8")
     demo_clock_rebase: bool = True
+    data_source: str = "fixture"
+    fabric_sql_endpoint: str = ""
+    fabric_workspace: str = "NovaSteelV3-Demo"
+    fabric_lakehouse: str = "lh_novasteelv3_core"
+    fabric_query_timeout_seconds: int = 30
 
     @property
     def is_demo_mode(self) -> bool:
@@ -102,6 +107,8 @@ class Settings:
                 f"BFF_CAPACITY_SKU_ALLOWLIST contains invalid SKUs: {invalid}. "
                 f"Permitted: {list(SCALABLE_SKUS)}."
             )
+        if self.data_source not in {"fixture", "fabric"}:
+            raise ConfigurationError("BFF_DATA_SOURCE must be 'fixture' or 'fabric'.")
 
     @classmethod
     def from_environment(cls) -> Settings:
@@ -145,6 +152,22 @@ class Settings:
         if capacity_mode not in {"local", "arm"}:
             raise ConfigurationError("BFF_CAPACITY_MODE must be 'local' or 'arm'.")
 
+        data_source = os.getenv("BFF_DATA_SOURCE", "fixture").strip().lower()
+        if data_source not in {"fixture", "fabric"}:
+            raise ConfigurationError("BFF_DATA_SOURCE must be 'fixture' or 'fabric'.")
+
+        raw_timeout = os.getenv("BFF_FABRIC_QUERY_TIMEOUT_SECONDS", "30").strip()
+        try:
+            fabric_query_timeout_seconds = int(raw_timeout)
+        except ValueError as error:
+            raise ConfigurationError(
+                "BFF_FABRIC_QUERY_TIMEOUT_SECONDS must be an integer number of seconds."
+            ) from error
+        if fabric_query_timeout_seconds <= 0:
+            raise ConfigurationError(
+                "BFF_FABRIC_QUERY_TIMEOUT_SECONDS must be a positive integer."
+            )
+
         return cls(
             service_name=os.getenv("BFF_SERVICE_NAME", "novasteel-bff-api").strip(),
             api_version="v1",
@@ -179,4 +202,13 @@ class Settings:
                 if value.strip()
             ),
             demo_clock_rebase=_env_bool("DEMO_CLOCK_REBASE", True),
+            data_source=data_source,
+            fabric_sql_endpoint=os.getenv("BFF_FABRIC_SQL_ENDPOINT", "").strip(),
+            fabric_workspace=os.getenv(
+                "BFF_FABRIC_WORKSPACE", "NovaSteelV3-Demo"
+            ).strip(),
+            fabric_lakehouse=os.getenv(
+                "BFF_FABRIC_LAKEHOUSE", "lh_novasteelv3_core"
+            ).strip(),
+            fabric_query_timeout_seconds=fabric_query_timeout_seconds,
         )

@@ -1251,7 +1251,7 @@ components:
         data:
           type: object
           additionalProperties: false
-          required: [apiVersion, service, environment, demoMode, authMode, dataNamespace, bridgeContractVersion]
+          required: [apiVersion, service, environment, demoMode, demoClockShiftDays, authMode, dataNamespace, dataSource, bridgeContractVersion]
           properties:
             apiVersion:
               type: string
@@ -1262,11 +1262,26 @@ components:
               type: string
             demoMode:
               type: boolean
+            demoClockShiftDays:
+              type: integer
+              description: >-
+                Whole days by which the deterministic demo clock has been shifted
+                forward so a fixed-seed scenario still reads as current. Zero when
+                the dataset is served at its recorded timestamps.
             authMode:
               type: string
               enum: [demo, entra, entra-pending]
             dataNamespace:
               type: string
+            dataSource:
+              type: string
+              description: >-
+                Provenance of the dataset the BFF is serving. Either the Fabric
+                lakehouse it read (`fabric-lakehouse:<lakehouse>`), the committed
+                simulator fixture pack (`simulator-fixture:<pack>`), or a
+                fixture fallback taken because Fabric was unreachable or its
+                capacity paused (`fabric-fallback:simulator-fixture:<pack>`).
+              example: fabric-lakehouse:lh_novasteelv3_core
             bridgeContractVersion:
               type: string
         asOf:

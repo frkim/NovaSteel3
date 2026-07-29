@@ -4,14 +4,21 @@ from __future__ import annotations
 
 import json
 import hashlib
+import logging
 import re
 from copy import deepcopy
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Iterable, Mapping
+from typing import TYPE_CHECKING, Any, Iterable, Mapping
 
 from .config import Settings
+
+if TYPE_CHECKING:
+    from .fabric_source import FabricLakehouseSource
+
+
+logger = logging.getLogger(__name__)
 
 
 _ROOT = Path(__file__).resolve().parents[4]
@@ -39,7 +46,59 @@ class DemoRepository:
     demo_clock_shift_days: int = 0
 
     @classmethod
-    def load(cls, settings: Settings) -> "DemoRepository":
+    def load(
+        cls,
+        settings: Settings,
+        *,
+        fabric_source: "FabricLakehouseSource | None" = None,
+    ) -> "DemoRepository":
+        if getattr(settings, "data_source", "fixture") == "fabric":
+            repository = cls._load_from_fabric(settings, fabric_source)
+            if repository is not None:
+                return repository
+            # Fabric was requested but is asleep/unreachable: fall back to the
+            # committed fixture pack, keeping the provenance honest for the UI.
+            return cls._load_from_fixture(
+                settings, source_prefix="fabric-fallback:"
+            )
+        return cls._load_from_fixture(settings)
+
+    @classmethod
+    def _load_from_fabric(
+        cls,
+        settings: Settings,
+        fabric_source: "FabricLakehouseSource | None",
+    ) -> "DemoRepository | None":
+        from .fabric_source import FabricLakehouseSource, FabricUnavailableError
+
+        source = fabric_source or FabricLakehouseSource.from_settings(settings)
+        try:
+            datasets, manifest = source.load()
+        except FabricUnavailableError as exc:
+            logger.warning(
+                "Fabric data source unavailable, falling back to fixtures: %s", exc
+            )
+            return None
+        # Safety invariants are re-checked here (defence in depth); a violation
+        # raises loudly and is never swallowed into a fixture fallback.
+        cls._ensure_local_safe(datasets)
+        shift_days = 0
+        if settings.demo_clock_rebase:
+            datasets, manifest, shift_days = _rebase_demo_clock(datasets, manifest)
+        logger.info("Serving BFF data from %s", source.provenance)
+        repository = cls(
+            datasets=datasets,
+            manifest=manifest,
+            source=source.provenance,
+            demo_clock_shift_days=shift_days,
+        )
+        repository._hydrate_mutable_projections()
+        return repository
+
+    @classmethod
+    def _load_from_fixture(
+        cls, settings: Settings, *, source_prefix: str = ""
+    ) -> "DemoRepository":
         candidates: list[Path] = []
         if settings.demo_data_directory:
             configured = Path(settings.demo_data_directory)
@@ -66,7 +125,7 @@ class DemoRepository:
                 repository = cls(
                     datasets=datasets,
                     manifest=manifest,
-                    source=f"simulator-fixture:{candidate.name}",
+                    source=f"{source_prefix}simulator-fixture:{candidate.name}",
                     demo_clock_shift_days=shift_days,
                 )
                 repository._hydrate_mutable_projections()
@@ -79,7 +138,7 @@ class DemoRepository:
         repository = cls(
             datasets=datasets,
             manifest=manifest,
-            source="built-in-fallback",
+            source=f"{source_prefix}built-in-fallback",
             demo_clock_shift_days=shift_days,
         )
         repository._hydrate_mutable_projections()

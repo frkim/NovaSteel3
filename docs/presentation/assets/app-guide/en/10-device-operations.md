@@ -105,7 +105,7 @@ A **sensor** reports a physical value such as temperature, pressure, flow, or he
 |---|---|---|---|
 | Physics-informed ML input stream | Supporting evidence for `AI-01`; no direct Device Operations proof badge in `proofCatalog.ts` | Simulator exposes reproducible sensor signals and incidents. | `GET /v1/devices/simulator`; `services\bff-api\src\bff_api\routes.py`; `services\bff-api\src\bff_api\device_adapter.py` |
 | Predict equipment failures | Supporting evidence for `OBJ-02` | `degrading-furnace` creates the lining-wear conditions. | `POST /v1/devices/incidents`; `apps\analytics-mfe\src\api\deviceFixtures.ts`; `docs\data\synthetic-data-and-simulators.md` |
-| 21-day warning demo | Supporting evidence for `OUT-03` | Demo mode starts `demo-full` with seed `240726` and seeds the degrading-furnace incident. | `services\bff-api\src\bff_api\device_adapter.py`; `docs\data\synthetic-data-and-simulators.md` |
+| 21-day warning demo | Supporting evidence for `OUT-03` | The `demo-full` scenario (seed `240726`) seeds the degrading-furnace incident. | `services\bff-api\src\bff_api\device_adapter.py`; `docs\data\synthetic-data-and-simulators.md` |
 
 **How the data reaches this screen.** `DeviceSimulator.tsx` calls `deviceClient.getSimulator()` and polls every 5 seconds while running. Buttons call `POST /v1/devices/simulator/commands`; triggers call `POST /v1/devices/incidents`; **Clear** calls `DELETE /v1/devices/incidents/{activeIncidentId}`. (`apps\analytics-mfe\src\components\screens\DeviceSimulator.tsx`; `apps\analytics-mfe\src\api\deviceClient.ts`; `services\bff-api\src\bff_api\routes.py`; `apps\analytics-mfe\src\components\devices\SimulatorControls.tsx`; `apps\analytics-mfe\src\components\devices\IncidentPanel.tsx`)
 

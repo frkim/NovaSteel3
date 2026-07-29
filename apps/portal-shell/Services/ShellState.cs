@@ -159,8 +159,6 @@ public sealed class ShellState
 
     public string BffBaseUrl => _options.BffBaseUrl;
 
-    public bool DemoMode { get; private set; } = true;
-
     public bool HelpBilingual { get; private set; }
 
     public ToastNotification? LastToast { get; private set; }
@@ -194,7 +192,7 @@ public sealed class ShellState
     }
 
     /// <summary>
-    /// True while a cloud-mode switch is waiting for the BFF to identify itself.
+    /// True while the BFF reachability probe is in flight.
     /// </summary>
     public bool BffProbeInFlight { get; private set; }
 
@@ -204,61 +202,67 @@ public sealed class ShellState
     public BffProbeResult? BffProbe { get; private set; }
 
     /// <summary>
-    /// Flips between the demo data set and cloud mode. Existing callers are
-    /// synchronous event handlers, so the probe is started here and completed in
-    /// the background; the UI updates again when it lands.
+    /// Whether the shell has reached the BFF: <c>null</c> before the first probe
+    /// lands, so the connection indicator can show a neutral "checking" state
+    /// rather than claiming the backend is down before anyone has asked it.
     /// </summary>
-    public void ToggleDemoMode() => _ = ToggleDemoModeAsync();
+    public bool? BffReachable => BffProbe?.Reachable;
 
     /// <summary>
-    /// Switching back to demo is instant. Switching to cloud mode asks the BFF
-    /// who it is first: if nothing answers, the shell stays in demo mode rather
-    /// than showing a CLOUD badge with no backend behind it.
+    /// Contacts the unauthenticated <c>GET /v1/meta</c> bootstrap route so the
+    /// connection indicator can state which backend answered. The portal is
+    /// always cloud-backed; this runs once on shell start and can be re-run from
+    /// the indicator. When nothing answers the shell says so plainly and the
+    /// analytics MFE falls back to its bundled synthetic fixtures for rendering.
     /// </summary>
-    public async Task ToggleDemoModeAsync(CancellationToken cancellationToken = default)
+    /// <param name="announceSuccess">
+    /// When <c>true</c> a success toast names the backend that answered — used
+    /// for a user-initiated re-check, which deserves an answer. The automatic
+    /// startup probe passes <c>false</c> and stays silent on success, since the
+    /// connection indicator and footer already reflect reachability. A failure
+    /// is always announced, prompted or not.
+    /// </param>
+    public async Task ProbeBffAsync(bool announceSuccess = false, CancellationToken cancellationToken = default)
     {
-        if (!DemoMode)
+        if (BffProbeInFlight)
         {
-            DemoMode = true;
-            BffProbeInFlight = false;
-            PublishToast("info", "Demo mode is active: synthetic data set, demo controls visible.");
             return;
         }
 
-        DemoMode = false;
         BffProbeInFlight = true;
-        PublishToast("info", $"Cloud mode: contacting the NovaSteel BFF at {BffBaseUrl}\u2026");
+        Notify();
 
         var probe = await _bffHealth.ProbeAsync(cancellationToken);
         BffProbe = probe;
         BffProbeInFlight = false;
 
-        if (!probe.Reachable)
+        if (probe.Reachable)
         {
-            DemoMode = true;
-            PublishToast(
-                "warning",
-                $"Cloud mode unavailable: {BffBaseUrl} did not answer ({probe.Detail}). Staying in demo mode.");
+            if (announceSuccess)
+            {
+                var descriptor = string.Join(
+                    " \u00b7 ",
+                    new[]
+                    {
+                        probe.Service,
+                        probe.ApiVersion is null ? null : $"API {probe.ApiVersion}",
+                        probe.Environment is null ? null : $"env {probe.Environment}",
+                        probe.AuthMode is null ? null : $"auth {probe.AuthMode}",
+                    }.Where(part => !string.IsNullOrWhiteSpace(part)));
+
+                // The data set is synthetic by design; the BFF connection is about
+                // where the data comes from, not whether it describes a real plant.
+                PublishToast("success", $"Connected to {descriptor}. The data set stays synthetic by design.");
+                return;
+            }
+
+            Notify();
             return;
         }
 
-        var descriptor = string.Join(
-            " \u00b7 ",
-            new[]
-            {
-                probe.Service,
-                probe.ApiVersion is null ? null : $"API {probe.ApiVersion}",
-                probe.Environment is null ? null : $"env {probe.Environment}",
-                probe.AuthMode is null ? null : $"auth {probe.AuthMode}",
-            }.Where(part => !string.IsNullOrWhiteSpace(part)));
-
-        // The data set is synthetic in both modes by design; cloud mode is about
-        // where the data comes from, not whether it describes a real plant.
-        var dataNote = probe.DemoData
-            ? "Every screen is now served by that backend. The data set stays synthetic by design."
-            : "Every screen is now served by that backend.";
-
-        PublishToast("success", $"Cloud mode: connected to {descriptor}. {dataNote}");
+        PublishToast(
+            "warning",
+            $"NovaSteel BFF at {BffBaseUrl} is unreachable ({probe.Detail}). Screens fall back to bundled synthetic data.");
     }
 
     public void SetThemeMode(ThemeMode mode)
@@ -321,7 +325,6 @@ public sealed class ShellState
             Locale,
             ActivePersona,
             Site,
-            DemoMode,
             _tokenReferenceBroker.Current.Value,
             "1.0",
             new AnalyticsNavigation(Section, SubView, Site),

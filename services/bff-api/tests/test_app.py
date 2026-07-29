@@ -32,6 +32,7 @@ def test_metadata_exposes_demo_safe_context() -> None:
     assert response.status_code == 200
     data = response.json()["data"]
     assert data.pop("demoClockShiftDays") >= 0
+    assert data.pop("dataSource").endswith("simulator-fixture:demo-full")
     assert data == {
         "apiVersion": "v1",
         "service": "test-bff",

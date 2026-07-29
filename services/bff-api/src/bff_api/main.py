@@ -194,6 +194,7 @@ def create_app(
                 demo_clock_shift_days=app.state.services.repository.demo_clock_shift_days,
                 auth_mode=runtime_settings.auth_mode,
                 data_namespace=runtime_settings.data_namespace,
+                data_source=app.state.services.repository.source,
                 bridge_contract_version="1.0",
             ),
             as_of=utc_now(),

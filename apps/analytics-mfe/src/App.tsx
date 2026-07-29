@@ -32,7 +32,6 @@ function App() {
     locale: 'en-LU',
     activePersona: 'PlantManager',
     site: 'lu',
-    demoMode: true,
     tokenRef: 'standalone-demo-reference',
     bridgeVersion: '1.0',
     navigation: {

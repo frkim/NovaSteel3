@@ -279,11 +279,17 @@ regenerated against our site catalogue, not adopted verbatim. This is a change t
 
 ### 6.4 Schema-style mismatch
 
-Azure-Brain is Kimball (`dim_`/`fact_`, surrogate keys). NovaSteel's
-`contracts/data/gold.v1.json` declares 8 facts by **grain and keys only, with no column
-lists** — deliberately flexible. So the gold contract can *absorb* the star schema by
-adding column specs; it does not contradict it. The bronze/silver contracts are untouched
-because the accelerator has no equivalent layer.
+Azure-Brain is Kimball (`dim_`/`fact_`, surrogate keys). NovaSteel's gold contract declared 8
+facts by **grain and keys only, with no column lists** — deliberately flexible. So the gold
+contract could *absorb* the star schema by adding column specs; it did not contradict it. The
+bronze/silver contracts are untouched because the accelerator has no equivalent layer.
+
+**Since resolved.** The contract is now `contracts/data/gold.v2.json`: it carries explicit
+column specs, and its keys moved from surrogate (`plant_key`, `grade_key`, `asset_key`) to
+natural (`plant_id`, `grade_code`, `date_key`, …). The reason is recorded in the file's
+`keyDesign` block — the deterministic analytical demo runs no SCD2 dimension load, so a
+surrogate key would reference a dimension row that nothing produces. Surrogate keys return
+under a new contract version if a dimension load is ever added.
 
 ### 6.5 Narrative mismatch
 
@@ -314,7 +320,7 @@ The report as generated has a brand slot but no synthetic-data banner.
 | # | Option | Value | Effort | Risk |
 |---|---|---|---|---|
 | A | **Adopt the generator** — port `generate_data.py` to our site catalogue and `NS-DEMO-` naming; emit 24 months at gold grain | High — turns asserted KPIs into computed ones | M | Low (offline, deterministic) |
-| B | **Adopt the star schema** into `contracts/data/gold.v1.json` column specs and load it into `lh_novasteelv3_core` via the existing medallion pipeline | High — makes Fabric actually hold NovaSteel data | M | Low |
+| B | **Adopt the star schema** into the gold contract's column specs and load it into `lh_novasteelv3_core` via the existing medallion pipeline | High — makes Fabric actually hold NovaSteel data | M | Low |
 | C | **Adopt the semantic model** — rebuild `SM_NovaSteel` (Direct Lake, 45 measures) over our lakehouse | High — one authoritative measure definition instead of Python+TS duplicates | M | Med (measure/UI drift) |
 | D | **Embed the report** in `ExecutivePowerBi.tsx`, replacing the placeholder | **Highest demo value per hour** | S | Low |
 | E | **Wire the Data Agent** as a Copilot grounding source alongside AI Search | High — answers "why" from rows | M | **High** — its eval scores DAX execution, not accuracy (§3.5); must be re-gated first |
@@ -350,7 +356,7 @@ Neither is hard; both would have been embarrassing in the FAQ.
 | Phase | Work | Gate |
 |---|---|---|
 | 0 | ~~Identify the owning identity~~ **done** — use the tenant-native account; decide consolidate-vs-share capacity | user decision |
-| 1 | Port the generator to `NS-DEMO-` sites/furnaces; **fix the High band to 8–21 days**; commit output under `fabric/seed/`; extend `gold.v1.json` with column specs | protected-feed scan, contract tests, checksum manifest |
+| 1 | ~~Port the generator to `NS-DEMO-` sites/furnaces; **fix the High band to 8–21 days**; extend the gold contract with column specs~~ **done** — `simulator/analytics.py` + `contracts/data/gold.v2.json`; the 21-day warning is now computed from rows, not asserted | protected-feed scan, contract tests, checksum manifest |
 | 2 | Load into `lh_novasteelv3_core` through `pl-novasteelv3-medallion`; run `v3-validate-data-quality` | data-quality notebook passes; capacity returns to Paused |
 | 3 | Publish the semantic model with the 45 measures renamed to our vocabulary; rework `Avoided Failure Cost` to the conservative framing; **assert the model's KPI outputs equal the Proof-of-Execution claims, including 21 days** | numeric equality test — this is the whole point, and it has already caught two defects |
 | 4 | Publish the 5-page report; embed it in `ExecutivePowerBi.tsx` behind the BFF token flow; add the synthetic-data banner; confirm tenant-vs-capacity region (§6.2) | portal test + live check with capacity Active |

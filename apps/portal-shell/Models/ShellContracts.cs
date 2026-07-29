@@ -35,7 +35,6 @@ public sealed record AnalyticsBridgeContext(
     [property: JsonPropertyName("locale")] string Locale,
     [property: JsonPropertyName("activePersona")] string ActivePersona,
     [property: JsonPropertyName("site")] string Site,
-    [property: JsonPropertyName("demoMode")] bool DemoMode,
     [property: JsonPropertyName("tokenRef")] string TokenRef,
     [property: JsonPropertyName("bridgeVersion")] string BridgeVersion,
     [property: JsonPropertyName("navigation")] AnalyticsNavigation Navigation,

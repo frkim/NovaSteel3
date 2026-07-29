@@ -9,7 +9,6 @@
     "locale",
     "activePersona",
     "site",
-    "demoMode",
     "tokenRef",
     "bridgeVersion",
     "navigation"
@@ -34,9 +33,6 @@
     "site": {
       "type": "string",
       "minLength": 1
-    },
-    "demoMode": {
-      "type": "boolean"
     },
     "tokenRef": {
       "type": "string",

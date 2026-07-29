@@ -54,13 +54,13 @@ Cross-cutting means “not tied to one business screen.” These features make e
 
 **What it is.** A presenter-friendly tour through the demo moments.
 
-**What you see.** `Start guided demo` appears only in demo mode. The tour panel has a step number, title, narrative, headline, Next/Back, and optional auto-advance.
+**What you see.** `Start guided demo` is always available in the dock. The tour panel has a step number, title, narrative, headline, Next/Back, and optional auto-advance.
 
 **Why implemented.** The defense/demo needs a reliable story that does not depend on live plant data.
 
 **Requirement served.** The tour ties the four headline outcomes and AI infusion points together; the first tour step explicitly repeats −14% energy, −22% CO₂, +8% yield, and 21-day warning (`apps\analytics-mfe\src\components\DemoTour.tsx:27-70`).
 
-**Evidence.** The dashboard shows the button only when `context.demoMode` is true (`apps\analytics-mfe\src\components\AnalyticsDashboard.tsx:183-192`). `DemoTour` navigates by emitting `nav.intent` and uses deterministic steps (`apps\analytics-mfe\src\components\DemoTour.tsx:82-108`, `apps\analytics-mfe\src\components\DemoTour.tsx:116-168`).
+**Evidence.** The dashboard renders the button unconditionally (`apps\analytics-mfe\src\components\AnalyticsDashboard.tsx:189-196`) and mounts `DemoTour` on every screen (`apps\analytics-mfe\src\components\AnalyticsDashboard.tsx:241`). `DemoTour` navigates by emitting `nav.intent` and uses deterministic steps (`apps\analytics-mfe\src\components\DemoTour.tsx:82-108`, `apps\analytics-mfe\src\components\DemoTour.tsx:116-168`).
 
 ## 5. Fabric capacity control panel
 
@@ -82,13 +82,13 @@ Cross-cutting means “not tied to one business screen.” These features make e
 
 **What it is.** Modal for appearance, language, data mode, BFF URL display, and bilingual help.
 
-**What you see.** `Light`, `Dark`, `System`; a locale listbox; checked `Demo mode (synthetic data)`; BFF base URL; bilingual help checkbox.
+**What you see.** `Light`, `Dark`, `System`; a locale listbox; the read-only BFF base URL; bilingual help checkbox.
 
 **Why implemented.** Preferences belong to the shell because they affect every page and must be accessible before the React MFE even renders.
 
 **Requirement served.** Accessibility and multilingual operations support WCAG and cross-country operation (`docs\ux\dashboard-specification.md:14-16`, `docs\usecase\usecase.md:7-10`).
 
-**Evidence.** `SettingsDialog` defines those sections and controls (`apps\portal-shell\Components\SettingsDialog.razor:17-72`). It focuses the dialog, supports Escape, and activates a focus trap (`apps\portal-shell\Components\SettingsDialog.razor:103-160`). State maps to `ThemeMode`, `Locale`, `DemoMode`, and `HelpBilingual` (`apps\portal-shell\Services\ShellState.cs:64-83`).
+**Evidence.** `SettingsDialog` defines those sections and controls (`apps\portal-shell\Components\SettingsDialog.razor:17-72`). It focuses the dialog, supports Escape, and activates a focus trap (`apps\portal-shell\Components\SettingsDialog.razor:103-160`). State maps to `ThemeMode`, `Locale`, and `HelpBilingual` (`apps\portal-shell\Services\ShellState.cs`).
 
 ## 7. Theme and dark mode
 

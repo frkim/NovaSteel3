@@ -255,6 +255,68 @@ if ($null -ne $eventstream) {
     Add-Result -Name 'eventstream-no-credential' `
         -Passed ($eventstreamRaw -notmatch '(?i)(sas|password|secret|connectionString|accessKey)') `
         -Detail 'Eventstream definition contains identifiers only.'
+
+    # Hot KQL routes must use DirectIngestion + a named JSON mapping that exists in the
+    # KQL database schema, and each route's schema_name filter must line up with the
+    # table it feeds. This catches the ProcessedIngestion no-op that silently dropped
+    # every hot-table event (rows only reached bronze), and any table/mapping drift.
+    $routeContract = @{
+        'telemetry_hot'         = @{ mapping = 'telemetry_v1_json';       schemaName = 'novasteel.telemetry.v1';       stream = 'telemetry-stream' }
+        'alarm_hot'             = @{ mapping = 'alarm_v1_json';           schemaName = 'novasteel.alarm.v1';           stream = 'alarm-stream' }
+        'gateway_health_hot'    = @{ mapping = 'gateway_health_v1_json';  schemaName = 'novasteel.gateway-health.v1';  stream = 'gateway-health-stream' }
+        'model_inference_hot'   = @{ mapping = 'model_inference_v1_json'; schemaName = 'novasteel.model-inference.v1'; stream = 'model-inference-stream' }
+        'ingest_quarantine_hot' = @{ mapping = 'quarantine_v1_json';      schemaName = 'novasteel.quarantine.v1';      stream = 'quarantine-stream' }
+    }
+    $kqlDestinations = @($eventstream.destinations | Where-Object type -eq 'Eventhouse')
+    $routingOperator = @($eventstream.operators | Where-Object type -eq 'SQL')
+    $routingQuery = if ($routingOperator.Count -ge 1) { [string]$routingOperator[0].properties.query } else { '' }
+    $connectionNames = @()
+    foreach ($destination in $kqlDestinations) {
+        $props = $destination.properties
+        $table = [string]$props.tableName
+        $expected = $routeContract[$table]
+
+        Add-Result -Name "eventstream-direct-ingestion:$($destination.name)" `
+            -Passed ($props.dataIngestionMode -eq 'DirectIngestion') `
+            -Detail "dataIngestionMode='$($props.dataIngestionMode)' (must be DirectIngestion so the KQL named mapping is applied)."
+
+        $connectionNames += [string]$props.connectionName
+        Add-Result -Name "eventstream-connection-name:$($destination.name)" `
+            -Passed (-not [string]::IsNullOrWhiteSpace([string]$props.connectionName) -and ([string]$props.connectionName).Length -le 40) `
+            -Detail "connectionName='$($props.connectionName)' (required, <=40 chars)."
+
+        if ($null -ne $expected) {
+            Add-Result -Name "eventstream-mapping-rule:$table" `
+                -Passed ($props.mappingRuleName -eq $expected.mapping) `
+                -Detail "mappingRuleName='$($props.mappingRuleName)' expected '$($expected.mapping)'."
+
+            $mappingExists = $kql -match "(?im)\.create-or-alter\s+table\s+$([regex]::Escape($table))\s+ingestion\s+json\s+mapping\s+'$([regex]::Escape($expected.mapping))'"
+            Add-Result -Name "eventstream-kql-mapping-defined:$($expected.mapping)" `
+                -Passed $mappingExists `
+                -Detail "Named JSON mapping for $table must exist in DatabaseSchema.kql."
+
+            $streamName = if ($destination.inputNodes.Count -ge 1) { [string]$destination.inputNodes[0].name } else { '' }
+            Add-Result -Name "eventstream-input-stream:$table" `
+                -Passed ($streamName -eq $expected.stream) `
+                -Detail "inputNode='$streamName' expected '$($expected.stream)'."
+
+            $routePresent = ($routingQuery -match "INTO\s+\[$([regex]::Escape($expected.stream))\]") -and `
+                            ($routingQuery -match "schema_name\s*=\s*'$([regex]::Escape($expected.schemaName))'")
+            Add-Result -Name "eventstream-route-schema:$($expected.schemaName)" `
+                -Passed $routePresent `
+                -Detail "Routing operator must fan schema_name '$($expected.schemaName)' into [$($expected.stream)]."
+        }
+        else {
+            Add-Result -Name "eventstream-unexpected-kql-destination:$($destination.name)" `
+                -Passed $false -Detail "Destination table '$table' is not in the known route contract."
+        }
+    }
+    Add-Result -Name 'eventstream-all-hot-routes-present' `
+        -Passed ((@($routeContract.Keys | Where-Object { $_ -notin @($kqlDestinations | ForEach-Object { [string]$_.properties.tableName }) })).Count -eq 0) `
+        -Detail 'All five hot-table routes are declared.'
+    Add-Result -Name 'eventstream-connection-names-unique' `
+        -Passed (($connectionNames | Select-Object -Unique).Count -eq $connectionNames.Count) `
+        -Detail "connectionNames: $($connectionNames -join ', ')"
 }
 
 $medallionPath = Join-Path $FabricRoot 'lakehouse\schema\medallion-catalog.json'

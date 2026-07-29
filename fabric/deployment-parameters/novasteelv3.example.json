@@ -37,6 +37,7 @@
   "items": {
     "eventhouseOperations": { "displayName": "evh-novasteelv3-operations", "id": "" },
     "kqlOperations": { "displayName": "kql-novasteelv3-operations", "id": "" },
+    "eventstreamTelemetry": { "displayName": "es-ns-telemetry-v1", "id": "" },
     "landingLakehouse": { "displayName": "lh_novasteelv3_landing", "id": "" },
     "coreLakehouse": { "displayName": "lh_novasteelv3_core", "id": "" },
     "notebookInitialize": { "displayName": "v3-initialize-lakehouses", "id": "" },

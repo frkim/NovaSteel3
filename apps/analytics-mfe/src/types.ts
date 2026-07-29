@@ -11,7 +11,6 @@ export interface ShellContext {
   locale: string
   activePersona: string
   site: string
-  demoMode: boolean
   tokenRef: string
   bridgeVersion: '1.0'
   navigation: AnalyticsNavigation

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Notebook",
+    "displayName": "ns-load-analytical-gold",
+    "description": "Idempotently load the multi-month analytical gold facts (uploaded to OneLake Files) into lh_novasteelv3_core Delta tables."
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "63000000-0000-4630-8630-000000000010"
+  }
+}

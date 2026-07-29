@@ -3,7 +3,7 @@
 This React/TypeScript/Vite library is mounted by `portal-shell` through
 `src/bridge.tsx`. It receives only the typed, versioned shell context:
 
-`themeMode`, `locale`, `activePersona`, `site`, `demoMode`, opaque `tokenRef`,
+`themeMode`, `locale`, `activePersona`, `site`, opaque `tokenRef`,
 `bridgeVersion`, `navigation`, optional `bffBaseUrl`, and optional
 `permittedActions`. It never stores or receives a bearer token.
 

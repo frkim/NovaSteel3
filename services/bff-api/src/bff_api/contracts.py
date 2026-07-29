@@ -61,6 +61,7 @@ class MetaData(WireModel):
     demo_clock_shift_days: int = Field(alias="demoClockShiftDays")
     auth_mode: str = Field(alias="authMode")
     data_namespace: str = Field(alias="dataNamespace")
+    data_source: str = Field(alias="dataSource")
     bridge_contract_version: str = Field(alias="bridgeContractVersion")
 
 

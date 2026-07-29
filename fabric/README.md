@@ -50,6 +50,14 @@ and the production lifecycle hard deny. It does not contact Azure or Fabric.
 
 ## Tenant deployment
 
+> **Real-time streaming path.** To deploy the `es-ns-telemetry-v1` Eventstream
+> against the live single-workspace `NovaSteelV3-Demo` tenant and prove
+> simulator → Eventstream → KQL hot tables + bronze Delta ingestion end to end,
+> follow the step-by-step runbook in [`rti/README.md`](rti/README.md)
+> ("Live real-time path runbook"). It uses the focused
+> `scripts/Deploy-FabricEventstream.ps1`, `scripts/Get-FabricEventstreamEndpoint.ps1`,
+> and `scripts/publish_to_eventstream.py` helpers.
+
 1. Copy an environment example and replace placeholder identifiers. Never add a
    password, client secret, SAS token, connection string, or access key.
 

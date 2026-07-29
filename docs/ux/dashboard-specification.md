@@ -264,7 +264,7 @@ Tokens are the single source of truth; MUI theme and Blazor CSS variables both c
 | S-14 | Platform Ops — Fabric Capacity | P8 | `/{site}/platform/fabric-capacity` | Capacity lifecycle control (§11) |
 | S-15 | Platform Ops — Jobs & Pipelines | P8 | `.../jobs` | Job table, run history |
 | S-16 | Platform Ops — Cost & Telemetry | P8 | `.../cost` | Cost trend, capacity-utilization chart |
-| S-17 | Settings & Profile | all | `/settings` | Theme, locale, persona default, demo mode, units |
+| S-17 | Settings & Profile | all | `/settings` | Theme, locale, persona default, BFF base-URL readout, units |
 | S-18 | Global Search Results | all | `/search?q=` | Grouped results, filters |
 | S-19 | Notifications / Alert Detail | all | overlay/`/alerts/{id}` | Alert detail, ack/assign, timeline |
 | S-20 | Device Fleet | all (reader) | `/{site}/device-operations/fleet` | KPI band, device table, device detail panel with sensor list |
@@ -309,7 +309,7 @@ Every screen also defines its four cross-cutting states (`STATE-LOAD`, `STATE-EM
 - Active item: 3px `color.brand.primary` inset bar + bold label + `aria-current="page"`.
 - Keyboard: `Tab` order top→bottom; `Enter`/`Space` activates; roving tabindex within group.
 - Persona-gated: items the user lacks permission for are hidden (not disabled) to avoid clutter; a "Request access" affordance lives in Settings.
-- The AxelorMetal corporate website is grouped as narrative/public context rather than an operational persona section; all five sub-views remain available in demo mode.
+- The AxelorMetal corporate website is grouped as narrative/public context rather than an operational persona section; all five sub-views remain available to every persona.
 
 ### 9.3 Command Center (S-00)
 
@@ -441,9 +441,9 @@ The dashboard header exposes **Reset layout** only when a dock is mounted. Activ
 - Panel content keeps the normal table/chart accessibility rules in §13–§17. Inside a dock, `DockedContext` removes duplicate card chrome because the tab already provides the frame and title.
 - KPI drill-downs call `revealPanel(id)`: inside a dock this activates the target tab; outside a dock it falls back to scrolling and focusing the target section.
 
-### 9.8 Theme, locale, demo-mode, capacity — top-bar controls
+### 9.8 Theme, locale, connection, capacity — top-bar controls
 
-Covered in §11 (capacity), §18 (locale), §19 (theme), §20 (demo mode).
+Covered in §11 (capacity), §18 (locale), §19 (theme), §20 (backend connection & synthetic-data honesty).
 
 ### 9.9 Help Assistant — explain mode
 
@@ -1232,7 +1232,7 @@ The UI binds to a **BFF (Backend-for-Frontend)** whose contracts are owned by `s
 
 | Direction | Message | Payload |
 | --- | --- | --- |
-| shell → MFE | `context.update` | `{ themeMode, locale, activePersona, site, demoMode, tokenRef }` |
+| shell → MFE | `context.update` | `{ themeMode, locale, activePersona, site, tokenRef }` |
 | shell → MFE | `navigate` | `{ section, subView, params }` |
 | MFE → shell | `nav.intent` | `{ route }` (for shell router) |
 | MFE → shell | `capacity.request` | `{ action: start|pause }` (shell routes the request through the BFF) |
@@ -1302,32 +1302,23 @@ The settings dialog (`SettingsDialog.razor`, opened from the top-bar hamburger m
 
 ---
 
-## 20. Demo Mode
+## 20. Backend Connection & Synthetic-Data Honesty
 
-Purpose: run persuasive, safe demos and offline walkthroughs without live plant data or real platform cost.
+Purpose: keep the portal on a single, honest, backend-driven path. There is no user-facing DEMO/CLOUD mode toggle — the shell is always cloud-backed, states plainly whether the BFF answered, and never lets the "this is synthetic" guarantee become conditional.
 
-| Aspect | Spec |
-| --- | --- |
-| Activation | Toggle in Settings and via `?demo=1`; persisted per session; requires no special role. |
-| Indicator | Persistent "DEMO" badge in top bar + subtle canvas watermark so demo data is never mistaken for production. |
-| Data | Serves deterministic synthetic datasets (owned by `data-demo-spec`) covering all personas, including seeded alerts, forecasts, and a scripted "incident" for storytelling. |
-| Behavior | All interactions work (filters, drills, exports); mutations (schedule apply, alert ack) are simulated and reset on reload. |
-| Fabric capacity | Capacity control (§11) is fully interactive but **simulated** — a "Simulated" badge shows and no real API call fires; lifecycle transitions are timed to look realistic. |
-| Guided tour | Optional step-through overlay highlighting each persona's headline value (energy −14%, CO₂ −22%, yield +8%, 21-day warning). |
-| Exit | One click leaves Demo Mode and enters Cloud Mode (below). |
-
-### 20.1 Cloud Mode
-
-Cloud Mode is the counterpart of Demo Mode in the top bar (`CLOUD` badge) and the settings dialog. It used to be a purely cosmetic shell flag whose only feedback was an apology that live integration was not configured; that was stale — the micro-frontend calls the deployed BFF in both modes.
+The data set is synthetic *by design* wherever it is read from, so the honesty guardrail is unconditional: the synthetic-data banner renders on every screen and cannot be switched off.
 
 | Aspect | Spec |
 | --- | --- |
-| Meaning | Demo scaffolding (synthetic-data banners, seed/reset affordances) is hidden and the shell asserts which backend it is talking to. It does **not** mean the data stops being synthetic — the whole platform is synthetic by design. |
-| Probe | Switching to Cloud Mode calls the unauthenticated bootstrap route `GET /v1/meta` through `BffHealthService`, with an 8-second timeout. |
-| Success | A success toast names what answered: service, API version, environment and auth mode, e.g. *"Cloud mode: connected to novasteel-bff-api · API v1 · env demo · auth demo."* When the BFF reports `demoMode: true` the toast also states that the data set stays synthetic by design. |
-| Failure | The shell **reverts to Demo Mode** and warns with the base URL and the reason (HTTP status, `timed out`, or the transport error). A `CLOUD` badge is never shown without a backend behind it. |
-| In flight | `ShellState.BffProbeInFlight` is true while the probe runs; the last result is kept in `ShellState.BffProbe`. |
-| Caller contract | `ToggleDemoMode()` stays synchronous for existing Blazor event handlers and starts `ToggleDemoModeAsync()` in the background; the UI re-renders when the probe lands. |
+| Synthetic-data banner | A persistent banner ("Synthetic demo data — not for operational control") renders unconditionally under the top bar (`MainLayout.razor`, the `demo-banner` element). It is never gated on a mode, because the data is synthetic regardless of where it is read from. |
+| Connection pill | A top-bar **BFF connection pill** replaces the old mode toggle: it shows *checking* (`BFF…`), *online* (`BFF online`) or *offline* (`BFF offline`), and is clickable to re-check. States map to `.bff-pill-probing` / `.bff-pill-online` / `.bff-pill-offline` / `.bff-pill-unknown`. |
+| Automatic probe | The reachability probe fires on shell initialisation (`OnInitializedAsync` calls `ShellState.ProbeBffAsync()`, fire-and-forget), not behind a switch. It hits the unauthenticated bootstrap route `GET /v1/meta` through `BffHealthService`. |
+| Success | A success toast names what answered — service, API version, environment and auth mode — and states that the data set stays synthetic by design, e.g. *"Connected to novasteel-bff-api · API v1 · env demo · auth demo. The data set stays synthetic by design."* |
+| Failure | A warning toast gives the base URL and the reason (HTTP status, `timed out`, or the transport error); the connection pill and footer both read *offline / unreachable*. Screens keep working: the analytics MFE falls back to its bundled synthetic fixtures. |
+| Fixture fallback | Falling back to bundled fixtures is a **resilience rung, not a mode choice**: `apps/analytics-mfe/src/api/dataClient.ts` serves bundled fixtures whenever a BFF call fails, and the build-time `VITE_FIXTURES_ONLY` flag forces the fixture-only path. The UI renders identically; only the data source changes. |
+| Data & mutations | Deterministic synthetic datasets (owned by `data-demo-spec`) cover all personas, including seeded alerts, forecasts, and a scripted "incident" for storytelling. All interactions work (filters, drills, exports); mutations (schedule apply, alert ack) are simulated and reset on reload. |
+| Guided tour | The Demo Tour — a step-through overlay highlighting each persona's headline value (energy −14%, CO₂ −22%, yield +8%, 21-day warning) — is always available; it is no longer gated on a mode. |
+| Footer & state | The footer states the honest connection status (`connected` / `unreachable — using bundled synthetic data` / `connection not yet checked`). `ShellState.BffProbeInFlight` is true while the probe runs, the last result is kept in `ShellState.BffProbe`, and `ShellState.BffReachable` exposes `null` (not yet checked) / `true` / `false`. |
 
 ---
 
@@ -1360,7 +1351,7 @@ Global gates (in addition to per-persona AC in §12):
 - **AC-G7 Accessibility:** WCAG 2.2 AA — axe-core clean in CI, full keyboard path, SR pass (NVDA/Narrator/VoiceOver) per persona; AA contrast in both themes; reduced-motion honored.
 - **AC-G8 Localization:** all UI strings externalized; EN/FR/DE/NL/ES selectable; numbers/dates/units/currency localized; +40% expansion tolerated; RTL-ready.
 - **AC-G9 Theming:** light/dark/system with no FOUC; tokens drive MUI, D3, and Power BI theme; forced-colors honored.
-- **AC-G10 Demo mode:** deterministic synthetic data across all personas; persistent DEMO badge; simulated mutations reset on reload.
+- **AC-G10 Synthetic-data honesty & connection:** deterministic synthetic data across all personas; a synthetic-data banner that renders unconditionally (never gated on a mode); simulated mutations reset on reload; the BFF reachability probe runs automatically on shell start and is surfaced as a clickable connection pill, with a bundled-fixture fallback so screens keep rendering when the backend is unreachable.
 - **AC-G11 AI transparency:** every AI-derived value shows confidence, freshness, and a "Why?" affordance (EU AI Act cue).
 - **AC-G12 Shell reconciliation:** Blazor shell hosts React/MUI microfrontend per §4 with the typed interop contract (§16.5); if architecture overrides the host, only §4 changes and all other sections remain valid.
 - **AC-G13 Deep-linkability:** site, section, filters, and time range serialize to the URL; any view is shareable/bookmarkable.

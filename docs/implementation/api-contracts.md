@@ -47,9 +47,9 @@ Canonical business personas map to these stable authorization values rather than
 
 A request lacking the required role for a route receives `403` with `code: "FORBIDDEN_ROLE"` (§3). A request with a valid token but no plant-scope match for the requested resource receives `403` with `code: "FORBIDDEN_SCOPE"`. Both are distinguished so client telemetry and support triage can tell "wrong role" from "wrong plant" without exposing exactly which plants exist to an unauthorized caller — the response body never enumerates the caller's actual permitted scope in an error path, only in `/v1/me` (§4.1).
 
-### 1.3 Demo Mode and token separation
+### 1.3 Synthetic operation and token separation
 
-Demo Mode (`portal-shell`'s `demoMode` context flag) never changes which token is used for authentication; it changes only the visual/behavioral surface (simulated capacity control, synthetic banners). The demo (`NS-DEMO-*`) environment uses an entirely separate Entra app registration with no role assignment reaching production scope, so a Demo Mode toggle in the UI is not itself a security boundary — the boundary is the environment's app registration and Fabric workspace isolation (`solution-architecture.md` §2 row "Demo capacity control").
+The portal has no client-side demo/cloud mode flag: the synthetic-data banner renders unconditionally and capacity simulation is driven by the BFF's own `demoModeSimulated` signal, not by a UI toggle. Which token is used for authentication never depended on any such flag in any case. The demo (`NS-DEMO-*`) environment uses an entirely separate Entra app registration with no role assignment reaching production scope, so the security boundary is the environment's app registration and Fabric workspace isolation — never a client flag (`solution-architecture.md` §2 row "Demo capacity control").
 
 For the offline local deterministic implementation only, the BFF uses explicit
 test stubs `X-Demo-User`, `X-Demo-Roles`, and `X-Demo-Plants`; it accepts only

@@ -32,15 +32,13 @@
       "name": "kql-telemetry-hot",
       "type": "Eventhouse",
       "properties": {
-        "dataIngestionMode": "ProcessedIngestion",
+        "dataIngestionMode": "DirectIngestion",
         "workspaceId": "{{workspace.rtiIngress.id}}",
         "itemId": "{{item.kqlOperations.id}}",
-        "databaseName": "kql-ns-operations",
+        "databaseName": "{{item.kqlOperations.displayName}}",
         "tableName": "telemetry_hot",
-        "inputSerialization": {
-          "type": "Json",
-          "properties": { "encoding": "UTF8" }
-        }
+        "mappingRuleName": "telemetry_v1_json",
+        "connectionName": "es-eh-conn-telemetry"
       },
       "inputNodes": [
         { "name": "telemetry-stream" }
@@ -50,15 +48,13 @@
       "name": "kql-alarm-hot",
       "type": "Eventhouse",
       "properties": {
-        "dataIngestionMode": "ProcessedIngestion",
+        "dataIngestionMode": "DirectIngestion",
         "workspaceId": "{{workspace.rtiIngress.id}}",
         "itemId": "{{item.kqlOperations.id}}",
-        "databaseName": "kql-ns-operations",
+        "databaseName": "{{item.kqlOperations.displayName}}",
         "tableName": "alarm_hot",
-        "inputSerialization": {
-          "type": "Json",
-          "properties": { "encoding": "UTF8" }
-        }
+        "mappingRuleName": "alarm_v1_json",
+        "connectionName": "es-eh-conn-alarm"
       },
       "inputNodes": [
         { "name": "alarm-stream" }
@@ -68,15 +64,13 @@
       "name": "kql-gateway-health-hot",
       "type": "Eventhouse",
       "properties": {
-        "dataIngestionMode": "ProcessedIngestion",
+        "dataIngestionMode": "DirectIngestion",
         "workspaceId": "{{workspace.rtiIngress.id}}",
         "itemId": "{{item.kqlOperations.id}}",
-        "databaseName": "kql-ns-operations",
+        "databaseName": "{{item.kqlOperations.displayName}}",
         "tableName": "gateway_health_hot",
-        "inputSerialization": {
-          "type": "Json",
-          "properties": { "encoding": "UTF8" }
-        }
+        "mappingRuleName": "gateway_health_v1_json",
+        "connectionName": "es-eh-conn-gateway-health"
       },
       "inputNodes": [
         { "name": "gateway-health-stream" }
@@ -86,15 +80,13 @@
       "name": "kql-model-inference-hot",
       "type": "Eventhouse",
       "properties": {
-        "dataIngestionMode": "ProcessedIngestion",
+        "dataIngestionMode": "DirectIngestion",
         "workspaceId": "{{workspace.rtiIngress.id}}",
         "itemId": "{{item.kqlOperations.id}}",
-        "databaseName": "kql-ns-operations",
+        "databaseName": "{{item.kqlOperations.displayName}}",
         "tableName": "model_inference_hot",
-        "inputSerialization": {
-          "type": "Json",
-          "properties": { "encoding": "UTF8" }
-        }
+        "mappingRuleName": "model_inference_v1_json",
+        "connectionName": "es-eh-conn-model-inference"
       },
       "inputNodes": [
         { "name": "model-inference-stream" }
@@ -104,15 +96,13 @@
       "name": "kql-ingest-quarantine-hot",
       "type": "Eventhouse",
       "properties": {
-        "dataIngestionMode": "ProcessedIngestion",
+        "dataIngestionMode": "DirectIngestion",
         "workspaceId": "{{workspace.rtiIngress.id}}",
         "itemId": "{{item.kqlOperations.id}}",
-        "databaseName": "kql-ns-operations",
+        "databaseName": "{{item.kqlOperations.displayName}}",
         "tableName": "ingest_quarantine_hot",
-        "inputSerialization": {
-          "type": "Json",
-          "properties": { "encoding": "UTF8" }
-        }
+        "mappingRuleName": "quarantine_v1_json",
+        "connectionName": "es-eh-conn-quarantine"
       },
       "inputNodes": [
         { "name": "quarantine-stream" }

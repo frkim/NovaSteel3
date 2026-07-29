@@ -14,7 +14,6 @@ export interface AnalyticsContextValue {
   site: string
   unitSystem: UnitSystem
   t: TranslateFn
-  demoMode: boolean
   can: (action: string) => boolean
 }
 

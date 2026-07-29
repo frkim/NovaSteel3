@@ -24,13 +24,21 @@ from simulator.reset import reset_run_directory
 from simulator.scenario import list_scenarios, load_manifest
 from simulator.sink_http import publish_ndjson
 from simulator import contract_projection as proj
+from simulator.analytics import (
+    generate_analytical_run,
+    list_analytical_scenarios,
+    load_analytical_manifest,
+)
+from simulator.fabric_operational import export_operational_pack
 from simulator.validators import contract_schema as contract_schema_validator
 from simulator.validators.contract import validate_envelopes
+from simulator.validators.gold_contract import validate_analytical_run
 from simulator.validators.physics import validate_furnace_physics
 from simulator.validators.scenario_assertions import validate_scenario
 from simulator.writer import read_ndjson
 
 DEFAULT_OUT_ROOT = Path("output")
+_REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 def _default_out_dir(scenario_id: str) -> Path:
@@ -60,6 +68,60 @@ def cmd_demo(args: argparse.Namespace) -> int:
     args.fast = True
     args.out = args.out or str(DEFAULT_OUT_ROOT / "demo")
     return cmd_generate(args)
+
+
+def cmd_list_analytical_scenarios(args: argparse.Namespace) -> int:
+    for scenario_id in list_analytical_scenarios():
+        scenario = load_analytical_manifest(scenario_id)
+        print(f"{scenario_id}\tseed={scenario.root_seed}\t{scenario.raw.get('description', '')}")
+    return 0
+
+
+def cmd_generate_analytics(args: argparse.Namespace) -> int:
+    scenario = load_analytical_manifest(args.scenario)
+    out_dir = Path(args.out) if args.out else _default_out_dir(scenario.scenario_id)
+    result = generate_analytical_run(scenario, out_dir=out_dir, fast=args.fast, parquet=args.parquet)
+    print(f"Generated analytical scenario {scenario.scenario_id!r} (seed={scenario.root_seed}) "
+          f"into {out_dir}")
+    for name, rows in result.datasets.items():
+        print(f"  {name}: {len(rows)} rows")
+    k = result.measured_kpis
+    print("Measured KPIs (computed from rows):")
+    print(f"  energy per ton reduction:   {k['energy_intensity_reduction'] * 100:.2f}%")
+    print(f"  specific CO2 reduction:     {k['co2_intensity_reduction'] * 100:.2f}%")
+    print(f"  high-grade yield gain:      {k['high_grade_yield_gain_pp'] * 100:.2f} pts")
+    print(f"  lining advance warning:     {k['lining_warning_days']} days")
+    return 0
+
+
+def cmd_generate_operational(args: argparse.Namespace) -> int:
+    pack_dir = Path(args.pack)
+    out_dir = Path(args.out) if args.out else _default_out_dir("operational-envelopes")
+    result = export_operational_pack(pack_dir, out_dir)
+    print(f"Exported operational envelope tables from {pack_dir} into {out_dir}")
+    for name, count in result["row_counts"].items():
+        print(f"  {name}: {count} rows")
+    return 0
+
+
+def cmd_validate_analytics(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir)
+    manifest_path = run_dir / "manifest.json"
+    if not manifest_path.exists():
+        print(f"no analytical run manifest found at {manifest_path}", file=sys.stderr)
+        return 2
+    ok, reports = validate_analytical_run(run_dir)
+    for name, report in reports.items():
+        print(f"{name} validator: {'PASS' if report.ok else 'FAIL'} ({report.checked} checks)")
+        for err in report.errors[:20]:
+            print(f"  - {err}")
+    if not args.skip_checksum:
+        checksum_ok, problems = verify_checksums(run_dir)
+        ok = ok and checksum_ok
+        print(f"checksum validator: {'PASS' if checksum_ok else 'FAIL'}")
+        for problem in problems[:20]:
+            print(f"  - {problem}")
+    return 0 if ok else 1
 
 
 def cmd_publish(args: argparse.Namespace) -> int:
@@ -200,6 +262,34 @@ def build_parser() -> argparse.ArgumentParser:
     p_demo.add_argument("--out", default=None)
     p_demo.add_argument("--format", choices=["ndjson", "csv", "json"], default="ndjson")
     p_demo.set_defaults(func=cmd_demo)
+
+    p_list_an = sub.add_parser("list-analytical-scenarios",
+                               help="List available multi-month analytical (gold) scenarios")
+    p_list_an.set_defaults(func=cmd_list_analytical_scenarios)
+
+    p_gen_an = sub.add_parser("generate-analytics",
+                              help="Generate a multi-month analytical gold-fact dataset")
+    p_gen_an.add_argument("--scenario", required=True, help="Analytical scenario id")
+    p_gen_an.add_argument("--out", default=None, help="Output directory (default output/<scenario_id>)")
+    p_gen_an.add_argument("--fast", action="store_true", help="Use the scenario's short fast window")
+    p_gen_an.add_argument("--parquet", action="store_true",
+                          help="Also write Parquet alongside the canonical CSV (needs pyarrow)")
+    p_gen_an.set_defaults(func=cmd_generate_analytics)
+
+    p_val_an = sub.add_parser("validate-analytics",
+                              help="Validate an analytical gold run (contract/guardrails/KPIs/checksums)")
+    p_val_an.add_argument("--run-dir", required=True)
+    p_val_an.add_argument("--skip-checksum", action="store_true")
+    p_val_an.set_defaults(func=cmd_validate_analytics)
+
+    p_gen_op = sub.add_parser("generate-operational",
+                              help="Reshape the committed simulator pack into Fabric operational "
+                                   "envelope tables (the BFF's Lakehouse read layer)")
+    p_gen_op.add_argument("--pack", default=str(_REPO_ROOT / "services" / "bff-api" / "fixtures" / "demo-full"),
+                          help="Source simulator pack directory (default: the committed demo-full pack)")
+    p_gen_op.add_argument("--out", default=None,
+                          help="Output directory (default output/operational-envelopes)")
+    p_gen_op.set_defaults(func=cmd_generate_operational)
 
     p_pub = sub.add_parser("publish", help="Paced publish of a generated run to an HTTP sink")
     p_pub.add_argument("--run-dir", required=True)

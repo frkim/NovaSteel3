@@ -51,12 +51,11 @@
 
             <section class="settings-section">
                 <h3>Data</h3>
-                <label class="settings-label">
-                    <input type="checkbox" checked="@Shell.DemoMode" @onchange="OnDemoToggle" />
-                    Demo mode (synthetic data)
-                </label>
                 <p class="settings-readonly">
                     BFF base URL: <code>@Shell.BffBaseUrl</code>
+                </p>
+                <p class="settings-hint">
+                    Every screen is served by the NovaSteel BFF; the data set is synthetic by design.
                 </p>
             </section>
 
@@ -127,11 +126,6 @@
     private void OnLocaleChanged(string locale)
     {
         Shell.SetLocale(locale);
-    }
-
-    private void OnDemoToggle(ChangeEventArgs args)
-    {
-        Shell.ToggleDemoMode();
     }
 
     private void OnBilingualToggle(ChangeEventArgs args)

@@ -66,10 +66,21 @@ def test_event_fixtures_have_a_valid_and_invalid_case_per_schema() -> None:
 
 
 def test_data_contract_manifests_are_versioned_and_parseable() -> None:
-    for contract_path in (REPOSITORY_ROOT / "contracts" / "data").glob("*.v1.json"):
-        contract = json.loads(contract_path.read_text(encoding="utf-8"))
+    """The major version in the filename must match ``contractVersion``.
 
-        assert contract["contractVersion"] == 1
+    Globbing only ``*.v1.json`` would silently stop covering a contract the day
+    it is bumped, which is exactly when the check matters most: ``gold`` moved to
+    v2 when its keys changed from surrogate to natural, and the rename to
+    ``gold.v2.json`` is what keeps the declared version and the filename honest.
+    """
+    contract_paths = sorted((REPOSITORY_ROOT / "contracts" / "data").glob("*.v*.json"))
+    assert contract_paths
+
+    for contract_path in contract_paths:
+        contract = json.loads(contract_path.read_text(encoding="utf-8"))
+        declared_major = int(contract_path.name.rsplit(".v", 1)[1].split(".", 1)[0])
+
+        assert contract["contractVersion"] == declared_major
         assert contract["tables"]
 
 

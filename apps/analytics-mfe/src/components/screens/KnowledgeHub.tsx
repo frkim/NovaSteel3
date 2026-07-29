@@ -373,7 +373,7 @@ function PipelineView({ procedures }: { procedures: ProcedureRow[] }) {
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
 export function KnowledgeHub() {
-  const { client, context, emit, can, demoMode } = useAnalytics()
+  const { client, context, emit, can } = useAnalytics()
   const tokens = useTokens()
   const [query, setQuery] = useState('')
   const debounced = useDebouncedValue(query, 250)
@@ -488,16 +488,12 @@ export function KnowledgeHub() {
                 <Button size="small" variant="contained" startIcon={<NoteAddIcon />} onClick={() => setCreateOpen(true)} data-help="knowledge:createEntry">
                   New entry
                 </Button>
-                {demoMode && (
-                  <>
-                    <Button size="small" variant="outlined" startIcon={<ScienceIcon />} onClick={handleSeedDemo} data-help="knowledge:demoSeed">
-                      Seed samples
-                    </Button>
-                    <Button size="small" variant="outlined" color="warning" startIcon={<RestartAltIcon />} onClick={handleResetDemo} data-help="knowledge:demoReset">
-                      Reset demo
-                    </Button>
-                  </>
-                )}
+                <Button size="small" variant="outlined" startIcon={<ScienceIcon />} onClick={handleSeedDemo} data-help="knowledge:demoSeed">
+                  Seed samples
+                </Button>
+                <Button size="small" variant="outlined" color="warning" startIcon={<RestartAltIcon />} onClick={handleResetDemo} data-help="knowledge:demoReset">
+                  Reset demo
+                </Button>
               </Stack>
             }
           >

@@ -51,6 +51,76 @@ List them (with descriptions) at any time:
 python -m simulator.cli list-scenarios
 ```
 
+## Analytical (static) gold data stream
+
+Alongside the streaming event generator above, the simulator emits a
+**multi-month analytical** dataset of **gold-grain star-schema facts**
+(`contracts/data/gold.v2.json`) for the Microsoft Fabric Lakehouse. Where the
+event path shows a single shift, this shows the **programme** trend.
+
+| Analytical scenario | Seed | Span | What it shows |
+|---|---:|---|---|
+| `analytical-programme-24m` | 240801 | ~24 months, daily/shift grain | The four-plant efficiency programme with an explicit rollout boundary. |
+
+It emits eight gold facts — `fact_production_shift`, `fact_energy_daily`,
+`fact_emissions_daily`, `fact_quality_yield`, `fact_furnace_rul`,
+`fact_dispatch_recommendation`, `fact_knowledge_procedure`,
+`fact_ai_decision_audit` — with columns matching the deployed
+`lh_novasteelv3_core` Delta DDL so the loader can MERGE straight in.
+
+These facts use **natural business keys** (e.g. `date_key, plant_id`,
+`shift_id`, `date_key, plant_id, grade_code`, `inference_id`), not surrogate
+`*_key` dimension keys. `contracts/data/gold.v2.json` is **contractVersion 2**
+and its `keyDesign` block explains why: the demo runs no SCD2 dimension load, so
+a surrogate key would reference a dimension row nothing produces.
+`validate-analytics` asserts the produced tables against that contract (columns,
+order, keys present, primary/idempotency uniqueness, and generator↔contract key
+agreement), so the contract and the tables cannot silently drift.
+
+```powershell
+python -m simulator.cli list-analytical-scenarios
+python -m simulator.cli generate-analytics --scenario analytical-programme-24m [--fast] [--parquet]
+python -m simulator.cli validate-analytics --run-dir output\analytical-programme-24m [--skip-checksum]
+```
+
+The headline improvements are **computed from the emitted rows**, not asserted,
+against an explicit `rollout_date` before/after boundary:
+
+| KPI | Target | Source of truth |
+|---|---:|---|
+| Energy per ton | −14 % | `Σ energy_gj / Σ crude_steel_tons`, after ÷ before |
+| Specific CO₂ | −22 % | `Σ total_co2e_t / Σ crude_steel_tons`, after ÷ before |
+| High-grade first-pass yield | +8 pts | `Σ first_pass_good_tons / Σ attempted_tons` (high-grade) |
+| Furnace-lining advance warning | 21 days | first `fact_furnace_rul` alert: `predicted_failure_date − scored_date` |
+
+The lining alert fires exactly when `rul_days_p50 <= 21` **and**
+`risk_score >= 0.80`, and those thresholds coincide at 21 days, so the warning
+genuinely falls out of the data (no "High = 7–20 days" style contradiction).
+CSV is the canonical, byte-reproducible, checksummed format; `--parquet` adds
+Fabric-idiomatic Parquet when `pyarrow` is available. The loader notebook
+(`fabric/notebooks/ns-load-analytical-gold.Notebook`) and the upload/capacity
+script (`tools/fabric/Load-AnalyticalGold.ps1`) are documented in
+[`tools/fabric/README.md`](../tools/fabric/README.md).
+
+### Operational envelope tables (what the application reads)
+
+The **gold facts above** feed the semantic model / Power BI / KPI trends. The
+*application* (BFF) reads a **second** layer from the same lakehouse: the nine
+raw simulator-envelope datasets, landed as Delta tables the BFF consumes when
+`BFF_DATA_SOURCE=fabric`. Reshape the committed pack into loader-ready tables
+with:
+
+```powershell
+python -m simulator.cli generate-operational
+# -> output\operational-envelopes\{telemetry,...,truth_ledger,manifest}.ndjson
+```
+
+Each row is `{event_id, envelope}` where `envelope` is the full envelope as a
+JSON string — a lossless round trip proven by
+`tests/integration/test_fabric_operational_round_trip.py`. Loading is documented
+in [`tools/fabric/README.md`](../tools/fabric/README.md)
+(`Load-AnalyticalGold.ps1 -Layer operational`).
+
 ## CLI reference
 
 ```powershell

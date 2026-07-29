@@ -43,6 +43,10 @@
       "displayName": "kql-novasteelv3-operations",
       "id": "7c3ab91a-c8ac-4658-83b5-f500dad946ec"
     },
+    "eventstreamTelemetry": {
+      "displayName": "es-ns-telemetry-v1",
+      "id": "9706234c-cf70-4760-9edc-5f535720058e"
+    },
     "landingLakehouse": {
       "displayName": "lh_novasteelv3_landing",
       "id": "f03d1c6b-fad8-4992-819f-f66fc4f01001"

@@ -11,7 +11,6 @@ namespace PortalShell.Services;
 /// <param name="Environment">Deployment environment the BFF reports.</param>
 /// <param name="AuthMode">Authentication mode the BFF is running in.</param>
 /// <param name="ApiVersion">API version the BFF is serving.</param>
-/// <param name="DemoData">True when the BFF is serving the synthetic demo data set.</param>
 /// <param name="Detail">Short failure reason, populated only when unreachable.</param>
 public sealed record BffProbeResult(
     bool Reachable,
@@ -19,16 +18,14 @@ public sealed record BffProbeResult(
     string? Environment = null,
     string? AuthMode = null,
     string? ApiVersion = null,
-    bool DemoData = false,
     string? Detail = null);
 
 /// <summary>
-/// Asks the BFF who it is. Cloud mode used to be a purely cosmetic shell flag,
-/// so switching to it could only ever apologise for itself. Probing the
-/// unauthenticated <c>GET /v1/meta</c> bootstrap route instead lets the shell
-/// state exactly which backend it reached, and refuse cloud mode outright when
-/// nothing answers rather than showing a CLOUD badge that is not backed by
-/// anything.
+/// Asks the BFF who it is. Probing the unauthenticated <c>GET /v1/meta</c>
+/// bootstrap route lets the shell state exactly which backend it reached, so the
+/// connection indicator can report reachability honestly rather than assuming a
+/// backend is present. When nothing answers the shell says so plainly and the
+/// analytics MFE falls back to its bundled synthetic fixtures.
 /// </summary>
 public sealed class BffHealthService
 {
@@ -66,8 +63,7 @@ public sealed class BffHealthService
                 meta.Service,
                 meta.Environment,
                 meta.AuthMode,
-                meta.ApiVersion,
-                meta.DemoMode);
+                meta.ApiVersion);
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
@@ -85,6 +81,5 @@ public sealed class BffHealthService
         [property: JsonPropertyName("apiVersion")] string? ApiVersion,
         [property: JsonPropertyName("service")] string? Service,
         [property: JsonPropertyName("environment")] string? Environment,
-        [property: JsonPropertyName("demoMode")] bool DemoMode,
         [property: JsonPropertyName("authMode")] string? AuthMode);
 }

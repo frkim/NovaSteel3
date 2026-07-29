@@ -105,7 +105,7 @@ Un **capteur** (sensor) remonte une valeur physique : température, pression, d�
 |---|---|---|---|
 | Flux d’entrée pour IA informée par la physique | Support pour `AI-01`; pas de badge direct Device Operations | Le simulateur expose signaux et incidents reproductibles. | `GET /v1/devices/simulator`; `services\bff-api\src\bff_api\routes.py`; `services\bff-api\src\bff_api\device_adapter.py` |
 | Prédire les défaillances | Support pour `OBJ-02` | `degrading-furnace` crée les conditions d’usure. | `POST /v1/devices/incidents`; `apps\analytics-mfe\src\api\deviceFixtures.ts`; `docs\data\synthetic-data-and-simulators.md` |
-| Démo du préavis de 21 jours | Support pour `OUT-03` | Le mode démo démarre `demo-full` avec seed `240726` et amorce l’incident de garnissage. | `services\bff-api\src\bff_api\device_adapter.py`; `docs\data\synthetic-data-and-simulators.md` |
+| Démo du préavis de 21 jours | Support pour `OUT-03` | Le scénario `demo-full` (seed `240726`) amorce l’incident de garnissage. | `services\bff-api\src\bff_api\device_adapter.py`; `docs\data\synthetic-data-and-simulators.md` |
 
 **Comment les données arrivent à cet écran.** `DeviceSimulator.tsx` appelle `deviceClient.getSimulator()` et interroge toutes les 5 secondes en mode running. Les boutons appellent `POST /v1/devices/simulator/commands`; les déclenchements appellent `POST /v1/devices/incidents`; **Clear** appelle `DELETE /v1/devices/incidents/{activeIncidentId}`. (`apps\analytics-mfe\src\components\screens\DeviceSimulator.tsx`; `apps\analytics-mfe\src\api\deviceClient.ts`; `services\bff-api\src\bff_api\routes.py`; `apps\analytics-mfe\src\components\devices\SimulatorControls.tsx`; `apps\analytics-mfe\src\components\devices\IncidentPanel.tsx`)
 

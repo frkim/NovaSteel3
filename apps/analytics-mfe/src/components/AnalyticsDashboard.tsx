@@ -54,7 +54,7 @@ export function AnalyticsDashboard({ context, emit }: AnalyticsDashboardProps) {
     // `site` is included so switching site rebinds the client and every screen
     // refetches; without it the dashboard kept showing the previous site's data.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [context.bffBaseUrl, context.locale, context.demoMode, context.site],
+    [context.bffBaseUrl, context.locale, context.site],
   )
   const copilotClient = useMemo(
     () => new CopilotClient(context),
@@ -79,7 +79,6 @@ export function AnalyticsDashboard({ context, emit }: AnalyticsDashboardProps) {
       site: context.site,
       unitSystem: 'metric',
       t: translator,
-      demoMode: context.demoMode,
       can: (action: string) => !permitted || permitted.length === 0 || permitted.includes(action),
     }
   }, [context, emit, client, deviceClient, translator])
@@ -100,24 +99,22 @@ export function AnalyticsDashboard({ context, emit }: AnalyticsDashboardProps) {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box className="analytics-dashboard" component="div">
-        {context.demoMode && (
-          <Alert
-            severity="info"
-            role="status"
-            icon={false}
-            sx={{
-              mb: 2,
-              fontWeight: 600,
-              color: demoColors.accent,
-              bgcolor: demoColors.surface,
-              border: '1px solid',
-              borderColor: demoColors.accent,
-            }}
-            data-testid="demo-banner"
-          >
-            {translator('app.synthetic')}
-          </Alert>
-        )}
+        <Alert
+          severity="info"
+          role="status"
+          icon={false}
+          sx={{
+            mb: 2,
+            fontWeight: 600,
+            color: demoColors.accent,
+            bgcolor: demoColors.surface,
+            border: '1px solid',
+            borderColor: demoColors.accent,
+          }}
+          data-testid="demo-banner"
+        >
+          {translator('app.synthetic')}
+        </Alert>
 
         <Stack
           direction={{ xs: 'column', md: 'row' }}
@@ -189,16 +186,14 @@ export function AnalyticsDashboard({ context, emit }: AnalyticsDashboardProps) {
             >
               {copilotOpen ? translator('copilot.close') : translator('copilot.title')}
             </Button>
-            {context.demoMode && (
-              <Button
-                size="small"
-                variant={tourOpen ? 'contained' : 'outlined'}
-                startIcon={tourOpen ? <StopCircleIcon /> : <PlayCircleOutlineIcon />}
-                onClick={() => setTourOpen((open) => !open)}
-              >
-                {tourOpen ? translator('demo.tour.stop') : translator('demo.tour.start')}
-              </Button>
-            )}
+            <Button
+              size="small"
+              variant={tourOpen ? 'contained' : 'outlined'}
+              startIcon={tourOpen ? <StopCircleIcon /> : <PlayCircleOutlineIcon />}
+              onClick={() => setTourOpen((open) => !open)}
+            >
+              {tourOpen ? translator('demo.tour.stop') : translator('demo.tour.start')}
+            </Button>
           </Stack>
         </Stack>
 
@@ -243,9 +238,7 @@ export function AnalyticsDashboard({ context, emit }: AnalyticsDashboardProps) {
               />
             }
           />
-          {context.demoMode && (
-            <DemoTour open={tourOpen} onClose={() => setTourOpen(false)} emit={emit} site={context.site} />
-          )}
+          <DemoTour open={tourOpen} onClose={() => setTourOpen(false)} emit={emit} site={context.site} />
           <HelpAssistant
             active={helpMode}
             onExit={() => setHelpMode(false)}

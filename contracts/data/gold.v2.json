@@ -1,0 +1,181 @@
+{
+  "contractVersion": 2,
+  "zone": "gold",
+  "classificationRule": "Stable star-schema facts used by the Direct Lake semantic model and BFF read projections.",
+  "keyDesign": {
+    "policy": "natural-keys",
+    "supersedes": "contractVersion 1 declared surrogate dimension keys (plant_key, grade_key, asset_key).",
+    "rationale": "The deterministic analytical demo (simulator/analytics.py) emits gold facts directly from the scenario and runs NO SCD2 dimension load. In a full medallion the surrogate *_key columns are minted by SCD2 dimension tables (see dim_plant in silver.v1.json); with no dimension load running, a surrogate key would reference a dimension row that nothing produces -- a dangling, fictional key. The deployed lh_novasteelv3_core Delta DDL (fabric/notebooks/ns-initialize-lakehouses.Notebook) and the loader (fabric/notebooks/ns-load-analytical-gold.Notebook) therefore key on the natural business columns (plant_id, grade_code, date_key, shift_id, inference_id, ...). This contract v2 declares those same natural keys so the contract, the physical schema, the generator (simulator/analytics.py::IDEMPOTENCY_KEYS) and the validator (simulator/validators/gold_contract.py) all agree. If an SCD2 dimension load is added later, reintroduce the surrogate keys under a new contract version.",
+    "enforcedBy": "simulator/validators/gold_contract.py::validate_gold_contract asserts produced tables against this file's columns, primaryKey and idempotencyKey."
+  },
+  "tables": [
+    {
+      "name": "fact_energy_daily",
+      "grain": "One plant-day energy KPI.",
+      "primaryKey": ["date_key", "plant_id"],
+      "idempotencyKey": ["date_key", "plant_id"],
+      "columns": [
+        { "name": "date_key", "type": "date", "nullable": false },
+        { "name": "plant_id", "type": "string", "nullable": false },
+        { "name": "energy_gj", "type": "double", "nullable": false },
+        { "name": "electricity_mwh", "type": "double", "nullable": false },
+        { "name": "energy_cost_eur", "type": "double", "nullable": false },
+        { "name": "baseline_energy_gj", "type": "double", "nullable": false },
+        { "name": "baseline_cost_eur", "type": "double", "nullable": false },
+        { "name": "crude_steel_tons", "type": "double", "nullable": false },
+        { "name": "calculation_version", "type": "string", "nullable": false }
+      ]
+    },
+    {
+      "name": "fact_emissions_daily",
+      "grain": "One plant-day emissions KPI.",
+      "primaryKey": ["date_key", "plant_id"],
+      "idempotencyKey": ["date_key", "plant_id"],
+      "columns": [
+        { "name": "date_key", "type": "date", "nullable": false },
+        { "name": "plant_id", "type": "string", "nullable": false },
+        { "name": "scope1_co2e_t", "type": "double", "nullable": false },
+        { "name": "scope2_co2e_t", "type": "double", "nullable": false },
+        { "name": "total_co2e_t", "type": "double", "nullable": false },
+        { "name": "baseline_co2e_t", "type": "double", "nullable": false },
+        { "name": "crude_steel_tons", "type": "double", "nullable": false },
+        { "name": "free_allocation_t", "type": "double", "nullable": false },
+        { "name": "ets_allowance_price_eur_per_t", "type": "double", "nullable": false },
+        { "name": "ets_exposure_eur", "type": "double", "nullable": false },
+        { "name": "calculation_version", "type": "string", "nullable": false }
+      ]
+    },
+    {
+      "name": "fact_production_shift",
+      "grain": "One plant production shift.",
+      "primaryKey": ["shift_id"],
+      "idempotencyKey": ["shift_id"],
+      "columns": [
+        { "name": "shift_id", "type": "string", "nullable": false },
+        { "name": "shift_date", "type": "date", "nullable": false },
+        { "name": "plant_id", "type": "string", "nullable": false },
+        { "name": "line_id", "type": "string", "nullable": false },
+        { "name": "planned_minutes", "type": "double", "nullable": false },
+        { "name": "runtime_minutes", "type": "double", "nullable": false },
+        { "name": "ideal_rate_tph", "type": "double", "nullable": false },
+        { "name": "total_tons", "type": "double", "nullable": false },
+        { "name": "good_tons", "type": "double", "nullable": false },
+        { "name": "crude_steel_tons", "type": "double", "nullable": false },
+        { "name": "on_time_orders", "type": "long", "nullable": false },
+        { "name": "total_orders", "type": "long", "nullable": false },
+        { "name": "calculation_version", "type": "string", "nullable": false }
+      ]
+    },
+    {
+      "name": "fact_quality_yield",
+      "grain": "One plant, grade, and production-day yield KPI.",
+      "primaryKey": ["date_key", "plant_id", "grade_code"],
+      "idempotencyKey": ["date_key", "plant_id", "grade_code"],
+      "columns": [
+        { "name": "date_key", "type": "date", "nullable": false },
+        { "name": "plant_id", "type": "string", "nullable": false },
+        { "name": "grade_code", "type": "string", "nullable": false },
+        { "name": "high_grade_flag", "type": "boolean", "nullable": false },
+        { "name": "attempted_tons", "type": "double", "nullable": false },
+        { "name": "first_pass_good_tons", "type": "double", "nullable": false },
+        { "name": "rework_tons", "type": "double", "nullable": false },
+        { "name": "downgrade_tons", "type": "double", "nullable": false },
+        { "name": "scrap_tons", "type": "double", "nullable": false },
+        { "name": "defect_count", "type": "long", "nullable": false },
+        { "name": "produced_units", "type": "long", "nullable": false },
+        { "name": "open_ncr_count", "type": "long", "nullable": false },
+        { "name": "calculation_version", "type": "string", "nullable": false }
+      ]
+    },
+    {
+      "name": "fact_furnace_rul",
+      "grain": "One asset scored forecast.",
+      "primaryKey": ["inference_id"],
+      "idempotencyKey": ["inference_id"],
+      "columns": [
+        { "name": "inference_id", "type": "string", "nullable": false },
+        { "name": "scored_date", "type": "date", "nullable": false },
+        { "name": "scored_at", "type": "timestamp", "nullable": false },
+        { "name": "plant_id", "type": "string", "nullable": false },
+        { "name": "asset_id", "type": "string", "nullable": false },
+        { "name": "component_id", "type": "string", "nullable": true },
+        { "name": "rul_days_p10", "type": "double", "nullable": false },
+        { "name": "rul_days_p50", "type": "double", "nullable": false },
+        { "name": "rul_days_p90", "type": "double", "nullable": false },
+        { "name": "risk_score", "type": "double", "nullable": false },
+        { "name": "confidence", "type": "double", "nullable": false },
+        { "name": "predicted_failure_date", "type": "date", "nullable": false },
+        { "name": "alert_issued_at", "type": "timestamp", "nullable": true },
+        { "name": "actual_reline_or_failure_at", "type": "timestamp", "nullable": true },
+        { "name": "unplanned_outage_flag", "type": "boolean", "nullable": false },
+        { "name": "model_version", "type": "string", "nullable": false },
+        { "name": "top_factors_json", "type": "string", "nullable": true },
+        { "name": "scenario_id", "type": "string", "nullable": false },
+        { "name": "seed", "type": "long", "nullable": false }
+      ]
+    },
+    {
+      "name": "fact_dispatch_recommendation",
+      "grain": "One energy dispatch recommendation.",
+      "primaryKey": ["recommendation_id"],
+      "idempotencyKey": ["recommendation_id"],
+      "columns": [
+        { "name": "recommendation_id", "type": "string", "nullable": false },
+        { "name": "recommendation_date", "type": "date", "nullable": false },
+        { "name": "issued_at", "type": "timestamp", "nullable": false },
+        { "name": "plant_id", "type": "string", "nullable": false },
+        { "name": "status", "type": "string", "nullable": false },
+        { "name": "baseline_cost_eur", "type": "double", "nullable": false },
+        { "name": "optimized_cost_eur", "type": "double", "nullable": false },
+        { "name": "as_run_cost_eur", "type": "double", "nullable": false },
+        { "name": "expected_cost_avoidance_eur", "type": "double", "nullable": false },
+        { "name": "realized_cost_avoidance_eur", "type": "double", "nullable": false },
+        { "name": "expected_co2_avoided_t", "type": "double", "nullable": false },
+        { "name": "shiftable_mw", "type": "double", "nullable": false },
+        { "name": "hard_constraint_violations", "type": "long", "nullable": false },
+        { "name": "model_version", "type": "string", "nullable": false },
+        { "name": "correlation_id", "type": "string", "nullable": false }
+      ]
+    },
+    {
+      "name": "fact_knowledge_procedure",
+      "grain": "One approved immutable procedure version.",
+      "primaryKey": ["procedure_id", "version"],
+      "idempotencyKey": ["procedure_id", "version"],
+      "columns": [
+        { "name": "procedure_id", "type": "string", "nullable": false },
+        { "name": "version", "type": "int", "nullable": false },
+        { "name": "topic_id", "type": "string", "nullable": false },
+        { "name": "equipment_id", "type": "string", "nullable": false },
+        { "name": "review_status", "type": "string", "nullable": false },
+        { "name": "approved_flag", "type": "boolean", "nullable": false },
+        { "name": "published_date", "type": "date", "nullable": false },
+        { "name": "source_citation_count", "type": "long", "nullable": false },
+        { "name": "content_hash", "type": "string", "nullable": false }
+      ]
+    },
+    {
+      "name": "fact_ai_decision_audit",
+      "grain": "One append-only audit evidence record.",
+      "primaryKey": ["audit_id"],
+      "idempotencyKey": ["audit_id"],
+      "appendOnly": true,
+      "columns": [
+        { "name": "audit_id", "type": "string", "nullable": false },
+        { "name": "recorded_date", "type": "date", "nullable": false },
+        { "name": "recorded_at", "type": "timestamp", "nullable": false },
+        { "name": "domain", "type": "string", "nullable": false },
+        { "name": "entity_id", "type": "string", "nullable": false },
+        { "name": "recommendation_status", "type": "string", "nullable": false },
+        { "name": "input_snapshot_ref", "type": "string", "nullable": false },
+        { "name": "model_version", "type": "string", "nullable": true },
+        { "name": "confidence", "type": "double", "nullable": false },
+        { "name": "human_decision_at", "type": "timestamp", "nullable": true },
+        { "name": "outcome_recorded_at", "type": "timestamp", "nullable": true },
+        { "name": "complete_audit_flag", "type": "boolean", "nullable": false },
+        { "name": "correlation_id", "type": "string", "nullable": false },
+        { "name": "projection_version", "type": "string", "nullable": false }
+      ]
+    }
+  ]
+}

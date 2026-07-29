@@ -65,8 +65,9 @@
         <LocaleListbox Locales="ShellState.Locales" Value="@Shell.Locale" ValueChanged="OnLocaleChanged"
                        AriaLabel="Selected locale" Compact="true" Class="locale-field" />
 
-        <button class="demo-button" type="button" @onclick="Shell.ToggleDemoMode" aria-pressed="@Shell.DemoMode">
-            @(Shell.DemoMode ? "DEMO" : "CLOUD")
+        <button class="bff-pill @BffPillClass" type="button" @onclick="ReprobeBff"
+                title="@BffPillTitle" aria-label="@BffPillTitle">
+            <span aria-hidden="true">●</span> @BffPillLabel
         </button>
 
         <details class="account-menu">
@@ -116,12 +117,9 @@
         </div>
     </header>
 
-    @if (Shell.DemoMode)
-    {
-        <div class="demo-banner" role="status">
-            Synthetic demo data — not for operational control
-        </div>
-    }
+    <div class="demo-banner" role="status">
+        Synthetic demo data — not for operational control
+    </div>
 
     <div class="shell-content">
         <aside class="shell-nav" aria-label="Persona navigation">
@@ -162,7 +160,7 @@
     </div>
 
     <footer class="shell-footer">
-        <span>@(Shell.DemoMode ? "Demo mode" : "Cloud mode") · BFF @Shell.BffBaseUrl</span>
+        <span>BFF @Shell.BffBaseUrl · @BffFooterStatus</span>
         <span>WCAG 2.2 AA target · synthetic evidence only</span>
     </footer>
 </div>
@@ -178,10 +176,51 @@
     private bool _focusHamburgerAfterSettingsClose;
     private ElementReference _hamburgerButton;
 
+    // The portal is always cloud-backed; this indicator states honestly whether
+    // the BFF answered, and lets the user re-check on demand.
+    private Task ReprobeBff() => Shell.ProbeBffAsync(announceSuccess: true);
+
+    private string BffPillLabel => Shell.BffProbeInFlight
+        ? "BFF…"
+        : Shell.BffReachable switch
+        {
+            true => "BFF online",
+            false => "BFF offline",
+            _ => "BFF",
+        };
+
+    private string BffPillClass => Shell.BffProbeInFlight
+        ? "bff-pill-probing"
+        : Shell.BffReachable switch
+        {
+            true => "bff-pill-online",
+            false => "bff-pill-offline",
+            _ => "bff-pill-unknown",
+        };
+
+    private string BffPillTitle => Shell.BffProbe is { } probe
+        ? probe.Reachable
+            ? $"Connected to {Shell.BffBaseUrl}. Click to re-check."
+            : $"{Shell.BffBaseUrl} unreachable ({probe.Detail}). Screens use bundled synthetic data. Click to retry."
+        : $"Checking {Shell.BffBaseUrl}…";
+
+    private string BffFooterStatus => Shell.BffProbeInFlight
+        ? "checking connection…"
+        : Shell.BffReachable switch
+        {
+            true => "connected",
+            false => "unreachable — using bundled synthetic data",
+            _ => "connection not yet checked",
+        };
+
     protected override async Task OnInitializedAsync()
     {
         Shell.Changed += OnShellStateChanged;
         Capacity.Changed += OnShellStateChanged;
+        // The portal is always cloud-backed, so the reachability probe runs on
+        // start rather than behind a mode switch; the indicator updates when it
+        // lands. Fire-and-forget so the first render is not blocked on the BFF.
+        _ = Shell.ProbeBffAsync(announceSuccess: false);
         // Stored preferences are applied before the first capacity call so the
         // panel is fetched in the language the visitor last chose.
         await Preferences.InitializeAsync();
@@ -287,7 +326,7 @@
     {
         CloseHamburger();
         Shell.PublishToast("info",
-            $"NovaSteel v1.0 — Demo platform for AxelorMetal. All data is synthetic. Mode: {(Shell.DemoMode ? "DEMO" : "CLOUD")}.");
+            "NovaSteel v1.0 — Demo platform for AxelorMetal. All data is synthetic.");
     }
 
     private bool IsActive(ShellNavItem item) =>
