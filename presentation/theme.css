@@ -1,0 +1,462 @@
+/* @theme novasteel */
+
+/*
+ * NovaSteel editorial theme for Marp.
+ *
+ * Palette is derived from the NovaSteel / AxelorMetal brand assets committed in
+ * apps/portal-shell/wwwroot/brand: molten-orange accent on a cool graphite base.
+ * Class contract consumed by slides.md: lead, tight, backup, cards[.four],
+ * card[.teal|.orange|.purple|.green], card-num, split[.right-wide], stat/big/label,
+ * pill[.green|.orange|.purple|.gray|.blue], tag, grad, hero-line, herostats.
+ */
+
+@import 'default';
+
+:root {
+  --ns-ink: #0f172a;
+  --ns-ink-soft: #475569;
+  --ns-line: #dbe1ea;
+  --ns-surface: #ffffff;
+  --ns-surface-alt: #f4f6fa;
+  --ns-molten: #d4571b;
+  --ns-molten-soft: #fdece2;
+  --ns-teal: #0f766e;
+  --ns-teal-soft: #e2f4f2;
+  --ns-purple: #5b4bb7;
+  --ns-purple-soft: #eceaf9;
+  --ns-green: #157347;
+  --ns-green-soft: #e4f3ea;
+  --ns-blue: #1f5fa9;
+  --ns-blue-soft: #e6eff9;
+}
+
+section {
+  width: 1280px;
+  height: 720px;
+  padding: 56px 72px 72px;
+  background: var(--ns-surface);
+  color: var(--ns-ink);
+  font-family: 'Segoe UI', 'Selawik', 'Helvetica Neue', Arial, 'Noto Color Emoji', 'Segoe UI Emoji', sans-serif;
+  font-size: 24px;
+  line-height: 1.45;
+  align-content: center;
+}
+
+section::after {
+  color: var(--ns-ink-soft);
+  font-size: 16px;
+  right: 40px;
+  bottom: 24px;
+}
+
+header {
+  color: var(--ns-ink-soft);
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  left: 72px;
+  top: 24px;
+}
+
+footer {
+  color: var(--ns-molten);
+  font-size: 15px;
+  font-weight: 600;
+  left: 72px;
+  bottom: 24px;
+}
+
+h1 {
+  font-size: 52px;
+  line-height: 1.1;
+  margin: 0 0 20px;
+  color: var(--ns-ink);
+  letter-spacing: -0.015em;
+}
+
+h1::after {
+  content: '';
+  display: block;
+  width: 96px;
+  height: 5px;
+  margin-top: 18px;
+  background: var(--ns-molten);
+  border-radius: 3px;
+}
+
+h2 {
+  font-size: 30px;
+  font-weight: 600;
+  color: var(--ns-ink-soft);
+  margin: 0 0 14px;
+}
+
+h3 {
+  font-size: 22px;
+  margin: 0 0 6px;
+}
+
+p,
+li {
+  font-size: 22px;
+}
+
+ul,
+ol {
+  margin: 8px 0;
+}
+
+li {
+  margin-bottom: 6px;
+}
+
+strong {
+  color: var(--ns-ink);
+}
+
+a {
+  color: var(--ns-blue);
+}
+
+blockquote {
+  margin: 20px 0 0;
+  padding: 14px 22px;
+  border: 0;
+  border-left: 5px solid var(--ns-molten);
+  background: var(--ns-surface-alt);
+  color: var(--ns-ink);
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 600;
+  border-radius: 0 8px 8px 0;
+}
+
+blockquote::before,
+blockquote::after {
+  content: none;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 19px;
+  margin-top: 12px;
+}
+
+th {
+  background: var(--ns-surface-alt);
+  color: var(--ns-ink);
+  text-align: left;
+  font-weight: 600;
+}
+
+th,
+td {
+  border: 1px solid var(--ns-line);
+  padding: 8px 12px;
+}
+
+code {
+  background: var(--ns-surface-alt);
+  color: var(--ns-ink);
+  font-size: 0.9em;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+img {
+  display: block;
+  margin: 0 auto;
+  border-radius: 10px;
+}
+
+/* Marp sizes images with an inline width; keep them inside a split column. */
+.split img {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+/* --- density variants ------------------------------------------------- */
+
+section.tight {
+  padding: 44px 56px 60px;
+}
+
+section.tight h1 {
+  font-size: 40px;
+  margin-bottom: 14px;
+}
+
+section.tight h1::after {
+  margin-top: 12px;
+  height: 4px;
+  width: 72px;
+}
+
+section.tight p,
+section.tight li {
+  font-size: 20px;
+}
+
+section.backup {
+  background: var(--ns-surface-alt);
+}
+
+section.backup h1 {
+  color: var(--ns-blue);
+}
+
+section.backup h1::after {
+  background: var(--ns-blue);
+}
+
+/* --- lead / title slide ------------------------------------------------ */
+
+section.lead {
+  background:
+    radial-gradient(circle at 82% 12%, rgba(212, 87, 27, 0.16), transparent 46%),
+    linear-gradient(150deg, #0f172a 0%, #16233d 58%, #1f2f4d 100%);
+  color: #f8fafc;
+  justify-content: center;
+}
+
+section.lead h1 {
+  font-size: 62px;
+  color: #ffffff;
+}
+
+section.lead h1::after {
+  content: none;
+}
+
+section.lead h2 {
+  color: #cbd5e1;
+  font-size: 28px;
+  font-weight: 500;
+}
+
+section.lead h3 {
+  color: #94a3b8;
+  font-size: 21px;
+  font-weight: 500;
+}
+
+section.lead p {
+  color: #e2e8f0;
+}
+
+section.lead img {
+  border-radius: 0;
+}
+
+.grad {
+  background: linear-gradient(96deg, #f9a03f 0%, #d4571b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.tag {
+  display: inline-block;
+  padding: 7px 16px;
+  margin-bottom: 22px;
+  border: 1px solid rgba(248, 250, 252, 0.35);
+  border-radius: 999px;
+  font-size: 17px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #e2e8f0;
+}
+
+.hero-line {
+  width: 180px;
+  height: 5px;
+  margin: 10px 0 22px;
+  background: linear-gradient(90deg, #f9a03f 0%, #d4571b 100%);
+  border-radius: 3px;
+}
+
+.herostats {
+  display: flex;
+  gap: 26px;
+  margin-top: 34px;
+}
+
+.herostats .s {
+  flex: 1;
+  padding: 14px 18px;
+  border-radius: 10px;
+  background: rgba(248, 250, 252, 0.08);
+  border: 1px solid rgba(248, 250, 252, 0.16);
+}
+
+.herostats .s b {
+  display: block;
+  font-size: 32px;
+  color: #f9a03f;
+  line-height: 1.15;
+}
+
+.herostats .s span {
+  display: block;
+  margin-top: 4px;
+  font-size: 15px;
+  color: #cbd5e1;
+}
+
+/* --- card grid --------------------------------------------------------- */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin: 18px 0 0;
+}
+
+.cards.four {
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.card {
+  padding: 16px 18px;
+  border: 1px solid var(--ns-line);
+  border-top: 4px solid var(--ns-molten);
+  border-radius: 10px;
+  background: var(--ns-molten-soft);
+}
+
+.card h3 {
+  font-size: 20px;
+  margin: 0 0 6px;
+}
+
+.card p {
+  font-size: 17px;
+  line-height: 1.4;
+  margin: 0;
+  color: var(--ns-ink-soft);
+}
+
+.card-num {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ns-molten);
+  margin-bottom: 6px;
+}
+
+.card.teal {
+  border-top-color: var(--ns-teal);
+  background: var(--ns-teal-soft);
+}
+
+.card.teal .card-num {
+  color: var(--ns-teal);
+}
+
+.card.purple {
+  border-top-color: var(--ns-purple);
+  background: var(--ns-purple-soft);
+}
+
+.card.purple .card-num {
+  color: var(--ns-purple);
+}
+
+.card.green {
+  border-top-color: var(--ns-green);
+  background: var(--ns-green-soft);
+}
+
+.card.green .card-num {
+  color: var(--ns-green);
+}
+
+.card.orange {
+  border-top-color: var(--ns-molten);
+  background: var(--ns-molten-soft);
+}
+
+/* --- two-column split -------------------------------------------------- */
+
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 34px;
+  align-items: start;
+  margin-top: 12px;
+}
+
+.split.right-wide {
+  grid-template-columns: 5fr 7fr;
+}
+
+.split > div > *:first-child {
+  margin-top: 0;
+}
+
+/* --- statistics -------------------------------------------------------- */
+
+.stat {
+  margin-bottom: 18px;
+  padding-left: 16px;
+  border-left: 4px solid var(--ns-molten);
+}
+
+.stat .big {
+  font-size: 46px;
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--ns-ink);
+}
+
+.stat .label {
+  font-size: 18px;
+  color: var(--ns-ink-soft);
+}
+
+/* --- chips ------------------------------------------------------------- */
+
+.pill {
+  display: inline-block;
+  margin: 4px 6px 4px 0;
+  padding: 5px 13px;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 600;
+  background: var(--ns-surface-alt);
+  color: var(--ns-ink-soft);
+  border: 1px solid var(--ns-line);
+}
+
+.pill.green {
+  background: var(--ns-green-soft);
+  color: var(--ns-green);
+  border-color: #bfe3ce;
+}
+
+.pill.orange {
+  background: var(--ns-molten-soft);
+  color: var(--ns-molten);
+  border-color: #f6cdb5;
+}
+
+.pill.purple {
+  background: var(--ns-purple-soft);
+  color: var(--ns-purple);
+  border-color: #cfc9ef;
+}
+
+.pill.blue {
+  background: var(--ns-blue-soft);
+  color: var(--ns-blue);
+  border-color: #c3d8ef;
+}
+
+.pill.gray {
+  background: #eef1f6;
+  color: var(--ns-ink-soft);
+  border-color: var(--ns-line);
+}
