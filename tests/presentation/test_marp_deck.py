@@ -132,7 +132,11 @@ def test_deck_carries_the_architecture_and_ai_flow_diagrams() -> None:
     _, slides = _front_matter_and_slides()
     diagrams = [slide for slide in slides if '<div class="flow">' in slide]
     assert len(diagrams) == 2, "the deck needs an architecture diagram and an AI detail diagram"
-    titles = [re.search(r"(?m)^#\s+(.*)$", slide).group(1) for slide in diagrams]
+    titles = []
+    for slide in diagrams:
+        heading = re.search(r"(?m)^#\s+(.*)$", slide)
+        assert heading is not None, "a diagram slide is missing its title"
+        titles.append(heading.group(1))
     assert titles == ["Architecture at a Glance", "AI Architecture in Detail"]
 
 
