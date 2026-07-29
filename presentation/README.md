@@ -43,6 +43,12 @@ artifacts, and publishes the HTML deck to GitHub Pages under `/deck/`. The Pages
 copy is generated from a stripped `slides.pages.md` so speaker notes are never
 published on the web.
 
+Publishing requires GitHub Pages to be enabled once, by a repository admin, under
+**Settings → Pages → Source: GitHub Actions**. The workflow's `GITHUB_TOKEN` cannot
+create the Pages site itself, so while Pages is disabled the `Configure Pages` step
+only emits a warning: the deck is still built, verified and uploaded as workflow
+artifacts, and the `github-pages-deploy` job is skipped.
+
 ## Editing rules
 
 - Every content slide carries exactly one speaker note comment that starts with a

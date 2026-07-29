@@ -168,3 +168,18 @@ def test_presentation_workflow_builds_and_publishes_the_deck() -> None:
     assert "tests/presentation" in workflow
     assert "NovaSteel-Oral-Defense.pptx" in workflow
     assert "NovaSteel-Oral-Defense.pdf" in workflow
+
+
+def test_presentation_workflow_never_bootstraps_github_pages() -> None:
+    """``enablement: true`` needs ``administration: write``, which GITHUB_TOKEN
+    cannot have, so Pages must be enabled once in the repository settings and the
+    publishing steps must not break the deck build when it is not."""
+
+    workflow = _read(ROOT / ".github" / "workflows" / "presentation.yml")
+
+    assert "enablement" not in workflow
+    assert "actions/configure-pages@" in workflow
+    assert "continue-on-error: true" in workflow
+    assert "pages_configured: ${{ steps.pages.outcome }}" in workflow
+    assert "steps.pages.outcome == 'success'" in workflow
+    assert "needs.build.outputs.pages_configured == 'success'" in workflow

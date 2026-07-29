@@ -33,6 +33,8 @@ jobs:
       contents: read
       pages: write
       id-token: write
+    outputs:
+      pages_configured: ${{ steps.pages.outcome }}
     env:
       NPM_CONFIG_REGISTRY: ${{ vars.NPM_PROTECTED_REGISTRY || 'https://packagefeedproxy.microsoft.io/npm/' }}
       PIP_CONFIG_FILE: ${{ github.workspace }}/pip.conf
@@ -115,13 +117,23 @@ jobs:
           mkdir -p ../_site/deck/images
           cp images/* ../_site/deck/images/
           cp dist/NovaSteel-Oral-Defense.pdf dist/NovaSteel-Oral-Defense.pptx ../_site/deck/
+      # Pages must be enabled once in Settings -> Pages with "GitHub Actions" as the
+      # source: GITHUB_TOKEN cannot create the Pages site itself (that needs
+      # administration: write), so asking the action to bootstrap Pages fails with
+      # "Resource not accessible by integration". Until Pages is enabled the deck
+      # artifacts stay the deliverable, so publishing is best-effort, not blocking.
       - name: Configure Pages
+        id: pages
         if: github.event_name != 'pull_request'
+        continue-on-error: true
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
-        with:
-          enablement: true
+      - name: Report that GitHub Pages is not enabled
+        if: github.event_name != 'pull_request' && steps.pages.outcome != 'success'
+        shell: bash
+        run: |
+          echo "::warning title=GitHub Pages is not enabled::Enable it in Settings -> Pages with 'GitHub Actions' as the source to publish the web deck. The deck artifacts were still built and uploaded."
       - name: Upload the Pages artifact
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && steps.pages.outcome == 'success'
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: _site
@@ -129,7 +141,7 @@ jobs:
   deploy:
     name: github-pages-deploy
     needs: build
-    if: github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request' && needs.build.outputs.pages_configured == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: read
