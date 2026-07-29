@@ -1,0 +1,144 @@
+name: Presentation
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'presentation/**'
+      - 'tests/presentation/**'
+      - 'apps/portal-shell/wwwroot/brand/**'
+      - 'tools/presentation/assets/**'
+      - 'docs/presentation/assets/app-guide/screenshots/**'
+      - '.github/workflows/presentation.yml'
+  pull_request:
+    paths:
+      - 'presentation/**'
+      - 'tests/presentation/**'
+      - '.github/workflows/presentation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: presentation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: marp-build-deck
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    env:
+      NPM_CONFIG_REGISTRY: ${{ vars.NPM_PROTECTED_REGISTRY || 'https://packagefeedproxy.microsoft.io/npm/' }}
+      PIP_CONFIG_FILE: ${{ github.workspace }}/pip.conf
+      PIP_INDEX_URL: https://packagefeedproxy.microsoft.io/pypi/simple
+      PIP_EXTRA_INDEX_URL: ""
+      PIP_NO_INPUT: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: tests/presentation/requirements.txt
+      - name: Require an approved npm registry
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$NPM_CONFIG_REGISTRY"
+          case "$NPM_CONFIG_REGISTRY" in
+            https://registry.npmjs.org*|https://registry.yarnpkg.com*) exit 1 ;;
+            https://*) ;;
+            *) exit 1 ;;
+          esac
+      - name: Restore pinned Python test dependencies from the protected feed
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check -r tests/presentation/requirements.txt
+      - name: Validate deck source structure and timing budget
+        run: python -m pytest tests/presentation -q
+      - name: Restore Marp through the protected feed
+        working-directory: presentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f package-lock.json ]; then
+            npm ci --ignore-scripts
+          else
+            npm install --ignore-scripts --no-audit --no-fund
+          fi
+      - name: Build HTML, PDF, speaker-note PDF and PPTX
+        working-directory: presentation
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        run: npm run build
+      - name: Verify the generated deck artifacts
+        working-directory: presentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          for artifact in dist/index.html dist/NovaSteel-Oral-Defense.pdf \
+            dist/NovaSteel-Oral-Defense-notes.pdf dist/NovaSteel-Oral-Defense.pptx; do
+            test -s "$artifact"
+            echo "ok  $artifact  $(wc -c < "$artifact") bytes"
+          done
+      - name: Publish the deck artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: novasteel-presentation-${{ github.run_id }}
+          path: |
+            presentation/dist/NovaSteel-Oral-Defense.pdf
+            presentation/dist/NovaSteel-Oral-Defense-notes.pdf
+            presentation/dist/NovaSteel-Oral-Defense.pptx
+          if-no-files-found: error
+          retention-days: 90
+      - name: Assemble the Pages site without speaker notes
+        if: github.event_name != 'pull_request'
+        working-directory: presentation
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        run: |
+          set -euo pipefail
+          node scripts/strip-notes.mjs
+          npx marp --theme theme.css --html --allow-local-files slides.pages.md -o ../_site/deck/index.html
+          mkdir -p ../_site/deck/images
+          cp images/* ../_site/deck/images/
+          cp dist/NovaSteel-Oral-Defense.pdf dist/NovaSteel-Oral-Defense.pptx ../_site/deck/
+      - name: Configure Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+        with:
+          enablement: true
+      - name: Upload the Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: _site
+
+  deploy:
+    name: github-pages-deploy
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0

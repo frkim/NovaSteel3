@@ -1,0 +1,23 @@
+{
+  "name": "novasteel-presentation",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Marp source for the NovaSteel oral-defense deck (HTML, PDF and PPTX).",
+  "type": "module",
+  "scripts": {
+    "images": "node scripts/sync-images.mjs",
+    "dev": "npm run images && marp --theme theme.css --html --allow-local-files -s .",
+    "html": "npm run images && marp --theme theme.css --html --allow-local-files slides.md -o dist/index.html",
+    "pdf": "npm run images && marp --theme theme.css --html --allow-local-files --pdf slides.md -o dist/NovaSteel-Oral-Defense.pdf",
+    "pdf-notes": "npm run images && marp --theme theme.css --html --allow-local-files --pdf --pdf-notes slides.md -o dist/NovaSteel-Oral-Defense-notes.pdf",
+    "pptx": "npm run images && marp --theme theme.css --html --allow-local-files --pptx slides.md -o dist/NovaSteel-Oral-Defense.pptx && node scripts/format-pptx-notes.mjs dist/NovaSteel-Oral-Defense.pptx",
+    "build": "npm run html && npm run pdf && npm run pdf-notes && npm run pptx && npm run verify",
+    "verify": "node scripts/verify-build.mjs"
+  },
+  "dependencies": {
+    "@marp-team/marp-cli": "4.5.0"
+  },
+  "devDependencies": {
+    "adm-zip": "0.6.0"
+  }
+}
