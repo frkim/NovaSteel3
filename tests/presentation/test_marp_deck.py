@@ -170,6 +170,26 @@ def test_presentation_workflow_builds_and_publishes_the_deck() -> None:
     assert "NovaSteel-Oral-Defense.pdf" in workflow
 
 
+def test_presentation_workflow_publishes_every_built_document_as_an_artifact() -> None:
+    """The HTML deck, both PDFs and the PPTX must be downloadable from every run,
+    including pull-request runs, so reviewers never have to build the deck."""
+
+    workflow = _read(ROOT / ".github" / "workflows" / "presentation.yml")
+    upload = workflow.split("- name: Publish the deck artifacts", 1)[1]
+    upload = upload.split("- name: Assemble the Pages site", 1)[0]
+
+    assert "actions/upload-artifact@" in upload
+    for document in (
+        "presentation/dist/index.html",
+        "presentation/dist/NovaSteel-Oral-Defense.pdf",
+        "presentation/dist/NovaSteel-Oral-Defense-notes.pdf",
+        "presentation/dist/NovaSteel-Oral-Defense.pptx",
+    ):
+        assert document in upload
+    assert "if-no-files-found: error" in upload
+    assert "if:" not in upload, "deck artifacts must also be published on pull requests"
+
+
 def test_presentation_workflow_never_bootstraps_github_pages() -> None:
     """``enablement: true`` needs ``administration: write``, which GITHUB_TOKEN
     cannot have, so Pages must be enabled once in the repository settings and the

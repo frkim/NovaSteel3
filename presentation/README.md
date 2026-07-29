@@ -37,11 +37,13 @@ root [`.npmrc`](../.npmrc); never add a public registry here.
 ## Build in CI
 
 [`.github/workflows/presentation.yml`](../.github/workflows/presentation.yml) rebuilds
-the deck on every push that touches `presentation/`, uploads `NovaSteel-Oral-Defense.pdf`,
-`NovaSteel-Oral-Defense-notes.pdf` and `NovaSteel-Oral-Defense.pptx` as workflow
-artifacts, and publishes the HTML deck to GitHub Pages under `/deck/`. The Pages
-copy is generated from a stripped `slides.pages.md` so speaker notes are never
-published on the web.
+the deck on every push and pull request that touches `presentation/`, and uploads the
+whole build output — `index.html`, `NovaSteel-Oral-Defense.pdf`,
+`NovaSteel-Oral-Defense-notes.pdf` and `NovaSteel-Oral-Defense.pptx` — as the
+`novasteel-presentation-<run id>` workflow artifact (90-day retention). The run summary
+lists each file with its size. On `main` it also publishes the HTML deck to GitHub Pages
+under `/deck/`. The Pages copy is generated from a stripped `slides.pages.md` so speaker
+notes are never published on the web.
 
 Publishing requires GitHub Pages to be enabled once, by a repository admin, under
 **Settings → Pages → Source: GitHub Actions**. The workflow's `GITHUB_TOKEN` cannot
