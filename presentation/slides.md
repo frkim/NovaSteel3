@@ -17,6 +17,12 @@ footer: 'Phase 0 · Real architecture, synthetic data · AI advises, humans deci
 
 Microsoft Fabric–centered architecture · AxelorMetal · 4 EU countries
 
+<div class="brandbar">
+<img src="images/novasteel-logo.png" alt="NovaSteel" onerror="this.remove()">
+<img src="images/ama-logo.png" alt="AxelorMetal" onerror="this.remove()">
+<img src="images/microsoft-logo.png" alt="Microsoft" onerror="this.remove()">
+</div>
+
 <div class="herostats">
 <div class="s"><b>−14%</b><span>energy per ton · target</span></div>
 <div class="s"><b>−22%</b><span>CO₂ per ton · target</span></div>

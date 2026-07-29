@@ -65,6 +65,12 @@ artifacts, and the `github-pages-deploy` job is skipped.
   `Phase 0 · Real architecture, synthetic data · AI advises, humans decide`
 - Only reference images that `scripts/sync-images.mjs` provides; the test suite
   checks every `images/…` reference against that manifest.
+- The title slide's logo bar reads `docs/images/logo/NovaSteel Logo.png`,
+  `docs/images/logo/ama_logo.png` (falling back to the tracked
+  `docs/AxelorMetal-web/logo/AxelorMetal_logo_full_alpha.png`) and
+  `docs/images/logo/microsoft_logo.png`. The Microsoft mark is a trademark asset the
+  repository does not ship: drop the file at that path and the next `npm run images`
+  picks it up, otherwise the slot removes itself and the bar closes up.
 - [`docs/presentation/oral-defense-and-slide-plan.md`](../docs/presentation/oral-defense-and-slide-plan.md)
   stays the authoritative narrative script; `slides.md` is its rendered deck.
   The PptxGenJS deck under [`tools/presentation`](../tools/presentation/README.md)

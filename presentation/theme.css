@@ -7,7 +7,7 @@
  * apps/portal-shell/wwwroot/brand: molten-orange accent on a cool graphite base.
  * Class contract consumed by slides.md: lead, tight, backup, cards[.four],
  * card[.teal|.orange|.purple|.green], card-num, split[.right-wide], stat/big/label,
- * pill[.green|.orange|.purple|.gray|.blue], tag, grad, hero-line, herostats,
+ * pill[.green|.orange|.purple|.gray|.blue], tag, grad, hero-line, herostats, brandbar,
  * flow/lane[.teal|.orange|.purple|.green|.blue]/lane-tag/nodes/node/arrow/legend.
  */
 
@@ -275,6 +275,28 @@ section.lead img {
   margin: 10px 0 22px;
   background: linear-gradient(90deg, #f9a03f 0%, #d4571b 100%);
   border-radius: 3px;
+}
+
+/* Title-slide logo lockup. The sources are opaque artwork on white, so they sit on
+   a light plate rather than directly on the dark lead background. Any logo whose
+   asset is absent removes itself (see slides.md), and the flex gap closes up. */
+.brandbar {
+  display: flex;
+  align-self: flex-start;
+  align-items: center;
+  justify-content: flex-start;
+  width: fit-content;
+  gap: 34px;
+  margin-top: 26px;
+  padding: 12px 22px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+}
+
+.brandbar img {
+  height: 34px;
+  width: auto;
 }
 
 .herostats {

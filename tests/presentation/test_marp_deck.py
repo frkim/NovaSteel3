@@ -27,6 +27,7 @@ TIMING_PATTERN = re.compile(r"^\s*⏱\s*(\d+):([0-5]\d)\s*·\s")
 SCOPED_CLASS_PATTERN = re.compile(r"<!--\s*_class:\s*(.*?)\s*-->")
 HTML_CLASS_PATTERN = re.compile(r'class="([^"]+)"')
 IMAGE_PATTERN = re.compile(r"!\[[^\]]*\]\(images/([^)]+)\)")
+HTML_IMAGE_PATTERN = re.compile(r'<img[^>]+src="images/([^"]+)"')
 PLACEHOLDERS = ("TODO", "TBD", "FIXME", "Lorem ipsum", "XXX")
 
 
@@ -98,9 +99,28 @@ def test_backup_slides_are_outside_the_speaking_budget() -> None:
 def test_referenced_images_are_provided_by_the_sync_script() -> None:
     sync_script = _read(PRESENTATION / "scripts" / "sync-images.mjs")
     available = set(re.findall(r'"([\w-]+\.png)"', sync_script))
-    referenced = set(IMAGE_PATTERN.findall(_read(SLIDES)))
+    slides = _read(SLIDES)
+    referenced = set(IMAGE_PATTERN.findall(slides)) | set(HTML_IMAGE_PATTERN.findall(slides))
     assert referenced, "the deck should use at least one visual"
     assert referenced <= available, f"unknown images referenced: {sorted(referenced - available)}"
+
+
+def test_title_slide_carries_the_three_brand_logos() -> None:
+    """The NovaSteel, AxelorMetal and Microsoft marks open the deck. Each one is
+    removed at render time when its source asset is absent, so a logo the repository
+    cannot ship (the Microsoft trademark) never leaves a broken image behind."""
+
+    _, slides = _front_matter_and_slides()
+    title = slides[0]
+    assert 'class="brandbar"' in title
+    for logo in ("novasteel-logo.png", "ama-logo.png", "microsoft-logo.png"):
+        assert f'src="images/{logo}"' in title
+        assert 'onerror="this.remove()"' in title
+
+    sync_script = _read(PRESENTATION / "scripts" / "sync-images.mjs")
+    assert "NovaSteel Logo.png" in sync_script
+    assert "ama_logo.png" in sync_script
+    assert "microsoft_logo.png" in sync_script
 
 
 def test_every_css_class_used_by_the_deck_exists_in_the_theme() -> None:
