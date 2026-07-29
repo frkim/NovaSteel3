@@ -17,8 +17,8 @@ PRESENTATION = ROOT / "presentation"
 SLIDES = PRESENTATION / "slides.md"
 THEME = PRESENTATION / "theme.css"
 
-MAIN_SLIDE_COUNT = 20
-BACKUP_SLIDE_COUNT = 6
+MAIN_SLIDE_COUNT = 22
+BACKUP_SLIDE_COUNT = 12
 MIN_TALK_SECONDS = 29 * 60
 MAX_TALK_SECONDS = 30 * 60
 
@@ -119,6 +119,29 @@ def test_deck_carries_no_placeholder_text() -> None:
     text = _read(SLIDES)
     found = [marker for marker in PLACEHOLDERS if marker in text]
     assert found == [], f"placeholder text left in the deck: {found}"
+
+
+def test_deck_drops_the_synthetic_realism_slide_and_guardrail() -> None:
+    text = _read(SLIDES)
+    assert "Synthetic Data & OT Realism" not in text
+    assert "Synthetic-only Phase 0" not in text
+    assert "NS-DEMO-*" not in text
+
+
+def test_deck_carries_the_architecture_and_ai_flow_diagrams() -> None:
+    _, slides = _front_matter_and_slides()
+    diagrams = [slide for slide in slides if '<div class="flow">' in slide]
+    assert len(diagrams) == 2, "the deck needs an architecture diagram and an AI detail diagram"
+    titles = [re.search(r"(?m)^#\s+(.*)$", slide).group(1) for slide in diagrams]
+    assert titles == ["Architecture at a Glance", "AI Architecture in Detail"]
+
+
+def test_deck_sizes_the_run_cost_for_one_site() -> None:
+    _, slides = _front_matter_and_slides()
+    cost = [slide for slide in slides if "What It Costs to Run One Site" in slide]
+    assert len(cost) == 1
+    for tier in ("**Mini**", "**Medium**", "**Large**"):
+        assert tier in cost[0], f"the cost slide must size the {tier} tier"
 
 
 def test_build_scripts_produce_html_pdf_and_pptx() -> None:

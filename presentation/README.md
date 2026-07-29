@@ -47,8 +47,9 @@ published on the web.
 
 - Every content slide carries exactly one speaker note comment that starts with a
   timing marker, e.g. `<!-- ⏱ 1:30 · … -->`. The markers are the timing budget:
-  `tests/presentation/test_marp_deck.py` fails the build if the 20 main slides do
-  not add up to a 30-minute talk.
+  `tests/presentation/test_marp_deck.py` fails the build if the 22 main slides do
+  not add up to a 30-minute talk. Backup and appendix slides carry `⏱ 0:00` so they
+  stay outside the speaking budget.
 - Keep the honesty contract of the project: 🎯 TARGET (projected outcome) versus
   🔬 EVIDENCE (reproducible synthetic-scenario result), and the persistent footer
   `Phase 0 · Synthetic demonstration · Not for operational control.`
