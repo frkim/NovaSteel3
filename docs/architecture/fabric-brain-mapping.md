@@ -168,7 +168,7 @@ produces synthetic Delta rows in `lh_novasteelv3_landing` from the same
 deterministic simulator config. This makes the demo reproducible end-to-end in
 Fabric without changing the simulator source.
 
-**Impact on existing architecture:** Phase 0 synthetic data remains isolated
+**Impact on existing architecture:** Demonstration synthetic data remains isolated
 (`NS-DEMO-*` namespace, `dataClassification: SYNTHETIC`). The medallion
 notebooks and pipelines already defined in the repo consume the Delta input
 without modification. No application code or contract file changes.

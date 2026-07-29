@@ -2,7 +2,7 @@
 
 The deck is generated in CI (``.github/workflows/presentation.yml``) straight from
 ``presentation/slides.md``. These checks keep that source buildable and keep the
-30-minute speaking budget honest before a single browser is started.
+35-minute speaking budget honest before a single browser is started.
 """
 
 from __future__ import annotations
@@ -18,9 +18,9 @@ SLIDES = PRESENTATION / "slides.md"
 THEME = PRESENTATION / "theme.css"
 
 MAIN_SLIDE_COUNT = 22
-BACKUP_SLIDE_COUNT = 12
-MIN_TALK_SECONDS = 29 * 60
-MAX_TALK_SECONDS = 30 * 60
+BACKUP_SLIDE_COUNT = 13
+MIN_TALK_SECONDS = 34 * 60
+MAX_TALK_SECONDS = 35 * 60
 
 NOTE_PATTERN = re.compile(r"<!--(?!\s*_)(.*?)-->", re.DOTALL)
 TIMING_PATTERN = re.compile(r"^\s*⏱\s*(\d+):([0-5]\d)\s*·\s")
@@ -60,10 +60,17 @@ def test_front_matter_declares_the_novasteel_marp_theme() -> None:
     assert "marp: true" in front_matter
     assert "theme: novasteel" in front_matter
     assert "paginate: true" in front_matter
-    assert "Phase 0 · Real architecture, synthetic data · AI advises, humans decide" in front_matter
+    assert "AI advises, humans decide" in front_matter
+    assert "Phase 0" not in front_matter
 
 
-def test_deck_has_twenty_main_slides_and_six_backup_slides() -> None:
+def test_deck_never_mentions_a_phase_zero() -> None:
+    """The "Phase 0" label was retired; the demonstration is named, not numbered."""
+
+    assert "Phase 0" not in _read(SLIDES)
+
+
+def test_deck_has_twenty_two_main_slides_and_thirteen_backup_slides() -> None:
     _, slides = _front_matter_and_slides()
     assert len(slides) == MAIN_SLIDE_COUNT + BACKUP_SLIDE_COUNT
     assert all("backup" not in _classes(slide) for slide in slides[:MAIN_SLIDE_COUNT])
@@ -78,16 +85,40 @@ def test_every_slide_carries_exactly_one_timed_speaker_note() -> None:
         _duration_seconds(notes[0])
 
 
-def test_main_slides_fit_the_thirty_minute_budget() -> None:
+def test_main_slides_fit_the_thirty_five_minute_budget() -> None:
     _, slides = _front_matter_and_slides()
     durations = [
         _duration_seconds(NOTE_PATTERN.findall(slide)[0]) for slide in slides[:MAIN_SLIDE_COUNT]
     ]
     total = sum(durations)
     assert MIN_TALK_SECONDS <= total <= MAX_TALK_SECONDS, (
-        f"main slides speak for {total // 60}:{total % 60:02d}; the budget is 29:00-30:00"
+        f"main slides speak for {total // 60}:{total % 60:02d}; the budget is 34:00-35:00"
     )
     assert all(duration > 0 for duration in durations)
+
+
+def test_deck_carries_a_compliance_slide_instead_of_the_deployment_slide() -> None:
+    """Regulatory posture earns a main slide; capacity and scale move to the appendix."""
+
+    _, slides = _front_matter_and_slides()
+    main = slides[:MAIN_SLIDE_COUNT]
+    backup = slides[MAIN_SLIDE_COUNT:]
+
+    compliance = [slide for slide in main if re.search(r"(?m)^#\s+Compliance\s*$", slide)]
+    assert len(compliance) == 1
+    for regulation in ("EU AI Act", "EU ETS", "IEC 62443", "NIS2", "GDPR"):
+        assert regulation in compliance[0], f"the compliance slide must name {regulation}"
+
+    assert not any("# Deployment, Capacity & Scale" in slide for slide in main)
+    assert any("Appendix — Deployment, Capacity & Scale" in slide for slide in backup)
+
+
+def test_demo_handoff_announces_a_ten_minute_demonstration() -> None:
+    _, slides = _front_matter_and_slides()
+    handoff = [slide for slide in slides if "What You'll See Next" in slide]
+    assert len(handoff) == 1
+    assert "10-minute demonstration" in handoff[0]
+    assert "15-minute" not in handoff[0]
 
 
 def test_backup_slides_are_outside_the_speaking_budget() -> None:

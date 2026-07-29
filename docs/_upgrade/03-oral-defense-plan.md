@@ -1,7 +1,7 @@
 # NovaSteel — 60-Minute Oral Defense Plan
 
 > Built on **Project B (`Novasteel 3`)** after the Wave 1 + Wave 2 modifications in
-> `02-modification-plan.md`. Structure follows B's existing **30 + 15 + 15** plan in
+> `02-modification-plan.md`. Structure follows B's existing **35 + 10 + 15** plan in
 > `docs\presentation\oral-defense-and-slide-plan.md`, reinforced with Project A's
 > business-case material.
 
@@ -21,34 +21,34 @@
 
 ---
 
-## Part 1 — Architecture & value story (00:00 – 30:00)
+## Part 1 — Architecture & value story (00:00 – 35:00)
 
 | Clock | Slide(s) | Content | Notes |
 |---|---|---|---|
 | 00:00–03:00 | 1–2 | **The hook.** Four numbers: energy = 35 % of cost · €8 M per lining failure · EU ETS penalties rising · operators retiring. Then: *"Four countries, one platform, three decisions."* | Do **not** open with architecture. Open with money and risk. |
 | 03:00–06:00 | 3–4 | **Business case.** €0.6–1.1 M build, €0.3–0.7 M/yr run, ~€24.5 M/yr energy benefit, sub-12-month payback, with sensitivity band. | 🎯 TARGET-labelled. From M7 (imported from Project A). |
-| 06:00–11:00 | 5–7 | **Target architecture.** OT gateway (outbound only) → Event Hubs → managed-identity relay → Fabric Eventstream → Eventhouse/KQL + OneLake medallion → Python advisory services → FastAPI BFF → Blazor shell + React dashboard. | Land the **safety boundary** here: decision support only — never PLC, interlock, setpoint, schedule-commit or CMMS write. Jurors remember this. |
-| 11:00–15:00 | 8–10 | **Design & scalability.** 6 resource groups, hub-and-spoke, **per-plant Event Hub + per-plant identity for all four countries**, 4 environments, 10 ADRs. Named patterns: Ports & Adapters, BFF, microfrontend, capacity state machine, idempotency, policy-as-code. | Compress these slides (they are B's densest). One pattern → one file → one trade-off, then move. |
-| 15:00–20:00 | 11–13 | **Security & compliance.** Private endpoints + private DNS everywhere · `disableLocalAuth: true` · **7 per-service managed identities + per-plant OT identity** · GitHub OIDC (no secrets) · **subscription-scope deny-public-network Azure Policy** · custom least-privilege `Fabric Capacity Operator` role · SHA-256 hash-chained audit · STRIDE threat model · **EU AI Act: high-risk-adjacent pending Legal**. | 🥇 **Your strongest 5 minutes.** Slow down. This is where B scores 5/5. Show the policy JSON on screen. |
-| 20:00–26:00 | 14–17 | **AI & agentic.** (a) Physics-informed RUL — heat-flux slope regression, P10/P50/P90 from fit residuals. (b) Energy dispatch — **PuLP/CBC MILP**, binary start-slot variables, no-overlap constraints, weighted CO₂+cost objective. (c) GenAI knowledge capture — grounded RAG on GPT-5, enforced citations, decline path, Content Safety. Then the **state graph**: DRAFT→IN_REVIEW→APPROVED with HITL gates, a **critic/reflection loop**, and the **RUL↔dispatch handoff**. | Post-M1/M2/M3/M6 this is real. Show the Mermaid state graph **generated from the code**. |
-| 26:00–29:00 | 18–19 | **Operations.** Correlation IDs end-to-end → W3C traceparent · the four business KPIs as Application Insights **custom metrics** · alert rules as Bicep resources · Sentinel · tiered retention (prod 365 d) · 9 CI workflows with CodeQL, SBOM, SHA-pinned actions. | From M4/M5. *"Every number on the executive dashboard is also a metric with an alert on it."* |
-| 29:00–30:00 | 20 | **Handoff to demo.** Restate the three decisions and name the personas about to be shown. | |
+| 06:00–12:00 | 5–7 | **Target architecture.** OT gateway (outbound only) → Event Hubs → managed-identity relay → Fabric Eventstream → Eventhouse/KQL + OneLake medallion → Python advisory services → FastAPI BFF → Blazor shell + React dashboard. | Land the **safety boundary** here: decision support only — never PLC, interlock, setpoint, schedule-commit or CMMS write. Jurors remember this. |
+| 12:00–16:30 | 8–10 | **Design & scalability.** 6 resource groups, hub-and-spoke, **per-plant Event Hub + per-plant identity for all four countries**, 4 environments, 10 ADRs. Named patterns: Ports & Adapters, BFF, microfrontend, capacity state machine, idempotency, policy-as-code. | Compress these slides (they are B's densest). One pattern → one file → one trade-off, then move. |
+| 16:30–23:00 | 11–13 | **Security & compliance.** Private endpoints + private DNS everywhere · `disableLocalAuth: true` · **7 per-service managed identities + per-plant OT identity** · GitHub OIDC (no secrets) · **subscription-scope deny-public-network Azure Policy** · custom least-privilege `Fabric Capacity Operator` role · SHA-256 hash-chained audit · STRIDE threat model · **EU AI Act: high-risk-adjacent pending Legal**. | 🥇 **Your strongest 6+ minutes.** Slow down. This is where B scores 5/5; give the added time to the compliance and EU AI Act story. Show the policy JSON on screen. |
+| 23:00–30:30 | 14–17 | **AI & agentic.** (a) Physics-informed RUL — heat-flux slope regression, P10/P50/P90 from fit residuals. (b) Energy dispatch — **PuLP/CBC MILP**, binary start-slot variables, no-overlap constraints, weighted CO₂+cost objective. (c) GenAI knowledge capture — grounded RAG on GPT-5, enforced citations, decline path, Content Safety. Then the **state graph**: DRAFT→IN_REVIEW→APPROVED with HITL gates, a **critic/reflection loop**, and the **RUL↔dispatch handoff**. | Post-M1/M2/M3/M6 this is real. Show the Mermaid state graph **generated from the code**. |
+| 30:30–34:00 | 18–19 | **Operations.** Correlation IDs end-to-end → W3C traceparent · the four business KPIs as Application Insights **custom metrics** · alert rules as Bicep resources · Sentinel · tiered retention (prod 365 d) · 9 CI workflows with CodeQL, SBOM, SHA-pinned actions. | From M4/M5. *"Every number on the executive dashboard is also a metric with an alert on it."* |
+| 34:00–35:00 | 20 | **Handoff to demo.** Restate the three decisions and name the personas about to be shown. | |
 
 ---
 
-## Part 2 — Live demonstration (30:00 – 45:00)
+## Part 2 — Live demonstration (35:00 – 45:00)
 
 Use `docs\demo\demo-runbook.md` and `drive_demo.py`. Deterministic seed, committed
 `demo-full` fixture, no cloud dependency for the core path.
 
 | Clock | Moment | Persona | Proof point | Route |
 |---|---|---|---|---|
-| 30:00–32:30 | 1 | **Plant Manager** | Command center: live estate across 4 countries, one screen | `/lu/command-center` |
-| 32:30–35:30 | 2 | **Reliability Engineer** | RUL forecast — **P10/P50/P90 = 18.69 / 19.65 / 20.61 days, risk 0.90 HIGH**, confidence 0.78 from a fitted wear slope of −3.21 mm/day (r² = 0.88). Change the thermal input, watch the forecast move (this is the M2 payoff) | `/lu/furnace-health/lining-forecast` |
-| 35:30–38:30 | 3 | **Energy Manager** | MILP dispatch — 960 = 960 tonnes conserved, **zero hard-constraint violations**, **7.25 % cost / 3.29 % CO₂ / 7.89 % peak reduction** (all whole-dispatch basis), peak 56.0 → 51.58 MW, CO₂ computed from per-slot carbon intensity | `/lu/energy-optimization/spot-price-schedule` |
-| 38:30–40:30 | 4 | **Quality Engineer** | Batch genealogy + bounded what-if 88 % → 95 %, **with no operational write** | `/lu/quality/batches` |
-| 40:30–43:00 | 5 | **Knowledge Engineer** | 🎬 **The set-piece.** A live GPT-5 extraction from an operator interview → **critic loop rejects an uncited claim** → revision → human approval gate → entry appended to the hash-chained audit | `/lu/knowledge-hub/procedures` |
-| 43:00–44:30 | 6 | **Sustainability / Audit** | Emissions ledger + `verify()` on the SHA-256 audit chain, live | `/lu/sustainability-compliance/emissions-ledger` |
+| 35:00–36:30 | 1 | **Plant Manager** | Command center: live estate across 4 countries, one screen | `/lu/command-center` |
+| 36:30–38:30 | 2 | **Reliability Engineer** | RUL forecast — **P10/P50/P90 = 18.69 / 19.65 / 20.61 days, risk 0.90 HIGH**, confidence 0.78 from a fitted wear slope of −3.21 mm/day (r² = 0.88). Change the thermal input, watch the forecast move (this is the M2 payoff) | `/lu/furnace-health/lining-forecast` |
+| 38:30–40:30 | 3 | **Energy Manager** | MILP dispatch — 960 = 960 tonnes conserved, **zero hard-constraint violations**, **7.25 % cost / 3.29 % CO₂ / 7.89 % peak reduction** (all whole-dispatch basis), peak 56.0 → 51.58 MW, CO₂ computed from per-slot carbon intensity | `/lu/energy-optimization/spot-price-schedule` |
+| 40:30–41:30 | 4 | **Quality Engineer** | Batch genealogy + bounded what-if 88 % → 95 %, **with no operational write** | `/lu/quality/batches` |
+| 41:30–43:30 | 5 | **Knowledge Engineer** | 🎬 **The set-piece.** A live GPT-5 extraction from an operator interview → **critic loop rejects an uncited claim** → revision → human approval gate → entry appended to the hash-chained audit | `/lu/knowledge-hub/procedures` |
+| 43:30–44:30 | 6 | **Sustainability / Audit** | Emissions ledger + `verify()` on the SHA-256 audit chain, live | `/lu/sustainability-compliance/emissions-ledger` |
 | 44:30–45:00 | — | **Close** | Executive overview; hand back to the panel | `/lu/executive-overview` |
 
 **Demo discipline**

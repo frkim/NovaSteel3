@@ -101,7 +101,7 @@ regarder :
 | Catalogue des exigences (source de vérité) | `apps/analytics-mfe/src/proof/proofCatalog.ts` |
 | Cahier des charges du cas d'usage | `docs/usecase/usecase.md` |
 | Document de preuve d'exécution | `docs/presentation/proof_of_execution.md` |
-| Runbook de démonstration (script de 15 min) | `docs/demo/demo-runbook.md` |
+| Runbook de démonstration (script de 10 min) | `docs/demo/demo-runbook.md` |
 | Code front-end | `apps/portal-shell/` (coque Blazor), `apps/analytics-mfe/` (React) |
 | Code back-end | `services/bff-api/`, `services/optimizer-worker/`, `services/scoring-worker/`, `services/knowledge-orchestrator/` |
 

@@ -37,7 +37,7 @@ Counts exclude `node_modules`, `.venv`, `.git`, and (for A) the `docs\usecase\0_
 | Category | Project A | Project B |
 |---|---|---|
 | Executive summary | ✓ `First_Proposal\00-executive-summary.md` (510 w) + ★ McKinsey `2_mckensey_analysis\00-executive-summary.md` (697 w) — names €24.5M/yr energy, payback <12 mo | ✓ Combined into `docs\README.md` + `oral-defense-and-slide-plan.md`; no dedicated ROI page but explicit refusal to quote a €/hr figure |
-| Business case / ROI | ★ `05-cost-estimate.md` (846 w) with build €0.6–1.1M, run €0.3–0.7M/yr, ~€24.5M/yr energy, conservative/base/optimistic + assumptions + sensitivity table | ~ deliberately no euro number; oral-defense-and-slide-plan §Slide 19 & FAQ Q16/Q17 explain *why*: "credible euro figure needs measured pilot CU consumption" — honest but light for a CFO |
+| Business case / ROI | ★ `05-cost-estimate.md` (846 w) with build €0.6–1.1M, run €0.3–0.7M/yr, ~€24.5M/yr energy, conservative/base/optimistic + assumptions + sensitivity table | ~ deliberately no euro number; oral-defense-and-slide-plan §"Appendix — Deployment, Capacity & Scale" backup slide & FAQ Q16/Q17 explain *why*: "credible euro figure needs measured pilot CU consumption" — honest but light for a CFO |
 | Strategic analysis (McKinsey-style) | ★ 16 files, ~14,900 w, industry context → operating model → risk register | ✗ none in that genre |
 | Solution architecture | ✓ `02-solution-architecture.md` (1,460 w) + `02a-fabric-iot-architecture.md` (3,140 w, 7-layer) | ★ `architecture\solution-architecture.md` (**7,131 w**), 12+ ADRs, explicit conflict-resolution table |
 | Deployment topology | ~ scattered in 02/02a/03 | ★ `architecture\deployment-topology.md` (**3,706 w**), Sweden Central primary, capacity lifecycle |
@@ -81,7 +81,7 @@ Counts exclude `node_modules`, `.venv`, `.git`, and (for A) the `docs\usecase\0_
 
 **Analysis for the CFO seat of the jury**
 - **Project A gives a CFO something to grade.** It commits to an ROI band, an assumptions table (A1–A10), a sensitivity table, and a per-persona role summary. Weakness: figures are all flagged "illustrative demo estimates" and the €24.5M figure is repeated in ≥3 files unchanged, which risks the impression of a headline number that has never been challenged. NPV/IRR are deferred to a workshop — mentioned but not computed.
-- **Project B refuses to bluff.** It explicitly says "I won't quote a €/hour figure" (Slide 19, FAQ Q16/Q17) because credible production cost requires measured pilot Fabric CU consumption. That is a **defensible position with a sophisticated CFO** ("this presenter won't invent numbers") but a **weakness with an impatient jury** that wants a bottom line. B compensates with a *savings-ledger mechanism* (Q4) — the way −14% will *become proven* rather than asserted — which is arguably the better strategic answer but requires patient explanation.
+- **Project B refuses to bluff.** It explicitly says "I won't quote a €/hour figure" (backup slide "Appendix — Deployment, Capacity & Scale", FAQ Q16/Q17) because credible production cost requires measured pilot Fabric CU consumption. That is a **defensible position with a sophisticated CFO** ("this presenter won't invent numbers") but a **weakness with an impatient jury** that wants a bottom line. B compensates with a *savings-ledger mechanism* (Q4) — the way −14% will *become proven* rather than asserted — which is arguably the better strategic answer but requires patient explanation.
 
 **Judgment:** for a rubric that rewards "**adapt to target audience level**", A's approach lands faster with a mixed jury; B's is more architect-mature but demands more talk-time to sell. Given the 60-minute format has budget for it, B's approach is defensible — but a *hybrid* would beat both (see §7 recommended agenda).
 
@@ -91,8 +91,8 @@ Counts exclude `node_modules`, `.venv`, `.git`, and (for A) the `docs\usecase\0_
 
 | Asset | Project A | Project B |
 |---|---|---|
-| **60-min minute-by-minute plan** | ✗ | ★ Yes — every slide has a `Duration` and `Running clock` (e.g. Slide 12: "2:00 · 16:15 → 18:15"), plus §4 checkpoints at 09:30, 16:15, 22:30, 29:15, 30:00, 45:00, 60:00 |
-| Deck outline | ✓ 16 slides, self-labeled "30–40 min" — **too short for the format** | ★ 20 primary + 6 FAQ backup slides, timed to 29:45 with 15 s buffer |
+| **60-min minute-by-minute plan** | ✗ | ★ Yes — every slide has a `Duration` and `Running clock` (e.g. Slide 12: "2:30 · 18:00 → 20:30"), plus §4 checkpoints at 10:00, 18:00, 25:30, 34:15, 35:00, 45:00, 60:00 |
+| Deck outline | ✓ 16 slides, self-labeled "30–40 min" — **too short for the format** | ★ 20 primary + 6 FAQ backup slides, timed to 34:45 with 15 s buffer |
 | Actual PPT file | ✗ | ★ Generated `NovaSteel-Oral-Defense.pptx` (2.1 MB) with a documented rebuild path (`npm run build`) and a title/backup structure validated by `pptx_titles.log` and `pptx_alignment.log` |
 | Speaker notes | ~ one-line "Notes:" per outline slide | ★ 60–150 words per slide, including *anticipated objections* rehearsed aloud (e.g., Slide 9: "Why not Databricks/Snowflake?"; Slide 10: "Contributor is too broad") |
 | Executive hook (first 3 min) | ✓ Executive Summary can be read in 60 s; deck outline Slides 1–5 approximately | ★ Slides 1–3 explicitly designed as the hook — title/framing (0:45) → business challenge (1:30) → cost of standing still (1:15) — closing on "doing nothing isn't neutral, it's the most expensive option" |
@@ -179,7 +179,7 @@ Rubric text (Excellent = 5): *"Clear, concise, and thorough presentation. Demons
 1. **Add one CFO bridge slide** with an *illustrative* build/run/benefit band (mirroring A's cost estimate) — explicitly labelled 🎯 TARGET with a stated assumption row and a sensitivity range. The current refusal to quote a number is defensible but leaves the CFO seat unfed for 60 minutes. Anchor it with the same discipline used elsewhere ("baseline X → Y with assumption Z").
 2. **Add a French-language executive summary and glossary** (1–2 pages) for the Luxembourg jury. The rest can stay English but the exec preamble in FR is a small effort with high adaptation-to-audience payoff for the rubric.
 3. **Add 2–3 hero visuals** — a real blast-furnace photo (or a permissive stock image), a Fabric-centered architecture rendered to PNG at high resolution, and a Sankey-style value flow — to relieve the slide density on Slides 1–8. The current `steelworks-hero.png` is procedurally generated and reads a bit synthetic.
-4. **Compress the "one idea per slide" principle harder on Slides 8–10** (Architecture Map / ADR / Trustworthy Data). At 5:15 of speech across three slides they are the densest patch of the 30 minutes; a rehearsal will show this. Consider one animated build-up on Slide 8 rather than three consecutive dense slides.
+4. **Compress the "one idea per slide" principle harder on Slides 8–10** (Architecture Map / ADR / Trustworthy Data). At 6:45 of speech across three slides they are the densest patch of the 35 minutes; a rehearsal will show this. Consider one animated build-up on Slide 8 rather than three consecutive dense slides.
 5. **Ship a short "presenter's rehearsal card"** (1 page) that lists the 7 checkpoint clocks, the 5-level fallback ladder short-form, and the 4 headline numbers with baselines. Currently these live inside a 6,763-word plan; a physical card lowers demo-day risk.
 
 ---
@@ -192,20 +192,20 @@ The agenda below is Project B's structure with two Project-A-inspired additions 
 |---|---|---|---|
 | **00:00 – 00:45** | S1 Title & framing (bilingual EN/FR opener) | Set identity + honesty contract | Slide 1 |
 | **00:45 – 03:30** | S2–S3 Business challenge & cost of standing still | Executive hook: 35% energy, €8M failures, retiring experts, ETS | Slides 2–3 |
-| **03:30 – 05:00** | S4 Four targets with baselines | 🎯 label; falsifiable | Slide 4 |
-| **05:00 – 08:00** | S5–S6 One-platform overview + non-negotiable guardrails | "Decision support, not a control system"; EU-only; no standing secrets | Slides 5–6 |
-| **08:00 – 09:30** | S7 8 personas → dashboard map | Set up the demo tabs | Slide 7 |
-| **09:30 – 13:30** | S8–S9 Architecture map + why Fabric is the centre (ADR-001/002) | Panel probe expected here | Slides 8–9 |
-| **13:30 – 16:15** | S10–S11 OT-signal-to-trust + 4 AI capabilities frame | Bronze/silver/gold + quarantine; "Python decides, Foundry explains" | Slides 10–11 |
-| **16:15 – 22:30** | S12–S15 Deep dives: RUL / Energy / Quality / Knowledge | Each with 🔬 EVIDENCE band + guardrail | Slides 12–15 |
-| **22:30 – 26:15** | S16–S17 Responsible AI + Security & residency | Prompt Shields, RAI board, EU AI Act, four-plane identity | Slides 16–17 |
-| **26:15 – 27:45** | S18 Synthetic data & OT realism | Determinism, physics-first, truth ledger | Slide 18 |
-| **27:45 – 29:15** | S19 Delivery posture + **NEW: CFO illustrative band** | F2/F4 baseline + one *illustrative* cost/benefit band à la Project A | Slide 19 |
-| **29:15 – 30:00** | S20 Demo handoff (buffer) | Timer starts, banner up | Slide 20 |
-| **30:00 – 45:00** | **Live 15-minute demo** — 6 persona moments DM-1…DM-6 | Deterministic, seed `240725`, 60× clock, 5-level fallback ready | `demo-runbook.md` + `drive_demo.py` |
+| **03:30 – 05:15** | S4 Four targets with baselines | 🎯 label; falsifiable | Slide 4 |
+| **05:15 – 08:30** | S5–S6 One-platform overview + non-negotiable guardrails | "Decision support, not a control system"; EU-only; no standing secrets | Slides 5–6 |
+| **08:30 – 10:00** | S7 8 personas → dashboard map | Set up the demo tabs | Slide 7 |
+| **10:00 – 14:45** | S8–S9 Architecture map + why Fabric is the centre (ADR-001/002) | Panel probe expected here | Slides 8–9 |
+| **14:45 – 18:00** | S10–S11 OT-signal-to-trust + 4 AI capabilities frame | Bronze/silver/gold + quarantine; "Python decides, Foundry explains" | Slides 10–11 |
+| **18:00 – 25:30** | S12–S15 Deep dives: RUL / Energy / Quality / Knowledge | Each with 🔬 EVIDENCE band + guardrail | Slides 12–15 |
+| **25:30 – 30:45** | S16–S17 Responsible AI + Security & residency | Prompt Shields, RAI board, EU AI Act, four-plane identity | Slides 16–17 |
+| **30:45 – 32:15** | S18 Synthetic data & OT realism | Determinism, physics-first, truth ledger | Slide 18 |
+| **32:15 – 34:15** | S19 Compliance (AI Act / ETS / IEC 62443 / NIS2 / GDPR) | Regulation-to-control map; append-only audit chain, emission lineage, outbound-only DMZ, 24 h/72 h path; open gates named. Capacity/cost + CFO illustrative band moved to the "Appendix — Deployment, Capacity & Scale" backup slide | Slide 19 |
+| **34:15 – 35:00** | S20 Demo handoff (buffer) | Timer starts, banner up | Slide 20 |
+| **35:00 – 45:00** | **Live 10-minute demo** — 6 persona moments DM-1…DM-6 | Deterministic, seed `240725`, 60× clock, 5-level fallback ready | `demo-runbook.md` + `drive_demo.py` |
 | **45:00 – 60:00** | Moderated FAQ (target ≥ 8–10 questions) | Themes A–M; open with a "limitations" answer for skeptic-priming | `faq.md` + 6 BACKUP slides |
 
-**Rehearsal gates:** CP-1 09:30 · CP-2 16:15 · CP-3 22:30 · CP-4 29:15 · CP-5 30:00 · CP-6 45:00 · CP-7 60:00.
+**Rehearsal gates:** CP-1 10:00 · CP-2 18:00 · CP-3 25:30 · CP-4 34:15 · CP-5 35:00 · CP-6 45:00 · CP-7 60:00.
 **Fallback ladder (memorize):** live cloud → local deterministic replay → cached interactive → recorded flow → static proof pack. Never diagnose > 10 seconds on-screen.
 
 ---

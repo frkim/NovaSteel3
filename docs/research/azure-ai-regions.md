@@ -27,7 +27,7 @@ The Foundry Agent Service regional-support table accessed on the research date l
 3. **Knowledge capture:** obtain and record consent, language, speaker role, retention deadline, and deletion-request linkage before sending audio for transcription. Raw audio and unapproved transcripts are Highly Confidential.
 4. **Retrieval:** query approved procedures only for general answers. Drafts and raw transcripts are never a generally accessible source corpus.
 5. **Safety:** use Prompt Shields/content controls where supported; treat retrieved text and market payloads as untrusted data, not instructions. Log tool outcome and safety state without logging sensitive audio, transcript, or prompt payloads.
-6. **Preview exclusion:** no preview tool, model, feature, or SDK is on the Phase 0 critical path. Do not select a model family, version, tool feature, or API route from this document.
+6. **Preview exclusion:** no preview tool, model, feature, or SDK is on the demonstration critical path. Do not select a model family, version, tool feature, or API route from this document.
 
 ## Deployment validation gate
 

@@ -4,7 +4,7 @@
 > **Date:** 2026-07-27  
 > **Rubric source:** [`docs/tech/rating_grid.md`](rating_grid.md)  
 > **Repository:** <https://github.com/frkim/NovaSteel3>  
-> **Scope:** Phase 0 synthetic demonstration; this analysis evaluates the
+> **Scope:** Synthetic demonstration; this analysis evaluates the
 > delivered artefacts, not unrealised production claims.
 
 ---
@@ -38,7 +38,7 @@ from `docs/tech/rating_grid.md`, citing verifiable file paths and stating
 caveats honestly. The self-assessed total is **56 / 60** (Grade Band A —
 exceptional implementation and architectural rigour). The assessor believes a
 straight 60 would require production telemetry, real-plant validation, and a
-fully wired Fabric capacity, none of which a Phase 0 synthetic demo can
+fully wired Fabric capacity, none of which a synthetic demo can
 honestly claim. Where the analysis awards a 5, the evidence is strong; where it
 awards a 4, the gap is stated plainly.
 
@@ -530,13 +530,13 @@ audience.
 
 #### How NovaSteel satisfies it
 
-The demo is structured around a validated 26-slide deck with a 15-minute
+The demo is structured around a validated 26-slide deck with a 10-minute
 live-demo segment, scripted in `docs/presentation/oral-defense-and-slide-plan.md`
 and rehearsed with `docs/presentation/fiche-repetition-presentateur.md`. Every
 number displayed is explicitly labelled as either **EVIDENCE** (a reproducible
 synthetic-scenario result) or **TARGET** (a projected business outcome). The
 slide plan is timed to the second, with rehearsal checkpoints at 10:00, 18:00,
-26:00, and 30:00.
+25:30, and 35:00.
 
 **Demo narrative arc.** Executive → technical → proof: business pain →
 measurable ambition → governed platform → Fabric centrality → data trust → AI
@@ -610,7 +610,7 @@ persistent and cannot be dismissed.
 #### What would raise the score
 
 - A fully wired end-to-end demo path through live Fabric RTI with real
-  Eventstream data flowing to KQL dashboards during the 15-minute presentation.
+  Eventstream data flowing to KQL dashboards during the 10-minute presentation.
 - Power BI embed working live in the Blazor shell during the demo.
 
 ---
@@ -1463,8 +1463,8 @@ Clear, concise, and thorough presentation with audience adaptation.
 **Structured presentation.** A 27-slide deck follows a deliberate narrative arc:
 business pain → measurable ambition → governed platform → Fabric centrality →
 data trust → AI specifics → safety/legal/honesty → live demo → defend. Every
-slide has a single idea, timing target (29:45 total speech + 15s buffer to
-30:00), and fallback instruction. Evidence vs. target labelling is colour-coded
+slide has a single idea, timing target (34:45 total speech + 15s buffer to
+35:00), and fallback instruction. Evidence vs. target labelling is colour-coded
 throughout (amber chip for TARGET, blue chip for EVIDENCE).
 
 The slide plan includes eight FAQ backup slides for panel questions, bringing the
