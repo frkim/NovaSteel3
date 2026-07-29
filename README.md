@@ -279,6 +279,12 @@ deck (20 primary slides including the demo handoff, plus six FAQ backups). Use
 in `artifacts\demo-validation\rehearsal-report.md`; final handoff is
 `artifacts\final-handoff.md`.
 
+The same deck is also maintained as Markdown in `presentation\slides.md` and
+rebuilt autonomously with [Marp](https://marp.app/): the `Presentation` workflow
+regenerates `NovaSteel-Oral-Defense.pdf`, the speaker-note PDF and
+`NovaSteel-Oral-Defense.pptx` on every change and publishes the web deck to
+GitHub Pages. See [`presentation\README.md`](presentation/README.md).
+
 ## Validated proof
 
 - 66/66 live BFF checks passed against the deterministic scenario; 1,139
@@ -315,10 +321,11 @@ the difference is scope, not a shortfall against the model.
 | `contracts` | OpenAPI, event, data, and UI interop contracts |
 | `infra` | Bicep control-plane IaC, policy, OIDC-only deployment scripts |
 | `fabric` | Fabric REST/CLI assets, KQL, Lakehouse, notebooks, pipeline, semantic model |
-| `tests` | Contract, simulator, backend, integration, E2E, infra, and knowledge tests |
+| `tests` | Contract, simulator, backend, integration, E2E, infra, knowledge, and presentation tests |
 | `tools\validation` | Local validation, feed/security scans, SBOM, PPTX validation |
 | `docs` | Architecture, operations, runbook, presentation, research, and the bilingual illustrated application guide |
 | `artifacts` | Local validation, rehearsal, fallback, and final-handoff evidence |
+| `presentation` | Marp deck source (`slides.md`, `theme.css`) built to HTML/PDF/PPTX by the `Presentation` workflow |
 
 ## Cloud deployment
 
