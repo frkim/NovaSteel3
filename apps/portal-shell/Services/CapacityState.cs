@@ -129,7 +129,7 @@ public sealed class CapacityState
         {
             Source = "bff";
             AppendTransition(Status.State, result.State, effectiveReason, result.OperationId ?? "bff");
-            Status = Status with { State = result.State, DemoModeSimulated = true, Stale = false };
+            Status = Status with { State = result.State, Stale = false };
             LastMessage = $"{normalized} accepted by the BFF: {result.Status} → {result.State}.";
         }
         else
@@ -205,7 +205,7 @@ public sealed class CapacityState
             Source = "bff";
             var applied = result.Data.Sku ?? requested;
             AppendTransition(Status.State, result.Data.State, $"{effectiveReason} (SKU {previousSku} → {applied})", result.Data.OperationId ?? "bff");
-            Status = Status with { State = result.Data.State, Sku = applied, DemoModeSimulated = true, Stale = false };
+            Status = Status with { State = result.Data.State, Sku = applied, Stale = false };
             LastMessage = $"SKU change accepted by the BFF: {previousSku} → {applied} ({result.Data.Status}).";
         }
         else if (result.ErrorMessage is not null)

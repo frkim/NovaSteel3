@@ -883,14 +883,14 @@ Phase 2: guarded write-back to CMMS/MES — human-approved, bounded, reversible.
 | 005 | Identity-based Custom Endpoint ingress — **no SAS key** |
 | 006 | Python is authoritative for optimization/scoring; Foundry is not the controller |
 | 007 | Human approval and **no direct OT action** |
-| 008 | Demo is a separate deterministic product slice |
+| 008 | Demo is a separate deterministic product slice *(amended by 017)* |
+| 009 | No guessed runtime versions |
 
 </div>
 <div>
 
 | ADR | Decision |
 |---|---|
-| 009 | No guessed runtime versions |
 | 010 | Internal Power BI embedding is user-owned data |
 | 011 | The Copilot chat explains; it does not retrieve operational values |
 | 012 | Conversations are in-process, never persisted to Fabric |
@@ -898,11 +898,13 @@ Phase 2: guarded write-back to CMMS/MES — human-approved, bounded, reversible.
 | 014 | Two-level Dockview workspace with JSX-derived panels |
 | 015 | The Help Assistant resolves topics from the DOM |
 | 016 | Event Hubs, not IoT Hub, is the telemetry ingress buffer |
+| 017 | One data path — no mode toggle; **honesty is unconditional** |
+| 018 | Two streams into Fabric: governed analytical **and** real-time |
 
 </div>
 </div>
 
-<!-- ⏱ 0:00 · Appendix slide. Sixteen recorded architecture decisions, each with a rationale and a rejected-alternatives section in docs/architecture/solution-architecture.md section 10. Anything I assert on stage traces back to one of these; ADR-001, 005, 006 and 007 are the four that carry the most weight. -->
+<!-- ⏱ 0:00 · Appendix slide. Eighteen recorded architecture decisions, each with a rationale and a rejected-alternatives section in docs/architecture/solution-architecture.md section 10. Anything I assert on stage traces back to one of these; ADR-001, 005, 006 and 007 are the four that carry the most weight, and 017 and 018 are the newest — they remove the demo/cloud toggle and define the two data streams landing in Fabric. -->
 
 ---
 
