@@ -6,7 +6,7 @@ the PDF (with and without speaker notes) and the PowerPoint package.
 
 | File | Role |
 |---|---|
-| `slides.md` | The deck source. 20 timed slides for a 30-minute talk plus 6 FAQ backup slides. |
+| `slides.md` | The deck source. 22 timed slides for a 35-minute talk plus 13 FAQ/appendix backup slides. |
 | `theme.css` | The `novasteel` Marp theme (brand palette, card grid, split layout, chips). |
 | `marp.config.mjs` | Renders emoji as text so the build never depends on the Twemoji CDN. |
 | `scripts/sync-images.mjs` | Copies brand assets and UI screenshots into `images/` from their canonical repository locations. |
@@ -58,11 +58,12 @@ artifacts, and the `github-pages-deploy` job is skipped.
 - Every content slide carries exactly one speaker note comment that starts with a
   timing marker, e.g. `<!-- ⏱ 1:30 · … -->`. The markers are the timing budget:
   `tests/presentation/test_marp_deck.py` fails the build if the 22 main slides do
-  not add up to a 30-minute talk. Backup and appendix slides carry `⏱ 0:00` so they
-  stay outside the speaking budget.
+  not add up to a 35-minute talk. Backup and appendix slides carry `⏱ 0:00` so they
+  stay outside the speaking budget. The defense clock is 35 min slides + 10 min live
+  demo + 15 min Q&A.
 - Keep the honesty contract of the project: 🎯 TARGET (projected outcome) versus
   🔬 EVIDENCE (reproducible synthetic-scenario result), and the persistent footer
-  `Phase 0 · Real architecture, synthetic data · AI advises, humans decide`
+  `AI advises, humans decide`
 - Only reference images that `scripts/sync-images.mjs` provides; the test suite
   checks every `images/…` reference against that manifest.
 - The title slide's logo bar reads `docs/images/logo/NovaSteel Logo.png`,

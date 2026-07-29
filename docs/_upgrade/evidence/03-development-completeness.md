@@ -112,7 +112,7 @@ gates. Neither depends on real plant data — both use synthetic, labelled data.
 
 ---
 
-## Demo readiness (what can be shown live in 15 min)
+## Demo readiness (what can be shown live in 10 min)
 
 ### Project A
 

@@ -23,7 +23,7 @@ not restate architecture decisions; it operationalizes them.
 |---|---|---|---|
 | `dev` | Developer integration, contract tests | Engineering leads | Pause when unused; no business dependency |
 | `test` | Security/integration/performance/release validation | Platform Admin + QA | Scheduled pause permitted after test drain |
-| `demo` | Repeatable 15-minute defense and rehearsal | Platform Ops (presenter's supporting engineer) | F2 initial/F4 measurement fallback; 01:00 daily lifecycle check (§5) |
+| `demo` | Repeatable 10-minute defense and rehearsal | Platform Ops (presenter's supporting engineer) | F2 initial/F4 measurement fallback; 01:00 daily lifecycle check (§5) |
 | `prod` | Pilot and production operations (post-gate) | Platform SRE | No automated pause; capacity/SLO decisions made after pilot measurement (§9) |
 
 No environment's on-call rotation, runbook, or automation may reach across the `demo`/`prod` boundary — this mirrors the hard isolation rule in `deployment-topology.md` §2.1.
@@ -285,7 +285,7 @@ Proceed only when: all displayed data is labeled synthetic; deterministic manife
 
 ### 8.4 F2 → F4 decision procedure
 
-1. Run the scripted 15-minute demo (and at least one stress rehearsal with concurrent pipeline/notebook activity) on F2.
+1. Run the scripted 10-minute demo (and at least one stress rehearsal with concurrent pipeline/notebook activity) on F2.
 2. Capture Capacity Metrics CU utilization, throttling events, and query/report latency during the run.
 3. If throttling or latency measurably degrades the presenter experience (subjective threshold: any fallback-ladder trigger attributable to capacity contention rather than a genuine fault), escalate to F4 with the same budget/owner sign-off as any other cost-driver change (§8.1 row 1).
 4. F4 is never selected merely to obtain a Power BI licensing side-effect — that decision is independently governed by the Pro/PPU/trial rule in §8.1 row 2, per `solution-architecture.md` §2 reconciliation table.
@@ -435,7 +435,7 @@ recalculates as: `1.0 Mt × €175/t × validated-%`.
 
 #### 8.5.7 🔬 EVIDENCE — Demo environment actual cost (contrast)
 
-The Phase 0 demo environment cost posture for comparison:
+The demonstration environment cost posture for comparison:
 
 - **Fabric capacity:** F2 (smallest SKU), Sweden Central
 - **Cost control:** 01:00 Europe/Luxembourg auto-pause Logic App (§5); no overage enabled
@@ -447,12 +447,13 @@ This demo cost is 🔬 **EVIDENCE** — it reflects what the platform actually c
 
 ---
 
-<!-- BEGIN CFO BRIDGE SLIDE CONTENT — lift onto a slide after Slide 19 ("Deployment, capacity, cost & scale") -->
+<!-- BEGIN CFO BRIDGE SLIDE CONTENT — lift onto the backup slide "Appendix — Deployment, Capacity & Scale" (capacity/cost/scale moved off the main deck when Slide 19 became "Compliance") -->
 
 ### 8.5.8 CFO bridge — cost / benefit / payback summary (slide-ready)
 
-> **Slide placement:** insert as a new slide **after Slide 19** and before the demo handoff
-> (renumber Slide 20 to Slide 21). Title: *"Investment & Return — Illustrative Business Case"*.
+> **Slide placement:** attach to the backup slide **"Appendix — Deployment, Capacity & Scale"**
+> (pulled up only if the panel probes deployment economics; the main-deck Slide 19 is now *Compliance*).
+> Title: *"Investment & Return — Illustrative Business Case"*.
 
 **On-slide content (one-page summary):**
 
@@ -507,7 +508,7 @@ These restate `implementation-guide.md` §15 from an operations lens — they ar
 
 1. **No automated production capacity pause/resume ever exists.** Under no incident-response pressure does an on-call engineer add the production capacity ID to the 01:00 Logic App's allow-list "just for tonight." A capacity-cost emergency in production is handled through the standard change-management process (`deployment-topology.md` §5.2, "production capacity lifecycle" row), not this document's automation.
 2. **No incident response action ever writes to a PLC, safety interlock, furnace, or production setpoint**, regardless of how compelling the automated fix appears. Any proposal to do so is itself immediately a Sev-1-adjacent governance escalation requiring security/legal/OT/RAI review (ADR-007), not an on-call judgment call.
-3. **Energy/quality "approve" actions remain simulated/shadow in Phase 0/1.** An on-call engineer must never manually flip a database flag to make an approval "real" as an incident workaround; that is a data-integrity and governance violation, not a fix.
+3. **Energy/quality "approve" actions remain simulated/shadow in the demonstration and pilot phases.** An on-call engineer must never manually flip a database flag to make an approval "real" as an incident workaround; that is a data-integrity and governance violation, not a fix.
 4. **Foundry Data Zone (EU) processing is not a single-region guarantee.** If a legal/DPO requirement for Sweden-Central-only processing is later confirmed, this is a configuration change to a regional deployment (`implementation-guide.md` §15 item 5) executed through the standard release process, not an operational hotfix.
 5. **Demo/production data, identity, and workspace isolation is never bridged**, even temporarily, to unblock an incident. If a demo rehearsal genuinely needs production-realistic data, that requirement is redirected to the synthetic-data workstream (`synthetic-data-and-simulators.md`), not solved by a one-off cross-environment shortcut.
 

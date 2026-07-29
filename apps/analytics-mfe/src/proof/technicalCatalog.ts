@@ -255,7 +255,7 @@ export const TECH_REQUIREMENTS: TechRequirement[] = [
       { kind: 'ui', label: 'Command Center', route: 'command-center/overview' },
       { kind: 'ui', label: 'Proof of Execution', route: 'proof-of-execution/requirements' },
     ],
-    gap: 'Some Fabric artefacts (notebooks, Activator rules, the RTI eventstream) are provisioned as templates and are demonstrated from captured output rather than executed live during the 15-minute demo window.',
+    gap: 'Some Fabric artefacts (notebooks, Activator rules, the RTI eventstream) are provisioned as templates and are demonstrated from captured output rather than executed live during the 10-minute demo window.',
     uplift:
       'Run one end-to-end Fabric pipeline live on the F2 capacity during the demo \u2014 eventstream ingest through the silver-to-gold notebook to an Activator alert \u2014 rather than replaying captured output.',
     primaryRoute: 'command-center/overview',
