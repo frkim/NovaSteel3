@@ -14,7 +14,12 @@ const presentationDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const source = join(presentationDir, "slides.md");
 const target = join(presentationDir, "slides.pages.md");
 
-const stripped = readFileSync(source, "utf8").replace(/<!--(?!\s*_)[\s\S]*?-->/g, "");
+let stripped = readFileSync(source, "utf8");
+let previous;
+do {
+  previous = stripped;
+  stripped = stripped.replace(/<!--(?!\s*_)[\s\S]*?-->/g, "");
+} while (stripped !== previous);
 
 writeFileSync(target, stripped, "utf8");
 console.log(`strip-notes: wrote ${target} without speaker notes`);
