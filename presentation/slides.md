@@ -865,30 +865,33 @@ Phase 2: guarded write-back to CMMS/MES — human-approved, bounded, reversible.
 
 | ADR | Decision |
 |---|---|
-| 001 | Fabric is the analytics core — **no parallel data lake** |
-| 002 | Hot KQL separated from governed Delta |
-| 003 | Sweden Central + Foundry EU Data Zone; West Europe = tested contingency |
-| 004 | Blazor WASM C# shell hosting a React/TS microfrontend |
-| 005 | Event Hubs buffer + managed-identity relay to an Eventstream Custom Endpoint — **no SAS key** |
-| 006 | Python is authoritative for math; Foundry explains and retrieves |
+| 001 | Fabric is the data and analytics core — **no parallel data lake** |
+| 002 | Separate hot KQL from governed Delta |
+| 003 | Sweden Central primary, EU-zone-aware AI |
+| 004 | Blazor shell plus React/MUI/D3 microfrontend |
+| 005 | Identity-based Custom Endpoint ingress — **no SAS key** |
+| 006 | Python is authoritative for optimization/scoring; Foundry is not the controller |
+| 007 | Human approval and **no direct OT action** |
+| 008 | Demo is a separate deterministic product slice |
 
 </div>
 <div>
 
 | ADR | Decision |
 |---|---|
-| 007 | Advisory only — no OT write (Purdue L0–L2, IEC 62443, IEC 61511) |
-| 008 | Phase 0 runs on an isolated, non-production estate |
-| 009 | No preview features on the demonstration critical path |
-| 011 | Copilot chat has **no tools** — explain-only |
-| 012 | Chat history stays in the API process and is dropped on restart |
-| 013 | Device simulator has no OT connection |
-| 016 | If OT edge comes into scope, use Azure IoT Operations |
+| 009 | No guessed runtime versions |
+| 010 | Internal Power BI embedding is user-owned data |
+| 011 | The Copilot chat explains; it does not retrieve operational values |
+| 012 | Conversations are in-process, never persisted to Fabric |
+| 013 | Device simulator runs in-process inside the BFF |
+| 014 | Two-level Dockview workspace with JSX-derived panels |
+| 015 | The Help Assistant resolves topics from the DOM |
+| 016 | Event Hubs, not IoT Hub, is the telemetry ingress buffer |
 
 </div>
 </div>
 
-<!-- ⏱ 0:00 · Appendix slide. Thirteen recorded architecture decisions, each with a rationale and a rejected-alternatives section in docs/architecture/solution-architecture.md section 10. Anything I assert on stage traces back to one of these. -->
+<!-- ⏱ 0:00 · Appendix slide. Sixteen recorded architecture decisions, each with a rationale and a rejected-alternatives section in docs/architecture/solution-architecture.md section 10. Anything I assert on stage traces back to one of these; ADR-001, 005, 006 and 007 are the four that carry the most weight. -->
 
 ---
 
