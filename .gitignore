@@ -44,3 +44,6 @@ tests/simulator/.tmp/*
 ~$*.pptx
 ~$*.docx
 ~$*.xlsx
+
+# Transient Docker build staging tree created by the deploy scripts
+.azure/docker/.buildstage/

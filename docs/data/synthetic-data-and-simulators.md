@@ -583,6 +583,18 @@ The envelope tables exist because the BFF reads whole envelopes, not star-schema
 
 Because the analytical span **ends on the generation date**, it needs no demo-clock rebasing: the 21-day lining warning is genuinely 21 days away from today, computed from the rows rather than asserted alongside them.
 
+#### Eventstream ingestion — three settings that fail silently
+
+Getting the dynamic stream to actually reach the Eventhouse cost three non-obvious corrections, all of which fail *quietly* rather than erroring. They are pinned by tests so they cannot regress:
+
+1. **`ProcessedIngestion` is a no-op for this topology.** With it set, events reached `bronze_event_envelope` normally while every KQL hot table stayed empty — the most misleading possible symptom, because the path looks half-alive. All five Eventhouse destinations use **`DirectIngestion` with a named `mappingRuleName`** and a unique `connectionName`.
+2. **The destination `itemId` must be the KQLDatabase item, not the Eventhouse item.** Pointing it at the Eventhouse writes into that item's empty default database, so rows land somewhere real but invisible to every query anyone will run.
+3. **Named mappings must match where the envelope actually nests each field.** The `model_inference_v1_json` mapping read top-level paths while the simulator nests them under `payload`; it now reads `$.payload.*`.
+
+`tests/infra/test_fabric_eventstream.py` and `fabric/scripts/Test-FabricAssetsLocal.ps1` assert the ingestion mode, mapping-rule presence, connection-name uniqueness, the `schema_name` → stream → table routing, and the mapping-to-envelope alignment — all offline, with no live capacity required.
+
+Neither stream is connected to a real sensor, ERP, or MES. Both are synthetic by construction and carry the guardrail fields defined in §1.
+
 ## 12. Package-feed-safe implementation commands
 
 No package installation is required to read or validate this specification. If a future Python simulator implementation requires dependencies on a Microsoft-managed device, use the approved protected feed explicitly and never point commands at public PyPI:

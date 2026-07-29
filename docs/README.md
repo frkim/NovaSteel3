@@ -1,12 +1,45 @@
 # NovaSteel documentation
 
-> **Documentation status:** v1.3 · **Implemented baseline:** local deterministic
+> **Documentation status:** v1.4 · **Implemented baseline:** local deterministic
 > demo, application source, tests/CI, Bicep IaC, and Fabric source assets are
 > present and locally validated.  
-> **Cloud status:** no Azure, Fabric, Foundry, Speech, Eventstream, or Power BI
-> tenant deployment has been performed.  
+> **Cloud status:** the application is deployed to Azure Container Apps (Sweden
+> Central) and the Fabric demo estate is deployed to workspace
+> `NovaSteelV3-Demo` — two lakehouses, an Eventhouse/KQL database, medallion
+> notebooks, pipelines, and the `es-ns-telemetry-v1` Eventstream with verified
+> end-to-end ingestion. The F2 capacity is **paused outside demonstration
+> windows** for cost control, so live Fabric reads fall back to the committed
+> fixture pack and say so. No Power BI report or Direct Lake semantic model has
+> been published into this workspace yet.  
 > **Technical authority:** [solution architecture](architecture/solution-architecture.md)
-> and [deployment topology](architecture/deployment-topology.md) · **Freshness:** 2026-07-27
+> and [deployment topology](architecture/deployment-topology.md) · **Freshness:** 2026-07-29
+
+## Wave 10 summary — Fabric data streams and a single data path
+
+Wave 10 (completed 2026-07-29) made Fabric hold real NovaSteel data and removed
+the user-facing data-source mode choice:
+
+- **Two data streams into Fabric** — a deterministic 24-month *static analytical*
+  stream (eight `fact_*` gold Delta tables in `lh_novasteelv3_core`, plus nine
+  operational envelope tables and a `manifest` table at the application grain)
+  and a *dynamic real-time* stream (simulator → `es-ns-telemetry-v1` Eventstream
+  → five Eventhouse hot tables and `bronze_event_envelope` in parallel). See
+  §11.1, [synthetic-data-and-simulators.md](data/synthetic-data-and-simulators.md)
+  and ADR-018, [solution-architecture.md](architecture/solution-architecture.md).
+- **The BFF can read from Fabric** — `BFF_DATA_SOURCE=fabric` reads the lakehouse
+  SQL analytics endpoint through a managed identity; a paused capacity is a soft
+  failure that falls back to the fixture pack. `GET /v1/meta` now reports
+  `dataSource`, so every screen can state whether rows came from Fabric, the
+  fixture pack, or a fallback.
+- **The DEMO/CLOUD toggle is gone** — the portal is always BFF-backed, a startup
+  probe surfaces reachability as a connection indicator, and the synthetic-data
+  banner is now **unconditional** rather than switchable (ADR-017).
+- **Gold contract v2** — `contracts/data/gold.v2.json` declares the natural keys
+  the tables actually use instead of surrogate `*_key` columns that no dimension
+  load produces, and the validator now enforces the contract rather than a
+  hard-coded column list.
+- **Verification** — 1113 Python tests, 30 MFE test files, clean `dotnet build`
+  and `tsc`, and a passing protected-feed scan over 619 files.
 
 ## Wave 4 summary
 
