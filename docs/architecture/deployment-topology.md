@@ -26,7 +26,7 @@
 |---|---|---|---|---|
 | `dev` | Isolated `NS-dev-*` workspaces/capacity assignment | Synthetic or approved masked test data only | Developer integration, contract tests | Pause when unused; no business demo dependency |
 | `test` | Isolated `NS-test-*` workspaces/capacity assignment | Synthetic and approved test fixtures | Security, integration, performance, release validation | Scheduled pause permitted after test drain |
-| `demo` | Isolated `NS-DEMO-*` RTI/DataCore/ML/Analytics workspaces | 100% `SYNTHETIC` / `DEMO-NONPERSONAL` | Repeatable 15-minute defense and rehearsal | F2 initial / F4 measured fallback / F8 demo-day burst, requestable from the portal capacity dialog with a recorded reason; 01:00 lifecycle check |
+| `demo` | Isolated `NS-DEMO-*` RTI/DataCore/ML/Analytics workspaces | 100% `SYNTHETIC` / `DEMO-NONPERSONAL` | Repeatable 10-minute defense and rehearsal | F2 initial / F4 measured fallback / F8 demo-day burst, requestable from the portal capacity dialog with a recorded reason; 01:00 lifecycle check |
 | `prod` | Isolated `NS-prod-*` Fabric workspaces and production application resources | Real EU operational/personal data only after gates | Pilot and production operations | No automated pause; capacity/SLO decision made after pilot measurement |
 
 No Fabric workspace, OneLake shortcut, Eventstream connection, application configuration, Key Vault secret, or managed identity may bridge `demo` and `prod`. The synthetic dataset rule that entities start with `NS-DEMO-` is enforced in schema validation and UI banners.

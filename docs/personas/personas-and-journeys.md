@@ -4,7 +4,7 @@
 > **Companion document:** `docs\specs\solution-requirements.md` (functional/non-functional requirements, KPI catalog, traceability matrix)
 > **Status:** Aligned v1.1
 > **Owner:** Business Specification workstream (`business-spec`)
-> **Note:** Detailed dashboard visual design belongs to `ux-spec`; RBAC control implementation belongs to `security-spec`. This document defines role goals, pains, decisions, permissions (business-level), key screens (by name/purpose, not pixel design), and journeys — including the binding 15-minute demo storyboard used in the 1-hour defense.
+> **Note:** Detailed dashboard visual design belongs to `ux-spec`; RBAC control implementation belongs to `security-spec`. This document defines role goals, pains, decisions, permissions (business-level), key screens (by name/purpose, not pixel design), and journeys — including the binding 10-minute demo storyboard used in the 1-hour defense.
 
 ---
 
@@ -22,7 +22,7 @@ Ten personas represent the full decision-making surface of the NovaSteel platfor
 - **User journey** — a realistic day/week-in-the-life narrative.
 - **Demo moment** — which of the six demo moments (`DM-1`…`DM-6`, see §10) feature this persona.
 
-A cross-persona RACI-style summary and the full 15-minute demo storyboard for the 1-hour defense appear in §9–§10.
+A cross-persona RACI-style summary and the full 10-minute demo storyboard for the 1-hour defense appear in §9–§10.
 
 ---
 
@@ -82,13 +82,13 @@ European multi-site group.
 
 **Permissions**
 - Full read access to all site-level KPIs and cockpits (energy, furnace, quality, knowledge library, audit trail summaries).
-- Approval authority for documented cross-domain trade-offs escalated by other roles (for example, “delay reline versus accept risk”); any production schedule connector remains outside the Phase 0/1 platform.
+- Approval authority for documented cross-domain trade-offs escalated by other roles (for example, “delay reline versus accept risk”); any production schedule connector remains outside the demonstration and pilot platform.
 - Cannot directly override safety interlocks or bypass required human-approval gates (FR-GOV-05).
 - Can escalate to Executive for cross-site or capital decisions.
 
 **Key decisions**
 - Approve or defer a furnace lining reline based on RUL alert and production calendar.
-- Approve the documented business decision for an energy recommendation; Phase 0/1 records that decision without writing a schedule.
+- Approve the documented business decision for an energy recommendation; the demonstration and pilot phases record that decision without writing a schedule.
 - Approve corrective action plans for recurring quality deviations.
 - Decide when to escalate an AI Act / governance concern (FR-GOV-05 flag) upward.
 
@@ -173,7 +173,7 @@ European multi-site group.
 **Permissions**
 - Read access to energy consumption, cost, and market-price data across all sites.
 - Configure optimization guardrails/thresholds (FR-ENE-07) — subject to Plant Manager/Executive sign-off for major threshold changes.
-- In Phase 0/1, review, simulate, or record approval/rejection of schedule recommendations (FR-ENE-05); rejections require a reason code and no platform action writes an operational schedule.
+- In the demonstration and pilot phases, review, simulate, or record approval/rejection of schedule recommendations (FR-ENE-05); rejections require a reason code and no platform action writes an operational schedule.
 - Cannot unilaterally enable full autonomous execution without governance sign-off (C-04, AI-05).
 
 **Key decisions**
@@ -217,7 +217,7 @@ European multi-site group.
 
 **Permissions**
 - Read access to furnace thermal data, RUL model outputs, confidence bands, and feature explainability (FR-FUR-01…04).
-- Create or link a synthetic work-order record from an alert in Phase 0; any production CMMS connector is a separately approved Phase 2+ integration (FR-FUR-05).
+- Create or link a synthetic work-order record from an alert in the demonstration; any production CMMS connector is a separately approved Phase 2+ integration (FR-FUR-05).
 - Configure sensor/alert thresholds within approved engineering limits.
 - Provide model feedback (predicted vs. actual outcomes, FR-FUR-06) but does not directly retrain models (a Knowledge Engineer/Admin or MLOps function owns retraining pipelines).
 
@@ -480,7 +480,7 @@ dedicated screen in the portal.
 
 ## 10. The 15-Minute Demo Storyboard (1-Hour Defense)
 
-This storyboard is the binding link between personas and the demo, matching `docs\specs\solution-requirements.md` §15/§19. It is designed to be reliably rehearsed, run on synthetic data only, and to fit the 1-hour defense allocation: 30-minute slides, 15-minute demo, and 15-minute FAQ.
+This storyboard is the binding link between personas and the demo, matching `docs\specs\solution-requirements.md` §15/§19. It is designed to be reliably rehearsed, run on synthetic data only, and to fit the 1-hour defense allocation: 35-minute slides, 10-minute demo, and 15-minute FAQ.
 
 | # | Moment | Time | Lead persona (voice) | Narrative beat | What's shown |
 |---|---|---|---|---|---|
@@ -496,7 +496,7 @@ This storyboard is the binding link between personas and the demo, matching `doc
 
 ### 10.1 Fitting the 1-Hour Defense
 
-The demo above is nested inside the 60-minute agenda defined in `solution-requirements.md` §19.2 (**30-minute slides → 15-minute demo → 15-minute FAQ**). Presenters should map to personas where possible (e.g., whoever narrates DM-2 should consistently "be" the Energy Manager voice) so the audience experiences a coherent role-based story rather than a feature tour.
+The demo above is nested inside the 60-minute agenda defined in `solution-requirements.md` §19.2 (**35-minute slides → 10-minute demo → 15-minute FAQ**). Presenters should map to personas where possible (e.g., whoever narrates DM-2 should consistently "be" the Energy Manager voice) so the audience experiences a coherent role-based story rather than a feature tour.
 
 ---
 

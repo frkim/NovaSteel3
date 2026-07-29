@@ -1,9 +1,9 @@
 // Copies the brand assets and UI screenshots the deck references from their
 // canonical locations in the repository into presentation/images/.
 //
-// The images are deliberately not committed twice: docs/presentation/assets and
-// apps/portal-shell/wwwroot/brand remain the single source of truth, and
-// presentation/images/ is a build output (see presentation/.gitignore).
+// The images are deliberately not committed twice: docs/presentation/assets,
+// docs/images/logo and apps/portal-shell/wwwroot/brand remain the single source of
+// truth, and presentation/images/ is a build output (see presentation/.gitignore).
 //
 // Usage: node scripts/sync-images.mjs
 
@@ -17,6 +17,8 @@ const repoRoot = resolve(presentationDir, "..");
 const targetDir = join(presentationDir, "images");
 
 const brandDir = join(repoRoot, "apps", "portal-shell", "wwwroot", "brand");
+const logoDir = join(repoRoot, "docs", "images", "logo");
+const axelorLogoDir = join(repoRoot, "docs", "AxelorMetal-web", "logo");
 const generatedDir = join(repoRoot, "tools", "presentation", "assets");
 const screenshotDir = join(
   repoRoot,
@@ -56,6 +58,27 @@ if (missing.length > 0) {
   process.exit(1);
 }
 
+/**
+ * Title-slide logos, resolved from the first candidate that exists. The preferred
+ * candidate is always the file under docs/images/logo/, so dropping the exact asset
+ * there overrides the fallback without touching this script. A logo whose candidates
+ * are all absent is simply not copied: the title slide drops that slot rather than
+ * rendering a broken image.
+ *
+ * `microsoft_logo.png` is not committed — a Microsoft trademark asset has to be
+ * supplied by the presenter under Microsoft's trademark guidelines.
+ *
+ * @type {Array<[string, string[]]>} file name inside images/ -> candidate sources
+ */
+const logos = [
+  ["novasteel-logo.png", [join(logoDir, "NovaSteel Logo.png")]],
+  [
+    "ama-logo.png",
+    [join(logoDir, "ama_logo.png"), join(axelorLogoDir, "AxelorMetal_logo_full_alpha.png")],
+  ],
+  ["microsoft-logo.png", [join(logoDir, "microsoft_logo.png")]],
+];
+
 if (existsSync(targetDir)) {
   for (const entry of readdirSync(targetDir)) {
     rmSync(join(targetDir, entry), { recursive: true, force: true });
@@ -68,4 +91,17 @@ for (const [source, name] of assets) {
   copyFileSync(source, join(targetDir, name));
 }
 
-console.log(`sync-images: copied ${assets.length} assets into ${targetDir}`);
+let copiedLogos = 0;
+for (const [name, candidates] of logos) {
+  const source = candidates.find((candidate) => existsSync(candidate));
+  if (source === undefined) {
+    console.warn(`sync-images: no source for ${name}; the title slide will omit that logo`);
+    continue;
+  }
+  copyFileSync(source, join(targetDir, name));
+  copiedLogos += 1;
+}
+
+console.log(
+  `sync-images: copied ${assets.length + copiedLogos} assets into ${targetDir}`,
+);

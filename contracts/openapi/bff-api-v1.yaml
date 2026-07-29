@@ -177,7 +177,7 @@ paths:
               $ref: '#/components/schemas/ApprovalRequest'
       responses:
         '200':
-          description: Phase 0/1 simulated or shadow approval.
+          description: Demonstration/pilot simulated or shadow approval.
           content:
             application/json:
               schema:

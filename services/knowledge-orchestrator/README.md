@@ -1,7 +1,7 @@
 # NovaSteel knowledge-orchestrator
 
 Consent-aware **Speech-to-Text (STT)** and **Microsoft Foundry Agent Service**
-knowledge-capture workflow for NovaSteel (Phase 0). This service coordinates the
+knowledge-capture workflow for NovaSteel (demonstration). This service coordinates the
 "Operator Knowledge" flow: consent → Fast Transcription → grounded agent extraction →
 draft → review → approved procedure, with append-only auditing.
 

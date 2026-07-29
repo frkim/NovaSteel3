@@ -6,7 +6,7 @@ the PDF (with and without speaker notes) and the PowerPoint package.
 
 | File | Role |
 |---|---|
-| `slides.md` | The deck source. 20 timed slides for a 30-minute talk plus 6 FAQ backup slides. |
+| `slides.md` | The deck source. 22 timed slides for a 35-minute talk plus 13 FAQ/appendix backup slides. |
 | `theme.css` | The `novasteel` Marp theme (brand palette, card grid, split layout, chips). |
 | `marp.config.mjs` | Renders emoji as text so the build never depends on the Twemoji CDN. |
 | `scripts/sync-images.mjs` | Copies brand assets and UI screenshots into `images/` from their canonical repository locations. |
@@ -37,23 +37,41 @@ root [`.npmrc`](../.npmrc); never add a public registry here.
 ## Build in CI
 
 [`.github/workflows/presentation.yml`](../.github/workflows/presentation.yml) rebuilds
-the deck on every push that touches `presentation/`, uploads `NovaSteel-Oral-Defense.pdf`,
-`NovaSteel-Oral-Defense-notes.pdf` and `NovaSteel-Oral-Defense.pptx` as workflow
-artifacts, and publishes the HTML deck to GitHub Pages under `/deck/`. The Pages
-copy is generated from a stripped `slides.pages.md` so speaker notes are never
-published on the web.
+the deck on every push and pull request that touches `presentation/`, and uploads the
+whole build output — `index.html`, `NovaSteel-Oral-Defense.pdf`,
+`NovaSteel-Oral-Defense-notes.pdf` and `NovaSteel-Oral-Defense.pptx` — as the
+`novasteel-presentation-<run id>` workflow artifact (90-day retention). The run summary
+lists each file with its size. On `main` it also publishes the HTML deck to GitHub Pages
+at the site root — <https://frkim.github.io/NovaSteel3/> — with the PDF and PPTX next to
+it (`NovaSteel-Oral-Defense.pdf`, `NovaSteel-Oral-Defense.pptx`); the older `/deck/` URL
+redirects there. The Pages copy is generated from a stripped `slides.pages.md` so speaker
+notes are never published on the web.
+
+Publishing requires GitHub Pages to be enabled once, by a repository admin, under
+**Settings → Pages → Source: GitHub Actions**. The workflow's `GITHUB_TOKEN` cannot
+create the Pages site itself, so while Pages is disabled the `Configure Pages` step
+only emits a warning: the deck is still built, verified and uploaded as workflow
+artifacts, and the `github-pages-deploy` job is skipped.
 
 ## Editing rules
 
 - Every content slide carries exactly one speaker note comment that starts with a
   timing marker, e.g. `<!-- ⏱ 1:30 · … -->`. The markers are the timing budget:
-  `tests/presentation/test_marp_deck.py` fails the build if the 20 main slides do
-  not add up to a 30-minute talk.
+  `tests/presentation/test_marp_deck.py` fails the build if the 22 main slides do
+  not add up to a 35-minute talk. Backup and appendix slides carry `⏱ 0:00` so they
+  stay outside the speaking budget. The defense clock is 35 min slides + 10 min live
+  demo + 15 min Q&A.
 - Keep the honesty contract of the project: 🎯 TARGET (projected outcome) versus
   🔬 EVIDENCE (reproducible synthetic-scenario result), and the persistent footer
-  `Phase 0 · Synthetic demonstration · Not for operational control.`
+  `AI advises, humans decide`
 - Only reference images that `scripts/sync-images.mjs` provides; the test suite
   checks every `images/…` reference against that manifest.
+- The title slide's logo bar reads `docs/images/logo/NovaSteel Logo.png`,
+  `docs/images/logo/ama_logo.png` (falling back to the tracked
+  `docs/AxelorMetal-web/logo/AxelorMetal_logo_full_alpha.png`) and
+  `docs/images/logo/microsoft_logo.png`. The Microsoft mark is a trademark asset the
+  repository does not ship: drop the file at that path and the next `npm run images`
+  picks it up, otherwise the slot removes itself and the bar closes up.
 - [`docs/presentation/oral-defense-and-slide-plan.md`](../docs/presentation/oral-defense-and-slide-plan.md)
   stays the authoritative narrative script; `slides.md` is its rendered deck.
   The PptxGenJS deck under [`tools/presentation`](../tools/presentation/README.md)

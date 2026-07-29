@@ -129,7 +129,7 @@ export function EnergySimulator() {
                 Record simulated approval
               </Button>
               <Typography variant="caption" color="text.secondary">
-                No UI action writes an operational schedule. Approval is simulated/shadow in Phase 0/1 and is fully audited by the BFF.
+                No UI action writes an operational schedule. Approval is simulated/shadow in the demonstration and pilot phases and is fully audited by the BFF.
               </Typography>
             </Stack>
           </PanelCard>

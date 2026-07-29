@@ -2,7 +2,7 @@
 
 > **Status:** Authoritative architecture v1.0  
 > **Date:** 2026-07-25  
-> **Scope:** Phase 0 synthetic demonstration and the production-ready target shape; this document does not authorize production control.  
+> **Scope:** Synthetic demonstration and the production-ready target shape; this document does not authorize production control.  
 > **Owning workstream:** `solution-architecture`  
 > **Companion topology:** [deployment-topology.md](deployment-topology.md)
 
@@ -23,13 +23,13 @@ This document resolves system-design choices across the completed business, data
 
 1. **Microsoft Fabric is the central operational analytics core.** Real-Time Intelligence (RTI), Eventstream, Eventhouse/KQL, OneLake/Lakehouse, governed gold data, semantic model, and Power BI are not optional side systems.
 2. **The platform is decision support, not a safety or control system.** No application, agent, Activator rule, pipeline, or demo control writes to a PLC, safety interlock, furnace, or production setpoint. Existing OT safety systems remain authoritative.
-3. **Phase 0 is synthetic-only.** The demo has isolated `NS-DEMO-*` data, identities, workspaces, capacity, and fallback assets. It never shares a table, storage path, semantic model, or credential with production.
+3. **The demonstration is synthetic-only.** The demo has isolated `NS-DEMO-*` data, identities, workspaces, capacity, and fallback assets. It never shares a table, storage path, semantic model, or credential with production.
 4. **EU-only processing is required.** Sweden Central is the primary placement. A Data Zone (EU) model deployment is EU-zone processing, not a single-region guarantee; a regional deployment is required if policy requires processing only in Sweden Central.
 5. **Every consequential AI output is append-only auditable.** Inputs/feature snapshot, version, output, confidence, rationale, human decision, and outcome are correlated and retained under the security retention policy.
 
 ### 1.2 Architecture scope by delivery phase
 
-| Capability | Phase 0 — defense/demo | Phase 1 — pilot | Phase 2+ — production scale |
+| Capability | Demonstration (today) | Phase 1 — pilot | Phase 2+ — production scale |
 |---|---|---|---|
 | Sources | Deterministic simulator and approved replay files | One site, read-only historian/MES/CMMS/market feeds | Four sites, approved integrations |
 | Ingestion | Eventstream custom endpoint from a demo simulator | OT gateway → Event Hubs buffer → identity-based relay → Eventstream | Same contract, per-plant relay and capacity measurement |
@@ -214,7 +214,7 @@ flowchart LR
   V --> Pack["Checksummed fallback pack"]
 ```
 
-- **Cloud rehearsal/demo:** a Python simulator runs as an Azure Container Apps Job (or equivalent supported Azure workload) with `mi-ns-demo-simulator`. It publishes directly to the isolated demo Eventstream Custom Endpoint with Entra ID. This avoids needing a live OT/Event Hubs dependency in the 15-minute demonstration.
+- **Cloud rehearsal/demo:** a Python simulator runs as an Azure Container Apps Job (or equivalent supported Azure workload) with `mi-ns-demo-simulator`. It publishes directly to the isolated demo Eventstream Custom Endpoint with Entra ID. This avoids needing a live OT/Event Hubs dependency in the 10-minute demonstration.
 - **Production-path test:** a separate integration test runs the gateway → Event Hubs → relay → Eventstream route to prove buffering, duplicate replay, late events, and recovery. It is not required to keep the scripted demo alive.
 - **Offline replay:** the same signed event files and cached inference/optimization/transcript results are served by a local BFF/UI mode. It makes no cloud calls and is the second fallback level after live cloud.
 - Every run records root seed, scenario ID, generator version, configuration checksum, simulated clock, row counts, truth-ledger checksum, and expected cue values. The default demo manifest uses the approved `240725` root seed; named anomaly scenarios use the documented scenario-seed policy. A run is presentable only after contract, physical, and scenario assertions pass.
@@ -311,7 +311,7 @@ flowchart LR
   R -->|host token broker; no stored service token| A
 ```
 
-The shell is a host, not a second business backend. The React bundle is versioned with the shell for Phase 0 to avoid shell/MFE contract skew. The shell exposes only typed context/events: `themeMode`, `locale`, `activePersona`, `site`, navigation intent, toast, capacity request, and telemetry. It does **not** hand a workload credential to React. Dataset provenance is not part of this contract: it is reported by the backend on `GET /v1/meta` (ADR-017, ADR-018) rather than asserted by the shell.
+The shell is a host, not a second business backend. The React bundle is versioned with the shell for the demonstration to avoid shell/MFE contract skew. The shell exposes only typed context/events: `themeMode`, `locale`, `activePersona`, `site`, navigation intent, toast, capacity request, and telemetry. It does **not** hand a workload credential to React. Dataset provenance is not part of this contract: it is reported by the backend on `GET /v1/meta` (ADR-017, ADR-018) rather than asserted by the shell.
 
 The Dockview layout layer is inside the MFE, not a second application. An outer `CopilotDock` hosts the current workspace and, when opened, the chat panel; floating groups are disabled, so Copilot can be moved to any edge but never detaches into a free window. The outer layout persists per browser in `localStorage` under `novasteel.copilot.dock.v2`; the chat sends the active section, sub-view, and site with every question so an under-specified question such as "what is the risk" resolves against what the user is actually looking at.
 
@@ -369,7 +369,7 @@ AI-derived values use a common shape:
 | `/v1/realtime/alerts` | GET (SSE) | Authorized user | SSE preferred; reconnect/poll fallback exposes stale state. |
 | `/v1/furnaces/{assetId}/lining-forecast` | GET | Assigned plant reader | RUL uncertainty, drivers, source snapshot, audit link. |
 | `/v1/energy/schedules:simulate` | POST | `EnergyPlanner.Approve` or simulator role | Returns a feasible proposed schedule and constraint report; never writes an operational schedule. |
-| `/v1/energy/recommendations/{id}:approve` | POST | `EnergyPlanner.Approve` + policy gate | Requires reason/approval context; Phase 0/1 returns simulated or shadow state. Phase 2 validates separate approved write connector. |
+| `/v1/energy/recommendations/{id}:approve` | POST | `EnergyPlanner.Approve` + policy gate | Requires reason/approval context; demonstration/pilot returns simulated or shadow state. Phase 2 validates separate approved write connector. |
 | `/v1/quality/batches` | GET | Quality-scoped reader | Genealogy/risk data filtered by plant/product permission. |
 | `/v1/knowledge/interviews` | POST | Knowledge workflow role and consent | Creates consent-bound session; no raw audio appears in general analytics. |
 | `/v1/knowledge/procedures/{id}:approve` | POST | Knowledge publisher role | Publishes a reviewed immutable version and triggers derived-index update. |
@@ -592,7 +592,7 @@ Every flow propagates `correlation_id`; a decision audit record links it to even
 ### ADR-007 — Human approval and no direct OT action
 
 **Status:** Accepted.  
-**Decision:** All safety-adjacent and financial decisions have an explicit human approval event. Phase 0 simulations have no real write connector.  
+**Decision:** All safety-adjacent and financial decisions have an explicit human approval event. Demonstration simulations have no real write connector.  
 **Consequences:** Any request for automatic schedule/CMMS/OT action triggers security, legal, OT, and RAI-board review plus an updated threat model.
 
 ### ADR-008 — Demo is a separate deterministic product slice
@@ -759,7 +759,7 @@ audit.
 4. **Domain services:** deploy FastAPI/workers, query adapters, audit append path, optimizer, scoring, and Foundry tool OpenAPI surface.
 5. **Knowledge path:** deploy Speech/Foundry, restricted storage/search, consent/review workflow, content filters, Prompt Shields, and traces.
 6. **Experience:** deploy Blazor host/MFE, role-aware routes, API contract tests, SSE/poll degradation, accessibility checks, and Power BI internal embedding where needed.
-7. **Demo proof:** load signed seed manifests, validate all scenario assertions, verify two consecutive 15-minute runs, exercise every fallback level, and verify no real action/production data.
+7. **Demo proof:** load signed seed manifests, validate all scenario assertions, verify two consecutive 10-minute runs, exercise every fallback level, and verify no real action/production data.
 8. **Production gate:** obtain DPO/legal classification, OT sign-off, model evaluation, capacity/region/connector proof, threat-model update, DR test, and security acceptance gates before onboarding any real site.
 
 ## 14. Evidence and re-check ledger

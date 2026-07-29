@@ -7,7 +7,8 @@
  * apps/portal-shell/wwwroot/brand: molten-orange accent on a cool graphite base.
  * Class contract consumed by slides.md: lead, tight, backup, cards[.four],
  * card[.teal|.orange|.purple|.green], card-num, split[.right-wide], stat/big/label,
- * pill[.green|.orange|.purple|.gray|.blue], tag, grad, hero-line, herostats.
+ * pill[.green|.orange|.purple|.gray|.blue], tag, grad, hero-line, herostats, brandbar,
+ * flow/lane[.teal|.orange|.purple|.green|.blue]/lane-tag/nodes/node/arrow/legend.
  */
 
 @import 'default';
@@ -276,6 +277,28 @@ section.lead img {
   border-radius: 3px;
 }
 
+/* Title-slide logo lockup. The sources are opaque artwork on white, so they sit on
+   a light plate rather than directly on the dark lead background. Any logo whose
+   asset is absent removes itself (see slides.md), and the flex gap closes up. */
+.brandbar {
+  display: flex;
+  align-self: flex-start;
+  align-items: center;
+  justify-content: flex-start;
+  width: fit-content;
+  gap: 34px;
+  margin-top: 26px;
+  padding: 12px 22px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+}
+
+.brandbar img {
+  height: 34px;
+  width: auto;
+}
+
 .herostats {
   display: flex;
   gap: 26px;
@@ -459,4 +482,123 @@ section.lead img {
   background: #eef1f6;
   color: var(--ns-ink-soft);
   border-color: var(--ns-line);
+}
+
+/* --- layered flow diagram ---------------------------------------------- */
+
+.flow {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.lane {
+  display: grid;
+  grid-template-columns: 152px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 9px 12px;
+  border: 1px solid var(--ns-line);
+  border-left: 5px solid var(--ns-molten);
+  border-radius: 9px;
+  background: var(--ns-surface-alt);
+}
+
+.lane.teal {
+  border-left-color: var(--ns-teal);
+}
+
+.lane.orange {
+  border-left-color: var(--ns-molten);
+}
+
+.lane.purple {
+  border-left-color: var(--ns-purple);
+}
+
+.lane.green {
+  border-left-color: var(--ns-green);
+}
+
+.lane.blue {
+  border-left-color: var(--ns-blue);
+}
+
+.lane-tag {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ns-ink-soft);
+  line-height: 1.25;
+}
+
+.nodes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.node {
+  flex: 1 1 0;
+  min-width: 128px;
+  padding: 7px 11px;
+  border: 1px solid var(--ns-line);
+  border-radius: 7px;
+  background: var(--ns-surface);
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.node b {
+  display: block;
+  font-size: 16px;
+  color: var(--ns-ink);
+}
+
+.node span {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--ns-ink-soft);
+}
+
+.node.teal {
+  border-color: #9ed5cf;
+  background: var(--ns-teal-soft);
+}
+
+.node.orange {
+  border-color: #f6cdb5;
+  background: var(--ns-molten-soft);
+}
+
+.node.purple {
+  border-color: #cfc9ef;
+  background: var(--ns-purple-soft);
+}
+
+.node.green {
+  border-color: #bfe3ce;
+  background: var(--ns-green-soft);
+}
+
+.node.blue {
+  border-color: #c3d8ef;
+  background: var(--ns-blue-soft);
+}
+
+.arrow {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ns-molten);
+  line-height: 1;
+}
+
+.legend {
+  margin-top: 10px;
+  font-size: 15px;
+  color: var(--ns-ink-soft);
 }

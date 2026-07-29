@@ -10,19 +10,19 @@
 
 | Segment | Durée | Horloge | Contenu |
 |---|---|---|---|
-| **Slides** | 30 min | 00:00 → 30:00 | 20 slides (+ 1 CFO bridge si inséré) |
-| **Démo live** | 15 min | 30:00 → 45:00 | 7 onglets, données synthétiques, graine `240725` |
+| **Slides** | 35 min | 00:00 → 35:00 | 20 slides (+ 1 CFO bridge si inséré) |
+| **Démo live** | 10 min | 35:00 → 45:00 | 7 onglets, données synthétiques, graine `240725` |
 | **Q&A jury** | 15 min | 45:00 → 60:00 | ≥ 8–10 questions ; [faq.md](faq.md) |
 
 ## Checkpoints (si en retard de > 30 s, couper en profondeur, pas en honnêteté)
 
 | CP | Horloge cible | Doit être vrai |
 |---|---|---|
-| CP-1 | **09:30** | Business case + cibles + gardes-fous + personas atterris |
-| CP-2 | **16:15** | Architecture + Fabric-centralité + ingestion + « Python décide » atterris |
-| CP-3 | **22:30** | 4 deep-dives IA terminés avec étiquettes 🎯 vs 🔬 intactes |
-| CP-4 | **29:15** | RAI + sécurité + synthétique + coût/échelle défendus |
-| CP-5 | **30:00** | Timer démo lancé, onglet Plant Manager ouvert, checklist verte |
+| CP-1 | **10:00** | Business case + cibles + gardes-fous + personas atterris |
+| CP-2 | **18:00** | Architecture + Fabric-centralité + ingestion + « Python décide » atterris |
+| CP-3 | **25:30** | 4 deep-dives IA terminés avec étiquettes 🎯 vs 🔬 intactes |
+| CP-4 | **34:15** | RAI + sécurité + synthétique + coût/échelle défendus |
+| CP-5 | **35:00** | Timer démo lancé, onglet Plant Manager ouvert, checklist verte |
 | CP-6 | **45:00** | Phrase récap prononcée ; ne pas déboguer en live |
 | CP-7 | **60:00** | ≥ 8 questions répondues ; inconnues logguées en suivi écrit |
 

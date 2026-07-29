@@ -331,7 +331,7 @@ outside the completed local baseline.
 | `CI-003` | SBOM generation + dependency scanning (Dependabot) + secret scanning/push protection | `CI-001` | SBOM artifact retained 2 years (§14 security doc); Critical/High vulnerability SLA (7/30 days) enforced as a required check |
 | `CI-004` | CodeQL/SAST on every PR; pinned action SHAs; minimal `GITHUB_TOKEN` permissions | `CI-001` | No workflow uses a floating action tag; `permissions:` block is least-privilege per job |
 | `CI-005` | Integration test environment (`test`) wired to Fabric/Foundry test workspaces | `FAB-002`..`FAB-007`, `AI-001` | Full ingest→Fabric→BFF→frontend round trip passes in `test` before promotion to `demo`/`prod` gate |
-| `CI-006` | E2E persona journey tests (Playwright or equivalent) against `demo` environment | `FE-003`, `CI-005` | Two consecutive successful 15-minute scripted demo runs recorded as CI evidence, matching `deployment-topology.md` §8 step 8 |
+| `CI-006` | E2E persona journey tests (Playwright or equivalent) against `demo` environment | `FE-003`, `CI-005` | Two consecutive successful 10-minute scripted demo runs recorded as CI evidence, matching `deployment-topology.md` §8 step 8 |
 
 ### 6.7 Phase G — Infrastructure and security hardening (todo: `azure-infrastructure`)
 
@@ -565,7 +565,7 @@ Every flow propagates `correlation_id` end to end; `bff-api`'s audit table (§6.
 
 ## 14. Local demo mode ↔ offline fallback pack cross-reference
 
-Section 5 defines local demo mode as a developer/runtime capability. It is also fallback-ladder level 2 for the live 15-minute defense (`demo-runbook.md` §6.1). Implementation must keep these identical, not build two divergent "offline modes":
+Section 5 defines local demo mode as a developer/runtime capability. It is also fallback-ladder level 2 for the live 10-minute defense (`demo-runbook.md` §6.1). Implementation must keep these identical, not build two divergent "offline modes":
 
 1. **Level 1 — live cloud**: full Azure/Fabric path, described throughout this guide.
 2. **Level 2 — local deterministic replay**: exactly §5 of this guide.
@@ -583,9 +583,9 @@ Section 5 defines local demo mode as a developer/runtime capability. It is also 
 
 Restated from the architecture so implementers do not accidentally build production behavior into the demo path or vice versa:
 
-1. Phase 0 is synthetic-only; no code path may read a non-`NS-DEMO-*` namespace while `DEMO_MODE` is set, and no production code path may read a `NS-DEMO-*` namespace either — enforce both directions with a startup assertion, not a comment.
+1. The demonstration is synthetic-only; no code path may read a non-`NS-DEMO-*` namespace while `DEMO_MODE` is set, and no production code path may read a `NS-DEMO-*` namespace either — enforce both directions with a startup assertion, not a comment.
 2. No application, agent, Activator rule, pipeline, or demo control writes to a PLC, safety interlock, furnace, or production setpoint, in any environment, at any phase implemented so far. Any future work item proposing such a write requires the security/legal/OT/RAI review gate in `solution-architecture.md` ADR-007 before a single line of code is written.
-3. Energy-recommendation "approve" and quality "what-if" routes return simulated/shadow state in Phase 0/1; a real write connector is a Phase 2+ item gated by the production onboarding checklist (§9.1 step 10), not an implementation detail to "just add later" inside `optimizer-worker`.
+3. Energy-recommendation "approve" and quality "what-if" routes return simulated/shadow state in the demonstration and pilot phases; a real write connector is a Phase 2+ item gated by the production onboarding checklist (§9.1 step 10), not an implementation detail to "just add later" inside `optimizer-worker`.
 4. Capacity lifecycle automation (01:00 Logic App, GUI request) targets `dev`/`test`/`demo` only; the allow-list check is implemented independently in both the Logic App and `bff-api`, and a change that widens the allow-list to include a production capacity ID is a security-gate-blocking change requiring explicit sign-off.
 5. Foundry Data Zone (EU) is not a single-region guarantee; if legal/DPO impose a Sweden-Central-only requirement, the model deployment type must change to regional Standard/Provisioned — this is a configuration change (`AI-001`), not an architecture change.
 6. No exact runtime/package version is hard-coded in this guide beyond the one pinned Fabric capacity API version (§7.1); every other SDK/runtime version is resolved at bootstrap through the protected feed and recorded in lockfiles/SBOM per ADR-009.
@@ -608,6 +608,6 @@ the cloud rollout gates summarized in the root handoff and `docs\README.md`.
 | **Wave 4 — Domain services and AI** | `BE-004`, `BE-005`, `BE-006`, `BE-007`, `AI-001`, `AI-002`, `AI-003`, `AI-004`, `INFRA-005` | Optimizer/scoring workers, the audit ledger, capacity-operator routes, and both Foundry agents can proceed in parallel once the data core is queryable; Foundry provisioning (`INFRA-005`) should start at the beginning of this wave since regional/quota verification (§9.1 step 6 gate) can take longer than the code itself. |
 | **Wave 5 — Frontend experience** | `FE-001`, `FE-002`, `FE-003`, `FE-004`, `FE-005` | Requires `BE-002`/`BE-003`/`BE-007` to be queryable; can otherwise proceed fully in parallel with Wave 4's backend-only items once those specific routes are stable (coordinate via contract tests, not calendar time). |
 | **Wave 6 — CI/CD hardening and full-path testing** | `CI-001`–`CI-006`, `SEC-010`, `SEC-011` | Per-service CI should actually start in Wave 0 in skeletal form (lint/unit only); this wave is where the full contract/integration/E2E/security gate set is completed and made required, once there is a real cross-service path to test end to end. |
-| **Wave 7 — Demo rehearsal and production-gate readiness** | Demo rehearsal (`deployment-topology.md` §8 step 8), production-gate checklist (§9.1 step 10) | Final integration: two consecutive successful 15-minute runs, every fallback level exercised offline, and the production-onboarding governance checklist reviewed — this is a go/no-go gate, not a coding task. |
+| **Wave 7 — Demo rehearsal and production-gate readiness** | Demo rehearsal (`deployment-topology.md` §8 step 8), production-gate checklist (§9.1 step 10) | Final integration: two consecutive successful 10-minute runs, every fallback level exercised offline, and the production-onboarding governance checklist reviewed — this is a go/no-go gate, not a coding task. |
 
 **Explicit note for the fleet lead:** `FE-000` (npm protected feed resolution) and the Fabric/Foundry regional-availability and quota re-verification steps called out in `deployment-topology.md` §15 items 1–3 are the two most likely sources of calendar delay because they depend on an external approval or tenant check rather than engineering effort. Start both at the beginning of Wave 0/Wave 4 respectively, in parallel with coding work, rather than discovering the lead time mid-wave.

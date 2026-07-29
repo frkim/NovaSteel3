@@ -156,7 +156,7 @@
 
 | Ref | Ce qui manque honnêtement |
 |---|---|
-| `TR-DEV-01` | Certains artefacts Fabric (notebooks, règles Activator, l'eventstream Real-Time Intelligence) sont provisionnés comme modèles et démontrés à partir de sorties capturées plutôt qu'exécutés en direct dans la fenêtre de démo de 15 minutes. |
+| `TR-DEV-01` | Certains artefacts Fabric (notebooks, règles Activator, l'eventstream Real-Time Intelligence) sont provisionnés comme modèles et démontrés à partir de sorties capturées plutôt qu'exécutés en direct dans la fenêtre de démo de 10 minutes. |
 | `TR-DEV-02` | Les intégrations Manufacturing Execution System (MES) et batch historian sont spécifiées dans l'architecture mais non implémentées ; la démo lit un flux synthétique à leur place. |
 | `TR-AI-02` | Il n'existe pas d'artefact registre de modèles, de notebook d'entraînement ou de gate d'évaluation automatisé dans le dépôt. Le versionnage des modèles est une constante dans le code et le modèle physique est ajusté analytiquement plutôt qu'entraîné ; le cycle de vie est donc décrit dans la documentation plutôt qu'appliqué par outillage. |
 | `TR-ARC-01` | Aucun résultat de test de charge, aucune cible SLO/SLA publiée et aucun middleware circuit-breaker dans le code. Les affirmations de fiabilité reposent sur la configuration d'infrastructure et l'intention de conception plutôt que sur un comportement mesuré sous charge. |
