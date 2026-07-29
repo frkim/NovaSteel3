@@ -375,7 +375,7 @@ AI-derived values use a common shape:
 | `/v1/knowledge/procedures/{id}:approve` | POST | Knowledge publisher role | Publishes a reviewed immutable version and triggers derived-index update. |
 | `/v1/audit/decisions` | GET | Auditor/authorized owner | Queryable, export-audited record with model/input/decision/outcome lineage. |
 | `/v1/platform/capacity` | GET | Authenticated user | Read-only lifecycle state; cached safely and marked stale if unknown. |
-| `/v1/platform/capacity/start-requests` | POST | `Platform.Capacity.Manage` | Requests a demo-capacity resume outside Demo Mode; server-side policy and ARM polling only. |
+| `/v1/platform/capacity/start-requests` | POST | `Platform.Capacity.Manage` | Requests a demo-capacity resume when the service runs in a non-demo configuration; server-side policy and ARM polling only. |
 | `/v1/platform/capacity/pause-requests` | POST | `Platform.Capacity.Manage` | Requests a demo-capacity pause after drain checks; never accepts an alert-triggered request. |
 | `/v1/platform/capacity/sku-requests` | POST | `Platform.Capacity.Manage` | Resizes the non-production capacity within the policy-enforced SKU allow-list; leaves lifecycle state unchanged and is refused mid-transition. |
 | `/v1/copilot/chat` | POST | Any persona-scoped reader | Answers from assembled grounding material only; returns the sources used, the resolved reasoning tier, and whether the curated public corpus was consulted. Never returns an operational value the caller could not already see. |
