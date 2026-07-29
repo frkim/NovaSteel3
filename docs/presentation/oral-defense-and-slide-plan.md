@@ -51,7 +51,7 @@ Legend used throughout:
 ### Slide 1 — Title & framing
 - **Duration:** 0:45 · **Running clock:** 00:00 → 00:45
 - **Purpose:** Set identity, scope, and the honesty contract before any claim is made.
-- **Visual:** NovaSteel wordmark over a muted blast-furnace image; a persistent footer chip that will appear on *every* slide: **"Phase 0 · Synthetic demonstration · Not for operational control."**
+- **Visual:** NovaSteel wordmark over a muted blast-furnace image; a persistent footer chip that will appear on *every* slide: **"Phase 0 · Real architecture, synthetic data · AI advises, humans decide"**
 - **On-slide content:**
   - NovaSteel — AI-Powered Steel Production Optimization Platform
   - Phase 0 oral defense · Microsoft Fabric–centered architecture

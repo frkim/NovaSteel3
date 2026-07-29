@@ -17,8 +17,8 @@ PRESENTATION = ROOT / "presentation"
 SLIDES = PRESENTATION / "slides.md"
 THEME = PRESENTATION / "theme.css"
 
-MAIN_SLIDE_COUNT = 20
-BACKUP_SLIDE_COUNT = 6
+MAIN_SLIDE_COUNT = 22
+BACKUP_SLIDE_COUNT = 12
 MIN_TALK_SECONDS = 29 * 60
 MAX_TALK_SECONDS = 30 * 60
 
@@ -27,6 +27,7 @@ TIMING_PATTERN = re.compile(r"^\s*⏱\s*(\d+):([0-5]\d)\s*·\s")
 SCOPED_CLASS_PATTERN = re.compile(r"<!--\s*_class:\s*(.*?)\s*-->")
 HTML_CLASS_PATTERN = re.compile(r'class="([^"]+)"')
 IMAGE_PATTERN = re.compile(r"!\[[^\]]*\]\(images/([^)]+)\)")
+HTML_IMAGE_PATTERN = re.compile(r'<img[^>]+src="images/([^"]+)"')
 PLACEHOLDERS = ("TODO", "TBD", "FIXME", "Lorem ipsum", "XXX")
 
 
@@ -59,7 +60,7 @@ def test_front_matter_declares_the_novasteel_marp_theme() -> None:
     assert "marp: true" in front_matter
     assert "theme: novasteel" in front_matter
     assert "paginate: true" in front_matter
-    assert "Phase 0 · Synthetic demonstration · Not for operational control." in front_matter
+    assert "Phase 0 · Real architecture, synthetic data · AI advises, humans decide" in front_matter
 
 
 def test_deck_has_twenty_main_slides_and_six_backup_slides() -> None:
@@ -98,9 +99,28 @@ def test_backup_slides_are_outside_the_speaking_budget() -> None:
 def test_referenced_images_are_provided_by_the_sync_script() -> None:
     sync_script = _read(PRESENTATION / "scripts" / "sync-images.mjs")
     available = set(re.findall(r'"([\w-]+\.png)"', sync_script))
-    referenced = set(IMAGE_PATTERN.findall(_read(SLIDES)))
+    slides = _read(SLIDES)
+    referenced = set(IMAGE_PATTERN.findall(slides)) | set(HTML_IMAGE_PATTERN.findall(slides))
     assert referenced, "the deck should use at least one visual"
     assert referenced <= available, f"unknown images referenced: {sorted(referenced - available)}"
+
+
+def test_title_slide_carries_the_three_brand_logos() -> None:
+    """The NovaSteel, AxelorMetal and Microsoft marks open the deck. Each one is
+    removed at render time when its source asset is absent, so a logo the repository
+    cannot ship (the Microsoft trademark) never leaves a broken image behind."""
+
+    _, slides = _front_matter_and_slides()
+    title = slides[0]
+    assert 'class="brandbar"' in title
+    for logo in ("novasteel-logo.png", "ama-logo.png", "microsoft-logo.png"):
+        assert f'src="images/{logo}"' in title
+        assert 'onerror="this.remove()"' in title
+
+    sync_script = _read(PRESENTATION / "scripts" / "sync-images.mjs")
+    assert "NovaSteel Logo.png" in sync_script
+    assert "ama_logo.png" in sync_script
+    assert "microsoft_logo.png" in sync_script
 
 
 def test_every_css_class_used_by_the_deck_exists_in_the_theme() -> None:
@@ -121,6 +141,36 @@ def test_deck_carries_no_placeholder_text() -> None:
     assert found == [], f"placeholder text left in the deck: {found}"
 
 
+def test_deck_drops_the_synthetic_realism_slide_and_guardrail() -> None:
+    text = _read(SLIDES)
+    assert "Synthetic Data & OT Realism" not in text
+    assert "Synthetic-only Phase 0" not in text
+    assert "NS-DEMO-*" not in text
+
+
+def test_deck_carries_the_architecture_and_ai_flow_diagrams() -> None:
+    _, slides = _front_matter_and_slides()
+    titles: list[str] = []
+    for slide in slides:
+        if '<div class="flow">' not in slide:
+            continue
+        heading = re.search(r"(?m)^#\s+(.*)$", slide)
+        assert heading is not None, "a diagram slide is missing its title"
+        titles.append(heading.group(1))
+    assert {"Architecture at a Glance", "AI Architecture in Detail"} <= set(titles), (
+        "the deck needs an architecture diagram and an AI detail diagram"
+    )
+    assert titles.index("Architecture at a Glance") < titles.index("AI Architecture in Detail")
+
+
+def test_deck_sizes_the_run_cost_for_one_site() -> None:
+    _, slides = _front_matter_and_slides()
+    cost = [slide for slide in slides if "What It Costs to Run One Site" in slide]
+    assert len(cost) == 1
+    for tier in ("**Mini**", "**Medium**", "**Large**"):
+        assert tier in cost[0], f"the cost slide must size the {tier} tier"
+
+
 def test_build_scripts_produce_html_pdf_and_pptx() -> None:
     manifest = json.loads(_read(PRESENTATION / "package.json"))
     scripts = manifest["scripts"]
@@ -138,6 +188,42 @@ def test_presentation_workflow_builds_and_publishes_the_deck() -> None:
     assert "tests/presentation" in workflow
     assert "NovaSteel-Oral-Defense.pptx" in workflow
     assert "NovaSteel-Oral-Defense.pdf" in workflow
+
+
+def test_presentation_workflow_publishes_every_built_document_as_an_artifact() -> None:
+    """The HTML deck, both PDFs and the PPTX must be downloadable from every run,
+    including pull-request runs, so reviewers never have to build the deck."""
+
+    workflow = _read(ROOT / ".github" / "workflows" / "presentation.yml")
+    upload = workflow.split("- name: Publish the deck artifacts", 1)[1]
+    upload = upload.split("- name: Assemble the Pages site", 1)[0]
+
+    assert "actions/upload-artifact@" in upload
+    for document in (
+        "presentation/dist/index.html",
+        "presentation/dist/NovaSteel-Oral-Defense.pdf",
+        "presentation/dist/NovaSteel-Oral-Defense-notes.pdf",
+        "presentation/dist/NovaSteel-Oral-Defense.pptx",
+    ):
+        assert document in upload
+    assert "if-no-files-found: error" in upload
+    assert "if:" not in upload, "deck artifacts must also be published on pull requests"
+
+
+def test_presentation_workflow_publishes_the_deck_at_the_pages_root() -> None:
+    """The Pages site root must serve the deck itself; publishing only under
+    ``/deck/`` leaves https://<owner>.github.io/<repo>/ empty."""
+
+    workflow = _read(ROOT / ".github" / "workflows" / "presentation.yml")
+    assemble = workflow.split("- name: Assemble the Pages site", 1)[1]
+    assemble = assemble.split("- name: Configure Pages", 1)[0]
+
+    assert "-o ../_site/index.html" in assemble
+    assert "cp images/* ../_site/images/" in assemble
+    assert "dist/NovaSteel-Oral-Defense.pptx ../_site/" in assemble
+    assert "../_site/.nojekyll" in assemble
+    assert "../_site/deck/index.html" in assemble, "keep the old /deck/ URL working"
+    assert "path: _site" in workflow
 
 
 def test_presentation_workflow_never_bootstraps_github_pages() -> None:
