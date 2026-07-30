@@ -53,12 +53,12 @@
 | **−22 %** CO₂/tonne | 🎯 TARGET | usecase.md ; solution-requirements.md §4 |
 | **≥ 21 jours** alerte four | 🎯 TARGET (🔬 evidence : ~20 j) | solution-requirements.md §4 |
 | **+8 %** rendement haut de gamme | 🎯 TARGET | solution-requirements.md §4 |
-| **€8M** coût d'une défaillance four | Fait métier | personas-and-journeys.md |
 | **35 %** = part énergie dans le coût | Fait métier | usecase.md |
-| P50 **~20 j** / P10 **18,7** / P90 **20,6** | 🔬 EVIDENCE (scénario synthétique) | demo-runbook.md §5 ; RUL regression |
+| **€8M** coût d'une défaillance four | Fait métier | personas-and-journeys.md |
 | **7,25 %** réduction coût énergie (dispatch total) | 🔬 EVIDENCE (scénario synthétique 24 h) | optimizer MILP output |
 | **3,29 %** réduction CO₂ (dispatch total) | 🔬 EVIDENCE (scénario synthétique 24 h) | optimizer MILP output |
 | **7,89 %** réduction pic (dispatch-attribuable) | 🔬 EVIDENCE (scénario synthétique 24 h) | optimizer MILP output |
+| P50 **~20 j** / P10 **18,7** / P90 **20,6** | 🔬 EVIDENCE (scénario synthétique) | demo-runbook.md §5 ; RUL regression |
 | **~€24,5M/an** bénéfice énergie à l'échelle | 🎯 TARGET illustratif (dérivé de 14 % × A1 × A3) | operations-and-cost.md §8.5 |
 | **< 12 mois** retour sur investissement | 🎯 TARGET illustratif | operations-and-cost.md §8.5 |
 | Risque RUL **0,90** / confiance **0,78** | 🔬 EVIDENCE | RUL regression (r² = 0.88) |

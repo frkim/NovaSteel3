@@ -64,8 +64,8 @@ Source: [`docs/usecase/usecase.md`](../../../../usecase/usecase.md).
 
 | AI infusion point | Requirement ID | Status | Primary screen |
 |---|---|---|---|
-| Physics-informed ML predicts lining degradation from thermal signatures | `AI-01` | Met | Furnace Health › Thermal Explorer |
 | Energy dispatch optimization agent schedules around spot prices | `AI-02` | Met | Energy Optimization › Load-Shift Simulator |
+| Physics-informed ML predicts lining degradation from thermal signatures | `AI-01` | Met | Furnace Health › Thermal Explorer |
 | GenAI knowledge capture interviews operators into a procedure library | `AI-03` | Met | Knowledge Hub › Procedures |
 
 | Regulatory context | Requirement ID | Status | Primary screen |

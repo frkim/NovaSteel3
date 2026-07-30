@@ -1,7 +1,7 @@
 # NovaSteel — Security Governance & Threat Model
 
 > **Document type**: Implementation-ready security architecture
-> **Applies to**: NovaSteel AI-Powered Steel Production Optimization Platform (furnace-lining prediction, energy dispatch optimization agent, GenAI operator knowledge-capture system)
+> **Applies to**: NovaSteel AI-Powered Steel Production Optimization Platform (energy dispatch optimization agent, furnace-lining prediction, quality-risk prediction, GenAI operator knowledge-capture system)
 > **Status**: Draft v1.0 — for review by CISO organization, Data Protection Officer (DPO), and Platform Engineering
 > **Owning todo**: `security-spec`
 

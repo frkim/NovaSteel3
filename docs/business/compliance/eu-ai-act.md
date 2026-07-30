@@ -13,8 +13,8 @@ NovaSteel contains four distinct AI/algorithmic systems, each with a different r
 
 | # | AI system | Technique | Intended purpose | Output consumed by | Requirement IDs |
 |---|---|---|---|---|---|
-| AI-1 | **Furnace-lining RUL** | Physics-informed OLS regression over thermal features | Estimate remaining useful life; ≥21-day advance warning | Maintenance/Reliability Engineer (advisory) | FR-FUR-02..07, AI-01, AI-08 |
 | AI-2 | **Energy-dispatch optimizer** | PuLP/CBC mixed-integer linear program (MILP) | Recommend a lower-cost / lower-CO₂ schedule | Energy Manager (approve/modify/reject) | FR-ENE-01..07, AI-02 |
+| AI-1 | **Furnace-lining RUL** | Physics-informed OLS regression over thermal features | Estimate remaining useful life; ≥21-day advance warning | Maintenance/Reliability Engineer (advisory) | FR-FUR-02..07, AI-01, AI-08 |
 | AI-3 | **In-line quality prediction** | Explainable risk model over process/chemistry | Predict high-grade conformance; suggest what-if adjustments | Quality Engineer (advisory) | FR-QUA-01..05, AI-04 |
 | AI-4 | **GenAI knowledge capture + grounded RAG** | LLM interview + hybrid retrieval, RRF, citation-enforced | Elicit tacit knowledge; answer grounded operator questions | All personas (read); Knowledge Engineer publishes | FR-KNW-01..08, AI-03, AI-07 |
 

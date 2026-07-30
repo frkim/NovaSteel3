@@ -124,7 +124,7 @@ Today's demo will show the platform producing these kinds of outputs on syntheti
 <div>
 
 - One **Microsoft Fabric** core unifies production, energy, emissions, quality, maintenance & knowledge
-- Four AI capabilities: lining RUL · energy dispatch · quality risk · knowledge capture
+- Four AI capabilities: energy dispatch · lining RUL · quality risk · knowledge capture
 - Persona dashboards for **8 roles**, EU-hosted, audited end to end
 - **Decision support** — a human approves; the platform never actuates equipment
 
@@ -179,8 +179,8 @@ If any of these is a problem for you, stop me now, because I won't trade them aw
 | Persona | Dashboard | Key job-to-be-done |
 |---|---|---|
 | Plant Manager | Site Command Center | Single-page operational truth |
-| Reliability Engineer | Furnace Lining RUL | €8M failure → planned intervention |
 | Energy Manager | Dispatch Optimization | Move flexible load off price peaks |
+| Reliability Engineer | Furnace Lining RUL | €8M failure → planned intervention |
 | Quality Engineer | In-line Quality | Catch drift before it ships |
 | Sustainability Officer | ETS Cockpit | Own the −22% carbon target |
 | Knowledge Engineer | GenAI Capture Studio | Preserve retiring expertise |
@@ -188,7 +188,7 @@ If any of these is a problem for you, stop me now, because I won't trade them aw
 | Furnace Operator | Health Monitor + Knowledge | Daily decision context |
 
 <!-- ⏱ 1:25 · The platform serves eight roles, not one.
-The Plant Manager wants everything on one page she can defend. The Reliability Engineer wants an eight-million-euro failure turned into a planned intervention. The Energy Manager wants to move flexible load off price peaks. The Quality Engineer wants to catch drift before it ships and prove genealogy heat-by-heat.
+The Plant Manager wants everything on one page she can defend. The Energy Manager wants to move flexible load off price peaks. The Reliability Engineer wants an eight-million-euro failure turned into a planned intervention. The Quality Engineer wants to catch drift before it ships and prove genealogy heat-by-heat.
 The Sustainability Officer owns the twenty-two-percent carbon target and ETS exposure. The Knowledge Engineer wants a retiring expert's judgment captured before it's gone.
 In the demo I'll walk these as tabs, in the order a real operating day would touch them. -->
 
@@ -221,7 +221,7 @@ In the demo I'll walk these as tabs, in the order a real operating day would tou
 <div class="arrow">▲▼ features & labels ▲▼ predictions, recommendations, audit facts</div>
 <div class="lane purple"><div class="lane-tag">AI & app<br>services</div><div class="nodes">
 <div class="node purple"><b>Python FastAPI BFF</b><span>domain APIs · read-only adapters to KQL + gold</span></div>
-<div class="node purple"><b>Scoring / optimizer workers</b><span>RUL · MILP dispatch · quality risk</span></div>
+<div class="node purple"><b>Scoring / optimizer workers</b><span>MILP dispatch · RUL · quality risk</span></div>
 <div class="node purple"><b>Foundry (EU) + Speech</b><span>explain & transcribe · restricted OpenAPI tools</span></div>
 </div></div>
 <div class="arrow">▼ HTTPS + Entra access token — the browser never holds a workload credential</div>
@@ -299,15 +299,15 @@ On identity: Fabric's Event Hubs connector uses a shared key, which our security
 # The Four AI Capabilities
 
 <div class="cards four">
-<div class="card teal"><div class="card-num">RUL</div><h3>Lining RUL</h3><p>Physics-informed Python model, daily scoring</p></div>
 <div class="card orange"><div class="card-num">ENERGY</div><h3>Energy Dispatch</h3><p>Deterministic Python optimizer, constraint-aware</p></div>
+<div class="card teal"><div class="card-num">RUL</div><h3>Lining RUL</h3><p>Physics-informed Python model, daily scoring</p></div>
 <div class="card purple"><div class="card-num">QUALITY</div><h3>Quality Risk</h3><p>Python model over genealogy features</p></div>
 <div class="card green"><div class="card-num">KNOWLEDGE</div><h3>Knowledge Capture</h3><p>Azure Speech + Foundry Agent Service</p></div>
 </div>
 
 **ADR-006:** Python is authoritative for math · Foundry explains/retrieves, never decides or commits
 
-<!-- ⏱ 1:10 · Four capabilities, one principle that I'll defend hard: the deterministic, testable Python services compute the answer — remaining useful life, feasible dispatch, quality risk.
+<!-- ⏱ 1:10 · Four capabilities, one principle that I'll defend hard: the deterministic, testable Python services compute the answer — feasible dispatch, remaining useful life, quality risk.
 The generative agent explains, retrieves, and orchestrates approved tool calls; it never invents a schedule, relaxes a constraint, or makes a commitment.
 That's ADR-006, and it's why a language model being confidently wrong can't hurt a furnace here. -->
 
@@ -321,15 +321,15 @@ That's ADR-006, and it's why a language model being confidently wrong can't hurt
 
 <div class="flow">
 <div class="lane teal"><div class="lane-tag">Features<br>governed gold</div><div class="nodes">
-<div class="node teal"><b>Thermal & cooling</b><span>heat-flux slope, spatial contrast, cooling residual</span></div>
 <div class="node teal"><b>Dispatch inputs</b><span>day-ahead price, grid carbon, production & maintenance constraints</span></div>
+<div class="node teal"><b>Thermal & cooling</b><span>heat-flux slope, spatial contrast, cooling residual</span></div>
 <div class="node teal"><b>Genealogy</b><span>heat → slab → coil → sample → shipment</span></div>
 <div class="node teal"><b>Consented transcripts</b><span>PII auto-redacted to <code>[REDACTED:{KIND}]</code></span></div>
 </div></div>
 <div class="arrow">▼ Direct Lake / read-only adapters — features and labels, never raw OT credentials</div>
 <div class="lane purple"><div class="lane-tag">Deterministic core<br>Python decides</div><div class="nodes">
-<div class="node purple"><b>Lining RUL</b><span>physics-informed regression → P10/P50/P90 + confidence · daily scoring</span></div>
 <div class="node purple"><b>Energy dispatch</b><span>MILP (PuLP + CBC) → feasible schedule · greedy fallback, labelled in UI</span></div>
+<div class="node purple"><b>Lining RUL</b><span>physics-informed regression → P10/P50/P90 + confidence · daily scoring</span></div>
 <div class="node purple"><b>Quality risk</b><span>genealogy model → spec probability + bounded what-if</span></div>
 </div></div>
 <div class="arrow">▼ recommendation object: value, drivers, confidence, model version, constraints honoured</div>
@@ -347,47 +347,10 @@ That's ADR-006, and it's why a language model being confidently wrong can't hurt
 </div>
 
 <!-- ⏱ 2:05 · Now the same picture for the AI, because "we use AI" is not an architecture.
-Bottom layer up: every model reads governed gold features — thermal and cooling signals, dispatch inputs, the full heat-slab-coil genealogy, and consented, PII-redacted transcripts. No model gets a raw OT credential.
-The deterministic core is Python and it is the only thing that decides. Lining life is a physics-informed regression that emits P10, P50 and P90 with a confidence. Dispatch is a mixed-integer linear program solved with PuLP and CBC, with a deterministic greedy heuristic as a labelled fallback — never a silent one. Quality risk is a model over genealogy features.
+Bottom layer up: every model reads governed gold features — dispatch inputs, thermal and cooling signals, the full heat-slab-coil genealogy, and consented, PII-redacted transcripts. No model gets a raw OT credential.
+The deterministic core is Python and it is the only thing that decides. Dispatch is a mixed-integer linear program solved with PuLP and CBC, with a deterministic greedy heuristic as a labelled fallback — never a silent one. Lining life is a physics-informed regression that emits P10, P50 and P90 with a confidence. Quality risk is a model over genealogy features.
 Only then does language enter: Speech transcribes under an explicit consent state machine, and the Foundry agent in the EU Data Zone drafts and explains, with every claim cited to a transcript segment, behind Prompt Shields and a read-or-simulate tool allow-list.
 And nothing leaves that stack without a human accepting, modifying, or rejecting it with a reason code, written to an append-only trail. That is the whole trust argument in one diagram. -->
-
----
-
-<!-- _class: tight -->
-<!-- _header: '' -->
-<!-- _footer: '' -->
-
-# Deep Dive: Furnace Lining Remaining Useful Life
-
-![w:960](images/furnace-health-lining-forecast.png)
-
-<div class="split right-wide">
-<div>
-
-- Physics-informed model on silver thermal/cooling features
-- Drivers: heat-flux slope, spatial contrast, cooling residual
-- Advisory only → acknowledge → CMMS work order
-
-</div>
-<div>
-
-| Metric | Value |
-|---|---|
-| P50 RUL | ~20 d (19.65) |
-| P10 / P90 | 18.69 / 20.61 |
-| Risk score | 0.90 |
-| Confidence | 0.78 |
-| Rating | `HIGH` |
-
-<span class="pill blue">🔬 EVIDENCE</span> Synthetic scenario result
-
-</div>
-</div>
-
-<!-- ⏱ 1:45 · This is the capability that turns an eight-million-euro surprise into a planned intervention.
-The model is physics-informed — constrained by heat-flux and cooling physics, not a black box fitting noise. On our warning scenario it estimates a P50 remaining life of about twenty days with a tight band — P10 nineteen, P90 twenty-one — a confidence of zero-point-seven-eight from an r-squared of zero-point-eight-eight, and three named drivers.
-The engineer stays accountable: they acknowledge the alert and it links to a CMMS work order. The platform does not touch the furnace, and pilot scoring is daily — I'm not promising real-time inference as an MVP feature. -->
 
 ---
 
@@ -426,6 +389,43 @@ The engineer stays accountable: they acknowledge the alert and it links to a CMM
 The optimizer shifts one eligible reheat batch — the urgent automotive coil stays fixed — and never silently relaxes a hard production constraint.
 On this synthetic horizon that's a seven-point-two-five-percent modeled energy-cost reduction, peak down from fifty-six to fifty-one-point-six megawatts, three-point-three-percent CO₂ reduction — all on the whole-dispatch basis with identical planned tonnage at nine-sixty tonnes and zero hard-constraint violations.
 Those are single-scenario evidence, not banked savings — realized savings are tracked separately in an auditable ledger, which is how the fourteen-percent annual target eventually gets proven rather than asserted. -->
+
+---
+
+<!-- _class: tight -->
+<!-- _header: '' -->
+<!-- _footer: '' -->
+
+# Deep Dive: Furnace Lining Remaining Useful Life
+
+![w:960](images/furnace-health-lining-forecast.png)
+
+<div class="split right-wide">
+<div>
+
+- Physics-informed model on silver thermal/cooling features
+- Drivers: heat-flux slope, spatial contrast, cooling residual
+- Advisory only → acknowledge → CMMS work order
+
+</div>
+<div>
+
+| Metric | Value |
+|---|---|
+| P50 RUL | ~20 d (19.65) |
+| P10 / P90 | 18.69 / 20.61 |
+| Risk score | 0.90 |
+| Confidence | 0.78 |
+| Rating | `HIGH` |
+
+<span class="pill blue">🔬 EVIDENCE</span> Synthetic scenario result
+
+</div>
+</div>
+
+<!-- ⏱ 1:45 · This is the capability that turns an eight-million-euro surprise into a planned intervention.
+The model is physics-informed — constrained by heat-flux and cooling physics, not a black box fitting noise. On our warning scenario it estimates a P50 remaining life of about twenty days with a tight band — P10 nineteen, P90 twenty-one — a confidence of zero-point-seven-eight from an r-squared of zero-point-eight-eight, and three named drivers.
+The engineer stays accountable: they acknowledge the alert and it links to a CMMS work order. The platform does not touch the furnace, and pilot scoring is daily — I'm not promising real-time inference as an MVP feature. -->
 
 ---
 
@@ -897,7 +897,7 @@ Phase 2: guarded write-back to CMMS/MES — human-approved, bounded, reversible.
 <span class="pill orange">Blast furnace route</span> ore, coke and limestone → pig iron → basic oxygen furnace. <span class="pill blue">Electric arc furnace route</span> scrap and DRI melted with electricity. Both converge on ladle refining, casting, rolling and coating.
 </div>
 
-<!-- ⏱ 0:00 · Appendix slide. AxelorMetal runs both primary routes, so the platform has to speak to both. The integrated route reduces iron ore, coking coal and limestone in the blast furnace into molten pig iron, which the basic oxygen furnace then decarburises into steel. The electric arc furnace route melts scrap and direct-reduced iron with electricity instead — far less embedded carbon, far more exposure to the hourly power price, which is exactly why energy dispatch matters more on that route. From ladle refining onward the two routes share one line: continuous casting into slabs, blooms and billets, then hot and cold rolling, galvanizing and coating. Everything NovaSteel does hangs off four points on this picture — refractory wear inside the furnace, the electricity the furnace pulls, the defect risk introduced at the caster and the mill, and the tacit knowledge that walks out of the gate at shift handover. -->
+<!-- ⏱ 0:00 · Appendix slide. AxelorMetal runs both primary routes, so the platform has to speak to both. The integrated route reduces iron ore, coking coal and limestone in the blast furnace into molten pig iron, which the basic oxygen furnace then decarburises into steel. The electric arc furnace route melts scrap and direct-reduced iron with electricity instead — far less embedded carbon, far more exposure to the hourly power price, which is exactly why energy dispatch matters more on that route. From ladle refining onward the two routes share one line: continuous casting into slabs, blooms and billets, then hot and cold rolling, galvanizing and coating. Everything NovaSteel does hangs off four points on this picture — the electricity the furnace pulls, refractory wear inside the furnace, the defect risk introduced at the caster and the mill, and the tacit knowledge that walks out of the gate at shift handover. -->
 
 ---
 
@@ -1097,12 +1097,12 @@ Burned error budget triggers a change freeze until root cause is addressed.
 
 | Output | Expected |
 |---|---|
-| RUL P50 / P10 / P90 | 19.65 / 18.69 / 20.61 d |
-| Risk · confidence | 0.90 · 0.78 (r² 0.88) |
 | Energy-cost cut | −7.25% |
 | Peak | 56.0 → 51.58 MW (−7.89%) |
 | CO₂ | −3.29% |
 | Planned tonnage | 960 t · zero violations |
+| RUL P50 / P10 / P90 | 19.65 / 18.69 / 20.61 d |
+| Risk · confidence | 0.90 · 0.78 (r² 0.88) |
 | Quality what-if | ~88% → ~95% first-pass |
 
 </div>
@@ -1110,7 +1110,7 @@ Burned error budget triggers a change freeze until root cause is addressed.
 
 **Named scenarios**
 
-`240726` lining warning · `240727` energy spike · `240728` quality drift · `240729` outage & recovery
+`240727` energy spike · `240726` lining warning · `240728` quality drift · `240729` outage & recovery
 
 **Five-level fallback ladder**
 

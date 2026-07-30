@@ -40,7 +40,7 @@ Legend used throughout:
 2. **Fabric is the spine, not a logo.** Return to the same architecture diagram (progressive reveal) so the audience never loses the map.
 3. **Targets vs. evidence are color-coded on every slide** that carries a number (e.g., amber chip for 🎯 TARGET, blue chip for 🔬 EVIDENCE).
 4. **Every AI output on a slide shows its uncertainty and its human approver.** No lonely point estimates.
-5. **The demo is the payoff, not a tangent.** Slides 12–15 pre-load exactly what the demo will show, so the demo confirms rather than introduces.
+5. **The demo is the payoff, not a tangent.** Slides 12–15 now run in the same order as the live demo moments DM-2 → DM-5 — energy, lining RUL, quality, knowledge — so each deep dive is replayed live in sequence rather than introduced cold.
 
 **Timing envelope:** 20 content slides total **34:45** of speech with **~15 s** of built-in buffer to land the demo handoff exactly at **35:00**. Rehearsal checkpoints (§4) are at **10:00, 18:00, 25:30, 35:00**.
 
@@ -109,7 +109,7 @@ Legend used throughout:
 - **Visual:** A single ring diagram: live plant signals → Fabric data core → four AI capabilities → persona experiences → human decisions → audited outcomes. Fabric at the center.
 - **On-slide content:**
   - One Microsoft Fabric core unifies production, energy, emissions, quality, maintenance & operator knowledge
-  - Four AI capabilities: lining RUL · energy dispatch · quality risk · knowledge capture
+  - Four AI capabilities: energy dispatch · lining RUL · quality risk · knowledge capture
   - Persona dashboards for 8 roles, EU-hosted, audited end to end
   - **Decision support** — a human approves; the platform never actuates equipment
 - **Speaker notes:** "Here is the entire platform in one picture. Live plant signals flow into a single Microsoft Fabric data core. On top of that governed core sit four AI capabilities. Those feed persona-specific experiences for eight roles. A human always makes the consequential decision, and every decision is audited. The center of gravity is Fabric — I'll spend real time defending *why* that's the right center, because it's the question this room should press hardest on."
@@ -191,19 +191,32 @@ Legend used throughout:
 ### Slide 11 — The four AI capabilities
 - **Duration:** 1:15 · **Running clock:** 16:45 → 18:00
 - **Purpose:** Transition from platform to intelligence; set the frame that Python computes and Foundry explains.
-- **Visual:** Four columns (Lining RUL · Energy Dispatch · Quality Risk · Knowledge Capture), each with input → model → human-approved output.
+- **Visual:** Four columns (Energy Dispatch · Lining RUL · Quality Risk · Knowledge Capture), each with input → model → human-approved output.
 - **On-slide content:**
-  - Lining RUL — physics-informed Python model, daily scoring
   - Energy dispatch — deterministic Python optimizer (constraint-aware)
+  - Lining RUL — physics-informed Python model, daily scoring
   - Quality risk — Python model over genealogy features
   - Knowledge capture — Azure Speech + Foundry Agent Service
   - **ADR-006:** Python is authoritative for math; **Foundry explains/retrieves, it does not decide or commit**
-- **Speaker notes:** "Four capabilities, one principle that I'll defend hard: the deterministic, testable Python services compute the answer — remaining useful life, feasible dispatch, quality risk. The generative agent explains, retrieves, and orchestrates approved tool calls; it never invents a schedule, relaxes a constraint, or makes a commitment. That's ADR-006, and it's why a language model being confidently wrong can't hurt a furnace here."
+- **Speaker notes:** "Four capabilities, one principle that I'll defend hard: the deterministic, testable Python services compute the answer — feasible dispatch, remaining useful life, quality risk. The generative agent explains, retrieves, and orchestrates approved tool calls; it never invents a schedule, relaxes a constraint, or makes a commitment. That's ADR-006, and it's why a language model being confidently wrong can't hurt a furnace here."
 - 🛈 **SOURCE CUE:** solution-architecture.md §4.2, ADR-006.
 - ⛑ **FALLBACK:** none; static.
 
-### Slide 12 — Deep dive: furnace lining remaining-useful-life
-- **Duration:** 2:30 · **Running clock:** 18:00 → 20:30
+### Slide 12 — Deep dive: energy dispatch optimization
+- **Duration:** 1:45 · **Running clock:** 18:00 → 19:45
+- **Purpose:** Show the clearest ROI story and the constraint-safety discipline.
+- **Visual:** Day-ahead price curve with an evening scarcity peak; baseline vs optimized Gantt; a savings/constraint panel.
+- **On-slide content:**
+  - Inputs: day-ahead price + grid carbon intensity + production/maintenance constraints
+  - Deterministic optimizer moves **only eligible flexible loads**; preserves soak times, delivery, capacity, planned tonnage
+  - 🔬 **EVIDENCE (synthetic):** 280 EUR/MWh peak → **7.25%** modeled energy-cost cut, **7.89%** lower peak (56.0→51.58 MW), **3.29%** CO₂ reduction, **equal tonnage (960 t)**, zero hard-constraint violations
+  - Human accepts / modifies / **rejects with reason code**; realized savings tracked in an auditable ledger
+- **Speaker notes:** "Energy is the fastest payback. Tomorrow evening has a scarcity peak at two-hundred-eighty euros a megawatt-hour. The optimizer shifts one eligible reheat batch by a hundred-and-twenty minutes — the urgent automotive coil stays fixed — and it never silently relaxes a hard production constraint. On this synthetic horizon that's a seven-point-two-five-percent modeled energy-cost reduction, a seven-point-nine-percent peak reduction from fifty-six to fifty-one-point-six megawatts, and three-point-three-percent CO₂ reduction — all on the whole-dispatch basis with identical planned tonnage at nine-sixty tonnes and zero hard-constraint violations. Those are single-scenario evidence, not banked savings — realized savings are tracked separately in an auditable ledger, which is how the fourteen-percent annual target eventually gets *proven* rather than asserted."
+- 🛈 **SOURCE CUE:** solution-architecture.md §4.2; demo-runbook.md §5; solution-requirements.md FR-ENE; synthetic-data-and-simulators.md §8.2.
+- ⛑ **FALLBACK:** demo reveals cached feasible result after ≤5 s; never leave a solver spinner visible.
+
+### Slide 13 — Deep dive: furnace lining remaining-useful-life
+- **Duration:** 2:30 · **Running clock:** 19:45 → 22:15
 - **Purpose:** Show the flagship safety-adjacent capability and pre-load the demo's centerpiece.
 - **Visual:** Hearth thermal map with sector 07 warming; a P10/P50/P90 RUL fan chart; a driver bar (heat-flux slope, spatial contrast, cooling residual).
 - **On-slide content:**
@@ -216,19 +229,6 @@ Legend used throughout:
 - 🛈 **SOURCE CUE:** solution-architecture.md §4.2; demo-runbook.md §5 (cue: P50 19.65/P10 18.69/P90 20.61/risk 0.8995); solution-requirements.md FR-FUR; synthetic-data-and-simulators.md §8.1.
 - **Anticipated objection:** *"Is 21 days validated?"* → "The measured P50 on this scenario is about twenty days — close to the target, not exactly it. Twenty-one days as a fleet-wide guarantee is the target requiring pilot validation across many relines. The model gives an actionable advance warning in the right order of magnitude and, critically, with a confidence estimate."
 - ⛑ **FALLBACK:** none on slide; the *demo* equivalent falls back to saved alert JSON (ensure risk ≥ 0.80, confidence ≥ 0.70, P50 ≈ 19.65).
-
-### Slide 13 — Deep dive: energy dispatch optimization
-- **Duration:** 1:45 · **Running clock:** 20:30 → 22:15
-- **Purpose:** Show the clearest ROI story and the constraint-safety discipline.
-- **Visual:** Day-ahead price curve with an evening scarcity peak; baseline vs optimized Gantt; a savings/constraint panel.
-- **On-slide content:**
-  - Inputs: day-ahead price + grid carbon intensity + production/maintenance constraints
-  - Deterministic optimizer moves **only eligible flexible loads**; preserves soak times, delivery, capacity, planned tonnage
-  - 🔬 **EVIDENCE (synthetic):** 280 EUR/MWh peak → **7.25%** modeled energy-cost cut, **7.89%** lower peak (56.0→51.58 MW), **3.29%** CO₂ reduction, **equal tonnage (960 t)**, zero hard-constraint violations
-  - Human accepts / modifies / **rejects with reason code**; realized savings tracked in an auditable ledger
-- **Speaker notes:** "Energy is the fastest payback. Tomorrow evening has a scarcity peak at two-hundred-eighty euros a megawatt-hour. The optimizer shifts one eligible reheat batch by a hundred-and-twenty minutes — the urgent automotive coil stays fixed — and it never silently relaxes a hard production constraint. On this synthetic horizon that's a seven-point-two-five-percent modeled energy-cost reduction, a seven-point-nine-percent peak reduction from fifty-six to fifty-one-point-six megawatts, and three-point-three-percent CO₂ reduction — all on the whole-dispatch basis with identical planned tonnage at nine-sixty tonnes and zero hard-constraint violations. Those are single-scenario evidence, not banked savings — realized savings are tracked separately in an auditable ledger, which is how the fourteen-percent annual target eventually gets *proven* rather than asserted."
-- 🛈 **SOURCE CUE:** solution-architecture.md §4.2; demo-runbook.md §5; solution-requirements.md FR-ENE; synthetic-data-and-simulators.md §8.2.
-- ⛑ **FALLBACK:** demo reveals cached feasible result after ≤5 s; never leave a solver spinner visible.
 
 ### Slide 14 — Deep dive: in-line quality prediction
 - **Duration:** 1:30 · **Running clock:** 22:15 → 23:45
@@ -359,8 +359,8 @@ The demo is executed strictly per [demo-runbook.md](../demo/demo-runbook.md) §4
 | Demo minute (runbook §4) | Tab / action | Bridge line connecting to the slides |
 |---|---|---|
 | 00:00–01:20 | Plant Manager → Fabric Core | "Slide 8's map, now live: one fleet view, and behind it the Fabric core with bronze-silver-gold lineage from Slide 10." |
-| 01:20–03:00 | Demo Control → Energy Manager | "We're accelerating *time*, not fabricating UI. Slide 13: only eligible loads move; seven-point-two-five-percent modeled cost cut; peak down from fifty-six to fifty-one-point-six megawatts; tonnage conserved; zero hard-constraint violations; no production schedule write." |
-| 03:00–04:50 | Reliability Engineer → RUL alert and synthetic work order | "This is Slide 12 live. Watch the band: P50 about twenty days, P10 nineteen, P90 twenty-one — a tight, confident prediction. Advisory only; no furnace actuation." |
+| 01:20–03:00 | Demo Control → Energy Manager | "We're accelerating *time*, not fabricating UI. Slide 12: only eligible loads move; seven-point-two-five-percent modeled cost cut; peak down from fifty-six to fifty-one-point-six megawatts; tonnage conserved; zero hard-constraint violations; no production schedule write." |
+| 03:00–04:50 | Reliability Engineer → RUL alert and synthetic work order | "This is Slide 13 live. Watch the band: P50 about twenty days, P10 nineteen, P90 twenty-one — a tight, confident prediction. Advisory only; no furnace actuation." |
 | 04:50–06:10 | Quality Engineer → what-if | "Slide 14: genealogy heat-by-heat, predicted yield eighty-eight to ninety-five percent, no recipe write-back." |
 | 06:10–07:50 | Operator Knowledge | "Slide 15: consented synthetic interview, cited draft, stays DRAFT until a human approves." |
 | 07:50–09:30 | Plant Manager / Sustainability / Executive → ETS, ROI, audit | "The targets are not banked savings; this is the semantic-model and audit evidence that makes them measurable." |
@@ -417,7 +417,7 @@ Rehearse against these hard gates; if a checkpoint slips by more than ~30 s, cut
 | Four headline outcomes (14/22/21/8) | usecase.md; solution-requirements.md §4, §13 | Always **TARGET**; baselines quoted make them falsifiable |
 | Fabric-centered architecture, ADRs | solution-architecture.md §3, §10 | Architecture facts |
 | Ingestion, identity, quarantine | solution-architecture.md §4.1, ADR-005; deployment-topology.md §3 | Architecture facts |
-| Live scenario numbers (RUL ~20/18.7/20.6, energy 7.25%, CO₂ 3.29%, peak 7.89%, quality 88→95%) | demo-runbook.md §5; synthetic-data-and-simulators.md §8 | Always **EVIDENCE** (synthetic, reproducible) |
+| Live scenario numbers (energy 7.25%, peak 7.89%, CO₂ 3.29%, RUL ~20/18.7/20.6, quality 88→95%) | demo-runbook.md §5; synthetic-data-and-simulators.md §8 | Always **EVIDENCE** (synthetic, reproducible) |
 | RAI / EU AI Act / Prompt Shields | security-governance-and-threat-model.md §12, §15, §16 | Governance posture |
 | Compliance mapping (AI Act, ETS/MRV, IEC 62443, NIS2, GDPR, CBAM) | [compliance/](../business/compliance/README.md): eu-ai-act.md, eu-ets.md, iec-62443.md, other-regulations.md | Conformance-ready posture; open gates named (verifier, DPIA, AI Act classification) |
 | Delivery / implementation process & phases | [project/implementation-process.md](../business/project/implementation-process.md) | Demonstration → one-site pilot → production |

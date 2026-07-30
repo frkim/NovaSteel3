@@ -65,8 +65,8 @@ Source : [`docs/usecase/usecase.md`](../../../../usecase/usecase.md).
 
 | Point d'infusion IA | Identifiant | Statut | Écran principal |
 |---|---|---|---|
-| Un modèle ML informé par la physique prédit la dégradation du garnissage à partir des signatures thermiques | `AI-01` | Atteint | Furnace Health › Thermal Explorer |
 | Un agent d'optimisation de la consommation planifie autour des prix spot | `AI-02` | Atteint | Energy Optimization › Load-Shift Simulator |
+| Un modèle ML informé par la physique prédit la dégradation du garnissage à partir des signatures thermiques | `AI-01` | Atteint | Furnace Health › Thermal Explorer |
 | Un système GenAI interroge les opérateurs et structure une bibliothèque de procédures | `AI-03` | Atteint | Knowledge Hub › Procedures |
 
 | Contexte réglementaire | Identifiant | Statut | Écran principal |
@@ -196,4 +196,3 @@ et `artifacts/demo-validation/rehearsal-report.md`.
 ---
 
 ◀ [15 · Glossaire](15-glossary.md) · ▲ [Sommaire](LISEZMOI.md) · [17 · Ce qui se passe derrière les écrans](17-how-it-works-behind-the-screens.md) ▶
-
