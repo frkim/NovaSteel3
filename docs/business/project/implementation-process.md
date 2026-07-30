@@ -216,7 +216,7 @@ Before services are written, the interface layer under [`contracts\`](../../../c
 |---|---|---|
 | [`contracts\openapi`](../../../contracts/openapi/bff-api-v1.yaml) | Versioned `/v1` BFF + Foundry tool OpenAPI | Generated clients (shell + tests), not hand DTOs |
 | [`contracts\events`](../../../contracts/events/event-envelope.v1.schema.json) | JSON Schema: envelope, telemetry, quality, inference, alarm, quarantine | Simulator, `ingest-relay`, Fabric bronze |
-| [`contracts\data`](../../../contracts/data/gold.v1.json) | Delta bronze/silver/gold + quarantine schema/KPI contracts | Fabric notebooks, semantic model |
+| [`contracts\data`](../../../contracts/data/gold.v2.json) | Delta bronze/silver/gold + quarantine schema/KPI contracts | Fabric notebooks, semantic model |
 | [`contracts\ui`](../../../contracts/ui/shell-interop.v1.schema.json) | Shell↔MFE interop schema + design tokens | Blazor shell, React MFE |
 
 The local baseline was delivered in exactly this order: **contract → simulator/validators → Fabric item definitions → Python services → shell/MFE → integration tests** (`solution-architecture.md` §11).

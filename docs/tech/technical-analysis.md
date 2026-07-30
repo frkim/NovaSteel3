@@ -67,7 +67,7 @@ by the catalog actually exists in the repository.
 | TR-AGT-01 | Agentic Behaviour | Autonomy and orchestration | 5 | Knowledge-capture workflow is an explicit StateGraph with gated human-in-the-loop nodes; consent, PII, grounding, content-safety, and critic reflection all execute autonomously before the human gate. |
 | TR-AGT-02 | Agentic Behaviour | Multi-agent coordination | 5 | Handoff protocol between energy-dispatch and RUL/scoring agents; critic/reflection loop capped at 2 iterations; tool allow-list with forbidden-action enforcement; Protocol-based ports. |
 | TR-ARC-01 | Additional Architecture | Performance and reliability | 4 | VNet-integrated Container Apps; zone-redundancy parameter; idempotency boundary; retry/circuit-breaker patterns; Activator-based alerting; gap: no load-test results or documented SLA targets. |
-| TR-PRE-01 | Presentation & Documentation | Clarity of explanation and presentation | 5 | 26-slide validated deck with timing plan; proof-of-execution register with 19 entries; 45+ pages of FAQ; authoritative architecture, deployment, API, and security documents. |
+| TR-PRE-01 | Presentation & Documentation | Clarity of explanation and presentation | 5 | 28-slide validated deck (20 primary + 8 backup) with timing plan; proof-of-execution register with 19 entries; 45+ pages of FAQ; authoritative architecture, deployment, API, and security documents. |
 | | | **Total** | **56** | **Grade Band A (54–60): Exceptional implementation and architectural rigour** |
 
 ---
@@ -530,7 +530,7 @@ audience.
 
 #### How NovaSteel satisfies it
 
-The demo is structured around a validated 26-slide deck with a 10-minute
+The demo is structured around a validated 28-slide deck (20 primary + 8 backup) with a 10-minute
 live-demo segment, scripted in `docs/presentation/oral-defense-and-slide-plan.md`
 and rehearsed with `docs/presentation/fiche-repetition-presentateur.md`. Every
 number displayed is explicitly labelled as either **EVIDENCE** (a reproducible
@@ -575,9 +575,9 @@ persistent and cannot be dismissed.
 
 #### Evidence
 
-- `docs/presentation/oral-defense-and-slide-plan.md` — 26-slide plan with
+- `docs/presentation/oral-defense-and-slide-plan.md` — 28-slide plan (20 primary + 8 backup) with
   per-slide timing, speaker notes, source cues, and fallback instructions.
-- `docs/presentation/NovaSteel-Oral-Defense.pptx` — validated 26-slide deck.
+- `docs/presentation/NovaSteel-Oral-Defense.pptx` — validated 28-slide deck (20 primary + 8 backup).
 - `docs/presentation/fiche-repetition-presentateur.md` — presenter rehearsal
   sheet with timing milestones.
 - `apps/analytics-mfe/src/proof/proofCatalog.ts` — 19-entry requirement
@@ -1525,7 +1525,7 @@ A reading path is documented in `docs/README.md`.
 
 #### Evidence
 
-- `docs/presentation/oral-defense-and-slide-plan.md` — 26-slide plan with
+- `docs/presentation/oral-defense-and-slide-plan.md` — 28-slide plan (20 primary + 8 backup) with
   narrative arc, timing, speaker notes, source cues, and per-slide fallback.
 - `docs/presentation/NovaSteel-Oral-Defense.pptx` — validated slide deck.
 - `docs/presentation/faq.md` — 30+ FAQ entries across seven categories.
