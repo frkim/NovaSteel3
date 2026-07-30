@@ -89,9 +89,11 @@ jobs:
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
       - name: Synchronize Fabric assets through the OIDC Azure CLI context
         shell: pwsh
+        env:
+          TARGET_ENVIRONMENT: ${{ inputs.environment }}
         run: |
           New-Item -ItemType Directory -Force -Path artifacts/deployment/fabric | Out-Null
-          $state = "artifacts/deployment/fabric/${{ inputs.environment }}-state.json"
+          $state = "artifacts/deployment/fabric/$($env:TARGET_ENVIRONMENT)-state.json"
           & pwsh -NoProfile -NonInteractive -File fabric/scripts/Deploy-FabricAssets.ps1 `
             -ParameterFile "$env:FABRIC_PARAMETER_FILE" `
             -StateOutputPath $state `

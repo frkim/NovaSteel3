@@ -14,6 +14,8 @@ on:
     paths:
       - 'docs/presentation/**'
       - 'tests/presentation/**'
+      - 'apps/portal-shell/wwwroot/brand/**'
+      - 'tools/presentation/assets/**'
       - '.github/workflows/presentation.yml'
   workflow_dispatch:
 

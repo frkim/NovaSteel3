@@ -49,9 +49,11 @@ jobs:
           --json artifacts/deployment/services/protected-feeds.json
       - name: Require an immutable image digest
         shell: bash
+        env:
+          IMAGE: ${{ inputs.image }}
         run: |
           set -euo pipefail
-          [[ "${{ inputs.image }}" =~ @sha256:[0-9a-fA-F]{64}$ ]]
+          [[ "$IMAGE" =~ @sha256:[0-9a-fA-F]{64}$ ]]
       - name: Publish pre-deployment evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -92,9 +94,11 @@ jobs:
       - name: Select the environment-scoped target
         id: target
         shell: bash
+        env:
+          SERVICE: ${{ inputs.service }}
         run: |
           set -euo pipefail
-          case "${{ inputs.service }}" in
+          case "$SERVICE" in
             bff-api) app="$BFF_CONTAINER_APP" ;;
             optimizer-worker) app="$OPTIMIZER_CONTAINER_APP" ;;
             scoring-worker) app="$SCORING_CONTAINER_APP" ;;
@@ -120,17 +124,22 @@ jobs:
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
       - name: Promote approved immutable image
         shell: bash
+        env:
+          TARGET_APP: ${{ steps.target.outputs.app }}
+          IMAGE: ${{ inputs.image }}
+          SERVICE: ${{ inputs.service }}
+          TARGET_ENVIRONMENT: ${{ inputs.environment }}
         run: |
           set -euo pipefail
           mkdir -p artifacts/deployment/services
           az containerapp update \
-            --name "${{ steps.target.outputs.app }}" \
+            --name "$TARGET_APP" \
             --resource-group "$CONTAINER_RESOURCE_GROUP" \
-            --image "${{ inputs.image }}"
+            --image "$IMAGE"
           az containerapp show \
-            --name "${{ steps.target.outputs.app }}" \
+            --name "$TARGET_APP" \
             --resource-group "$CONTAINER_RESOURCE_GROUP" \
-            --output json > artifacts/deployment/services/${{ inputs.service }}-${{ inputs.environment }}.json
+            --output json > "artifacts/deployment/services/${SERVICE}-${TARGET_ENVIRONMENT}.json"
       - name: Publish deployment evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

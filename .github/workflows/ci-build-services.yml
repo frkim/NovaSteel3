@@ -29,8 +29,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
-  packages: write
 
 concurrency:
   group: ci-images-${{ github.ref }}
@@ -90,6 +88,8 @@ jobs:
           fi
 
           changed_file=.ci-changed-images
+          # Always materialise the list so `emit` never greps a missing file.
+          : > "$changed_file"
           if [ "$all" = false ]; then
             if [ -n "${BASE_SHA:-}" ] && git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null; then
               git diff --name-only "$BASE_SHA" "$HEAD_SHA" > "$changed_file"

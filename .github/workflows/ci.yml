@@ -42,6 +42,9 @@ jobs:
         run: |
           set -euo pipefail
           changed_file=.ci-changed-files
+          # Always materialise the list: a manual dispatch validates everything and
+          # must not leave the later grep calls reading a missing file.
+          : > "$changed_file"
           all=false
           if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
             all=true
@@ -74,6 +77,28 @@ jobs:
           emit infra '^infra/'
           emit fabric '^fabric/'
           emit presentation '^(docs/presentation/|tools/presentation/)'
+
+  workflow-lint:
+    name: workflow-lint
+    runs-on: ubuntu-latest
+    env:
+      PIP_CONFIG_FILE: ${{ github.workspace }}/pip.conf
+      PIP_INDEX_URL: https://packagefeedproxy.microsoft.io/pypi/simple
+      PIP_EXTRA_INDEX_URL: ""
+      PIP_NO_INPUT: "1"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+      - name: Restore pinned workflow test dependencies from protected feed
+        run: >-
+          python -m pip install --disable-pip-version-check
+          -r tests/workflows/requirements.txt
+      - name: Validate every GitHub Actions workflow
+        run: python -m pytest tests/workflows -q
 
   verify-protected-feeds:
     name: verify-protected-feeds
