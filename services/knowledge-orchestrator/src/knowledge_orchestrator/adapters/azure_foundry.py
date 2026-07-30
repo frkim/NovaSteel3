@@ -5,6 +5,10 @@ Ported from Project A's live ``FoundryClient`` + ``KnowledgeAssistant`` patterns
 with ``DefaultAzureCredential`` (managed identity, no API keys); per
 solution-architecture.md §4.3 item 1 / security §8 ``disableLocalAuth: true``.
 
+Inference goes through the Foundry **project model**'s versionless OpenAI v1 route
+rather than the classic ``/openai/deployments/<name>?api-version=<date>`` path —
+see :mod:`knowledge_orchestrator.foundry_endpoints` for what that means and why.
+
 SDKs imported lazily so the package has zero cloud deps for tests/demo.
 Install from the approved feed only (see pip.conf).
 """
@@ -24,24 +28,20 @@ from ..models import (
     TranscriptSegment,
 )
 from .. import prompt_defense
+from ..foundry_endpoints import normalize_endpoint, openai_v1_url, token_scope
 from ..tools import ToolRegistry
 from .base import AgentResult, FoundryAgentAdapter
 
 logger = logging.getLogger(__name__)
 
-# Entra token scope for Azure AI Foundry (Cognitive Services) data-plane access.
-FOUNDRY_SCOPE = "https://cognitiveservices.azure.com/.default"
-
 # Environment variable configuration (no secrets in code).
 ENV_ENDPOINT = "FOUNDRY_ENDPOINT"
 ENV_CHAT_DEPLOYMENT = "FOUNDRY_CHAT_DEPLOYMENT"
 ENV_EMBED_DEPLOYMENT = "FOUNDRY_EMBED_DEPLOYMENT"
-ENV_API_VERSION = "FOUNDRY_API_VERSION"
 ENV_REASONING_EFFORT = "FOUNDRY_EXTRACTION_REASONING_EFFORT"
 
 DEFAULT_CHAT_DEPLOYMENT = "gpt-5.4-mini"
 DEFAULT_EMBED_DEPLOYMENT = "text-embedding-3-large"
-DEFAULT_API_VERSION = "2025-01-01-preview"
 
 # Not every 5-series model accepts every effort level: gpt-5.4-mini supports
 # 'minimal', while gpt-5.5 rejects it and offers only
@@ -93,20 +93,14 @@ class AzureFoundryKnowledgeAgent(FoundryAgentAdapter):
         endpoint: Optional[str] = None,
         chat_deployment: Optional[str] = None,
         embed_deployment: Optional[str] = None,
-        api_version: Optional[str] = None,
         credential: Optional[object] = None,
     ):
-        self.endpoint = (
-            endpoint or os.environ.get(ENV_ENDPOINT, "")
-        ).rstrip("/")
+        self.endpoint = normalize_endpoint(endpoint or os.environ.get(ENV_ENDPOINT, ""))
         self.chat_deployment = (
             chat_deployment or os.environ.get(ENV_CHAT_DEPLOYMENT, DEFAULT_CHAT_DEPLOYMENT)
         )
         self.embed_deployment = (
             embed_deployment or os.environ.get(ENV_EMBED_DEPLOYMENT, DEFAULT_EMBED_DEPLOYMENT)
-        )
-        self.api_version = (
-            api_version or os.environ.get(ENV_API_VERSION, DEFAULT_API_VERSION)
         )
         self._credential = credential
         self.reasoning_effort = os.environ.get(
@@ -116,16 +110,17 @@ class AzureFoundryKnowledgeAgent(FoundryAgentAdapter):
 
     def _get_token(self) -> str:  # pragma: no cover - requires azure-identity
         credential = self._credential or _default_credential()
-        return credential.get_token(FOUNDRY_SCOPE).token
+        return credential.get_token(token_scope()).token
 
     def _complete(self, system: str, user: str) -> str:  # pragma: no cover - requires network
         import requests
 
-        url = (
-            f"{self.endpoint}/openai/deployments/{self.chat_deployment}"
-            f"/chat/completions?api-version={self.api_version}"
-        )
+        # Foundry project model: the versionless OpenAI v1 route. The deployment is
+        # the `model` field in the body, not a path segment, and there is no
+        # `api-version` to keep in step with the service.
+        url = openai_v1_url(self.endpoint, "chat/completions")
         body = {
+            "model": self.chat_deployment,
             "messages": [
                 {"role": "system", "content": system},
                 {"role": "user", "content": user},

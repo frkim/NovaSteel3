@@ -19,6 +19,7 @@ import re
 from dataclasses import dataclass
 from typing import Optional, Protocol, runtime_checkable
 
+from .foundry_endpoints import normalize_endpoint, openai_v1_url, token_scope
 from .grounding import GroundingError
 from .models import Procedure
 from .procedure_workflow import is_retrievable
@@ -249,14 +250,15 @@ def _cosine(a: list[float], b: list[float]) -> float:
 # Environment variable names (mirroring azure_foundry.py)
 _ENV_ENDPOINT = "FOUNDRY_ENDPOINT"
 _ENV_EMBED_DEPLOYMENT = "FOUNDRY_EMBED_DEPLOYMENT"
-_ENV_API_VERSION = "FOUNDRY_API_VERSION"
 _DEFAULT_EMBED_DEPLOYMENT = "text-embedding-3-large"
-_DEFAULT_API_VERSION = "2025-01-01-preview"
-_FOUNDRY_SCOPE = "https://cognitiveservices.azure.com/.default"
 
 
 class AzureOpenAIEmbeddingProvider:
-    """Azure OpenAI embedding provider (mirrors AzureFoundryKnowledgeAgent).
+    """Foundry embedding provider (mirrors AzureFoundryKnowledgeAgent).
+
+    Calls the Foundry project model's versionless OpenAI v1 route
+    (``/openai/v1/embeddings``), not the classic dated deployments path — see
+    :mod:`knowledge_orchestrator.foundry_endpoints`.
 
     Authenticates with ``DefaultAzureCredential`` (managed identity / developer
     identity). Falls back to :class:`HashingEmbeddingProvider` on any failure
@@ -268,17 +270,13 @@ class AzureOpenAIEmbeddingProvider:
         self,
         endpoint: Optional[str] = None,
         deployment: Optional[str] = None,
-        api_version: Optional[str] = None,
         credential=None,
     ) -> None:
-        self._endpoint = (
+        self._endpoint = normalize_endpoint(
             endpoint or os.environ.get(_ENV_ENDPOINT, "")
-        ).rstrip("/")
+        )
         self._deployment = deployment or os.environ.get(
             _ENV_EMBED_DEPLOYMENT, _DEFAULT_EMBED_DEPLOYMENT
-        )
-        self._api_version = api_version or os.environ.get(
-            _ENV_API_VERSION, _DEFAULT_API_VERSION
         )
         self._credential = credential
         self._fallback = HashingEmbeddingProvider()
@@ -286,7 +284,7 @@ class AzureOpenAIEmbeddingProvider:
 
     def _get_token(self) -> str:  # pragma: no cover — requires azure-identity
         credential = self._credential or _default_azure_credential()
-        return credential.get_token(_FOUNDRY_SCOPE).token
+        return credential.get_token(token_scope()).token
 
     def embed(self, texts: list[str]) -> list[list[float]]:
         if not self._endpoint:
@@ -310,10 +308,7 @@ class AzureOpenAIEmbeddingProvider:
     def _azure_embed(self, texts: list[str]) -> list[list[float]]:  # pragma: no cover
         import requests  # lazily imported — zero cloud deps for tests
 
-        url = (
-            f"{self._endpoint}/openai/deployments/{self._deployment}"
-            f"/embeddings?api-version={self._api_version}"
-        )
+        url = openai_v1_url(self._endpoint, "embeddings")
         token = self._get_token()
         resp = requests.post(
             url,

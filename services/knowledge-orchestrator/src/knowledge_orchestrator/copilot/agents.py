@@ -21,6 +21,7 @@ import os
 from typing import Optional, Protocol
 
 from .. import prompt_defense
+from ..foundry_endpoints import normalize_endpoint, openai_v1_url, token_scope
 from .context import ResolvedContext
 from .context import resolve as resolve_context
 from . import glossary as glossary_lookup
@@ -41,11 +42,9 @@ ENV_ENDPOINT = "FOUNDRY_ENDPOINT"
 ENV_MODE = "COPILOT_CHAT_MODE"  # "azure" | "local" (explicit override)
 ENV_DEPLOYMENT_DEFAULT = "FOUNDRY_CHAT_DEPLOYMENT"
 ENV_DEPLOYMENT_HIGH = "FOUNDRY_REASONING_DEPLOYMENT"
-ENV_API_VERSION = "FOUNDRY_API_VERSION"
 
 DEFAULT_CHAT_DEPLOYMENT = "gpt-5.4-mini"
 DEFAULT_REASONING_DEPLOYMENT = "gpt-5.5"
-DEFAULT_API_VERSION = "2025-01-01-preview"
 
 # GPT-5 models expose an explicit reasoning budget. Mapping the UI's reasoning
 # toggle onto both a different deployment *and* a different effort level is what
@@ -67,8 +66,6 @@ MAX_COMPLETION_TOKENS_BY_TIER = {
     "default": 900,
     "high": 4000,
 }
-
-FOUNDRY_SCOPE = "https://cognitiveservices.azure.com/.default"
 
 LANGUAGE_NAMES = {
     "en": "English",
@@ -440,14 +437,12 @@ class AzureFoundryChatAgent:
         tier: ReasoningTier,
         endpoint: Optional[str] = None,
         deployment: Optional[str] = None,
-        api_version: Optional[str] = None,
         credential: Optional[object] = None,
         fallback: Optional[CopilotChatAgent] = None,
     ):
         self.tier = tier
-        self.endpoint = (endpoint or os.environ.get(ENV_ENDPOINT, "")).rstrip("/")
+        self.endpoint = normalize_endpoint(endpoint or os.environ.get(ENV_ENDPOINT, ""))
         self.deployment = deployment or _deployment_for(tier)
-        self.api_version = api_version or os.environ.get(ENV_API_VERSION, DEFAULT_API_VERSION)
         self.reasoning_effort = REASONING_EFFORT_BY_TIER.get(tier.value, "minimal")
         self.max_completion_tokens = MAX_COMPLETION_TOKENS_BY_TIER.get(tier.value, 900)
         self._credential = credential
@@ -456,10 +451,13 @@ class AzureFoundryChatAgent:
 
     def _get_token(self) -> str:  # pragma: no cover - requires azure-identity
         credential = self._credential or _default_credential()
-        return credential.get_token(FOUNDRY_SCOPE).token
+        return credential.get_token(token_scope()).token
 
     def _request_body(self, system: str, user: str) -> dict:
         """Build the chat-completions payload for this tier.
+
+        The deployment travels as ``model`` in the body: on the Foundry v1 route it
+        is not a path segment the way it was on the classic deployments route.
 
         Note ``max_completion_tokens`` rather than ``max_tokens``: the 5-series
         reasoning models reject the legacy parameter, because reasoning tokens are
@@ -467,6 +465,7 @@ class AzureFoundryChatAgent:
         what is being capped.
         """
         return {
+            "model": self.deployment,
             "messages": [
                 {"role": "system", "content": system},
                 {"role": "user", "content": user},
@@ -478,10 +477,7 @@ class AzureFoundryChatAgent:
     def _complete(self, system: str, user: str) -> str:  # pragma: no cover - requires network
         import requests
 
-        url = (
-            f"{self.endpoint}/openai/deployments/{self.deployment}"
-            f"/chat/completions?api-version={self.api_version}"
-        )
+        url = openai_v1_url(self.endpoint, "chat/completions")
         resp = requests.post(
             url,
             headers={"Authorization": f"Bearer {self._get_token()}"},

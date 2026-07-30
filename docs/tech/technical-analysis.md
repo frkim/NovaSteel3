@@ -1030,14 +1030,26 @@ and explainable … this keeps a confidently-wrong LLM away from any physical or
 financial commitment."
 
 **Secure deployment.** All Foundry model calls authenticate via
-`DefaultAzureCredential` scoped to
-`https://cognitiveservices.azure.com/.default` — no API keys anywhere in the
-codebase. The deployment targets EU Data Zone for data residency (documented in
-`deployment-topology.md` §2.2 and `solution-architecture.md` §4.3). The
-`adapter_factory.py` and `copilot/agents.py` patterns provide graceful
-degradation: if Foundry is unconfigured or the Azure SDK is unavailable, the
-service falls back to local fixture adapters with a logged warning rather than
-crashing.
+`DefaultAzureCredential` scoped to the Foundry audience
+`https://ai.azure.com/.default` — the same audience `AIProjectClient` uses, and no
+API keys anywhere in the codebase. The deployment targets EU Data Zone for data
+residency (documented in `deployment-topology.md` §2.2 and
+`solution-architecture.md` §4.3). The `adapter_factory.py` and
+`copilot/agents.py` patterns provide graceful degradation: if Foundry is
+unconfigured or the Azure SDK is unavailable, the service falls back to local
+fixture adapters with a logged warning rather than crashing.
+
+**Foundry project model, not the classic one.** The estate is a Foundry resource
+(`Microsoft.CognitiveServices/accounts`, kind `AIServices`, with
+`allowProjectManagement`) hosting `accounts/projects`; there is no
+`Microsoft.MachineLearningServices/workspaces` hub anywhere, and no hub connection
+string. Consequently every data-plane call goes to
+`https://<account>.services.ai.azure.com` — the project endpoint
+(`/api/projects/<project>`) for agents, and the versionless OpenAI **v1** route
+(`/openai/v1/…`) for inference, with the deployment carried as `model` in the
+request body. `foundry_endpoints.py` centralises that addressing and rewrites a
+classic `*.cognitiveservices.azure.com` host so an older configuration cannot
+silently reintroduce the dated `/openai/deployments/…?api-version=` path.
 
 **Model versioning.** Physics models carry explicit version strings in code:
 
@@ -1045,10 +1057,11 @@ crashing.
 - `quality-risk:1.0.0-demo` — `service.py` (scoring worker)
 - `energy-dispatch-deterministic:2.1.0` — `service.py` (optimizer worker)
 
-The Foundry deployment names and API version are configurable via environment
-variables (`FOUNDRY_CHAT_DEPLOYMENT`, `FOUNDRY_REASONING_DEPLOYMENT`,
-`FOUNDRY_API_VERSION`) and wired through Bicep parameters
-(`foundryChatDeployment`, `foundryEmbedDeployment` in `containerapps.bicep`).
+The Foundry deployment names are configurable via environment variables
+(`FOUNDRY_CHAT_DEPLOYMENT`, `FOUNDRY_REASONING_DEPLOYMENT`) and wired through Bicep
+parameters (`foundryChatDeployment`, `foundryEmbedDeployment` in
+`containerapps.bicep`). There is no API-version variable to keep in step: the v1
+route is versionless.
 
 **Offline evaluation.** The `evaluation.py` module runs a deterministic, offline
 evaluation over fixtures to produce a scorecard covering:
@@ -1066,9 +1079,10 @@ per-case results, supporting the model-governance evidence discipline.
 - `services/knowledge-orchestrator/src/knowledge_orchestrator/copilot/agents.py`
   — `DEFAULT_CHAT_DEPLOYMENT = "gpt-5.4-mini"`,
   `DEFAULT_REASONING_DEPLOYMENT = "gpt-5.5"`,
-  `REASONING_EFFORT_BY_TIER`, `MAX_COMPLETION_TOKENS_BY_TIER`,
-  `FOUNDRY_SCOPE = "https://cognitiveservices.azure.com/.default"`,
-  `DEFAULT_API_VERSION = "2025-01-01-preview"`.
+  `REASONING_EFFORT_BY_TIER`, `MAX_COMPLETION_TOKENS_BY_TIER`.
+- `services/knowledge-orchestrator/src/knowledge_orchestrator/foundry_endpoints.py`
+  — `FOUNDRY_SCOPE = "https://ai.azure.com/.default"`,
+  `OPENAI_V1_PREFIX = "openai/v1"`, `normalize_endpoint()`.
 - `services/knowledge-orchestrator/src/knowledge_orchestrator/adapter_factory.py`
   — `create_agent()` with Azure/local selection, `DefaultAzureCredential`.
 - `services/knowledge-orchestrator/src/knowledge_orchestrator/evaluation.py`
