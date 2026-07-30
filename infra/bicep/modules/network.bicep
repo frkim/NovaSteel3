@@ -234,6 +234,13 @@ var privateDnsZoneNames = [
   'privatelink.servicebus.windows.net'
   'privatelink.cognitiveservices.azure.com'
   'privatelink.openai.azure.com'
+  // A Foundry (AIServices) account private endpoint registers records in all three
+  // Cognitive Services zones. This one carries the Foundry-model hostname
+  // `<account>.services.ai.azure.com`, which is what serves the project endpoint
+  // (`/api/projects/<project>`) and the OpenAI v1 route. Without it the account is
+  // reachable only on its legacy `cognitiveservices.azure.com` name and every
+  // Agent Service call from the VNet fails to resolve.
+  'privatelink.services.ai.azure.com'
   'privatelink.azurecr.io'
   #disable-next-line no-hardcoded-env-urls
   'privatelink.table.core.windows.net'
@@ -292,8 +299,9 @@ output privateDnsZoneIds object = {
   serviceBus: privateDnsZones[2].id
   cognitiveServices: privateDnsZones[3].id
   openAi: privateDnsZones[4].id
-  containerRegistry: privateDnsZones[5].id
-  table: privateDnsZones[6].id
-  search: privateDnsZones[7].id
-  cosmosDb: privateDnsZones[8].id
+  aiServices: privateDnsZones[5].id
+  containerRegistry: privateDnsZones[6].id
+  table: privateDnsZones[7].id
+  search: privateDnsZones[8].id
+  cosmosDb: privateDnsZones[9].id
 }

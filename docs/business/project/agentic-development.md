@@ -15,7 +15,7 @@
 | **Last reviewed** | 2026-07-29 |
 | **Audience** | Engineering leadership; the evaluation jury; delivery teams adopting agentic development |
 | **Scope** | Engineering *method* and its SDLC mapping. The *business/technical* delivery narrative lives in [`implementation-process.md`](implementation-process.md); regulatory posture lives in [`../compliance/README.md`](../compliance/README.md). |
-| **Companion docs** | [`implementation-process.md`](implementation-process.md) · [`../compliance/README.md`](../compliance/README.md) · [`../../architecture/solution-architecture.md`](../../architecture/solution-architecture.md) · [`../../_upgrade/README.md`](../../_upgrade/README.md) |
+| **Companion docs** | [`implementation-process.md`](implementation-process.md) · [`../compliance/README.md`](../compliance/README.md) · [`../../architecture/solution-architecture.md`](../../architecture/solution-architecture.md) |
 
 ---
 
@@ -278,7 +278,7 @@ boundary, and a hand-off contract. No single agent holds the whole system in con
 | **Implementation agent** (one per bounded context) | Build one service/app slice to spec. | Its own `services/<x>/` or `apps/<y>/`. | Other contexts' folders; contracts (read-only). |
 | **Test / QA agent** | Encode acceptance criteria as executable tests; run them. | `tests/`, `*_test.py`, `*.test.tsx`. | Production logic (writes tests that *drive* it). |
 | **Security-review agent** | Threat-model, review diffs for auth/secret/injection flaws. | `docs/security/*`, review comments. | Feature code (advises; human/impl agent fixes). |
-| **Docs agent** | Keep specs, architecture, deck and handoffs in sync with code. | `docs/**`, `presentation/`. | Runtime code. |
+| **Docs agent** | Keep specs, architecture, deck and handoffs in sync with code. | `docs/**`, `docs/presentation/`. | Runtime code. |
 | **Research agent** | Verify external facts (Azure regions, model availability, framework claims). | `docs/research/*`, citations. | Runtime code. |
 | **Reviewer / critic agent** | Grade the delivered work skeptically against source; produce evidence reports. | `docs/_upgrade/evidence/*`. | Source (read-only). |
 
@@ -862,8 +862,8 @@ delivery is indicative.
 | Architecture + 16 ADRs | [`docs/architecture/solution-architecture.md`](../../architecture/solution-architecture.md) | Frozen design decisions. |
 | Requirements spec | [`docs/specs/solution-requirements.md`](../../specs/solution-requirements.md) | Requirements artefact. |
 | Contracts | [`contracts/`](../../../contracts) | Event/data/OpenAPI schemas + fixtures. |
-| Wave-6 handoffs | [`docs/_wave6/`](../../_wave6) | Parallel sub-agent handoff notes. |
-| Remediation / comparison pack | [`docs/_upgrade/`](../../_upgrade) | Skeptical critic evidence + modification plan. |
+| Wave-6 handoffs | `docs/_wave6/` *(working directory, not committed)* | Parallel sub-agent handoff notes. |
+| Remediation / comparison pack | `docs/_upgrade/` *(working directory, not committed)* | Skeptical critic evidence + modification plan. |
 | Evidence manifests | [`artifacts/`](../../../artifacts) | Captured live-API JSON + browser screenshots. |
 | Validation report | [`docs/validation-report.md`](../../validation-report.md) | QA verification record. |
 | Business implementation process | [`implementation-process.md`](implementation-process.md) | Companion (separate agent). |

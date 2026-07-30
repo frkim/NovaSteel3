@@ -5,16 +5,17 @@ on:
     branches:
       - main
     paths:
-      - 'presentation/**'
+      - 'docs/presentation/**'
       - 'tests/presentation/**'
       - 'apps/portal-shell/wwwroot/brand/**'
       - 'tools/presentation/assets/**'
-      - 'docs/presentation/assets/app-guide/screenshots/**'
       - '.github/workflows/presentation.yml'
   pull_request:
     paths:
-      - 'presentation/**'
+      - 'docs/presentation/**'
       - 'tests/presentation/**'
+      - 'apps/portal-shell/wwwroot/brand/**'
+      - 'tools/presentation/assets/**'
       - '.github/workflows/presentation.yml'
   workflow_dispatch:
 
@@ -71,7 +72,7 @@ jobs:
       - name: Validate deck source structure and timing budget
         run: python -m pytest tests/presentation -q
       - name: Restore Marp through the protected feed
-        working-directory: presentation
+        working-directory: docs/presentation
         shell: bash
         run: |
           set -euo pipefail
@@ -81,12 +82,12 @@ jobs:
             npm install --ignore-scripts --no-audit --no-fund
           fi
       - name: Build HTML, PDF, speaker-note PDF and PPTX
-        working-directory: presentation
+        working-directory: docs/presentation
         env:
           CHROME_PATH: /usr/bin/google-chrome
         run: npm run build
       - name: Verify the generated deck artifacts
-        working-directory: presentation
+        working-directory: docs/presentation
         shell: bash
         run: |
           set -euo pipefail
@@ -110,15 +111,15 @@ jobs:
         with:
           name: novasteel-presentation-${{ github.run_id }}
           path: |
-            presentation/dist/index.html
-            presentation/dist/NovaSteel-Oral-Defense.pdf
-            presentation/dist/NovaSteel-Oral-Defense-notes.pdf
-            presentation/dist/NovaSteel-Oral-Defense.pptx
+            docs/presentation/dist/index.html
+            docs/presentation/dist/NovaSteel-Oral-Defense.pdf
+            docs/presentation/dist/NovaSteel-Oral-Defense-notes.pdf
+            docs/presentation/dist/NovaSteel-Oral-Defense.pptx
           if-no-files-found: error
           retention-days: 90
       - name: Assemble the Pages site without speaker notes
         if: github.event_name != 'pull_request'
-        working-directory: presentation
+        working-directory: docs/presentation
         env:
           CHROME_PATH: /usr/bin/google-chrome
         run: |
@@ -126,12 +127,12 @@ jobs:
           node scripts/strip-notes.mjs
           # The deck is the site: it must land on _site/index.html, otherwise the
           # Pages root (https://<owner>.github.io/<repo>/) serves nothing.
-          npx marp --theme theme.css --html --allow-local-files slides.pages.md -o ../_site/index.html
-          mkdir -p ../_site/images ../_site/deck
-          cp images/* ../_site/images/
-          cp dist/NovaSteel-Oral-Defense.pdf dist/NovaSteel-Oral-Defense.pptx ../_site/
+          npx marp --theme theme.css --html --allow-local-files slides.pages.md -o ../../_site/index.html
+          mkdir -p ../../_site/images ../../_site/deck
+          cp images/* ../../_site/images/
+          cp dist/NovaSteel-Oral-Defense.pdf dist/NovaSteel-Oral-Defense.pptx ../../_site/
           # Pages serves the tree verbatim; without this Jekyll would try to build it.
-          touch ../_site/.nojekyll
+          touch ../../_site/.nojekyll
           # Keep the previously published /deck/ URL working.
           printf '%s\n' \
             '<!doctype html>' \
@@ -140,7 +141,7 @@ jobs:
             '<meta http-equiv="refresh" content="0; url=../">' \
             '<link rel="canonical" href="../"></head>' \
             '<body><p>The deck moved to <a href="../">the site root</a>.</p></body></html>' \
-            > ../_site/deck/index.html
+            > ../../_site/deck/index.html
       # Pages must be enabled once in Settings -> Pages with "GitHub Actions" as the
       # source: GITHUB_TOKEN cannot create the Pages site itself (that needs
       # administration: write), so asking the action to bootstrap Pages fails with

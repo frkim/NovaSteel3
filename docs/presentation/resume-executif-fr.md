@@ -25,8 +25,8 @@ AxelorMetal déploie **NovaSteel**, une plateforme unique d'optimisation de la p
 
 | Capacité IA | Fonction | Modèle |
 |---|---|---|
-| Durée de vie résiduelle (RUL) du garnissage | Prédire la défaillance réfractaire ≥ 21 jours à l'avance | Régression physique (flux thermique) — Python |
 | Pilotage énergétique | Décaler les charges flexibles hors des pics de prix/carbone | Optimiseur MILP (PuLP) — Python |
+| Durée de vie résiduelle (RUL) du garnissage | Prédire la défaillance réfractaire ≥ 21 jours à l'avance | Régression physique (flux thermique) — Python |
 | Risque qualité | Détecter les dérives avant résultat laboratoire | Modèle prédictif — Python |
 | Capture du savoir | Interviewer, transcrire (Azure Speech), structurer (Foundry) | Agent GenAI avec approbation humaine |
 

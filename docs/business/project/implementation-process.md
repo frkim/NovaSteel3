@@ -10,7 +10,7 @@
 
 ## 1. Executive summary — the implementation in ten lines
 
-1. **Frame the value case** on four AI capabilities — furnace-lining Remaining-Useful-Life (RUL), energy dispatch, in-line quality, and GenAI knowledge capture — against explicit KPI targets (−14% energy, −22% CO₂, ≥21-day lining warning, +8% high-grade yield).
+1. **Frame the value case** on four AI capabilities — energy dispatch, furnace-lining Remaining-Useful-Life (RUL), in-line quality, and GenAI knowledge capture — against explicit KPI targets (−14% energy, −22% CO₂, ≥21-day lining warning, +8% high-grade yield).
 2. **Elicit requirements** into the traceable `FR-xxx` catalogue, eight personas, and the non-negotiable constraints (EU residency, advisory-only, hard OT boundary).
 3. **Derive the target architecture** and lock the sixteen decisions `ADR-001` … `ADR-016`, with Microsoft Fabric as the centre of gravity and a contract-first interface layer.
 4. **Build the data foundation** — OT gateway → Event Hubs → Fabric Eventstream → Eventhouse/KQL + OneLake medallion — de-risked by a deterministic synthetic simulator (root seed `240725`).
@@ -65,8 +65,8 @@ AxelorMetal is a Luxembourg-headquartered integrated steel producer operating bl
 
 | Capability | What it does | Authoritative compute | Primary persona |
 |---|---|---|---|
-| **Furnace-lining RUL** | Predicts refractory Remaining-Useful-Life from thermal signatures, targeting ≥21-day warning | Physics-informed OLS regression over heat-flux features (`scoring-worker`) | Reliability Engineer |
 | **Energy dispatch** | Schedules energy-intensive processes around day-ahead/intraday spot prices | Deterministic PuLP/CBC MILP (`optimizer-worker`) | Energy Manager |
+| **Furnace-lining RUL** | Predicts refractory Remaining-Useful-Life from thermal signatures, targeting ≥21-day warning | Physics-informed OLS regression over heat-flux features (`scoring-worker`) | Reliability Engineer |
 | **In-line quality** | Predicts first-pass high-grade yield and recommends bounded corrections | Quality-risk scorer with genealogy features (`scoring-worker`) | Quality Engineer |
 | **GenAI knowledge capture** | Interviews operators, structures tacit knowledge into a searchable, reviewed procedure library | Azure Speech + Foundry Agent Service, grounded RAG with Content Safety (`knowledge-orchestrator`) | Knowledge Engineer/Admin |
 
@@ -216,7 +216,7 @@ Before services are written, the interface layer under [`contracts\`](../../../c
 |---|---|---|
 | [`contracts\openapi`](../../../contracts/openapi/bff-api-v1.yaml) | Versioned `/v1` BFF + Foundry tool OpenAPI | Generated clients (shell + tests), not hand DTOs |
 | [`contracts\events`](../../../contracts/events/event-envelope.v1.schema.json) | JSON Schema: envelope, telemetry, quality, inference, alarm, quarantine | Simulator, `ingest-relay`, Fabric bronze |
-| [`contracts\data`](../../../contracts/data/gold.v1.json) | Delta bronze/silver/gold + quarantine schema/KPI contracts | Fabric notebooks, semantic model |
+| [`contracts\data`](../../../contracts/data/gold.v2.json) | Delta bronze/silver/gold + quarantine schema/KPI contracts | Fabric notebooks, semantic model |
 | [`contracts\ui`](../../../contracts/ui/shell-interop.v1.schema.json) | Shell↔MFE interop schema + design tokens | Blazor shell, React MFE |
 
 The local baseline was delivered in exactly this order: **contract → simulator/validators → Fabric item definitions → Python services → shell/MFE → integration tests** (`solution-architecture.md` §11).

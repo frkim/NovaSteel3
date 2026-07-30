@@ -62,12 +62,12 @@ by the catalog actually exists in the repository.
 | TR-DEV-01 | Development | Application Demo | 4 | Compelling executive-friendly demo with synthetic data and offline fallback; slight gap: not all Fabric assets are wired live during the demo. |
 | TR-DEV-02 | Development | Implementation completeness | 4 | 19 requirements fully mapped with proof catalog; 20-gate validator; minor gap: some batch/MES integrations are design-only. |
 | TR-MON-01 | Monitoring | Logging and metrics | 5 | OpenTelemetry with Azure Monitor in all services; structured JSON logging with trace-id correlation; 10 Bicep-defined alert rules; Activator notification rules; business-KPI gauges. |
-| TR-AI-01 | AI Integration | Use of AI technologies | 5 | Physics-informed RUL model, MILP energy optimiser, hybrid BM25+semantic RAG, Azure Speech STT, Foundry Agent Service, screen-aware Copilot panel with five-language support. |
+| TR-AI-01 | AI Integration | Use of AI technologies | 5 | MILP energy optimiser, physics-informed RUL model, in-line quality prediction, hybrid BM25+semantic RAG, Azure Speech STT, Foundry Agent Service, screen-aware Copilot panel with five-language support. |
 | TR-AI-02 | AI Integration | AI model selection and deployment | 4 | gpt-5.4-mini default / gpt-5.5 high-reasoning tier via Azure AI Foundry with managed identity; EU Data Zone placement; model versioning in code; gap: no MLflow registry artefact in the repo. |
 | TR-AGT-01 | Agentic Behaviour | Autonomy and orchestration | 5 | Knowledge-capture workflow is an explicit StateGraph with gated human-in-the-loop nodes; consent, PII, grounding, content-safety, and critic reflection all execute autonomously before the human gate. |
 | TR-AGT-02 | Agentic Behaviour | Multi-agent coordination | 5 | Handoff protocol between energy-dispatch and RUL/scoring agents; critic/reflection loop capped at 2 iterations; tool allow-list with forbidden-action enforcement; Protocol-based ports. |
 | TR-ARC-01 | Additional Architecture | Performance and reliability | 4 | VNet-integrated Container Apps; zone-redundancy parameter; idempotency boundary; retry/circuit-breaker patterns; Activator-based alerting; gap: no load-test results or documented SLA targets. |
-| TR-PRE-01 | Presentation & Documentation | Clarity of explanation and presentation | 5 | 26-slide validated deck with timing plan; proof-of-execution register with 19 entries; 45+ pages of FAQ; authoritative architecture, deployment, API, and security documents. |
+| TR-PRE-01 | Presentation & Documentation | Clarity of explanation and presentation | 5 | 28-slide validated deck (20 primary + 8 backup) with timing plan; proof-of-execution register with 19 entries; 45+ pages of FAQ; authoritative architecture, deployment, API, and security documents. |
 | | | **Total** | **56** | **Grade Band A (54–60): Exceptional implementation and architectural rigour** |
 
 ---
@@ -530,7 +530,7 @@ audience.
 
 #### How NovaSteel satisfies it
 
-The demo is structured around a validated 26-slide deck with a 10-minute
+The demo is structured around a validated 28-slide deck (20 primary + 8 backup) with a 10-minute
 live-demo segment, scripted in `docs/presentation/oral-defense-and-slide-plan.md`
 and rehearsed with `docs/presentation/fiche-repetition-presentateur.md`. Every
 number displayed is explicitly labelled as either **EVIDENCE** (a reproducible
@@ -575,9 +575,9 @@ persistent and cannot be dismissed.
 
 #### Evidence
 
-- `docs/presentation/oral-defense-and-slide-plan.md` — 26-slide plan with
+- `docs/presentation/oral-defense-and-slide-plan.md` — 28-slide plan (20 primary + 8 backup) with
   per-slide timing, speaker notes, source cues, and fallback instructions.
-- `docs/presentation/NovaSteel-Oral-Defense.pptx` — validated 26-slide deck.
+- `docs/presentation/NovaSteel-Oral-Defense.pptx` — validated 28-slide deck (20 primary + 8 backup).
 - `docs/presentation/fiche-repetition-presentateur.md` — presenter rehearsal
   sheet with timing milestones.
 - `apps/analytics-mfe/src/proof/proofCatalog.ts` — 19-entry requirement
@@ -1023,21 +1023,33 @@ across five languages (`_HIGH_EFFORT_MARKERS` in `service.py`) and question
 length (`AUTO_LENGTH_THRESHOLD = 120`). The resolved tier is returned in the API
 response so the client knows which model was used.
 
-For the physics models (RUL, quality, energy dispatch), the choice is
+For the deterministic models (energy dispatch, RUL, quality), the choice is
 **deterministic Python** rather than an LLM. This is a deliberate architectural
 decision (documented in FAQ Q12): "the math must be deterministic, testable,
 and explainable … this keeps a confidently-wrong LLM away from any physical or
 financial commitment."
 
 **Secure deployment.** All Foundry model calls authenticate via
-`DefaultAzureCredential` scoped to
-`https://cognitiveservices.azure.com/.default` — no API keys anywhere in the
-codebase. The deployment targets EU Data Zone for data residency (documented in
-`deployment-topology.md` §2.2 and `solution-architecture.md` §4.3). The
-`adapter_factory.py` and `copilot/agents.py` patterns provide graceful
-degradation: if Foundry is unconfigured or the Azure SDK is unavailable, the
-service falls back to local fixture adapters with a logged warning rather than
-crashing.
+`DefaultAzureCredential` scoped to the Foundry audience
+`https://ai.azure.com/.default` — the same audience `AIProjectClient` uses, and no
+API keys anywhere in the codebase. The deployment targets EU Data Zone for data
+residency (documented in `deployment-topology.md` §2.2 and
+`solution-architecture.md` §4.3). The `adapter_factory.py` and
+`copilot/agents.py` patterns provide graceful degradation: if Foundry is
+unconfigured or the Azure SDK is unavailable, the service falls back to local
+fixture adapters with a logged warning rather than crashing.
+
+**Foundry project model, not the classic one.** The estate is a Foundry resource
+(`Microsoft.CognitiveServices/accounts`, kind `AIServices`, with
+`allowProjectManagement`) hosting `accounts/projects`; there is no
+`Microsoft.MachineLearningServices/workspaces` hub anywhere, and no hub connection
+string. Consequently every data-plane call goes to
+`https://<account>.services.ai.azure.com` — the project endpoint
+(`/api/projects/<project>`) for agents, and the versionless OpenAI **v1** route
+(`/openai/v1/…`) for inference, with the deployment carried as `model` in the
+request body. `foundry_endpoints.py` centralises that addressing and rewrites a
+classic `*.cognitiveservices.azure.com` host so an older configuration cannot
+silently reintroduce the dated `/openai/deployments/…?api-version=` path.
 
 **Model versioning.** Physics models carry explicit version strings in code:
 
@@ -1045,10 +1057,11 @@ crashing.
 - `quality-risk:1.0.0-demo` — `service.py` (scoring worker)
 - `energy-dispatch-deterministic:2.1.0` — `service.py` (optimizer worker)
 
-The Foundry deployment names and API version are configurable via environment
-variables (`FOUNDRY_CHAT_DEPLOYMENT`, `FOUNDRY_REASONING_DEPLOYMENT`,
-`FOUNDRY_API_VERSION`) and wired through Bicep parameters
-(`foundryChatDeployment`, `foundryEmbedDeployment` in `containerapps.bicep`).
+The Foundry deployment names are configurable via environment variables
+(`FOUNDRY_CHAT_DEPLOYMENT`, `FOUNDRY_REASONING_DEPLOYMENT`) and wired through Bicep
+parameters (`foundryChatDeployment`, `foundryEmbedDeployment` in
+`containerapps.bicep`). There is no API-version variable to keep in step: the v1
+route is versionless.
 
 **Offline evaluation.** The `evaluation.py` module runs a deterministic, offline
 evaluation over fixtures to produce a scorecard covering:
@@ -1066,9 +1079,10 @@ per-case results, supporting the model-governance evidence discipline.
 - `services/knowledge-orchestrator/src/knowledge_orchestrator/copilot/agents.py`
   — `DEFAULT_CHAT_DEPLOYMENT = "gpt-5.4-mini"`,
   `DEFAULT_REASONING_DEPLOYMENT = "gpt-5.5"`,
-  `REASONING_EFFORT_BY_TIER`, `MAX_COMPLETION_TOKENS_BY_TIER`,
-  `FOUNDRY_SCOPE = "https://cognitiveservices.azure.com/.default"`,
-  `DEFAULT_API_VERSION = "2025-01-01-preview"`.
+  `REASONING_EFFORT_BY_TIER`, `MAX_COMPLETION_TOKENS_BY_TIER`.
+- `services/knowledge-orchestrator/src/knowledge_orchestrator/foundry_endpoints.py`
+  — `FOUNDRY_SCOPE = "https://ai.azure.com/.default"`,
+  `OPENAI_V1_PREFIX = "openai/v1"`, `normalize_endpoint()`.
 - `services/knowledge-orchestrator/src/knowledge_orchestrator/adapter_factory.py`
   — `create_agent()` with Azure/local selection, `DefaultAzureCredential`.
 - `services/knowledge-orchestrator/src/knowledge_orchestrator/evaluation.py`
@@ -1525,7 +1539,7 @@ A reading path is documented in `docs/README.md`.
 
 #### Evidence
 
-- `docs/presentation/oral-defense-and-slide-plan.md` — 26-slide plan with
+- `docs/presentation/oral-defense-and-slide-plan.md` — 28-slide plan (20 primary + 8 backup) with
   narrative arc, timing, speaker notes, source cues, and per-slide fallback.
 - `docs/presentation/NovaSteel-Oral-Defense.pptx` — validated slide deck.
 - `docs/presentation/faq.md` — 30+ FAQ entries across seven categories.

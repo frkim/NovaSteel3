@@ -73,7 +73,10 @@ var storageAccountContributorRoleDefinitionId = subscriptionResourceId('Microsof
 var storageBlobDataOwnerRoleDefinitionId = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b')
 var monitoringMetricsPublisherRoleDefinitionId = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '3913510d-42f4-4e42-8a64-420c390055eb')
 
-resource aiServices 'Microsoft.CognitiveServices/accounts@2024-10-01' existing = {
+// Declared at the project-capable API version to match `platform.bicep`. Older
+// versions predate the Foundry project model (`accounts/projects`), so referencing
+// the parent at 2024-10-01 here would describe a classic Cognitive Services account.
+resource aiServices 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' existing = {
   name: aiServicesName
 }
 

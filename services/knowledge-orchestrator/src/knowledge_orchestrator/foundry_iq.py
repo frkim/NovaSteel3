@@ -133,6 +133,7 @@ def knowledge_base_config_from_env() -> Optional[KnowledgeBaseConfig]:
         ENV_SEARCH_ENDPOINT,
         ENV_SEARCH_INDEX,
     )
+    from .foundry_endpoints import normalize_endpoint
 
     endpoint = os.environ.get(ENV_SEARCH_ENDPOINT, "").strip().rstrip("/")
     if not endpoint:
@@ -144,7 +145,7 @@ def knowledge_base_config_from_env() -> Optional[KnowledgeBaseConfig]:
         knowledge_base_name=(
             os.environ.get(ENV_KNOWLEDGE_BASE, "").strip() or DEFAULT_KNOWLEDGE_BASE
         ),
-        foundry_endpoint=os.environ.get(ENV_FOUNDRY_ENDPOINT, "").strip().rstrip("/"),
+        foundry_endpoint=normalize_endpoint(os.environ.get(ENV_FOUNDRY_ENDPOINT, "")),
         chat_deployment=os.environ.get("FOUNDRY_CHAT_DEPLOYMENT", "").strip(),
         embed_deployment=os.environ.get(ENV_EMBED_DEPLOYMENT, "").strip(),
         include_web_source=online_search_mode() == ONLINE_MODE_WEB_IQ,

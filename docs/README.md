@@ -12,7 +12,13 @@
 > fixture pack and say so. No Power BI report or Direct Lake semantic model has
 > been published into this workspace yet.  
 > **Technical authority:** [solution architecture](architecture/solution-architecture.md)
-> and [deployment topology](architecture/deployment-topology.md) · **Freshness:** 2026-07-29
+> and [deployment topology](architecture/deployment-topology.md) · **Freshness:** 2026-07-30
+
+> **Layout note (2026-07-30):** the Marp deck source that used to sit in the
+> repository-root `presentation/` folder now lives with the rest of the defense
+> material in [`docs/presentation/`](presentation/README.md). There is no
+> top-level `presentation/` directory any more; `tools/presentation/` (PptxGenJS
+> deck generator) and `tests/presentation/` (deck validation) are unchanged.
 
 ## Wave 10 summary — Fabric data streams and a single data path
 
@@ -117,7 +123,7 @@ systems, CMMS, or production schedules.
 | Azure IaC | Bicep, policy, OIDC deployment scripts, alert rules, static validation — **deployed to Sweden Central** | Private-network hardening proof, DR rehearsal |
 | Observability | OpenTelemetry traces, JSON logs with correlation_id, four business KPI metrics | Production dashboards and alert tuning |
 | AI/knowledge | Consent, draft/review, grounding, restricted tools, critic loop, agent handoff, live GPT-5-series adapter with local fallback, AI Search procedure store, Foundry IQ knowledge base, hosted Agent Service procedure agent, screen-aware Copilot chat (5 languages, tool-free, per-tier agents incl. high-reasoning) | Tenant Agent Service capability host, model/quota, live Speech, private-network proof |
-| Defense | 26-slide PowerPoint, runbook, FAQ, scripted rehearsal, response/fallback evidence | Live-cloud rehearsal and presenter-browser screenshots |
+| Defense | 28-slide PowerPoint, Marp deck source, runbook, FAQ, scripted rehearsal, response/fallback evidence | Live-cloud rehearsal and presenter-browser screenshots |
 
 The rehearsal passed 66/66 BFF checks and 12/12 offline-fallback checks; 571
 automated tests and all 19 validation gates pass — 8 contract, 60 simulator, 112
@@ -155,7 +161,7 @@ See [the rehearsal report](../artifacts/demo-validation/rehearsal-report.md),
 | Audience | Start here | Then read |
 |---|---|---|
 | Newcomer to the app or to steel making | [Illustrated application guide (EN)](presentation/assets/app-guide/en/README.md) / [(FR)](presentation/assets/app-guide/fr/LISEZMOI.md) | [Use case](usecase/usecase.md), [proof of execution](presentation/proof_of_execution.md) |
-| Defense panel / presenter | [Root handoff](../README.md) | [Proof of execution](presentation/proof_of_execution.md), [technical analysis](tech/technical-analysis.md), [runbook](demo/demo-runbook.md), [slide plan](presentation/oral-defense-and-slide-plan.md), [FAQ](presentation/faq.md) |
+| Defense panel / presenter | [Root handoff](../README.md) and the [defense material index](presentation/README.md) | [Proof of execution](presentation/proof_of_execution.md), [technical analysis](tech/technical-analysis.md), [runbook](demo/demo-runbook.md), [slide plan](presentation/oral-defense-and-slide-plan.md), [FAQ](presentation/faq.md) |
 | Product owner | [Requirements](specs/solution-requirements.md) | [Personas](personas/personas-and-journeys.md), [UX specification](ux/dashboard-specification.md) |
 | Solution/data architect | [Solution architecture](architecture/solution-architecture.md) | [Deployment topology](architecture/deployment-topology.md), [Fabric assets](../fabric/README.md) |
 | Application engineer | [Root quick start](../README.md) | [API contracts](implementation/api-contracts.md), [implementation guide](implementation/implementation-guide.md) |
@@ -167,15 +173,21 @@ See [the rehearsal report](../artifacts/demo-validation/rehearsal-report.md),
 
 | Clock | Segment | Asset |
 |---|---|---|
-| 00:00–35:00 | Architecture, value and compliance narrative | [Plan](presentation/oral-defense-and-slide-plan.md) and `presentation\NovaSteel-Oral-Defense.pptx` |
+| 00:00–35:00 | Architecture, value and compliance narrative | [Plan](presentation/oral-defense-and-slide-plan.md) and `docs\presentation\NovaSteel-Oral-Defense.pptx` |
 | 35:00–45:00 | Six-moment deterministic persona demo | [Runbook](demo/demo-runbook.md) and `..\artifacts\demo-validation\drive_demo.py` |
 | 45:00–60:00 | Moderated FAQ / validation-gate discussion | [FAQ](presentation/faq.md), [proof of execution](presentation/proof_of_execution.md) and [technical analysis](tech/technical-analysis.md) |
 
-The PowerPoint has 28 slides: 20 primary narrative/demo-handoff slides and eight
-FAQ backup slides. The package validator found no placeholders and confirms
-alignment to the demo transitions.
+The delivered PowerPoint has 28 slides: 20 primary narrative/demo-handoff slides
+and eight FAQ backup slides. The package validator found no placeholders and
+confirms alignment to the demo transitions.
 
-| Repository/document index
+The same narrative is also maintained as Markdown in
+[`presentation/slides.md`](presentation/slides.md) and rebuilt autonomously with
+[Marp](https://marp.app/) — 22 timed main slides plus 14 FAQ/appendix backups —
+by the `Presentation` workflow, which publishes the HTML deck, both PDFs and the
+PPTX. See the [presentation folder index](presentation/README.md).
+
+## Repository/document index
 
 | Area | Primary artifacts |
 |---|---|
@@ -186,6 +198,7 @@ alignment to the demo transitions.
 | Implementation | [Root quick start](../README.md), [implementation guide](implementation/implementation-guide.md), [API contracts](implementation/api-contracts.md) |
 | Data/Fabric | [Synthetic data](data/synthetic-data-and-simulators.md), [Fabric README](../fabric/README.md), [Fabric research](research/fabric-platform.md), [Fabric-Brain mapping](architecture/fabric-brain-mapping.md) |
 | Experience | [Illustrated application guide](presentation/assets/app-guide/en/README.md), [UX spec §9.7](ux/dashboard-specification.md#97-dockview-workspace-model-all-screens), [UX spec §12.11](ux/dashboard-specification.md#1211-axelormetal-corporate-website-company-website-s-24), [Solution architecture ADR-014](architecture/solution-architecture.md#adr-014--two-level-dockview-workspace-with-jsx-derived-panels) |
+| Defense / presentation | [Folder index](presentation/README.md), [slide plan](presentation/oral-defense-and-slide-plan.md), [FAQ](presentation/faq.md), [proof of execution](presentation/proof_of_execution.md), [Marp deck source](presentation/slides.md), [French executive summary](presentation/resume-executif-fr.md) |
 | Device Operations | [Synthetic data §13](data/synthetic-data-and-simulators.md#13-device-simulator-estate), [UX spec §12.9–12.10](ux/dashboard-specification.md), [API contracts §4.12](implementation/api-contracts.md#412-device-operations), [Operations §12](operations/operations-and-cost.md) |
 | Security/operations | [Security governance](security/security-governance-and-threat-model.md), [operations](operations/operations-and-cost.md), [package-feed policy](tech/security_requirement.md) |
 | Rating grid | [Rubric](tech/rating_grid.md), [technical analysis](tech/technical-analysis.md), in-app **Technical Requirements** screen (`/{site}/technical-requirements/criteria`) |

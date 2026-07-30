@@ -34,6 +34,7 @@ import os
 from dataclasses import dataclass
 from typing import Any, Optional
 
+from .foundry_endpoints import normalize_endpoint
 from .foundry_iq import (
     KnowledgeBaseConfig,
     knowledge_base_config_from_env,
@@ -45,6 +46,11 @@ logger = logging.getLogger(__name__)
 ENV_PROJECT_ENDPOINT = "FOUNDRY_PROJECT_ENDPOINT"
 ENV_CHAT_DEPLOYMENT = "FOUNDRY_CHAT_DEPLOYMENT"
 ENV_AGENT_MODE = "FOUNDRY_AGENT_SERVICE_MODE"  # "azure" | "local" (explicit override)
+
+# Path that distinguishes a Foundry *project* endpoint from the account endpoint.
+# The project model addresses agents per project; there is no account-level agents
+# API, and the classic hub-based equivalent was a connection string instead.
+PROJECT_PATH_SEGMENT = "/api/projects/"
 
 DEFAULT_MODEL = "gpt-5.4-mini"
 
@@ -120,7 +126,7 @@ class FoundryAgentService:
         knowledge_base: Optional[KnowledgeBaseConfig] = None,
         credential: Any = None,
     ) -> None:
-        self.project_endpoint = project_endpoint.rstrip("/")
+        self.project_endpoint = normalize_endpoint(project_endpoint)
         self.model = model
         self._knowledge_base = knowledge_base
         self._credential = credential
@@ -330,7 +336,25 @@ def agent_service_status() -> AgentServiceStatus:
                 "capability host has not been deployed"
             ),
         )
-    return AgentServiceStatus(enabled=True, project_endpoint=endpoint.rstrip("/"))
+
+    # Rewrites a classic `<account>.cognitiveservices.azure.com` host onto the
+    # Foundry-model `<account>.services.ai.azure.com` one; a correctly configured
+    # deployment is already on the latter.
+    endpoint = normalize_endpoint(endpoint)
+    if PROJECT_PATH_SEGMENT not in endpoint:
+        # An account endpoint is not a project endpoint. AIProjectClient would accept
+        # it and then fail on the first agent call with a 404, which is a much harder
+        # failure to read than refusing here and staying on the local agents.
+        return AgentServiceStatus(
+            enabled=False,
+            reason=(
+                f"{ENV_PROJECT_ENDPOINT}={endpoint!r} is an account endpoint, not a "
+                f"Foundry project endpoint. Expected "
+                f"https://<account>.services.ai.azure.com{PROJECT_PATH_SEGMENT}<project> "
+                "— the classic hub connection string is not supported."
+            ),
+        )
+    return AgentServiceStatus(enabled=True, project_endpoint=endpoint)
 
 
 def host_agents() -> AgentServiceStatus:

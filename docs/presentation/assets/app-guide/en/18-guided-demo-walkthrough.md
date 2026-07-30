@@ -74,25 +74,7 @@ Open `http://localhost:5266`. If your local launch profile prints a different po
 |---|---|---|
 | **Simulator state: running**, scenario **demo-full**, ticks, devices, sensors, and active lining/price incidents. | “The demo is repeatable. A deterministic in-process simulator drives the fault story, not manual screen edits.” This supports data provenance for `AI-01` (`docs\README.md:37-41`; `README.md:201-216`). | “Where do the signals come from?” |
 
-### Stop 4 — Furnace Health: Lining Forecast
-
-**URL:** `http://localhost:5266/lu/furnace-health/lining-forecast`  
-![Furnace Health lining forecast](../screenshots/furnace-health-lining-forecast.png)
-
-| What to look at | What to say / what it proves | Newcomer question answered |
-|---|---|---|
-| Lining risk near 90%, days to threshold around 19.7, P10–P90 band, red 80% threshold, and driver panel. | “This is the strongest AI proof: transparent RUL regression on synthetic thermal history, with uncertainty and drivers.” It proves `CHL-03`, `OBJ-02`, `OUT-03`, `AI-01` (`services\scoring-worker\src\scoring_worker\rul_model.py:106-197`; `docs\validation-report.md:43-44`). | “How does NovaSteel warn before an €8M lining failure?” |
-
-### Stop 5 — Furnace Health: Maintenance Planner
-
-**URL:** `http://localhost:5266/lu/furnace-health/maintenance-planner`  
-![Furnace Health maintenance planner](../screenshots/furnace-health-maintenance-planner.png)
-
-| What to look at | What to say / what it proves | Newcomer question answered |
-|---|---|---|
-| Urgent BF-01 inspection, relining window, Gantt-style plan, and synthetic work order `WO-DEMO-LUX-1042`. | “The forecast becomes a planned inspection. It does not actuate the furnace; the human maintenance process remains accountable.” It supports `OBJ-02` and `OUT-03` (`services\bff-api\src\bff_api\repository.py:276-285`; `docs\validation-report.md:43-44`). | “What happens after the risk alert?” |
-
-### Stop 6 — Energy Optimization: Spot & Schedule
+### Stop 4 — Energy Optimization: Spot & Schedule
 
 **URL:** `http://localhost:5266/lu/energy-optimization/spot-price-schedule`  
 ![Energy spot price and schedule](../screenshots/energy-optimization-spot-price-schedule.png)
@@ -101,7 +83,7 @@ Open `http://localhost:5266`. If your local launch profile prints a different po
 |---|---|---|
 | 280 EUR/MWh peak, projected savings, CO₂ intensity, shiftable load, price/load chart, and schedule rows. | “Energy is a production planning problem. The screen shows which flexible reheat batches can move away from a price peak.” It supports `CHL-01`, `OBJ-01`, and `REG-02` oversight (`docs\data\synthetic-data-and-simulators.md:128-135`; `docs\validation-report.md:45`). | “Why do steel plants care about spot electricity prices?” |
 
-### Stop 7 — Energy Optimization: Load-Shift Simulator
+### Stop 5 — Energy Optimization: Load-Shift Simulator
 
 **URL:** `http://localhost:5266/lu/energy-optimization/load-shift-simulator`  
 ![Energy load-shift simulator](../screenshots/energy-optimization-load-shift-simulator.png)
@@ -109,6 +91,24 @@ Open `http://localhost:5266`. If your local launch profile prints a different po
 | What to look at | What to say / what it proves | Newcomer question answered |
 |---|---|---|
 | Baseline-vs-optimized bars, max-shift and concurrency sliders, **Simulate schedule**, and **Record simulated approval**. | “The MILP optimizer finds a feasible advisory schedule with zero hard violations. Approval is simulated/shadow and does not write production scheduling.” It proves `AI-02` (`services\optimizer-worker\src\optimizer_worker\milp.py:40-145`; `docs\validation-report.md:45`). | “Does the AI control production?” |
+
+### Stop 6 — Furnace Health: Lining Forecast
+
+**URL:** `http://localhost:5266/lu/furnace-health/lining-forecast`  
+![Furnace Health lining forecast](../screenshots/furnace-health-lining-forecast.png)
+
+| What to look at | What to say / what it proves | Newcomer question answered |
+|---|---|---|
+| Lining risk near 90%, days to threshold around 19.7, P10–P90 band, red 80% threshold, and driver panel. | “This is the RUL proof: transparent regression on synthetic thermal history, with uncertainty and drivers.” It proves `CHL-03`, `OBJ-02`, `OUT-03`, `AI-01` (`services\scoring-worker\src\scoring_worker\rul_model.py:106-197`; `docs\validation-report.md:43-44`). | “How does NovaSteel warn before an €8M lining failure?” |
+
+### Stop 7 — Furnace Health: Maintenance Planner
+
+**URL:** `http://localhost:5266/lu/furnace-health/maintenance-planner`  
+![Furnace Health maintenance planner](../screenshots/furnace-health-maintenance-planner.png)
+
+| What to look at | What to say / what it proves | Newcomer question answered |
+|---|---|---|
+| Urgent BF-01 inspection, relining window, Gantt-style plan, and synthetic work order `WO-DEMO-LUX-1042`. | “The forecast becomes a planned inspection. It does not actuate the furnace; the human maintenance process remains accountable.” It supports `OBJ-02` and `OUT-03` (`services\bff-api\src\bff_api\repository.py:276-285`; `docs\validation-report.md:43-44`). | “What happens after the risk alert?” |
 
 ### Stop 8 — Quality: Batch Quality
 

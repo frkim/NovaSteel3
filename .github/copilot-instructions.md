@@ -19,9 +19,9 @@ Always use the Microsoft-protected feeds backed by Central Feed Services (CFS):
 Rules:
 
 - Do not add `--index-url`, `--extra-index-url`, or `<add key="nuget.org" .../>` entries that reference public registries.
-- Reuse the existing repo configuration instead of inventing new ones: [NuGet.Config](NuGet.Config), [pip.conf](pip.conf), [.npmrc](.npmrc).
+- Reuse the existing repo configuration instead of inventing new ones: [NuGet.Config](../NuGet.Config), [pip.conf](../pip.conf), [.npmrc](../.npmrc).
 - New Python services must ship a `pip.conf` (or set `PIP_INDEX_URL`) pointing at the protected feed; new .NET projects inherit the root `NuGet.Config` with `<clear />` and package source mapping.
 - Container images and CI jobs must copy or set the same feed configuration before restoring packages.
 - If a package is unavailable on the protected feed, stop and ask the user to use the approved CFS exception process. Do not fall back to the public registry.
 
-Reference: [docs/tech/security_requirement.md](docs/tech/security_requirement.md)
+Reference: [docs/tech/security_requirement.md](../docs/tech/security_requirement.md)

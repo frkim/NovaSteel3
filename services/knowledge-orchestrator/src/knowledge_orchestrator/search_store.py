@@ -41,6 +41,7 @@ from dataclasses import dataclass
 from typing import Any, Optional, Protocol, runtime_checkable
 
 from .models import Procedure
+from .foundry_endpoints import normalize_endpoint
 from .procedure_workflow import is_retrievable
 from .retrieval import (
     Chunk,
@@ -108,7 +109,7 @@ class SearchStoreConfig:
         return cls(
             endpoint=endpoint.rstrip("/"),
             index_name=os.environ.get(ENV_SEARCH_INDEX, "").strip() or DEFAULT_INDEX_NAME,
-            foundry_endpoint=os.environ.get(ENV_FOUNDRY_ENDPOINT, "").strip().rstrip("/"),
+            foundry_endpoint=normalize_endpoint(os.environ.get(ENV_FOUNDRY_ENDPOINT, "")),
             embed_deployment=(
                 os.environ.get(ENV_EMBED_DEPLOYMENT, "").strip() or DEFAULT_EMBED_MODEL
             ),

@@ -35,9 +35,12 @@ jobs:
       - name: Install the Bicep CLI
         run: az bicep install
       - name: Run offline Bicep and PowerShell validation
+        shell: bash
+        env:
+          TARGET_ENVIRONMENT: ${{ inputs.environment }}
         run: >-
           pwsh -NoProfile -NonInteractive -File infra/scripts/validate.ps1
-          -Environment "${{ inputs.environment }}" -SkipArmValidate
+          -Environment "$TARGET_ENVIRONMENT" -SkipArmValidate
       - name: Publish pre-deployment evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -84,14 +87,20 @@ jobs:
       - name: Prepare deployment evidence directory
         run: mkdir -p artifacts/deployment/infra
       - name: Capture Azure what-if evidence
+        shell: bash
+        env:
+          TARGET_ENVIRONMENT: ${{ inputs.environment }}
         run: >-
           pwsh -NoProfile -NonInteractive -File infra/scripts/what-if.ps1
-          -Environment "${{ inputs.environment }}"
-          -OutFile "artifacts/deployment/infra/what-if-${{ inputs.environment }}.txt"
+          -Environment "$TARGET_ENVIRONMENT"
+          -OutFile "artifacts/deployment/infra/what-if-$TARGET_ENVIRONMENT.txt"
       - name: Deploy after what-if and GitHub Environment approval
+        shell: bash
+        env:
+          TARGET_ENVIRONMENT: ${{ inputs.environment }}
         run: >-
           pwsh -NoProfile -NonInteractive -File infra/scripts/deploy.ps1
-          -Environment "${{ inputs.environment }}" -Force
+          -Environment "$TARGET_ENVIRONMENT" -Force
       - name: Publish deployment evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
