@@ -13,6 +13,7 @@ tested is our loop, not the wire format.
 
 from __future__ import annotations
 
+import importlib.util
 import json
 
 import pytest
@@ -28,6 +29,13 @@ from knowledge_orchestrator.agent_service import (
 from knowledge_orchestrator.agent_tools import ToolError, ToolRegistry
 
 ENDPOINT = "https://x.services.ai.azure.com/api/projects/p"
+
+# Building an SDK `FunctionTool` needs the optional `azure` extra, which the
+# offline suite does not install. Only the assertions that reach that call skip.
+requires_sdk = pytest.mark.skipif(
+    importlib.util.find_spec("azure.ai.projects") is None,
+    reason="azure-ai-projects is an optional extra; the SDK object cannot be built without it",
+)
 
 
 class _FunctionCall:
@@ -270,6 +278,7 @@ def test_resolve_tools_drops_a_function_tool_with_no_implementation():
     assert names == ()
 
 
+@requires_sdk
 def test_resolve_tools_declares_every_function_tool_when_reconciling():
     """A definition must describe the agent as deployed, not as one process happens
     to be configured, so reconciliation passes no registry."""

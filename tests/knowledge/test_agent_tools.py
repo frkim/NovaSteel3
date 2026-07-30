@@ -7,6 +7,7 @@ behaviour and the strict-schema shape that Foundry validates against.
 
 from __future__ import annotations
 
+import importlib.util
 import json
 
 import pytest
@@ -19,6 +20,15 @@ from knowledge_orchestrator.agent_tools import (
     ToolSpec,
     UnknownToolError,
     tool_spec,
+)
+
+# The rest of this suite is deliberately runnable with nothing but the standard
+# library and pytest (see the service README), which is how CI runs it. Only the
+# handful of assertions that build a real SDK object need the optional `azure`
+# extra, so they skip rather than fail where it is absent.
+requires_sdk = pytest.mark.skipif(
+    importlib.util.find_spec("azure.ai.projects") is None,
+    reason="azure-ai-projects is an optional extra; the SDK object cannot be built without it",
 )
 
 
@@ -127,6 +137,7 @@ def test_registering_an_uncatalogued_name_fails_fast():
         ToolRegistry().register("invented_tool", lambda args: {})
 
 
+@requires_sdk
 def test_to_sdk_tool_is_strict():
     spec = ToolSpec(
         name="lining_rul_forecast",
