@@ -62,7 +62,7 @@ by the catalog actually exists in the repository.
 | TR-DEV-01 | Development | Application Demo | 4 | Compelling executive-friendly demo with synthetic data and offline fallback; slight gap: not all Fabric assets are wired live during the demo. |
 | TR-DEV-02 | Development | Implementation completeness | 4 | 19 requirements fully mapped with proof catalog; 20-gate validator; minor gap: some batch/MES integrations are design-only. |
 | TR-MON-01 | Monitoring | Logging and metrics | 5 | OpenTelemetry with Azure Monitor in all services; structured JSON logging with trace-id correlation; 10 Bicep-defined alert rules; Activator notification rules; business-KPI gauges. |
-| TR-AI-01 | AI Integration | Use of AI technologies | 5 | Physics-informed RUL model, MILP energy optimiser, hybrid BM25+semantic RAG, Azure Speech STT, Foundry Agent Service, screen-aware Copilot panel with five-language support. |
+| TR-AI-01 | AI Integration | Use of AI technologies | 5 | MILP energy optimiser, physics-informed RUL model, in-line quality prediction, hybrid BM25+semantic RAG, Azure Speech STT, Foundry Agent Service, screen-aware Copilot panel with five-language support. |
 | TR-AI-02 | AI Integration | AI model selection and deployment | 4 | gpt-5.4-mini default / gpt-5.5 high-reasoning tier via Azure AI Foundry with managed identity; EU Data Zone placement; model versioning in code; gap: no MLflow registry artefact in the repo. |
 | TR-AGT-01 | Agentic Behaviour | Autonomy and orchestration | 5 | Knowledge-capture workflow is an explicit StateGraph with gated human-in-the-loop nodes; consent, PII, grounding, content-safety, and critic reflection all execute autonomously before the human gate. |
 | TR-AGT-02 | Agentic Behaviour | Multi-agent coordination | 5 | Handoff protocol between energy-dispatch and RUL/scoring agents; critic/reflection loop capped at 2 iterations; tool allow-list with forbidden-action enforcement; Protocol-based ports. |
@@ -1023,7 +1023,7 @@ across five languages (`_HIGH_EFFORT_MARKERS` in `service.py`) and question
 length (`AUTO_LENGTH_THRESHOLD = 120`). The resolved tier is returned in the API
 response so the client knows which model was used.
 
-For the physics models (RUL, quality, energy dispatch), the choice is
+For the deterministic models (energy dispatch, RUL, quality), the choice is
 **deterministic Python** rather than an LLM. This is a deliberate architectural
 decision (documented in FAQ Q12): "the math must be deterministic, testable,
 and explainable … this keeps a confidently-wrong LLM away from any physical or

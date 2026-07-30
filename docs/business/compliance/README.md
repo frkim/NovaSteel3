@@ -40,7 +40,7 @@ NovaSteel sits at the intersection of five regulatory families, because it is si
 
 | Family | Primary instruments | Why it applies to NovaSteel |
 |---|---|---|
-| **AI regulation** | EU AI Act (Reg. (EU) 2024/1689); ISO/IEC 42001:2023; NIST AI RMF 1.0 | Physics-informed RUL model, MILP energy optimizer, in-line quality prediction, and a grounded GenAI/LLM knowledge assistant all influence industrial decisions. |
+| **AI regulation** | EU AI Act (Reg. (EU) 2024/1689); ISO/IEC 42001:2023; NIST AI RMF 1.0 | MILP energy optimizer, physics-informed RUL model, in-line quality prediction, and a grounded GenAI/LLM knowledge assistant all influence industrial decisions. |
 | **Industrial / OT cybersecurity** | IEC 62443 series; NIS2 (Dir. (EU) 2022/2555); Cyber Resilience Act (Reg. (EU) 2024/2847); ISO/IEC 27001:2022 | Per-plant OT gateways cross an industrial DMZ; "manufacture of basic metals" is a NIS2 sector; the platform is a software product with digital elements. |
 | **Climate / environment** | EU ETS (Dir. 2003/87/EC, amended by Dir. (EU) 2023/959); MRV (Impl. Reg. (EU) 2018/2066 & 2018/2067); FAR (Reg. (EU) 2019/331); CBAM (Reg. (EU) 2023/956); IED (Dir. 2010/75/EU, amended by Dir. (EU) 2024/1785); EED (Dir. (EU) 2023/1791) | The platform tracks CO₂ intensity, Scope 1/2 emissions and ETS allowance exposure for an iron-&-steel installation. |
 | **Data protection** | GDPR (Reg. (EU) 2016/679); EU Data Boundary; Data Act (Reg. (EU) 2023/2854) | Operator interviews are personal data (voice); automated decision-support touches Art. 22; IoT-generated OT data raises Data Act access questions. |
@@ -59,7 +59,7 @@ flowchart TB
   subgraph CLOUD["Azure Sweden Central and Microsoft Fabric - EU resident"]
     ING["Event Hubs buffer and identity relay"]
     FAB["Fabric: Eventhouse, OneLake medallion, Direct Lake, Power BI"]
-    AISVC["Python services: RUL, MILP optimizer, quality, GenAI RAG"]
+    AISVC["Python services: MILP optimizer, RUL, quality, GenAI RAG"]
     AUD["Hash-chained append-only audit log"]
     DMZ -->|outbound TLS| ING --> FAB
     FAB <--> AISVC

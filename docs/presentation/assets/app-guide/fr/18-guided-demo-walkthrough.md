@@ -74,25 +74,7 @@ Ouvrez `http://localhost:5266`. Si votre profil local affiche un autre port (par
 |---|---|---|
 | **Simulator state: running**, scénario **demo-full**, ticks, appareils, capteurs et incidents actifs. | « La démo est répétable. Un simulateur déterministe intégré au BFF alimente l'histoire, pas des modifications manuelles d'écran. » Cela soutient la provenance de `AI-01` (`docs\README.md:37-41`; `README.md:201-216`). | « D'où viennent les signaux ? » |
 
-### Arrêt 4 — Furnace Health : Lining Forecast
-
-**URL :** `http://localhost:5266/lu/furnace-health/lining-forecast`  
-![Prévision du garnissage four](../screenshots/furnace-health-lining-forecast.png)
-
-| À regarder | À dire / ce que cela prouve | Question débutant résolue |
-|---|---|---|
-| Risque de garnissage autour de 90 %, jours jusqu'au seuil autour de 19,7, bande P10–P90, seuil rouge 80 %, panneau des facteurs. | « C'est la preuve IA la plus forte : une régression RUL transparente sur historique thermique synthétique, avec incertitude et facteurs. » Elle prouve `CHL-03`, `OBJ-02`, `OUT-03`, `AI-01` (`services\scoring-worker\src\scoring_worker\rul_model.py:106-197`; `docs\validation-report.md:43-44`). | « Comment NovaSteel prévient avant une défaillance de garnissage à 8 M€ ? » |
-
-### Arrêt 5 — Furnace Health : Maintenance Planner
-
-**URL :** `http://localhost:5266/lu/furnace-health/maintenance-planner`  
-![Planification maintenance four](../screenshots/furnace-health-maintenance-planner.png)
-
-| À regarder | À dire / ce que cela prouve | Question débutant résolue |
-|---|---|---|
-| Inspection BF-01 urgente, fenêtre de relining, planning type Gantt et ordre synthétique `WO-DEMO-LUX-1042`. | « La prévision devient une inspection planifiée. Elle n'actionne pas le four ; le processus maintenance humain reste responsable. » Cela soutient `OBJ-02` et `OUT-03` (`services\bff-api\src\bff_api\repository.py:276-285`; `docs\validation-report.md:43-44`). | « Que se passe-t-il après l'alerte ? » |
-
-### Arrêt 6 — Energy Optimization : Spot & Schedule
+### Arrêt 4 — Energy Optimization : Spot & Schedule
 
 **URL :** `http://localhost:5266/lu/energy-optimization/spot-price-schedule`  
 ![Prix spot et planning énergie](../screenshots/energy-optimization-spot-price-schedule.png)
@@ -101,7 +83,7 @@ Ouvrez `http://localhost:5266`. Si votre profil local affiche un autre port (par
 |---|---|---|
 | Pic à 280 EUR/MWh, économies projetées, intensité CO₂, charge déplaçable, courbe prix/charge et lignes de planning. | « L'énergie est aussi un problème de planning. L'écran montre quels lots de réchauffage flexibles peuvent éviter le pic de prix. » Il soutient `CHL-01`, `OBJ-01` et la supervision `REG-02` (`docs\data\synthetic-data-and-simulators.md:128-135`; `docs\validation-report.md:45`). | « Pourquoi le prix spot de l'électricité compte dans l'acier ? » |
 
-### Arrêt 7 — Energy Optimization : Load-Shift Simulator
+### Arrêt 5 — Energy Optimization : Load-Shift Simulator
 
 **URL :** `http://localhost:5266/lu/energy-optimization/load-shift-simulator`  
 ![Simulateur de déplacement de charge](../screenshots/energy-optimization-load-shift-simulator.png)
@@ -109,6 +91,24 @@ Ouvrez `http://localhost:5266`. Si votre profil local affiche un autre port (par
 | À regarder | À dire / ce que cela prouve | Question débutant résolue |
 |---|---|---|
 | Barres baseline vs optimized, curseurs de fenêtre et concurrence, **Simulate schedule**, **Record simulated approval**. | « L'optimiseur MILP trouve un planning consultatif faisable, sans violation dure. L'approbation est simulée/shadow et n'écrit pas dans le planning production. » Il prouve `AI-02` (`services\optimizer-worker\src\optimizer_worker\milp.py:40-145`; `docs\validation-report.md:45`). | « L'IA contrôle-t-elle la production ? » |
+
+### Arrêt 6 — Furnace Health : Lining Forecast
+
+**URL :** `http://localhost:5266/lu/furnace-health/lining-forecast`  
+![Prévision du garnissage four](../screenshots/furnace-health-lining-forecast.png)
+
+| À regarder | À dire / ce que cela prouve | Question débutant résolue |
+|---|---|---|
+| Risque de garnissage autour de 90 %, jours jusqu'au seuil autour de 19,7, bande P10–P90, seuil rouge 80 %, panneau des facteurs. | « C'est la preuve RUL : une régression transparente sur historique thermique synthétique, avec incertitude et facteurs. » Elle prouve `CHL-03`, `OBJ-02`, `OUT-03`, `AI-01` (`services\scoring-worker\src\scoring_worker\rul_model.py:106-197`; `docs\validation-report.md:43-44`). | « Comment NovaSteel prévient avant une défaillance de garnissage à 8 M€ ? » |
+
+### Arrêt 7 — Furnace Health : Maintenance Planner
+
+**URL :** `http://localhost:5266/lu/furnace-health/maintenance-planner`  
+![Planification maintenance four](../screenshots/furnace-health-maintenance-planner.png)
+
+| À regarder | À dire / ce que cela prouve | Question débutant résolue |
+|---|---|---|
+| Inspection BF-01 urgente, fenêtre de relining, planning type Gantt et ordre synthétique `WO-DEMO-LUX-1042`. | « La prévision devient une inspection planifiée. Elle n'actionne pas le four ; le processus maintenance humain reste responsable. » Cela soutient `OBJ-02` et `OUT-03` (`services\bff-api\src\bff_api\repository.py:276-285`; `docs\validation-report.md:43-44`). | « Que se passe-t-il après l'alerte ? » |
 
 ### Arrêt 8 — Quality : Batch Quality
 

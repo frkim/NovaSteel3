@@ -223,17 +223,17 @@ flowchart LR
 
 | Capability | Authoritative compute path | Input/output and governance |
 |---|---|---|
-| Furnace lining RUL | Python physics-informed model, trained/evaluated in Fabric notebooks/Data Science and served/scored by an approved Python worker | Silver thermal/cooling features → feature snapshot → P10/P50/P90 RUL, risk, drivers → `fact_furnace_rul`/audit. Pilot frequency is daily; near-real-time is a measured later enhancement, not an MVP claim. |
 | Energy dispatch | Deterministic Python optimization worker is the authoritative solver; Foundry agent explains/orchestrates approved tool calls only | Forecast, market data, production constraints, maintenance windows → feasible baseline/optimized schedule → recommendation and constraint rationale. The agent cannot invent or commit a schedule. |
+| Furnace lining RUL | Python physics-informed model, trained/evaluated in Fabric notebooks/Data Science and served/scored by an approved Python worker | Silver thermal/cooling features → feature snapshot → P10/P50/P90 RUL, risk, drivers → `fact_furnace_rul`/audit. Pilot frequency is daily; near-real-time is a measured later enhancement, not an MVP claim. |
 | Quality | Python quality-risk model, batch/nearline scoring with genealogy features | Heat/coil/process/quality context → risk, drivers, bounded what-if suggestion → gold model and audit facts. No direct recipe/setpoint write. |
 | Knowledge capture | Azure Speech Fast Transcription plus Microsoft Foundry Agent Service | Consent + audio/text → transcript → draft procedure → human review → approved procedure/gold record → derived retrieval index. Drafts and unapproved transcripts never become operational instruction. |
 
 ```mermaid
 flowchart TD
   Silver["Silver Delta facts"] --> Features["Feature notebooks\nversioned feature snapshot"]
+  Gold["Gold facts / approved procedures"] --> Opt["Python optimizer"]
   Features --> RUL["Python RUL scorer"]
   Features --> Quality["Python quality scorer"]
-  Gold["Gold facts / approved procedures"] --> Opt["Python optimizer"]
   RUL --> Audit["Append-only decision audit"]
   Quality --> Audit
   Opt --> Audit
