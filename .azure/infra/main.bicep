@@ -174,6 +174,7 @@ module apps './modules/apps.bicep' = if (deployApps) {
     foundryReasoningDeployment: platform.outputs.reasoningDeploymentName
     foundryEmbedDeployment: platform.outputs.embeddingDeploymentName
     foundryProjectEndpoint: deployAiServices && deployAgentPlatform ? (agentPlatform.?outputs.?projectEndpoint ?? '') : ''
+    foundryOperationsProjectEndpoint: deployAiServices && deployAgentPlatform ? (agentPlatform.?outputs.?operationsProjectEndpoint ?? '') : ''
     searchEndpoint: deployAiServices && deployAgentPlatform ? (agentPlatform.?outputs.?searchEndpoint ?? '') : ''
     searchIndexName: deployAiServices && deployAgentPlatform ? (agentPlatform.?outputs.?procedureIndexName ?? '') : ''
     knowledgeBaseName: deployAiServices && deployAgentPlatform ? (agentPlatform.?outputs.?knowledgeBaseName ?? '') : ''
@@ -249,6 +250,7 @@ output hostnames object = {
   speech: platform.outputs.speechEndpoint
   search: deployAiServices && deployAgentPlatform ? (agentPlatform.?outputs.?searchEndpoint ?? '') : ''
   foundryProject: deployAiServices && deployAgentPlatform ? (agentPlatform.?outputs.?projectEndpoint ?? '') : ''
+  foundryOperationsProject: deployAiServices && deployAgentPlatform ? (agentPlatform.?outputs.?operationsProjectEndpoint ?? '') : ''
 }
 output modelDeployments object = {
   chat: platform.outputs.chatDeploymentName

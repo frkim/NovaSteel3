@@ -380,6 +380,8 @@ AI-derived values use a common shape:
 | `/v1/platform/capacity/sku-requests` | POST | `Platform.Capacity.Manage` | Resizes the non-production capacity within the policy-enforced SKU allow-list; leaves lifecycle state unchanged and is refused mid-transition. |
 | `/v1/copilot/chat` | POST | Any persona-scoped reader | Answers from assembled grounding material only; returns the sources used, the resolved reasoning tier, and whether the curated public corpus was consulted. Never returns an operational value the caller could not already see. |
 | `/v1/copilot/conversations/{id}` | GET, DELETE | Owning user only | History is owner-scoped and in-process; a conversation belonging to another user is indistinguishable from one that does not exist (`404`). |
+| `/v1/copilot/agents` | GET | Any persona-scoped reader | The operations agent roster and its tools, read from the manifest the reconciler applies. Answers even when the operations project is not deployed. |
+| `/v1/copilot/agent` | POST | Reader at the route; per-tool role and site inside | Reaches the tool-calling operations agents (ADR-019). The tools re-apply the caller's roles and plant scope, so a reader reaching this route is still refused by any tool they are not entitled to invoke. Returns proposals with `modelVersion` and `auditRef`, never a commitment. |
 | `/v1/devices` | GET | Reader role | All devices for the caller's plant scope with current status and health score. |
 | `/v1/devices/{deviceId}` | GET | Reader role | Single device with current status, health score, and active incidents. |
 | `/v1/devices/sensors` | GET | Reader role | All sensors; optional `deviceId` filter. |
@@ -615,13 +617,13 @@ Every flow propagates `correlation_id`; a decision audit record links it to even
 
 ### ADR-011 — The Copilot chat explains, it does not retrieve operational values
 
-**Status:** Accepted.  
+**Status:** Accepted; scoped by ADR-019 (the *chat* surface still receives no tools; a separate operations project hosts agents that do).  
 **Decision:** The chat agents receive no tools. `knowledge-orchestrator` assembles the grounding material — active screen profile, matched glossary definitions, and, only when the user ticks Online search, a curated corpus of durable public-context entries with official sources. The model answers from that material and the answer carries the sources it used. Live web search is not enabled.  
 **Consequences:** The chat cannot leak a value the caller is not entitled to see, and it cannot cite a page that changed after the demo was rehearsed. It also cannot answer a genuinely novel operational question — that is the dashboard's job, and the answer says so. Extending coverage means extending the glossary and screen profiles, which are reviewable artifacts, rather than widening a model's reach.
 
 ### ADR-012 — Conversations are in-process and never persisted to Fabric
 
-**Status:** Accepted.  
+**Status:** Accepted; qualified by ADR-019 for the operations agents, whose conversations are held server-side by Foundry.  
 **Decision:** Chat history lives in the `bff-api` process, keyed by the calling user, and is dropped on restart. A temporary-chat toggle skips storage entirely, and any conversation can be deleted by its owner.  
 **Consequences:** Free-text questions attributable to a named operator never enter the governed estate, so no new retention, classification, or subject-access obligation is created for a demonstration. The cost is that history does not survive a deployment; that is stated in the UI rather than hidden. Dictation is likewise browser-side only, so no audio reaches the backend.
 
@@ -690,6 +692,29 @@ The BFF reads the analytical stream through a narrow `FabricQueryClient` port ag
 **Alternatives considered:** *One stream only, real-time into the Eventhouse* (rejected: KQL retention is tuned for investigation, and multi-month KPI trends belong in governed Delta per ADR-002). *One stream only, batch into the lakehouse* (rejected: it would abandon the real-time claim entirely and leave the authored Eventstream dead in source). *Make Fabric a hard dependency and keep the capacity running* (rejected on cost, and it would remove the fallback rung that ADR-008 and §9.1 depend on). *Adopt the Azure-Brain accelerator's star schema wholesale* (rejected; see [fabric-accelerator-evaluation.md](../data/fabric-accelerator-evaluation.md) — its risk bands make its own advertised warning horizon arithmetically unreachable, and its "100 %" agent score measures query execution rather than answer accuracy).
 
 **Consequences:** The Fabric claim becomes demonstrable — rows can be shown in OneLake and queried live. The cost is a second copy of the truth: the fixture pack and the lakehouse must agree, or the demonstration will contradict itself when the capacity is asleep. That is mitigated by generating both from the same seeded scenario and by surfacing `dataSource` rather than hiding which one answered. Regenerating the analytical stream requires rerunning the load; this is automated and idempotent, but it is not a live feed, and the documentation must not imply otherwise. The platform still has no connection to a real sensor, ERP or MES — both streams are synthetic by design and labelled as such.
+
+### ADR-019 — Two Foundry projects: agents that read, and agents that call
+
+**Status:** Accepted. Scopes ADR-011; qualifies ADR-012; implements the "restricted simulation tools" half of ADR-006.
+
+**Context:** The estate provisioned one Foundry project and defined two agents in code that were created lazily on first request. Because the `knowledge-orchestrator` container app had never been deployed, no agent had ever been instantiated: the Agent Service was empty. Reviewing that gap raised the real question — should NovaSteel's deterministic calculations (the MILP dispatch optimizer and the physics-informed lining RUL model) move *into* agents, now that Foundry can host multi-step reasoning?
+
+**Decision:** No. The calculations stay in Python and are **exposed to** agents as client-side function tools. Agents are added, and they are split across **two Foundry projects in the same Foundry account**:
+
+1. **`proj-novasteel-<env>` (knowledge).** Agents that read untrusted or semi-trusted content — the procedure agent grounded in the approved corpus, and the web-search fallback. They have retrieval tools only.
+2. **`proj-novasteel-ops-<env>` (operations).** Agents that call the deterministic services — an energy advisor over `simulate_energy_dispatch` and a maintenance advisor over `lining_rul_forecast`. They have no retrieval.
+
+The roster lives in one reviewable manifest (`agent_manifest.py`) and is applied at release time by a reconciler (`agent_reconciler.py`, `--dry-run` supported) rather than created lazily on a user's request. Tool schemas and the deny-by-default registry live in `agent_tools.py`; the tool *bodies* live in the BFF (`bff_api/agent_tools.py`) and close over the request's already-validated `UserContext`.
+
+**Rationale:**
+1. **Two projects are a trust boundary, not a namespace.** An agent can only call the tools declared on its own definition in its own project. A prompt injected into a retrieved procedure therefore has no path to the dispatch optimizer, because the agent that read it has no such tool and cannot acquire one at runtime. Collapsing the roster into one project would make prompt injection a privilege-escalation path.
+2. **A function call carries no caller identity.** The agent runs as the project managed identity, so nothing in an emitted `function_call` says who asked. Client-side tools are chosen over server-side OpenAPI/MCP tools precisely so the tool body executes inside the original request scope and can re-apply `require_any_role` and `require_site`. The model may *propose* a site; only the BFF decides whether the caller may have it. (The production estate runs `publicNetworkAccess: 'Disabled'` with no inbound path from Foundry into the VNet, so a server-side tool would not have been reachable anyway.)
+3. **The tool result is a proposal, not a decision.** Every tool returns the same audited, version-pinned payload the equivalent REST route returns, marked `PROPOSAL_PENDING_HUMAN_APPROVAL` / `FORECAST_FOR_HUMAN_DECISION`, carrying `modelVersion` and `auditRef` (ADR-006, ADR-007). The agent explains a number it did not compute and cannot commit.
+4. **Declarative beats lazy.** Lazily creating an agent on first request means the definition that answers a question depends on which pod served it and when it was last restarted. A manifest plus a release-time reconcile makes the roster a reviewable artifact and makes drift detectable.
+
+**Alternatives considered:** *Move the optimizer/scorer into agent reasoning* (rejected: ADR-006, and an LLM re-deriving a constrained schedule is neither reproducible nor provable). *One project with more agents* (rejected: erases the injection boundary above). *Server-side OpenAPI tools pointing at the BFF* (rejected: no inbound network path in production, and the tool would then run outside the caller's request scope, losing the identity that authorization depends on). *A Foundry Connected Agent / multi-agent handoff topology* (deferred: it would let a knowledge agent delegate into an operations agent, which is the boundary this ADR exists to keep).
+
+**Consequences:** The estate now carries two projects and two project-scoped capability hosts per Foundry account, including in the cost-capped demo estate; the account-level capability host is shared and the two project hosts are serialised, because a capability host is immutable and concurrent creation on one account races. Each project needs its own Search/Cosmos/Storage connections and its own RBAC — the operations project gets a Search connection it never queries, purely because the capability-host contract requires one. Agent *runs* go through the Foundry Responses API against server-side conversations, which means an operations conversation is held by Foundry rather than in the BFF process; that is a genuine tension with ADR-012, mitigated by an explicit `delete_conversation()` erasure hook and by the fact that these conversations concern proposals rather than free-text personal narrative. Adding a tool is now a two-file change (schema plus authorized body) and must be accompanied by an authorization test, because a tool without a caller check is indistinguishable from an open API.
 
 ## 11. Implemented repository topology
 

@@ -38,6 +38,20 @@ from knowledge_orchestrator.foundry_iq import (
 from knowledge_orchestrator.search_store import ENV_SEARCH_ENDPOINT, ENV_SEARCH_INDEX
 
 
+def _unary(fn):
+    """Adapt a ``self``-only stub to ``ensure_agent(self, spec, registry=None)``.
+
+    ``host_agents`` walks the manifest and calls ``ensure_agent`` once per spec, so
+    the stubs below take the extra arguments and ignore them. Keeping the stubs
+    themselves ``self``-only keeps each test's intent legible.
+    """
+
+    def _wrapped(self, spec=None, registry=None):
+        return fn(self)
+
+    return _wrapped
+
+
 @pytest.fixture(autouse=True)
 def _clean_env(monkeypatch):
     for name in (
@@ -233,7 +247,7 @@ def test_host_agents_degrades_when_sdk_missing(monkeypatch):
     def _boom(self):
         raise ImportError("azure-ai-projects is not installed")
 
-    monkeypatch.setattr(FoundryAgentService, "ensure_procedure_agent", _boom)
+    monkeypatch.setattr(FoundryAgentService, "ensure_agent", _unary(_boom))
     status = host_agents()
     assert status.enabled is False
     assert "SDK unavailable" in status.reason
@@ -247,7 +261,7 @@ def test_host_agents_degrades_on_unreachable_project(monkeypatch):
     def _boom(self):
         raise RuntimeError("connection refused")
 
-    monkeypatch.setattr(FoundryAgentService, "ensure_procedure_agent", _boom)
+    monkeypatch.setattr(FoundryAgentService, "ensure_agent", _unary(_boom))
     status = host_agents()
     assert status.enabled is False
     assert "connection refused" in status.reason
@@ -263,7 +277,7 @@ def test_procedure_agent_uses_five_series_mini_by_default(monkeypatch):
         captured["model"] = self.model
         return agent_service.HostedAgent(name="a", agent_id="1", model=self.model)
 
-    monkeypatch.setattr(FoundryAgentService, "ensure_procedure_agent", _capture)
+    monkeypatch.setattr(FoundryAgentService, "ensure_agent", _unary(_capture))
     host_agents()
     assert captured["model"].startswith("gpt-5")
     assert "mini" in captured["model"]
@@ -280,7 +294,7 @@ def test_procedure_agent_model_follows_chat_deployment(monkeypatch):
         captured["model"] = self.model
         return agent_service.HostedAgent(name="a", agent_id="1", model=self.model)
 
-    monkeypatch.setattr(FoundryAgentService, "ensure_procedure_agent", _capture)
+    monkeypatch.setattr(FoundryAgentService, "ensure_agent", _unary(_capture))
     host_agents()
     assert captured["model"] == "gpt-5-mini"
 

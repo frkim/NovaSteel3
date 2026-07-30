@@ -9,6 +9,7 @@ from typing import Any, Mapping
 
 from .adapters import AuditStorePort, IdempotencyStorePort
 from .adapters.factory import create_audit_store, create_idempotency_store
+from .agent_adapter import OperationsAgentAdapter
 from .auth import Authenticator
 from .capacity import CapacityAdapter, LocalCapacityAdapter, UnconfiguredArmCapacityAdapter
 from .config import Settings
@@ -51,6 +52,7 @@ class BffServices:
     devices: DeviceAdapter
     optimizer: EnergyDispatchOptimizer = field(default_factory=EnergyDispatchOptimizer)
     scorer: ScoringWorker = field(default_factory=ScoringWorker)
+    agents: OperationsAgentAdapter = field(default_factory=OperationsAgentAdapter)
     recommendations: dict[str, dict[str, Any]] = field(default_factory=dict)
     forecasts: dict[str, tuple[dict[str, Any], str]] = field(default_factory=dict)
 
