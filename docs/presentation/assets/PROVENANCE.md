@@ -12,7 +12,7 @@ copyright-infringement risk. Therefore:
 
 - **No stock photography, artist renders, or externally-sourced images are committed.**
 - Visual impact for slides comes from **self-authored Excalidraw diagrams** (see
-  [`../../../docs/diagrams/`](../../diagrams/README.md)) and **procedurally generated assets**
+  [`../../../docs/architecture/diagrams/`](../../architecture/diagrams/README.md)) and **procedurally generated assets**
   (see [`../../../tools/presentation/assets/`](../../../tools/presentation/assets/)).
 
 ---
@@ -40,10 +40,10 @@ In all cases: **do not `git add` third-party imagery**. The `.gitignore` entry
 
 | Asset | Source | Slide support |
 |---|---|---|
-| `docs/diagrams/end-to-end-architecture.excalidraw` | Self-authored | Slide 8 (architecture) |
-| `docs/diagrams/deployment-topology.excalidraw` | Self-authored | Slide 17/19 (deployment) |
-| `docs/diagrams/demo-flow.excalidraw` | Self-authored | Slide 20 (demo handoff) |
-| `docs/diagrams/business-value-chain.excalidraw` | Self-authored | **Slides 1–4** (business hook) |
+| `docs/architecture/diagrams/end-to-end-architecture.excalidraw` | Self-authored | Slide 8 (architecture) |
+| `docs/architecture/diagrams/deployment-topology.excalidraw` | Self-authored | Slide 17/19 (deployment) |
+| `docs/architecture/diagrams/demo-flow.excalidraw` | Self-authored | Slide 20 (demo handoff) |
+| `docs/architecture/diagrams/business-value-chain.excalidraw` | Self-authored | **Slides 1–4** (business hook) |
 | `tools/presentation/assets/steel-texture.png` | Procedurally generated | Slide backgrounds |
 | `tools/presentation/assets/steelworks-hero.png` | Procedurally generated | Slide 1 title |
 | `tools/presentation/assets/thermal-map.png` | Procedurally generated | Slide 13 (RUL) |

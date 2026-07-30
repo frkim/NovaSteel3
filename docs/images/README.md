@@ -63,7 +63,7 @@ work and are not yet referenced by any page.
 
 `docs/images/logo/` holds the NovaSteel wordmark and mark sources (Paint.NET
 `.pdn` plus exported PNGs, ~1.3 MB total). These are committed, matching the
-AxelorMetal logo sources in `docs/AxelorMetal-web/logo/`, because they are small
+AxelorMetal logo sources in `docs/business/axelormetal/logo/`, because they are small
 and are the provenance for the tracked shell assets in
 `apps/portal-shell/wwwroot/brand/` (`novasteel-mark.png`,
 `novasteel-mark-dark.png`, `axelormetal-*.png`).

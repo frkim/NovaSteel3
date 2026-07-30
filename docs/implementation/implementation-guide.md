@@ -15,7 +15,7 @@ Retain the numbered contracts and backlog as traceability for maintenance and
 cloud rollout. The remaining forward-looking work is tenant deployment and the
 production gates in Sections 9, 15, and 16—not a missing local implementation.
 
-Every command, config snippet, and package reference in this document uses **only** the Microsoft-protected package feeds mandated by `docs/tech/security_requirement.md` and operationalized in `docs/security/security-governance-and-threat-model.md` §19:
+Every command, config snippet, and package reference in this document uses **only** the Microsoft-protected package feeds mandated by `docs/tech/security_requirement.md` and operationalized in `docs/tech/security-governance-and-threat-model.md` §19:
 
 - Python/pip: `https://packagefeedproxy.microsoft.io/pypi/simple`
 - .NET/NuGet: `https://packagefeedproxy.microsoft.io/nuget/v3/index.json`

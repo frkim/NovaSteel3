@@ -118,7 +118,7 @@ def main() -> int:
     parser.add_argument(
         "--presentation",
         type=Path,
-        default=Path("docs/presentation/NovaSteel-Oral-Defense.pptx"),
+        default=Path("docs/presentation/archives/NovaSteel-Oral-Defense.pptx"),
         help="PPTX file to validate.",
     )
     parser.add_argument(

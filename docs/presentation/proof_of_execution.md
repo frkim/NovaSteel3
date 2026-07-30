@@ -498,6 +498,6 @@ verifiable rather than asserted.
 - Use-case brief — [`docs/usecase/usecase.md`](../usecase/usecase.md)
 - Machine-readable register — [`apps/analytics-mfe/src/proof/proofCatalog.ts`](../../apps/analytics-mfe/src/proof/proofCatalog.ts)
 - In-app page — **Proof of Execution** (`/{site}/proof-of-execution/requirements`)
-- Slide plan — [`docs/presentation/oral-defense-and-slide-plan.md`](oral-defense-and-slide-plan.md)
+- Slide plan — [`docs/presentation/archives/oral-defense-and-slide-plan.md`](archives/oral-defense-and-slide-plan.md)
 - FAQ — [`docs/presentation/faq.md`](faq.md)
 - French executive summary — [`docs/presentation/resume-executif-fr.md`](resume-executif-fr.md)

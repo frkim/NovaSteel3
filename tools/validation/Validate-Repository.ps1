@@ -453,7 +453,7 @@ try {
                     Invoke-ValidationCommand -Name 'presentation-package-validator' -Executable $python -Arguments @(
                         'tools/validation/validate_pptx.py',
                         '--presentation',
-                        'docs/presentation/NovaSteel-Oral-Defense.pptx',
+                        'docs/presentation/archives/NovaSteel-Oral-Defense.pptx',
                         '--json',
                         (Join-Path $evidenceDirectory 'presentation.json')
                     )

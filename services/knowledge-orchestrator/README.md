@@ -9,7 +9,7 @@ draft → review → approved procedure, with append-only auditing.
 > unapproved transcripts never become operational instruction. Every consequential
 > AI output is grounded and append-only auditable. See
 > `docs/architecture/solution-architecture.md` §4.3 and
-> `docs/security/security-governance-and-threat-model.md` §12–13.
+> `docs/tech/security-governance-and-threat-model.md` §12–13.
 
 ## Layout
 

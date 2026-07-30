@@ -482,7 +482,7 @@ A frequent objection is that AI-generated repos skip the SDLC. The opposite is t
 phases are *present and auditable* — they are simply executed by a human-directed crew at high
 cadence. Importantly, this repository does **not** contain the *upstream* spec-authoring artefacts of
 a framework like Spec Kit (there is no `constitution.md`/`spec.md`/`tasks.md` chain); it contains
-their **functional equivalents** — ADRs, `docs/specs/solution-requirements.md`, contracts, and
+their **functional equivalents** — ADRs, `docs/business/solution-requirements.md`, contracts, and
 handoffs. §7 explains how to reintroduce the upstream chain by starting from a framework.
 
 ### 6.1 The agentic SDLC loop
@@ -510,7 +510,7 @@ stateDiagram-v2
 
 | Classical SDLC phase | Classical artifact | Agentic-crew equivalent | Evidence in this repo |
 | --- | --- | --- | --- |
-| Requirements | Requirements spec, user stories | Intent prompt + acceptance criteria authored with the spec agent | [`docs/specs/solution-requirements.md`](../../specs/solution-requirements.md); persona docs |
+| Requirements | Requirements spec, user stories | Intent prompt + acceptance criteria authored with the spec agent | [`docs/business/solution-requirements.md`](solution-requirements.md); persona docs |
 | Specification | Functional spec, SRS | Testable spec + fixtures; "what/why not how" | `docs/specs/*`, `contracts/**/fixtures/*` |
 | Design | Architecture doc, ADRs, interface contracts | 16 ADRs + JSON Schema / OpenAPI contracts | [`solution-architecture.md`](../../architecture/solution-architecture.md) (ADR-001…016); [`contracts/`](../../../contracts) |
 | Implementation | Source code, code review | Single-writer implementation agents per bounded context; PR review | 6 services, 2 apps, 21 Bicep files, 78 k LOC |
@@ -860,7 +860,7 @@ delivery is indicative.
 | Copilot instructions | [`.github/copilot-instructions.md`](../../../.github/copilot-instructions.md) | Machine-targeted mandatory policy. |
 | CI/CD workflows | [`.github/workflows/`](../../../.github/workflows) | The executable fitness function (7 workflows). |
 | Architecture + 16 ADRs | [`docs/architecture/solution-architecture.md`](../../architecture/solution-architecture.md) | Frozen design decisions. |
-| Requirements spec | [`docs/specs/solution-requirements.md`](../../specs/solution-requirements.md) | Requirements artefact. |
+| Requirements spec | [`docs/business/solution-requirements.md`](solution-requirements.md) | Requirements artefact. |
 | Contracts | [`contracts/`](../../../contracts) | Event/data/OpenAPI schemas + fixtures. |
 | Wave-6 handoffs | `docs/_wave6/` *(working directory, not committed)* | Parallel sub-agent handoff notes. |
 | Remediation / comparison pack | `docs/_upgrade/` *(working directory, not committed)* | Skeptical critic evidence + modification plan. |

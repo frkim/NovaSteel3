@@ -2,7 +2,7 @@
 
 > **Document type:** Evidence-backed self-assessment  
 > **Date:** 2026-07-27  
-> **Rubric source:** [`docs/tech/rating_grid.md`](rating_grid.md)  
+> **Rubric source:** [`docs/usecase/rating_grid.md`](../usecase/rating_grid.md)
 > **Repository:** <https://github.com/frkim/NovaSteel3>  
 > **Scope:** Synthetic demonstration; this analysis evaluates the
 > delivered artefacts, not unrealised production claims.
@@ -34,7 +34,7 @@ solvers, NLP pipelines, and multi-agent orchestration — not thin wrappers over
 GPT prompts.
 
 This analysis maps the repository contents to each of the twelve rubric criteria
-from `docs/tech/rating_grid.md`, citing verifiable file paths and stating
+from `docs/usecase/rating_grid.md`, citing verifiable file paths and stating
 caveats honestly. The self-assessed total is **56 / 60** (Grade Band A —
 exceptional implementation and architectural rigour). The assessor believes a
 straight 60 would require production telemetry, real-plant validation, and a
@@ -178,7 +178,7 @@ development and multi-site data segregation.
   (`mi-ns-bff-<env>`, `mi-ns-worker-<env>`, `mi-ns-ingest-relay-<env>`,
   `mi-ns-knowledge-<env>`) plus GitHub OIDC federation.
 - `contracts/openapi/bff-api-v1.yaml` — machine-readable OpenAPI 3.1 contract.
-- `docs/implementation/api-contracts.md` — human-readable companion with
+- `docs/tech/api-contracts.md` — human-readable companion with
   authentication model, error envelopes, pagination, and route surface.
 - `services/bff-api/src/bff_api/routes.py` — complete domain route surface
   including `/v1/me`, `/v1/command-center/summary`, `/v1/dashboard/kpis`,
@@ -468,7 +468,7 @@ protected feeds, dependency integrity, and vulnerability reports.
 
 #### Evidence
 
-- `docs/security/security-governance-and-threat-model.md` — 79.7 KB threat
+- `docs/tech/security-governance-and-threat-model.md` — 79.7 KB threat
   model with Zero Trust principles (§1), Conditional Access baseline (§2.2),
   identity matrix, supply-chain controls.
 - `services/knowledge-orchestrator/src/knowledge_orchestrator/pii.py`
@@ -531,8 +531,8 @@ audience.
 #### How NovaSteel satisfies it
 
 The demo is structured around a validated 28-slide deck (20 primary + 8 backup) with a 10-minute
-live-demo segment, scripted in `docs/presentation/oral-defense-and-slide-plan.md`
-and rehearsed with `docs/presentation/fiche-repetition-presentateur.md`. Every
+live-demo segment, scripted in `docs/presentation/archives/oral-defense-and-slide-plan.md`
+and rehearsed with `docs/presentation/archives/fiche-repetition-presentateur.md`. Every
 number displayed is explicitly labelled as either **EVIDENCE** (a reproducible
 synthetic-scenario result) or **TARGET** (a projected business outcome). The
 slide plan is timed to the second, with rehearsal checkpoints at 10:00, 18:00,
@@ -575,10 +575,10 @@ persistent and cannot be dismissed.
 
 #### Evidence
 
-- `docs/presentation/oral-defense-and-slide-plan.md` — 28-slide plan (20 primary + 8 backup) with
+- `docs/presentation/archives/oral-defense-and-slide-plan.md` — 28-slide plan (20 primary + 8 backup) with
   per-slide timing, speaker notes, source cues, and fallback instructions.
-- `docs/presentation/NovaSteel-Oral-Defense.pptx` — validated 28-slide deck (20 primary + 8 backup).
-- `docs/presentation/fiche-repetition-presentateur.md` — presenter rehearsal
+- `docs/presentation/archives/NovaSteel-Oral-Defense.pptx` — validated 28-slide deck (20 primary + 8 backup).
+- `docs/presentation/archives/fiche-repetition-presentateur.md` — presenter rehearsal
   sheet with timing milestones.
 - `apps/analytics-mfe/src/proof/proofCatalog.ts` — 19-entry requirement
   catalog with `refId`, `category`, `status`, `evidence` arrays, `caveat`,
@@ -1539,13 +1539,13 @@ A reading path is documented in `docs/README.md`.
 
 #### Evidence
 
-- `docs/presentation/oral-defense-and-slide-plan.md` — 28-slide plan (20 primary + 8 backup) with
+- `docs/presentation/archives/oral-defense-and-slide-plan.md` — 28-slide plan (20 primary + 8 backup) with
   narrative arc, timing, speaker notes, source cues, and per-slide fallback.
-- `docs/presentation/NovaSteel-Oral-Defense.pptx` — validated slide deck.
+- `docs/presentation/archives/NovaSteel-Oral-Defense.pptx` — validated slide deck.
 - `docs/presentation/faq.md` — 30+ FAQ entries across seven categories.
 - `docs/presentation/proof_of_execution.md` — 19-entry proof register with
   status vocabulary and per-requirement evidence tables.
-- `docs/presentation/fiche-repetition-presentateur.md` — presenter rehearsal
+- `docs/presentation/archives/fiche-repetition-presentateur.md` — presenter rehearsal
   sheet.
 - `docs/presentation/resume-executif-fr.md` — French executive summary.
 - `apps/analytics-mfe/src/proof/proofCatalog.ts` — machine-readable catalog
@@ -1553,9 +1553,9 @@ A reading path is documented in `docs/README.md`.
   links.
 - `docs/architecture/solution-architecture.md` — authoritative architecture
   (~74 KB).
-- `docs/security/security-governance-and-threat-model.md` — security
+- `docs/tech/security-governance-and-threat-model.md` — security
   governance (~80 KB).
-- `docs/implementation/api-contracts.md` — API contracts with authentication,
+- `docs/tech/api-contracts.md` — API contracts with authentication,
   envelopes, and route surface.
 - `docs/implementation/implementation-guide.md` — implementation guide.
 - `docs/README.md` — reading path for the documentation tree.

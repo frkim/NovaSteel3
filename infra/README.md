@@ -2,7 +2,7 @@
 
 Modular Bicep IaC for the NovaSteel platform's Azure control-plane resources, implementing
 `docs/architecture/deployment-topology.md`, `docs/architecture/solution-architecture.md` §11–13,
-`docs/security/security-governance-and-threat-model.md`, `docs/research/azure-ai-regions.md`, and
+`docs/tech/security-governance-and-threat-model.md`, `docs/research/azure-ai-regions.md`, and
 `docs/research/fabric-platform.md`. This folder and `tests/infra` are the only paths this
 workstream owns — it does not modify `apps/`, `services/`, `simulator/`, `fabric/`, or any
 presentation asset.

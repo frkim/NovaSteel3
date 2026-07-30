@@ -265,8 +265,8 @@ Other frequently used entry points:
 | Screen-by-screen UX specification | [`docs\ux\dashboard-specification.md`](docs/ux/dashboard-specification.md) |
 | Demo runbook | [`docs\demo\demo-runbook.md`](docs/demo/demo-runbook.md) |
 | Regulatory compliance analyses | [`docs\business\compliance\README.md`](docs/business/compliance/README.md) |
-| Implementation process | [`docs\business\project\implementation-process.md`](docs/business/project/implementation-process.md) |
-| Agentic development and SDLC | [`docs\business\project\agentic-development.md`](docs/business/project/agentic-development.md) |
+| Implementation process | [`docs\business\implementation-process.md`](docs/business/implementation-process.md) |
+| Agentic development and SDLC | [`docs\business\agentic-development.md`](docs/business/agentic-development.md) |
 | Package-feed security policy | [`docs\tech\security_requirement.md`](docs/tech/security_requirement.md) |
 
 ## Oral-defense handoff — 35 + 10 + 15 minutes
