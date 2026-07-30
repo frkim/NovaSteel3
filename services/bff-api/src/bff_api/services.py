@@ -14,6 +14,7 @@ from .capacity import CapacityAdapter, LocalCapacityAdapter, UnconfiguredArmCapa
 from .config import Settings
 from .copilot_adapter import CopilotAdapter
 from .device_adapter import DeviceAdapter
+from .dispatch_port import bind_dispatch_agent
 from .events import AlertEventBuffer
 from .knowledge_adapter import KnowledgeAdapter
 from .privacy_adapter import PrivacyAdapter
@@ -74,7 +75,7 @@ class BffServices:
             )
         knowledge = KnowledgeAdapter(demo_mode=settings.is_demo_mode)
         copilot = CopilotAdapter()
-        return cls(
+        services = cls(
             settings=settings,
             repository=repository,
             authenticator=Authenticator(settings),
@@ -91,6 +92,11 @@ class BffServices:
             ),
             devices=DeviceAdapter(demo_mode=settings.is_demo_mode),
         )
+        # Late binding, not a constructor argument: the dispatch port needs the fully
+        # assembled services (optimizer + repository + audit), which do not exist until
+        # this instance does.
+        bind_dispatch_agent(services)
+        return services
 
     def lining_forecast(self, *, asset_id: str, correlation_id: str) -> dict[str, Any]:
         cached = self.forecasts.get(asset_id)

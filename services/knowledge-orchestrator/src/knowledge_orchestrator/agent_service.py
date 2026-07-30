@@ -29,10 +29,11 @@ failure degrades to the local implementations rather than raising.
 
 from __future__ import annotations
 
+import json
 import logging
 import os
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any, Mapping, Optional, Sequence
 
 from .foundry_endpoints import normalize_endpoint
 from .foundry_iq import (
@@ -240,6 +241,71 @@ class FoundryAgentService:
         """
         self._project_client().agents.threads.delete(thread_id)
 
+    # -- energy dispatch ---------------------------------------------------
+
+    def ensure_energy_dispatch_agent(self) -> HostedAgent:
+        """Create or update the energy-dispatch agent. Idempotent by agent name.
+
+        The tools are *function* tools rather than an MCP connection, because the
+        thing behind them is not a retrieval endpoint but the MILP: a solver that must
+        run inside our own trust boundary, against our own plant data, with the
+        allow-list in ``tools.py`` between the model and every call.
+        """
+        from azure.ai.projects.models import PromptAgentDefinition
+
+        from .energy_agent import (
+            ENERGY_DISPATCH_AGENT_INSTRUCTIONS,
+            ENERGY_DISPATCH_AGENT_NAME,
+            ENERGY_TOOL_SCHEMAS,
+        )
+
+        client = self._project_client()
+        client.agents.create_version(
+            agent_name=ENERGY_DISPATCH_AGENT_NAME,
+            definition=PromptAgentDefinition(
+                model=self.model,
+                instructions=ENERGY_DISPATCH_AGENT_INSTRUCTIONS,
+                tools=_function_tool_definitions(ENERGY_TOOL_SCHEMAS),
+            ),
+        )
+
+        hosted = HostedAgent(
+            name=ENERGY_DISPATCH_AGENT_NAME,
+            agent_id=ENERGY_DISPATCH_AGENT_NAME,
+            model=self.model,
+            tools=tuple(schema["name"] for schema in ENERGY_TOOL_SCHEMAS),
+        )
+        logger.info(
+            "Energy-dispatch agent hosted in Agent Service: %s (model %s, tools %s)",
+            hosted.agent_id,
+            hosted.model,
+            ", ".join(hosted.tools),
+        )
+        return hosted
+
+
+def _function_tool_definitions(
+    schemas: Sequence[Mapping[str, Any]],
+) -> list[dict[str, Any]]:
+    """Render our JSON schemas in the shape Agent Service expects for function tools.
+
+    Built by hand rather than through ``FunctionTool``: that helper introspects Python
+    callables to derive a schema, and the schema is the contract here — it is asserted
+    against the allow-list at import time and reviewed as part of the security posture,
+    so it must not be a by-product of a signature someone edits later.
+    """
+    return [
+        {
+            "type": "function",
+            "function": {
+                "name": schema["name"],
+                "description": schema["description"],
+                "parameters": schema["parameters"],
+            },
+        }
+        for schema in schemas
+    ]
+
 
 def _message_text(message: Any) -> str:
     """Extract plain text from an agent message across SDK response shapes."""
@@ -257,6 +323,179 @@ def _message_text(message: Any) -> str:
                 texts.append(text)
         return "\n".join(texts).strip()
     return ""
+
+
+class HostedEnergyDispatchAgent:
+    """The energy-dispatch agent running in Foundry Agent Service.
+
+    The model chooses the tool; the tool *loop* runs here. That is not an accident of
+    the SDK — it is the security boundary. Agent Service pauses a run in
+    ``requires_action`` and asks the client to produce the tool outputs, so every
+    dispatch number is computed by our optimizer, inside our network, behind the
+    allow-list, and only then handed back to the model to be described.
+
+    Falls back to the deterministic local agent on any failure, so a Foundry outage
+    degrades the *prose* rather than the capability.
+    """
+
+    agent_name = "energy-dispatch-foundry"
+
+    def __init__(
+        self,
+        project_endpoint: str,
+        port: Any = None,
+        model: Optional[str] = None,
+        credential: Any = None,
+    ) -> None:
+        from .energy_agent import EnergyToolExecutor, LocalEnergyDispatchAgent
+
+        self._service = FoundryAgentService(
+            project_endpoint=project_endpoint,
+            model=model or os.environ.get(ENV_CHAT_DEPLOYMENT, DEFAULT_MODEL),
+            credential=credential,
+        )
+        self._executor = EnergyToolExecutor(port)
+        self._fallback = LocalEnergyDispatchAgent(port)
+        self._ensured = False
+
+    @property
+    def executor(self) -> Any:
+        return self._executor
+
+    def _ensure(self) -> None:
+        if not self._ensured:
+            self._service.ensure_energy_dispatch_agent()
+            self._ensured = True
+
+    def answer(self, question: str, *, site: str = "", language: str = "en") -> Any:
+        from .energy_agent import DispatchAnswer
+
+        try:
+            return self._run(question, site=site, language=language)
+        except Exception as exc:  # noqa: BLE001 — never fail a planner's question
+            logger.warning(
+                "Hosted energy-dispatch run failed (%s) — serving the deterministic "
+                "local answer",
+                exc,
+            )
+            local = self._fallback.answer(question, site=site, language=language)
+            if isinstance(local, DispatchAnswer):
+                return DispatchAnswer(
+                    answer=local.answer,
+                    proposal=local.proposal,
+                    agent=self.agent_name,
+                    grounded=local.grounded,
+                    trace=local.trace + (f"hosted run failed: {exc}",),
+                )
+            return local
+
+    def _run(self, question: str, *, site: str, language: str) -> Any:
+        from .energy_agent import (
+            ENERGY_DISPATCH_AGENT_NAME,
+            ENERGY_DISPATCH_DECLINE,
+            MAX_TOOL_ITERATIONS,
+            DispatchAnswer,
+            summarize_proposal,
+        )
+
+        self._ensure()
+        client = self._service._project_client()
+        agents = client.agents
+
+        thread = agents.threads.create()
+        agents.messages.create(
+            thread_id=thread.id,
+            role="user",
+            content=(
+                f"SITE: {site}\nREPLY LANGUAGE: {language}\nQUESTION: {question}"
+            ),
+        )
+        run = agents.runs.create(thread_id=thread.id, agent_name=ENERGY_DISPATCH_AGENT_NAME)
+
+        trace: list[str] = [f"foundry thread {thread.id}"]
+        # Scoped to this run on purpose. Reading the proposal back off the executor's
+        # history would attribute a *previous* turn's schedule to this question the
+        # moment this turn's solve fails — a grounded-looking answer about numbers
+        # nobody asked for.
+        proposal: dict[str, Any] = {}
+        for _ in range(MAX_TOOL_ITERATIONS):
+            run = _await_run(agents, thread.id, run)
+            status = str(getattr(run, "status", ""))
+            if status != "requires_action":
+                break
+            outputs = []
+            for call in _required_tool_calls(run):
+                name = getattr(getattr(call, "function", None), "name", "") or ""
+                raw = getattr(getattr(call, "function", None), "arguments", "") or "{}"
+                try:
+                    arguments = json.loads(raw) if isinstance(raw, str) else dict(raw)
+                except json.JSONDecodeError:
+                    arguments = {}
+                if site and not arguments.get("site"):
+                    arguments["site"] = site
+                record = self._executor.execute(name, arguments)
+                if record.name == "simulate_schedule" and record.ok:
+                    proposal = record.result
+                outputs.append(
+                    {
+                        "tool_call_id": getattr(call, "id", ""),
+                        "output": record.as_json(),
+                    }
+                )
+                trace.append(f"tool {name}{'' if record.ok else ' (failed)'}")
+            run = agents.runs.submit_tool_outputs(
+                thread_id=thread.id, run_id=getattr(run, "id", ""), tool_outputs=outputs
+            )
+        else:
+            raise RuntimeError(
+                f"energy-dispatch run exceeded {MAX_TOOL_ITERATIONS} tool iterations"
+            )
+
+        if str(getattr(run, "status", "")) == "failed":
+            raise RuntimeError(f"Agent run failed: {getattr(run, 'last_error', '')}")
+
+        answer = ""
+        for message in agents.messages.list(thread_id=thread.id, order="desc"):
+            if getattr(message, "role", "") == "assistant":
+                answer = _message_text(message)
+                break
+
+        # A hosted answer with no solver output behind it is exactly the failure the
+        # instructions forbid, so we substitute the grounded rendering rather than
+        # relay prose that has nothing under it.
+        if not proposal:
+            return DispatchAnswer(
+                answer=answer or ENERGY_DISPATCH_DECLINE,
+                agent=self.agent_name,
+                grounded=False,
+                trace=tuple(trace),
+            )
+        return DispatchAnswer(
+            answer=answer or summarize_proposal(proposal, language),
+            proposal=proposal,
+            agent=self.agent_name,
+            grounded=True,
+            trace=tuple(trace + [f"solver {proposal.get('solver', 'UNKNOWN')}"]),
+        )
+
+
+def _await_run(agents: Any, thread_id: str, run: Any) -> Any:
+    """Poll a run until it stops being queued or in progress."""
+    import time
+
+    deadline = time.monotonic() + 120
+    while str(getattr(run, "status", "")) in {"queued", "in_progress"}:
+        if time.monotonic() > deadline:
+            raise TimeoutError("energy-dispatch run did not settle within 120s")
+        time.sleep(0.5)
+        run = agents.runs.get(thread_id=thread_id, run_id=getattr(run, "id", ""))
+    return run
+
+
+def _required_tool_calls(run: Any) -> list[Any]:
+    action = getattr(run, "required_action", None)
+    submit = getattr(action, "submit_tool_outputs", None)
+    return list(getattr(submit, "tool_calls", None) or [])
 
 
 def run_web_search(question: str, limit: int = 3) -> list:
@@ -376,11 +615,21 @@ def host_agents() -> AgentServiceStatus:
             model=os.environ.get(ENV_CHAT_DEPLOYMENT, DEFAULT_MODEL),
             knowledge_base=knowledge_base_config_from_env(),
         )
-        agent = service.ensure_procedure_agent()
+        agents = [service.ensure_procedure_agent()]
+        # The dispatch agent is hosted alongside the procedure agent but must not be
+        # able to take it down: it is the newer capability and its tool surface is
+        # the one more likely to be edited, so a failure there is logged and the
+        # service continues with whatever was created successfully.
+        try:
+            agents.append(service.ensure_energy_dispatch_agent())
+        except Exception as exc:  # noqa: BLE001
+            logger.warning(
+                "Energy-dispatch agent not hosted (%s) — it will run locally", exc
+            )
         return AgentServiceStatus(
             enabled=True,
             project_endpoint=status.project_endpoint,
-            agents=(agent,),
+            agents=tuple(agents),
         )
     except ImportError as exc:
         logger.warning(

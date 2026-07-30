@@ -406,6 +406,11 @@ The engineer stays accountable: they acknowledge the alert and it links to a CMM
 - Moves **only eligible flexible loads**
 - Human accepts / modifies / rejects with reason code
 
+**MILP, not AI** — a mixed-integer linear program (PuLP/CBC). One yes/no variable per
+batch × 15-min slot; hard rules as equations (urgent heats pinned, furnace concurrency
+capped); objective = weighted cost + CO₂. Returns the **proven** cheapest legal
+schedule, single-threaded and deterministic. The agent explains it — it never computes it.
+
 </div>
 <div>
 

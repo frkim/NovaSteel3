@@ -16,12 +16,15 @@ from .context import resolve as resolve_context
 from .glossary import GlossaryEntry, all_entries, search
 from .models import (
     ChatMessage,
+    ChatSource,
     ChatTurnRequest,
+    ChatTurnResult,
     Conversation,
     GroundingItem,
     MessageRole,
     ReasoningTier,
     ScreenContext,
+    SourceKind,
     normalize_language,
 )
 from .store import ConversationStore, derive_title, new_id, user_message
@@ -109,9 +112,21 @@ class CopilotService:
         self,
         agents: Optional[dict[ReasoningTier, CopilotChatAgent]] = None,
         store: Optional[ConversationStore] = None,
+        energy_agent: Optional[object] = None,
     ):
         self._agents = agents or create_chat_agents()
         self._store = store or ConversationStore()
+        self._energy_agent = energy_agent
+
+    def bind_energy_agent(self, energy_agent: object) -> None:
+        """Attach the dispatch agent after construction.
+
+        The BFF builds the Copilot adapter before it has assembled the services that
+        own the optimizer, so the wiring cannot happen in ``__init__``. Without a bound
+        agent the panel simply never routes to dispatch, which is the correct
+        behaviour for a deployment that has no optimizer behind it.
+        """
+        self._energy_agent = energy_agent
 
     # -- suggestions & glossary -------------------------------------------
 
@@ -194,17 +209,16 @@ class CopilotService:
 
         history = conversation.messages[-(MAX_HISTORY_TURNS * 2) :]
         agent = self._agents.get(resolved_tier) or self._agents[ReasoningTier.DEFAULT]
-        result = agent.answer(
-            ChatTurnRequest(
-                question=text,
-                language=lang,
-                reasoning=resolved_tier,
-                online_search=online_search,
-                context=screen,
-                history=tuple(history),
-                grounding=tuple(grounding or ()),
-            )
+        turn = ChatTurnRequest(
+            question=text,
+            language=lang,
+            reasoning=resolved_tier,
+            online_search=online_search,
+            context=screen,
+            history=tuple(history),
+            grounding=tuple(grounding or ()),
         )
+        result = self._dispatch_answer(turn) or agent.answer(turn)
 
         asked = user_message(text)
         answered = ChatMessage(
@@ -249,6 +263,61 @@ class CopilotService:
         )
 
     # -- internals ----------------------------------------------------------
+
+    def _dispatch_answer(self, turn: ChatTurnRequest) -> Optional[ChatTurnResult]:
+        """Route a dispatch *request* to the energy agent, or return ``None``.
+
+        Returning ``None`` rather than a degraded answer is what makes this safe to
+        add: the panel keeps its existing behaviour for every question this does not
+        confidently claim, including questions the optimizer could not answer.
+        """
+        if self._energy_agent is None:
+            return None
+
+        from ..energy_agent import is_dispatch_request
+
+        if not is_dispatch_request(turn.question, section=turn.context.section):
+            return None
+
+        try:
+            outcome = self._energy_agent.answer(
+                turn.question,
+                site=turn.context.site,
+                language=turn.language,
+            )
+        except Exception as exc:  # noqa: BLE001 — never fail the panel on a routing bet
+            logger.warning(
+                "Energy-dispatch routing failed (%s) — falling back to chat", exc
+            )
+            return None
+
+        # An ungrounded dispatch answer is worth less than an ordinary grounded chat
+        # answer, so we decline the route rather than serve prose with no solve
+        # behind it.
+        if not getattr(outcome, "grounded", False):
+            return None
+
+        proposal = getattr(outcome, "proposal", {}) or {}
+        savings = proposal.get("savings") or {}
+        source = ChatSource(
+            kind=SourceKind.INTERNAL,
+            source_id=str(proposal.get("recommendationId", "dispatch-proposal")),
+            title="Energy-dispatch proposal (MILP)",
+            snippet=(
+                f"solver={proposal.get('solver', 'UNKNOWN')} "
+                f"costPct={savings.get('costPct', 'n/a')} "
+                f"co2Pct={savings.get('co2Pct', 'n/a')} "
+                f"violations={proposal.get('hardConstraintViolations', 'n/a')}"
+            ),
+        )
+        return ChatTurnResult(
+            answer=outcome.answer,
+            sources=(source,),
+            agent=getattr(outcome, "agent", "energy-dispatch"),
+            resolved_reasoning=turn.reasoning,
+            online_search_used=False,
+            trace=tuple(getattr(outcome, "trace", ())),
+        )
 
     def _resolve_conversation(
         self,
