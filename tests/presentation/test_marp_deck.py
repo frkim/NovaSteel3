@@ -18,7 +18,7 @@ SLIDES = PRESENTATION / "slides.md"
 THEME = PRESENTATION / "theme.css"
 
 MAIN_SLIDE_COUNT = 22
-BACKUP_SLIDE_COUNT = 14
+BACKUP_SLIDE_COUNT = 15
 MIN_TALK_SECONDS = 34 * 60
 MAX_TALK_SECONDS = 35 * 60
 
@@ -70,7 +70,7 @@ def test_deck_never_mentions_a_phase_zero() -> None:
     assert "Phase 0" not in _read(SLIDES)
 
 
-def test_deck_has_twenty_two_main_slides_and_fourteen_backup_slides() -> None:
+def test_deck_has_twenty_two_main_slides_and_fifteen_backup_slides() -> None:
     _, slides = _front_matter_and_slides()
     assert len(slides) == MAIN_SLIDE_COUNT + BACKUP_SLIDE_COUNT
     assert all("backup" not in _classes(slide) for slide in slides[:MAIN_SLIDE_COUNT])
@@ -110,7 +110,7 @@ def test_deck_carries_a_compliance_slide_instead_of_the_deployment_slide() -> No
         assert regulation in compliance[0], f"the compliance slide must name {regulation}"
 
     assert not any("# Deployment, Capacity & Scale" in slide for slide in main)
-    assert any("Appendix — Deployment, Capacity & Scale" in slide for slide in backup)
+    assert not any("Appendix — Deployment, Capacity & Scale" in slide for slide in backup)
 
 
 def test_demo_handoff_announces_a_ten_minute_demonstration() -> None:
