@@ -215,15 +215,15 @@ section.backup h1::after {
 
 section.lead {
   background:
-    radial-gradient(circle at 82% 12%, rgba(212, 87, 27, 0.16), transparent 46%),
-    linear-gradient(150deg, #0f172a 0%, #16233d 58%, #1f2f4d 100%);
+    radial-gradient(circle at 82% 12%, rgba(213, 89, 28, 0.16), transparent 46%),
+    linear-gradient(180deg, #111b2f 0%, #192742 100%);
   color: #f8fafc;
   justify-content: center;
 }
 
 section.lead h1 {
   font-size: 62px;
-  color: #ffffff;
+  color: #eb8532;
 }
 
 section.lead h1::after {
@@ -231,7 +231,7 @@ section.lead h1::after {
 }
 
 section.lead h2 {
-  color: #cbd5e1;
+  color: #d4571b;
   font-size: 28px;
   font-weight: 500;
 }
@@ -251,7 +251,7 @@ section.lead img {
 }
 
 .grad {
-  background: linear-gradient(96deg, #f9a03f 0%, #d4571b 100%);
+  background: linear-gradient(96deg, #d5591c 0%, #ed8833 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -273,7 +273,7 @@ section.lead img {
   width: 180px;
   height: 5px;
   margin: 10px 0 22px;
-  background: linear-gradient(90deg, #f9a03f 0%, #d4571b 100%);
+  background: linear-gradient(90deg, #d5591c 0%, #ed8833 100%);
   border-radius: 3px;
 }
 
@@ -316,7 +316,7 @@ section.lead img {
 .herostats .s b {
   display: block;
   font-size: 32px;
-  color: #f9a03f;
+  color: #ee8b35;
   line-height: 1.15;
 }
 
