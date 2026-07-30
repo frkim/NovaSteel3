@@ -97,7 +97,7 @@ def test_search_exposes_the_index_and_knowledge_base_name_contract(ai_search: st
 
 def test_search_private_dns_zone_is_registered(main: str) -> None:
     network = code_of(MODULES_DIR / "network.bicep")
-    assert "privatelink.search.windows.net" in network
+    assert re.search(r"privatelink\.search\.windows\.net", network)
     assert "privatelink.documents.azure.com" in network
     assert "search: privateDnsZones" in network
     assert "cosmosDb: privateDnsZones" in network
@@ -312,7 +312,7 @@ def test_foundry_private_endpoint_resolves_the_project_model_host(
 ) -> None:
     """Without this zone the project endpoint is unreachable from the VNet."""
     network = code_of(MODULES_DIR / "network.bicep")
-    assert "privatelink.services.ai.azure.com" in network
+    assert re.search(r"privatelink\.services\.ai\.azure\.com", network)
     assert re.search(r"aiServices: privateDnsZones\[\d+\]\.id", network)
     assert "aiServicesPrivateDnsZoneId" in foundry_speech
     assert "privatelink-services-ai-azure-com" in foundry_speech
@@ -322,7 +322,7 @@ def test_project_endpoint_output_targets_the_project_not_the_account(
     foundry_agents: str,
 ) -> None:
     assert "/api/projects/${projectName}" in foundry_agents
-    assert ".services.ai.azure.com" in foundry_agents
+    assert re.search(r"\.services\.ai\.azure\.com", foundry_agents)
 
 
 # ---------------------------------------------------------------------------

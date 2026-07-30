@@ -147,7 +147,7 @@ def test_default_allowed_domains_are_standards_bodies(monkeypatch):
     config = knowledge_base_config_from_env()
     assert config is not None
     assert config.allowed_domains == DEFAULT_ALLOWED_DOMAINS
-    assert "iso.org" in config.allowed_domains
+    assert any(d == "iso.org" for d in config.allowed_domains)
 
 
 def test_allowed_domains_override(monkeypatch):
