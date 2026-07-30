@@ -28,19 +28,19 @@
 }
 
 :root[data-theme="dark"] {
-  --ns-color-canvas: #141719;
-  --ns-color-surface: #1E2224;
-  --ns-color-surface-alt: #262B2E;
+  --ns-color-canvas: #111b2f;
+  --ns-color-surface: #192742;
+  --ns-color-surface-alt: #213354;
   --ns-color-text-primary: #F2F4F5;
   --ns-color-text-secondary: #AEB6BF;
-  --ns-color-brand-primary: #4C8DFF;
-  --ns-color-brand-accent: #3FD0CE;
+  --ns-color-brand-primary: #eb8532;
+  --ns-color-brand-accent: #ee8b35;
   --ns-color-critical: #FF6B5E;
   --ns-color-warning: #FFB84D;
   --ns-color-success: #5BD75B;
-  --ns-color-stale: #D6B77A;
-  --ns-color-focus: #8FB6FF;
+  --ns-color-stale: #d4571b;
+  --ns-color-focus: #ed8833;
   --ns-color-demo: #9B8AE8;
   --ns-color-demo-surface: #241F33;
-  --ns-color-demo-text: #141719;
+  --ns-color-demo-text: #111b2f;
 }
