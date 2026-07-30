@@ -101,3 +101,19 @@ artwork. Only the optimised WebP renditions in
 > degrades gracefully, because `ProcessDiagram` hides any figure whose asset
 > fails to load.
 
+---
+
+## Marp deck diagram renditions (committed as WebP)
+
+The Marp deck (`../slides.md`) carries one process diagram of its own, in the
+appendix slide *"How a Steel Plant Works"*. It follows the same policy as the
+Steel Knowledge artwork above: the ~8 MB PNG source stays local and untracked
+under `docs/images/`, and only the optimised WebP rendition is committed.
+
+| Rendition | Kind | Source | Licence position |
+|---|---|---|---|
+| `diagrams/steel-process-routes.webp` | Illustrated diagram | Generated for this project | No licence risk |
+
+`../scripts/sync-images.mjs` copies it into the deck's generated `images/`
+folder, so `slides.md` references it as `images/steel-process-routes.webp`.
+

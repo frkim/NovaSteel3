@@ -15,6 +15,17 @@ in-artwork labels need the whole content column.
 | `steel process with Electric arc furnace.png` | `steel-route-electric-arc-furnace` | The same journey starting from recycled scrap and electricity instead of iron ore and coke |
 | `steel process with Electric arc furnace2.png` | `eaf-process-detail` | A ten-step deep dive into the electric arc furnace route |
 
+## Presentation diagrams
+
+Consumed by the Marp deck rather than the website, so the rendition lives under
+[`../presentation/assets/diagrams/`](../presentation/assets/diagrams) instead of
+`apps/portal-shell/wwwroot/media/`. `docs/presentation/scripts/sync-images.mjs`
+copies it into the deck's generated `images/` folder at build time.
+
+| Source file | Deck rendition | Subject |
+|---|---|---|
+| `steel process with Blast Furnace and Electric arc furnace.png` | `../presentation/assets/diagrams/steel-process-routes.webp` | Both primary routes on one canvas — the appendix "How a Steel Plant Works" slide |
+
 ## Uniform figures
 
 Rendered by `ProcessDiagram variant="figure"`, which puts every one of them in
@@ -57,13 +68,14 @@ and are the provenance for the tracked shell assets in
 `apps/portal-shell/wwwroot/brand/` (`novasteel-mark.png`,
 `novasteel-mark-dark.png`, `axelormetal-*.png`).
 
-## Regenerating the web renditions
+## Regenerating the renditions
 
 Two renditions are produced per **full-width diagram** so the browser can pick
 the cheaper one on small screens: a `-sm` variant at 900 px and a full variant
 at 1800 px. The `ProcessDiagram` component wires them up through
 `srcSet`/`sizes`. **Figures** get a single rendition, capped at the source width
-so nothing is upscaled.
+so nothing is upscaled. **Presentation diagrams** get one 1800 px rendition,
+written to the deck's asset folder instead of the website media folder.
 
 From the repository root:
 
@@ -75,6 +87,7 @@ from PIL import Image
 
 SRC = Path("docs/images")
 DST = Path("apps/portal-shell/wwwroot/media")
+DECK_DST = Path("docs/presentation/assets/diagrams")
 
 DIAGRAMS = [
     ("steel process.png", "steel-route-blast-furnace"),
@@ -85,6 +98,9 @@ FIGURES = [
     ("Blast_furnace_schema2.png", "blast-furnace-cutaway", 1160),
     ("rolling_mils_01.png", "rolling-mill-stand", 1200),
     ("rolling_mils_02.jpeg", "rolling-mill-line", 1200),
+]
+DECK = [
+    ("steel process with Blast Furnace and Electric arc furnace.png", "steel-process-routes"),
 ]
 
 def save(img, out, width):
@@ -100,6 +116,11 @@ for src_name, stem in DIAGRAMS:
 for src_name, stem, max_width in FIGURES:
     img = Image.open(SRC / src_name).convert("RGB")
     save(img, DST / f"{stem}.webp", min(max_width, img.width))
+
+DECK_DST.mkdir(parents=True, exist_ok=True)
+for src_name, stem in DECK:
+    img = Image.open(SRC / src_name).convert("RGB")
+    save(img, DECK_DST / f"{stem}.webp", 1800)
 '@ | .\services\bff-api\.venv\Scripts\python.exe -
 ```
 

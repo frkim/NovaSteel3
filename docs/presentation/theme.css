@@ -6,8 +6,9 @@
  * Palette is derived from the NovaSteel / AxelorMetal brand assets committed in
  * apps/portal-shell/wwwroot/brand: molten-orange accent on a cool graphite base.
  * Class contract consumed by slides.md: lead, tight, backup, cards[.four],
- * card[.teal|.orange|.purple|.green], card-num, split[.right-wide], stat/big/label,
- * pill[.green|.orange|.purple|.gray|.blue], tag, grad, hero-line, herostats, brandbar,
+ * card[.teal|.orange|.purple|.green|.blue], card-num, subtitle, split[.right-wide],
+ * stat/big/label, pill[.green|.orange|.purple|.gray|.blue], tag, grad, hero-line,
+ * herostats, brandbar, corners[.bottom-right],
  * flow/lane[.teal|.orange|.purple|.green|.blue]/lane-tag/nodes/node/arrow/legend.
  */
 
@@ -83,6 +84,15 @@ h1::after {
   margin-top: 18px;
   background: var(--ns-molten);
   border-radius: 3px;
+}
+
+/* Standfirst under a slide title: one line of framing between the heading rule and
+   the content grid. Sits at h2 weight but ink-soft, so it reads as support rather
+   than a second heading. */
+.subtitle {
+  margin: -6px 0 4px;
+  font-size: 24px;
+  color: var(--ns-ink-soft);
 }
 
 h2 {
@@ -300,11 +310,10 @@ section.lead img {
   width: auto;
 }
 
-/* Title-slide corner marks: the Azure Master Architect credential badge top-right
-   and the Microsoft mark bottom-right. The wrapper is taken out of flow so the
-   centred hero block keeps its exact position. Both assets are transparent PNGs that
-   read directly on the dark lead background, so unlike .brandbar they need no light
-   plate. Either mark removes itself when its asset is absent (see slides.md). */
+/* Title-slide corner mark: the Microsoft partner mark, bottom right. The wrapper is
+   taken out of flow so the centred hero block keeps its exact position. The asset is a
+   transparent PNG that reads directly on the dark lead background, so unlike .brandbar
+   it needs no light plate, and it removes itself when absent (see slides.md). */
 .corners {
   position: absolute;
   inset: 0;
@@ -314,13 +323,6 @@ section.lead img {
 .corners img {
   position: absolute;
   margin: 0;
-}
-
-.corners .top-right {
-  top: 28px;
-  right: 60px;
-  height: 104px;
-  width: auto;
 }
 
 .corners .bottom-right {
@@ -431,6 +433,15 @@ section.lead img {
 .card.orange {
   border-top-color: var(--ns-molten);
   background: var(--ns-molten-soft);
+}
+
+.card.blue {
+  border-top-color: var(--ns-blue);
+  background: var(--ns-blue-soft);
+}
+
+.card.blue .card-num {
+  color: var(--ns-blue);
 }
 
 /* --- two-column split -------------------------------------------------- */
@@ -624,6 +635,33 @@ section.lead img {
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.04em;
+  color: var(--ns-molten);
+  line-height: 1;
+}
+
+/* --- horizontal step chain --------------------------------------------- */
+
+/* One left-to-right sequence placed under a slide's main content. Steps share the
+   width evenly and the chevrons between them are inert separators, so the row reads
+   as a single path rather than five unrelated tiles. */
+.chain {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.chain .node {
+  flex: 1 1 0;
+  min-width: 0;
+  text-align: center;
+}
+
+.chain .step {
+  align-self: center;
+  flex: 0 0 auto;
+  font-size: 20px;
+  font-weight: 700;
   color: var(--ns-molten);
   line-height: 1;
 }

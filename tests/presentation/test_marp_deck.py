@@ -18,7 +18,7 @@ SLIDES = PRESENTATION / "slides.md"
 THEME = PRESENTATION / "theme.css"
 
 MAIN_SLIDE_COUNT = 22
-BACKUP_SLIDE_COUNT = 13
+BACKUP_SLIDE_COUNT = 14
 MIN_TALK_SECONDS = 34 * 60
 MAX_TALK_SECONDS = 35 * 60
 
@@ -70,7 +70,7 @@ def test_deck_never_mentions_a_phase_zero() -> None:
     assert "Phase 0" not in _read(SLIDES)
 
 
-def test_deck_has_twenty_two_main_slides_and_thirteen_backup_slides() -> None:
+def test_deck_has_twenty_two_main_slides_and_fourteen_backup_slides() -> None:
     _, slides = _front_matter_and_slides()
     assert len(slides) == MAIN_SLIDE_COUNT + BACKUP_SLIDE_COUNT
     assert all("backup" not in _classes(slide) for slide in slides[:MAIN_SLIDE_COUNT])
@@ -129,7 +129,7 @@ def test_backup_slides_are_outside_the_speaking_budget() -> None:
 
 def test_referenced_images_are_provided_by_the_sync_script() -> None:
     sync_script = _read(PRESENTATION / "scripts" / "sync-images.mjs")
-    available = set(re.findall(r'"([\w-]+\.png)"', sync_script))
+    available = set(re.findall(r'"([\w-]+\.(?:png|webp))"', sync_script))
     slides = _read(SLIDES)
     referenced = set(IMAGE_PATTERN.findall(slides)) | set(HTML_IMAGE_PATTERN.findall(slides))
     assert referenced, "the deck should use at least one visual"
@@ -137,10 +137,10 @@ def test_referenced_images_are_provided_by_the_sync_script() -> None:
 
 
 def test_title_slide_carries_the_brand_and_partner_marks() -> None:
-    """The NovaSteel and AxelorMetal wordmarks share the title-slide plate, while the
-    Azure Master Architect badge and the Microsoft mark sit in the top-right and
-    bottom-right corners. Each one is removed at render time when its source asset is
-    absent, so a logo the repository cannot ship never leaves a broken image behind."""
+    """The NovaSteel and AxelorMetal wordmarks share the title-slide plate, and the
+    Microsoft mark sits in the bottom-right corner. Each one is removed at render time
+    when its source asset is absent, so a logo the repository cannot ship never leaves
+    a broken image behind."""
 
     _, slides = _front_matter_and_slides()
     title = slides[0]
@@ -149,7 +149,6 @@ def test_title_slide_carries_the_brand_and_partner_marks() -> None:
     for logo in (
         "novasteel-logo.png",
         "axelormetal-wordmark.png",
-        "ama-logo.png",
         "microsoft-logo.png",
     ):
         assert f'src="images/{logo}"' in title
@@ -157,7 +156,6 @@ def test_title_slide_carries_the_brand_and_partner_marks() -> None:
 
     sync_script = _read(PRESENTATION / "scripts" / "sync-images.mjs")
     assert "NovaSteel Logo.png" in sync_script
-    assert "ama_logo.png" in sync_script
     assert "microsoft_logo.png" in sync_script
 
 
