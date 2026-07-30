@@ -176,7 +176,7 @@ class FoundryAgentService:
         if self._knowledge_base is None:
             return None
 
-        from azure.ai.agents.models import MCPTool
+        from azure.ai.projects.models import MCPTool
 
         return MCPTool(
             server_label=KNOWLEDGE_MCP_LABEL,
@@ -207,7 +207,7 @@ class FoundryAgentService:
                     names.extend(KNOWLEDGE_MCP_ALLOWED_TOOLS)
                 continue
             if name == TOOL_WEB_SEARCH:
-                from azure.ai.agents.models import WebSearchTool
+                from azure.ai.projects.models import WebSearchTool
 
                 tools.append(WebSearchTool())
                 names.append("web_search")
@@ -276,6 +276,7 @@ class FoundryAgentService:
         agent_name: str = PROCEDURE_AGENT_NAME,
         conversation_id: Optional[str] = None,
         registry: Optional[ToolRegistry] = None,
+        context: Optional[str] = None,
     ) -> dict[str, Any]:
         """Run one turn against a hosted agent, executing any tool calls it makes.
 
@@ -293,7 +294,7 @@ class FoundryAgentService:
         agent_reference = {"agent_reference": {"name": agent_name, "type": "agent_reference"}}
 
         response = openai.responses.create(
-            input=question,
+            input=_turn_input(question, context),
             conversation=conversation,
             extra_body=agent_reference,
         )
@@ -340,6 +341,17 @@ def _sdk_tool(name: str) -> Any:
     from .agent_tools import tool_spec
 
     return tool_spec(name).to_sdk_tool()
+
+
+def _turn_input(question: str, context: Optional[str]) -> Any:
+    """Build the Responses API input for one operator turn."""
+    caller_context = (context or "").strip()
+    if not caller_context:
+        return question
+    return [
+        {"type": "message", "role": "developer", "content": caller_context},
+        {"type": "message", "role": "user", "content": question},
+    ]
 
 
 def _tool_outputs(

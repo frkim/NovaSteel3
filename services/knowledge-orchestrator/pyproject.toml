@@ -16,7 +16,8 @@ dependencies = []
 serve = ["fastapi", "uvicorn"]
 azure = [
   "azure-identity",
-  "azure-ai-projects",
+  "azure-ai-projects==2.2.0",
+  "openai==2.44.0",
   "azure-ai-agents",
   "azure-search-documents",
   "azure-monitor-opentelemetry",

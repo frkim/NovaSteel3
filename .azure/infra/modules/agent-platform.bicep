@@ -62,6 +62,13 @@ var operationsProjectName = '${resourcePrefix}-ops-proj'
 var searchConnectionName = '${resourcePrefix}-conn-search'
 var cosmosConnectionName = '${resourcePrefix}-conn-cosmos'
 var storageConnectionName = '${resourcePrefix}-conn-storage'
+// Connection names are unique per Foundry ACCOUNT, not per project: the service
+// rejects a second project reusing a name with "already exist, and can only be
+// updated by the workspace that created it". The operations project therefore
+// needs its own names even though it points at the same three backing stores.
+var operationsSearchConnectionName = '${resourcePrefix}-ops-conn-search'
+var operationsCosmosConnectionName = '${resourcePrefix}-ops-conn-cosmos'
+var operationsStorageConnectionName = '${resourcePrefix}-ops-conn-storage'
 var appInsightsConnectionName = '${resourcePrefix}-conn-appinsights'
 var accountCapabilityHostName = '${resourcePrefix}-account-caphost'
 var projectCapabilityHostName = '${resourcePrefix}-project-caphost'
@@ -158,6 +165,11 @@ resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2024-12-01-preview
         isZoneRedundant: false
       }
     ]
+    // Pinned to the value the live account already carries. It is a no-op on a
+    // single-region account, but leaving it unset makes every deployment of this
+    // module flip it back to false — gratuitous churn on an account shared with
+    // the agent thread storage.
+    enableAutomaticFailover: true
     publicNetworkAccess: 'Enabled'
     // Requested, but NOT guaranteed: the management-group Modify policy
     // `cosmosdb_publicnetwork_modify` overwrites this with 'Disabled' on every
@@ -276,7 +288,7 @@ resource operationsProject 'Microsoft.CognitiveServices/accounts/projects@2025-0
 #disable-next-line BCP081
 resource operationsSearchConnection 'Microsoft.CognitiveServices/accounts/projects/connections@2025-04-01-preview' = {
   parent: operationsProject
-  name: searchConnectionName
+  name: operationsSearchConnectionName
   properties: {
     category: 'CognitiveSearch'
     target: 'https://${searchService.name}.search.windows.net'
@@ -293,7 +305,7 @@ resource operationsSearchConnection 'Microsoft.CognitiveServices/accounts/projec
 #disable-next-line BCP081
 resource operationsCosmosConnection 'Microsoft.CognitiveServices/accounts/projects/connections@2025-04-01-preview' = {
   parent: operationsProject
-  name: cosmosConnectionName
+  name: operationsCosmosConnectionName
   properties: {
     category: 'CosmosDB'
     target: cosmosAccount.properties.documentEndpoint
@@ -310,7 +322,7 @@ resource operationsCosmosConnection 'Microsoft.CognitiveServices/accounts/projec
 #disable-next-line BCP081
 resource operationsStorageConnection 'Microsoft.CognitiveServices/accounts/projects/connections@2025-04-01-preview' = {
   parent: operationsProject
-  name: storageConnectionName
+  name: operationsStorageConnectionName
   properties: {
     category: 'AzureStorageAccount'
     target: storageAccount.properties.primaryEndpoints.blob
@@ -583,13 +595,13 @@ resource operationsProjectCapabilityHost 'Microsoft.CognitiveServices/accounts/p
     #disable-next-line BCP037
     capabilityHostKind: 'Agents'
     vectorStoreConnections: [
-      searchConnectionName
+      operationsSearchConnectionName
     ]
     threadStorageConnections: [
-      cosmosConnectionName
+      operationsCosmosConnectionName
     ]
     storageConnections: [
-      storageConnectionName
+      operationsStorageConnectionName
     ]
   }
   dependsOn: [

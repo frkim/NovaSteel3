@@ -119,6 +119,38 @@ def test_a_plain_answer_needs_no_tool_round_trip():
     assert result["answer"] == "Hello."
     assert result["tool_calls"] == ()
     assert len(fake.responses.calls) == 1
+    assert fake.responses.calls[0]["input"] == "hi"
+
+
+def test_context_is_sent_as_a_separate_developer_input_item():
+    service, fake = _service([_Response(output_text="Hello.")])
+
+    service.run(
+        "What is cheapest?",
+        ENERGY_ADVISOR_AGENT_NAME,
+        context="Caller scope (server-validated):\n- Authorized sites: NS-DEMO-LUX-01",
+    )
+
+    sent = fake.responses.calls[0]["input"]
+    assert sent == [
+        {
+            "type": "message",
+            "role": "developer",
+            "content": (
+                "Caller scope (server-validated):\n"
+                "- Authorized sites: NS-DEMO-LUX-01"
+            ),
+        },
+        {"type": "message", "role": "user", "content": "What is cheapest?"},
+    ]
+
+
+def test_procedure_agent_ask_does_not_inject_caller_scope_context():
+    service, fake = _service([_Response(output_text="Grounded answer.")])
+
+    service.ask("How do I inspect the lining?")
+
+    assert fake.responses.calls[0]["input"] == "How do I inspect the lining?"
 
 
 def test_a_function_call_is_executed_locally_and_resubmitted():

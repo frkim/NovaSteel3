@@ -634,9 +634,9 @@ module foundryOpsAgentCapabilityHost 'modules/foundry-agent-capability-host.bice
   params: {
     foundryAccountName: foundrySpeech.outputs.foundryAccountName
     projectName: foundryAgents.outputs.operationsProjectName
-    searchConnectionName: foundryAgents.outputs.searchConnectionName
-    cosmosConnectionName: foundryAgents.outputs.cosmosConnectionName
-    storageConnectionName: foundryAgents.outputs.storageConnectionName
+    searchConnectionName: foundryAgents.outputs.operationsSearchConnectionName
+    cosmosConnectionName: foundryAgents.outputs.operationsCosmosConnectionName
+    storageConnectionName: foundryAgents.outputs.operationsStorageConnectionName
     deployAccountCapabilityHost: false
   }
   dependsOn: [

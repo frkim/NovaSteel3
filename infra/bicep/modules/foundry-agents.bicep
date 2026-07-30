@@ -76,6 +76,13 @@ var operationsProjectName = 'proj-novasteel-ops-${environment}'
 var searchConnectionName = 'conn-${searchServiceName}'
 var cosmosConnectionName = 'conn-${cosmosAccountName}'
 var storageConnectionName = 'conn-${agentStorageAccountName}'
+// Connection names are unique per Foundry ACCOUNT, not per project: the service
+// rejects a second project reusing a name with "already exist, and can only be
+// updated by the workspace that created it". The operations project therefore
+// needs its own names even though it points at the same three backing stores.
+var operationsSearchConnectionName = 'conn-ops-${searchServiceName}'
+var operationsCosmosConnectionName = 'conn-ops-${cosmosAccountName}'
+var operationsStorageConnectionName = 'conn-ops-${agentStorageAccountName}'
 
 resource foundryAccount 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' existing = {
   name: foundryAccountName
@@ -186,7 +193,7 @@ resource operationsProject 'Microsoft.CognitiveServices/accounts/projects@2025-0
 
 resource operationsSearchConnection 'Microsoft.CognitiveServices/accounts/projects/connections@2025-04-01-preview' = {
   parent: operationsProject
-  name: searchConnectionName
+  name: operationsSearchConnectionName
   properties: {
     category: 'CognitiveSearch'
     target: 'https://${searchServiceName}.search.windows.net'
@@ -201,7 +208,7 @@ resource operationsSearchConnection 'Microsoft.CognitiveServices/accounts/projec
 
 resource operationsCosmosConnection 'Microsoft.CognitiveServices/accounts/projects/connections@2025-04-01-preview' = {
   parent: operationsProject
-  name: cosmosConnectionName
+  name: operationsCosmosConnectionName
   properties: {
     category: 'CosmosDB'
     target: cosmosDocumentEndpoint
@@ -216,7 +223,7 @@ resource operationsCosmosConnection 'Microsoft.CognitiveServices/accounts/projec
 
 resource operationsStorageConnection 'Microsoft.CognitiveServices/accounts/projects/connections@2025-04-01-preview' = {
   parent: operationsProject
-  name: storageConnectionName
+  name: operationsStorageConnectionName
   properties: {
     category: 'AzureStorageAccount'
     target: agentStorageBlobEndpoint
@@ -327,3 +334,7 @@ output operationsProjectPrincipalId string = operationsProject.identity.principa
 output operationsProjectWorkspaceId string = operationsProject.properties.internalId
 @description('Data-plane endpoint for the tool-calling operations agents. Surfaced to the apps as FOUNDRY_OPERATIONS_PROJECT_ENDPOINT.')
 output operationsProjectEndpoint string = 'https://${foundryAccountName}.services.ai.azure.com/api/projects/${operationsProjectName}'
+@description('The operations project\'s own BYO connection names. Distinct from the knowledge project\'s because connection names are unique per Foundry account.')
+output operationsSearchConnectionName string = operationsSearchConnectionName
+output operationsCosmosConnectionName string = operationsCosmosConnectionName
+output operationsStorageConnectionName string = operationsStorageConnectionName
