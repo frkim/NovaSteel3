@@ -374,6 +374,40 @@ Content-Type: application/json
 }
 ```
 
+### 4.8.1 Operations agents (tool-calling)
+
+Deliberately separate from `/v1/copilot/chat`. Chat is the grounded answering
+surface that has no tools (ADR-011). These routes reach the agents in the
+**operations** Foundry project, which can call the deterministic NovaSteel
+calculations as function tools (ADR-019).
+
+| Route | Query/body | Response `data` | Status codes |
+|---|---|---|---|
+| `GET /v1/copilot/agents` | none | `{ "configured": bool, "agents": [{ "name", "description", "tools": [...] }] }` — read from the same manifest the reconciler applies, so it answers even when the project is not deployed | `200`; `401`; `403` |
+| `POST /v1/copilot/agent` | `{ "question", "conversationId"?, "agent"? }`; unknown top-level keys return `400` | `{ "agent", "project", "answer", "conversationId", "toolCalls": [{ "tool", "status", "arguments" }] }` | `200`; `400 VALIDATION_ERROR`; `401`; `403`; `404 NOT_FOUND` for an unknown agent; `503 UPSTREAM_UNAVAILABLE` when `FOUNDRY_OPERATIONS_PROJECT_ENDPOINT` is unset |
+
+Authorization is **inside the tool**, not at the route. A hosted agent runs as the
+project managed identity, so the function call it emits carries no caller identity;
+each tool body therefore closes over the request's validated user context and
+re-applies the same role and plant-scope checks as the equivalent REST route. A
+reader can reach `POST /v1/copilot/agent`, but `simulate_energy_dispatch` still
+requires `EnergyPlanner.Approve` and `lining_rul_forecast` still requires
+`MaintenanceEngineer.Read`, and either refuses a site outside the caller's scope.
+The model may *propose* a site; only the BFF decides whether the caller may have it.
+
+Tool results are the same audited, version-pinned payloads the REST routes return,
+carrying `modelVersion` and `auditRef` and marked
+`PROPOSAL_PENDING_HUMAN_APPROVAL` / `FORECAST_FOR_HUMAN_DECISION`. Nothing on this
+path mutates state or commits a schedule (ADR-006, ADR-007).
+
+Unlike `/v1/copilot/chat`, the conversation is held **server-side by Foundry**, so
+`conversationId` here is a Foundry conversation, not a BFF one, and it does not
+appear under `GET /v1/copilot/conversations`.
+
+There is **no fallback** to the knowledge project when the operations project is
+absent: that project reads untrusted content, and borrowing it would hand tool
+access across the trust boundary the two projects exist to create.
+
 ### 4.9 Audit
 
 **`GET /v1/audit/decisions?domain=&entityId=&from=&to=&page=&size=`** — `Compliance.Auditor` or the resource's authorized owner. Returns an append-only, export-audited record with model/input/decision/outcome lineage; every field is read-only at the API level — there is no `PATCH`/`DELETE` route for this resource anywhere in the contract.
@@ -427,6 +461,8 @@ query semantics in §5; they are advisory/read-only and plant-scoped.
 | `/v1/copilot/conversations` | DELETE | reader role + owner | yes (history delete) | no |
 | `/v1/copilot/glossary/online` | GET | reader role | no | no |
 | `/v1/copilot/chat` | POST | reader role | yes (history unless temporary) | no |
+| `/v1/copilot/agents` | GET | reader role | no | no |
+| `/v1/copilot/agent` | POST | reader role at the route; per-tool role and site inside | no (proposals only) | no |
 | `/v1/audit/decisions` | GET | `Compliance.Auditor`/owner | no | no |
 | `/v1/platform/capacity` | GET | any authenticated | no | no |
 | `/v1/platform/capacity/start-requests` | POST | `Platform.Capacity.Manage` | yes | **yes** |

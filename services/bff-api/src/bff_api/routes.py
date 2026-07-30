@@ -1371,6 +1371,50 @@ def register_routes(app: FastAPI) -> None:
             ),
         )
 
+    @app.get("/v1/copilot/agents", tags=["Copilot"])
+    async def list_operations_agents(
+        request: Request,
+        user: UserContext = Depends(current_user),
+    ) -> dict[str, Any]:
+        require_reader(user)
+        adapter = request.app.state.services.agents
+        return _envelope(
+            request,
+            {
+                "configured": adapter.configured,
+                "agents": adapter.roster(),
+            },
+        )
+
+    @app.post("/v1/copilot/agent", tags=["Copilot"])
+    async def copilot_agent(
+        request: Request,
+        body: dict[str, Any] = Body(...),
+        user: UserContext = Depends(current_user),
+    ) -> dict[str, Any]:
+        """Ask a tool-calling operations agent.
+
+        Separate from ``/v1/copilot/chat`` on purpose. Chat is a grounded answering
+        surface with no tools (ADR-011); this endpoint reaches agents that can call
+        the deterministic NovaSteel calculations. Those tools re-apply the caller's
+        roles and plant scope themselves, so a reader can reach the endpoint but
+        will be refused by any tool they are not entitled to invoke — and every
+        number that comes back is a proposal, never an applied change.
+        """
+        require_reader(user)
+        _require_keys(body, {"question"}, {"question", "conversationId", "agent"})
+        return _envelope(
+            request,
+            request.app.state.services.agents.ask(
+                user=user,
+                services=request.app.state.services,
+                question=_required_string(body, "question"),
+                conversation_id=body.get("conversationId"),
+                correlation_id=_correlation_id(request),
+                agent_name=body.get("agent"),
+            ),
+        )
+
     @app.get("/v1/search", tags=["Bootstrap"])
     async def global_search(
         request: Request,
