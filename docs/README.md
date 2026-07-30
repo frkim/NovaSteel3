@@ -183,7 +183,7 @@ confirms alignment to the demo transitions.
 
 The same narrative is also maintained as Markdown in
 [`presentation/slides.md`](presentation/slides.md) and rebuilt autonomously with
-[Marp](https://marp.app/) — 22 timed main slides plus 13 FAQ/appendix backups —
+[Marp](https://marp.app/) — 22 timed main slides plus 14 FAQ/appendix backups —
 by the `Presentation` workflow, which publishes the HTML deck, both PDFs and the
 PPTX. See the [presentation folder index](presentation/README.md).
 

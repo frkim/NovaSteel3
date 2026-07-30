@@ -116,7 +116,7 @@ Legend used throughout:
 - 🛈 **SOURCE CUE:** solution-architecture.md §3 (target architecture), §1.
 - ⛑ **FALLBACK:** none; static.
 
-### Slide 6 — Non-negotiable guardrails
+### Slide 6 — Guardrails we will not trade away
 - **Duration:** 1:30 · **Running clock:** 07:00 → 08:30
 - **Purpose:** Pre-empt the safety, control, and residency objections early, in the executive frame, so the rest of the talk inherits that trust.
 - **Visual:** Five "lock" chips.
@@ -125,7 +125,7 @@ Legend used throughout:
   - 2. **Synthetic-only demonstration** — isolated `NS-DEMO-*`; never shares a table, path, or credential with production
   - 3. **EU-only processing** — Sweden Central primary; Foundry Data Zone (EU)
   - 4. **Every consequential AI output is append-only auditable** — inputs, version, confidence, rationale, human decision, outcome
-  - 5. **No standing secrets** — Entra managed identities everywhere
+  - 5. **Security** — no standing secrets; Entra identities for humans, managed identities for workloads, GitHub OIDC for deploys
 - **Speaker notes:** "Five guardrails are non-negotiable and they constrain everything else. First and most important: this is decision *support*. No application, agent, rule, pipeline, or demo control writes to a PLC, a safety interlock, a furnace, or a production setpoint — existing OT safety systems stay authoritative. Second, the demonstration is one-hundred-percent synthetic and physically isolated from production. Third, EU-only processing. Fourth, every consequential AI output is auditable end to end. Fifth, no standing secrets — Entra managed identities throughout. If any of these is a problem for you, stop me now, because I won't trade them away."
 - 🛈 **SOURCE CUE:** solution-architecture.md §1.1, ADR-007, ADR-008; security-governance-and-threat-model.md (OT boundary, no standing secrets).
 - ⛑ **FALLBACK:** none; static.

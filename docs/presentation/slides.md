@@ -9,6 +9,10 @@ footer: 'AI advises, humans decide'
 <!-- _class: lead -->
 <!-- _paginate: false -->
 
+<div class="corners">
+<img class="bottom-right" src="images/microsoft-logo.png" alt="Microsoft" onerror="this.remove()">
+</div>
+
 <div class="tag">Oral Defense</div>
 
 # NovaSteel — AI-Powered <span class="grad">Steel Production</span> Optimization
@@ -19,8 +23,7 @@ Microsoft Fabric–centered architecture · AxelorMetal · 4 EU countries
 
 <div class="brandbar">
 <img src="images/novasteel-logo.png" alt="NovaSteel" onerror="this.remove()">
-<img src="images/ama-logo.png" alt="AxelorMetal" onerror="this.remove()">
-<img src="images/microsoft-logo.png" alt="Microsoft" onerror="this.remove()">
+<img src="images/axelormetal-wordmark.png" alt="AxelorMetal" onerror="this.remove()">
 </div>
 
 <div class="herostats">
@@ -39,6 +42,8 @@ Today's demo proves the mechanics on synthetic data — it does not claim realiz
 
 # The Business Challenge
 
+<div class="subtitle">A steel estate under pressure on five fronts</div>
+
 <div class="split">
 <div>
 
@@ -54,13 +59,14 @@ Today's demo proves the mechanics on synthetic data — it does not claim realiz
 <div class="card teal"><div class="card-num">€8M</div><h3>Lining failure</h3><p>Per event, unpredictable today</p></div>
 <div class="card purple"><div class="card-num">CO₂</div><h3>ETS penalty pressure</h3><p>Carbon as material as energy</p></div>
 <div class="card green"><div class="card-num">Knowledge</div><h3>Operator attrition</h3><p>Retiring experts, irreversible loss</p></div>
+<div class="card blue"><div class="card-num">Yield</div><h3>Automotive-grade yield variability</h3><p>Genealogy must be heat-by-heat</p></div>
 </div>
 
 </div>
 </div>
 
 <!-- ⏱ 1:30 · AxelorMetal runs blast furnaces and rolling mills across four EU countries.
-Four structural problems: energy is thirty-five percent of production cost with no real-time lever; carbon is now a hard financial cost under the EU Emissions Trading System; a furnace-lining failure costs around eight million euros per event and today is effectively unpredictable; and the experts who know the furnace are retiring faster than we can capture what they know.
+Five structural problems: energy is thirty-five percent of production cost with no real-time lever; carbon is now a hard financial cost under the EU Emissions Trading System; a furnace-lining failure costs around eight million euros per event and today is effectively unpredictable; automotive-grade yield swings heat to heat, and the customers who buy that steel expect genealogy traced heat by heat rather than shift by shift; and the experts who know the furnace are retiring faster than we can capture what they know.
 This is a heavy-industry, safety-sensitive, EU-regulated context — which shapes every architectural choice that follows. -->
 
 ---
@@ -110,6 +116,8 @@ Today's demo will show the platform producing these kinds of outputs on syntheti
 
 ---
 
+<!-- _class: tight -->
+
 # One Governed Platform
 
 <div class="split">
@@ -123,9 +131,21 @@ Today's demo will show the platform producing these kinds of outputs on syntheti
 </div>
 <div>
 
-![w:560](images/executive-overview.png)
+![w:430](images/executive-overview.png)
 
 </div>
+</div>
+
+<div class="chain">
+<div class="node blue"><b>Plant signals</b><span>OT / MES / market</span></div>
+<div class="step">›</div>
+<div class="node teal"><b>Fabric core</b><span>governed data spine</span></div>
+<div class="step">›</div>
+<div class="node purple"><b>Four AI capabilities</b><span>Python + constrained GenAI</span></div>
+<div class="step">›</div>
+<div class="node green"><b>Persona experiences</b><span>8 role-specific views</span></div>
+<div class="step">›</div>
+<div class="node orange"><b>Human decision</b><span>approval + audit</span></div>
 </div>
 
 <!-- ⏱ 1:25 · Here is the entire platform in one picture.
@@ -134,13 +154,13 @@ The center of gravity is Fabric — I'll spend real time defending why that's th
 
 ---
 
-# Non-Negotiable Guardrails
+# Guardrails we will not trade away
 
 <div class="cards four">
 <div class="card teal"><div class="card-num">01</div><h3>Decision support only</h3><p>No write to PLC, interlock, furnace, or setpoint (ADR-007)</p></div>
 <div class="card purple"><div class="card-num">02</div><h3>EU-only processing</h3><p>Sweden Central; Foundry Data Zone (EU) — ADR-003</p></div>
 <div class="card green"><div class="card-num">03</div><h3>Append-only audit</h3><p>Every consequential AI output is replayable</p></div>
-<div class="card orange"><div class="card-num">04</div><h3>No standing secrets</h3><p>Entra managed identities everywhere</p></div>
+<div class="card orange"><div class="card-num">04</div><h3>Security</h3><p>No standing secrets — Entra identities, OIDC-federated deploys</p></div>
 </div>
 
 > Existing OT safety-instrumented systems stay authoritative. The platform advises; a human decides.
@@ -149,7 +169,7 @@ The center of gravity is Fabric — I'll spend real time defending why that's th
 First and most important: this is decision support. No application, agent, rule, pipeline, or demo control writes to a PLC, a safety interlock, a furnace, or a production setpoint — existing OT safety systems stay authoritative. That is ADR-007.
 Second, EU-only processing: Sweden Central, with Foundry in the EU Data Zone.
 Third, every consequential AI output is auditable end to end — inputs, model version, confidence, rationale, the human decision, and the outcome, append-only.
-Fourth, no standing secrets — Entra managed identities throughout.
+Fourth, security: there is no standing secret anywhere to steal. Humans authenticate with Entra, workloads run as managed identities, and deployments federate through GitHub OIDC — four separate authorization planes, so one compromised identity has a contained blast radius.
 If any of these is a problem for you, stop me now, because I won't trade them away. -->
 
 ---
@@ -864,6 +884,20 @@ Phase 2: guarded write-back to CMMS/MES — human-approved, bounded, reversible.
 </div>
 
 <!-- ⏱ 0:00 · Backup slide. We name limitations unprompted: synthetic-only data, daily not real-time scoring, Contributor role mitigated by isolation, no automatic BCDR, no cost figure, and real accuracy needs pilot validation. This honesty discipline is the trustworthiness — a vendor who converts every synthetic result into banked savings is the one to distrust. -->
+
+---
+
+<!-- _class: tight backup -->
+
+# Appendix — How a Steel Plant Works
+
+![w:840](images/steel-process-routes.webp)
+
+<div class="legend">
+<span class="pill orange">Blast furnace route</span> ore, coke and limestone → pig iron → basic oxygen furnace. <span class="pill blue">Electric arc furnace route</span> scrap and DRI melted with electricity. Both converge on ladle refining, casting, rolling and coating.
+</div>
+
+<!-- ⏱ 0:00 · Appendix slide. AxelorMetal runs both primary routes, so the platform has to speak to both. The integrated route reduces iron ore, coking coal and limestone in the blast furnace into molten pig iron, which the basic oxygen furnace then decarburises into steel. The electric arc furnace route melts scrap and direct-reduced iron with electricity instead — far less embedded carbon, far more exposure to the hourly power price, which is exactly why energy dispatch matters more on that route. From ladle refining onward the two routes share one line: continuous casting into slabs, blooms and billets, then hot and cold rolling, galvanizing and coating. Everything NovaSteel does hangs off four points on this picture — refractory wear inside the furnace, the electricity the furnace pulls, the defect risk introduced at the caster and the mill, and the tacit knowledge that walks out of the gate at shift handover. -->
 
 ---
 

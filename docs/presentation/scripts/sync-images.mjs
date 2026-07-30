@@ -19,8 +19,8 @@ const targetDir = join(presentationDir, "images");
 
 const brandDir = join(repoRoot, "apps", "portal-shell", "wwwroot", "brand");
 const logoDir = join(repoRoot, "docs", "images", "logo");
-const axelorLogoDir = join(repoRoot, "docs", "AxelorMetal-web", "logo");
 const generatedDir = join(repoRoot, "tools", "presentation", "assets");
+const diagramDir = join(repoRoot, "docs", "presentation", "assets", "diagrams");
 const screenshotDir = join(
   repoRoot,
   "docs",
@@ -35,6 +35,7 @@ const assets = [
   [join(brandDir, "novasteel-logo-full.png"), "novasteel-logo-full.png"],
   [join(brandDir, "novasteel-mark.png"), "novasteel-mark.png"],
   [join(brandDir, "axelormetal-wordmark.png"), "axelormetal-wordmark.png"],
+  [join(diagramDir, "steel-process-routes.webp"), "steel-process-routes.webp"],
   [join(generatedDir, "steelworks-hero.png"), "steelworks-hero.png"],
   [join(generatedDir, "thermal-map.png"), "thermal-map.png"],
   ...[
@@ -66,17 +67,10 @@ if (missing.length > 0) {
  * are all absent is simply not copied: the title slide drops that slot rather than
  * rendering a broken image.
  *
- * `microsoft_logo.png` is not committed — a Microsoft trademark asset has to be
- * supplied by the presenter under Microsoft's trademark guidelines.
- *
  * @type {Array<[string, string[]]>} file name inside images/ -> candidate sources
  */
 const logos = [
   ["novasteel-logo.png", [join(logoDir, "NovaSteel Logo.png")]],
-  [
-    "ama-logo.png",
-    [join(logoDir, "ama_logo.png"), join(axelorLogoDir, "AxelorMetal_logo_full_alpha.png")],
-  ],
   ["microsoft-logo.png", [join(logoDir, "microsoft_logo.png")]],
 ];
 
