@@ -9,6 +9,11 @@ footer: 'AI advises, humans decide'
 <!-- _class: lead -->
 <!-- _paginate: false -->
 
+<div class="corners">
+<img class="top-right" src="images/ama-logo.png" alt="Azure Master Architect" onerror="this.remove()">
+<img class="bottom-right" src="images/microsoft-logo.png" alt="Microsoft" onerror="this.remove()">
+</div>
+
 <div class="tag">Oral Defense</div>
 
 # NovaSteel — AI-Powered <span class="grad">Steel Production</span> Optimization
@@ -19,8 +24,7 @@ Microsoft Fabric–centered architecture · AxelorMetal · 4 EU countries
 
 <div class="brandbar">
 <img src="images/novasteel-logo.png" alt="NovaSteel" onerror="this.remove()">
-<img src="images/ama-logo.png" alt="AxelorMetal" onerror="this.remove()">
-<img src="images/microsoft-logo.png" alt="Microsoft" onerror="this.remove()">
+<img src="images/axelormetal-wordmark.png" alt="AxelorMetal" onerror="this.remove()">
 </div>
 
 <div class="herostats">

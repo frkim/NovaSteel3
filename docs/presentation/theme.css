@@ -277,9 +277,10 @@ section.lead img {
   border-radius: 3px;
 }
 
-/* Title-slide logo lockup. The sources are opaque artwork on white, so they sit on
-   a light plate rather than directly on the dark lead background. Any logo whose
-   asset is absent removes itself (see slides.md), and the flex gap closes up. */
+/* Title-slide product/customer lockup. The sources are opaque artwork on white, so
+   they sit on a light plate rather than directly on the dark lead background. Any
+   logo whose asset is absent removes itself (see slides.md), and the flex gap closes
+   up. Partner marks live in .corners instead, not on this plate. */
 .brandbar {
   display: flex;
   align-self: flex-start;
@@ -297,6 +298,36 @@ section.lead img {
 .brandbar img {
   height: 34px;
   width: auto;
+}
+
+/* Title-slide corner marks: the Azure Master Architect credential badge top-right
+   and the Microsoft mark bottom-right. The wrapper is taken out of flow so the
+   centred hero block keeps its exact position. Both assets are transparent PNGs that
+   read directly on the dark lead background, so unlike .brandbar they need no light
+   plate. Either mark removes itself when its asset is absent (see slides.md). */
+.corners {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.corners img {
+  position: absolute;
+  margin: 0;
+}
+
+.corners .top-right {
+  top: 28px;
+  right: 60px;
+  height: 104px;
+  width: auto;
+}
+
+.corners .bottom-right {
+  right: 60px;
+  bottom: 34px;
+  width: 190px;
+  height: auto;
 }
 
 .herostats {

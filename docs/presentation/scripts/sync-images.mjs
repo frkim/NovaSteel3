@@ -19,7 +19,6 @@ const targetDir = join(presentationDir, "images");
 
 const brandDir = join(repoRoot, "apps", "portal-shell", "wwwroot", "brand");
 const logoDir = join(repoRoot, "docs", "images", "logo");
-const axelorLogoDir = join(repoRoot, "docs", "AxelorMetal-web", "logo");
 const generatedDir = join(repoRoot, "tools", "presentation", "assets");
 const screenshotDir = join(
   repoRoot,
@@ -66,17 +65,15 @@ if (missing.length > 0) {
  * are all absent is simply not copied: the title slide drops that slot rather than
  * rendering a broken image.
  *
- * `microsoft_logo.png` is not committed — a Microsoft trademark asset has to be
- * supplied by the presenter under Microsoft's trademark guidelines.
+ * `ama-logo.png` is the Azure Master Architect credential badge shown in the
+ * title slide's top-right corner. The customer wordmark is a separate required
+ * asset (`axelormetal-wordmark.png`) and is not a fallback for it.
  *
  * @type {Array<[string, string[]]>} file name inside images/ -> candidate sources
  */
 const logos = [
   ["novasteel-logo.png", [join(logoDir, "NovaSteel Logo.png")]],
-  [
-    "ama-logo.png",
-    [join(logoDir, "ama_logo.png"), join(axelorLogoDir, "AxelorMetal_logo_full_alpha.png")],
-  ],
+  ["ama-logo.png", [join(logoDir, "ama_logo.png")]],
   ["microsoft-logo.png", [join(logoDir, "microsoft_logo.png")]],
 ];
 

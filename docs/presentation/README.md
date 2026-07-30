@@ -86,11 +86,12 @@ artifacts, and the `github-pages-deploy` job is skipped.
   `AI advises, humans decide`
 - Only reference images that `scripts/sync-images.mjs` provides; the test suite
   checks every `images/…` reference against that manifest.
-- The title slide's logo bar reads `docs/images/logo/NovaSteel Logo.png`,
-  `docs/images/logo/ama_logo.png` (falling back to the tracked
-  `docs/AxelorMetal-web/logo/AxelorMetal_logo_full_alpha.png`) and
-  `docs/images/logo/microsoft_logo.png`. The Microsoft mark is a trademark asset the
-  repository does not ship: drop the file at that path and the next `npm run images`
-  picks it up, otherwise the slot removes itself and the bar closes up.
+- The title slide carries four marks. The white plate under the subtitle holds the
+  product and customer wordmarks, `docs/images/logo/NovaSteel Logo.png` and
+  `apps/portal-shell/wwwroot/brand/axelormetal-wordmark.png`. The two corners hold the
+  partner marks: `docs/images/logo/ama_logo.png` (the Azure Master Architect
+  credential badge) top right and `docs/images/logo/microsoft_logo.png` bottom right.
+  All four are tracked. Any mark whose source asset is removed drops itself at render
+  time rather than leaving a broken image, and the plate closes up.
 - [`oral-defense-and-slide-plan.md`](oral-defense-and-slide-plan.md) stays the
   authoritative narrative script; `slides.md` is its rendered deck.

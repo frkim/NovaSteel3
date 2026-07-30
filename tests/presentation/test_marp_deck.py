@@ -136,15 +136,22 @@ def test_referenced_images_are_provided_by_the_sync_script() -> None:
     assert referenced <= available, f"unknown images referenced: {sorted(referenced - available)}"
 
 
-def test_title_slide_carries_the_three_brand_logos() -> None:
-    """The NovaSteel, AxelorMetal and Microsoft marks open the deck. Each one is
-    removed at render time when its source asset is absent, so a logo the repository
-    cannot ship (the Microsoft trademark) never leaves a broken image behind."""
+def test_title_slide_carries_the_brand_and_partner_marks() -> None:
+    """The NovaSteel and AxelorMetal wordmarks share the title-slide plate, while the
+    Azure Master Architect badge and the Microsoft mark sit in the top-right and
+    bottom-right corners. Each one is removed at render time when its source asset is
+    absent, so a logo the repository cannot ship never leaves a broken image behind."""
 
     _, slides = _front_matter_and_slides()
     title = slides[0]
     assert 'class="brandbar"' in title
-    for logo in ("novasteel-logo.png", "ama-logo.png", "microsoft-logo.png"):
+    assert 'class="corners"' in title
+    for logo in (
+        "novasteel-logo.png",
+        "axelormetal-wordmark.png",
+        "ama-logo.png",
+        "microsoft-logo.png",
+    ):
         assert f'src="images/{logo}"' in title
         assert 'onerror="this.remove()"' in title
 
