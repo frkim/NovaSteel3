@@ -1182,3 +1182,97 @@ Burned error budget triggers a change freeze until root cause is addressed.
 </div>
 
 <!-- ⏱ 0:00 · Appendix slide. This is a forward-looking control architecture: Arc-managed edge, IoT Operations for local protocol/runtime, IoT Hub for identity and cloud command, and policy-gated AI decisions. Start with human-confirmed actions, then expand only to bounded autonomous loops where safety, interlocks, and governance approvals are explicit. -->
+
+---
+
+<!-- _class: tight backup -->
+
+# Appendix — Why We Do Not Write to the Furnace
+
+<div class="split">
+<div>
+
+**Design choice, not missing feature**
+
+- Furnace setpoints and interlocks remain in OT safety layers (Purdue L0-L2)
+- Cloud-to-OT direct actuation would cross the IEC 62443 boundary by design
+- With synthetic data, we cannot evidence high-risk control duties to production standard
+
+</div>
+<div>
+
+**What the platform writes today**
+
+- Approved dispatch decisions
+- CMMS work orders from lining alerts
+- Approved knowledge procedures
+- Append-only, hash-chained audit facts
+
+<span class="pill green">SAFETY</span> The platform advises and records decisions; OT control systems stay authoritative.
+
+</div>
+</div>
+
+<!-- ⏱ 0:00 · Appendix slide. This is an intentional safety boundary. We automate decision quality and traceability, but direct furnace actuation stays with existing OT control and safety systems. -->
+
+---
+
+<!-- _class: tight backup -->
+
+# Appendix — Why Not Azure IoT Hub — or IoT Operations?
+
+<div class="split">
+<div>
+
+**Current baseline (this solution)**
+
+- Event Hubs + identity relay + Fabric Eventstream
+- Optimized for analytics ingestion, governance, and deterministic replay
+- Lowest integration overhead for the current advisory-only scope
+
+</div>
+<div>
+
+**When IoT Hub / IoT Operations becomes the right choice**
+
+- Need bidirectional device command and control loops
+- Need edge-native protocol mediation and local autonomy
+- Need fleet operations with device twins, jobs, and lifecycle orchestration
+
+Today they are roadmap capabilities, not required for the validated MVP boundary.
+
+</div>
+</div>
+
+<!-- ⏱ 0:00 · Appendix slide. We did not reject IoT Hub or IoT Operations as bad options; we deferred them because this release is advisory-first and analytics-centric. They become first-class in vNext closed-loop control. -->
+
+---
+
+<!-- _class: tight backup -->
+
+# Appendix — Why Fabric — and Why Not a Parallel Lake, Databricks, or Snowflake?
+
+<div class="split">
+<div>
+
+**Fabric fits the operating model**
+
+- One governed estate for hot + historical analytics
+- OneLake lineage and Direct Lake semantic consistency
+- Native Power BI and audit-friendly data contracts
+
+</div>
+<div>
+
+**Why not the alternatives in this architecture**
+
+- A parallel lake duplicates data and trust boundaries (explicitly rejected by ADR-001)
+- Extra cross-platform stitching increases latency and governance complexity
+- More copies means harder reconciliation and weaker audit posture
+
+<span class="pill blue">DECISION</span> Keep one governed estate, two clocks (operational + historical), no parallel lake.
+
+</div>
+</div>
+
+<!-- ⏱ 0:00 · Appendix slide. The architecture decision is about governance and operating simplicity, not vendor branding: one governed estate, minimal copies, and one semantic truth for KPI and audit evidence. -->
