@@ -1,9 +1,10 @@
 // Copies the brand assets and UI screenshots the deck references from their
-// canonical locations in the repository into presentation/images/.
+// canonical locations in the repository into docs/presentation/images/.
 //
 // The images are deliberately not committed twice: docs/presentation/assets,
 // docs/images/logo and apps/portal-shell/wwwroot/brand remain the single source of
-// truth, and presentation/images/ is a build output (see presentation/.gitignore).
+// truth, and docs/presentation/images/ is a build output (see
+// docs/presentation/.gitignore).
 //
 // Usage: node scripts/sync-images.mjs
 
@@ -13,7 +14,7 @@ import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const presentationDir = resolve(here, "..");
-const repoRoot = resolve(presentationDir, "..");
+const repoRoot = resolve(presentationDir, "..", "..");
 const targetDir = join(presentationDir, "images");
 
 const brandDir = join(repoRoot, "apps", "portal-shell", "wwwroot", "brand");

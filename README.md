@@ -260,6 +260,7 @@ Other frequently used entry points:
 |---|---|
 | Business brief | [`docs\usecase\usecase.md`](docs/usecase/usecase.md) |
 | Requirement register / proof of execution | [`docs\presentation\proof_of_execution.md`](docs/presentation/proof_of_execution.md) |
+| Oral-defense material (deck, plan, FAQ, app guide) | [`docs\presentation\README.md`](docs/presentation/README.md) |
 | Architecture and ADRs | [`docs\architecture\solution-architecture.md`](docs/architecture/solution-architecture.md) |
 | Screen-by-screen UX specification | [`docs\ux\dashboard-specification.md`](docs/ux/dashboard-specification.md) |
 | Demo runbook | [`docs\demo\demo-runbook.md`](docs/demo/demo-runbook.md) |
@@ -274,19 +275,19 @@ Other frequently used entry points:
 2. **35:00–45:00:** deterministic six-moment persona demonstration.
 3. **45:00–60:00:** moderated FAQ and production-gate discussion.
 
-Open `docs\presentation\NovaSteel-Oral-Defense.pptx` for the final 26-slide
-deck (20 primary slides including the demo handoff, plus six FAQ backups). Use
+Open `docs\presentation\NovaSteel-Oral-Defense.pptx` for the delivered 28-slide
+deck (20 primary slides including the demo handoff, plus eight FAQ backups). Use
 `docs\presentation\oral-defense-and-slide-plan.md` for speaker notes,
 `docs\demo\demo-runbook.md` for minute-by-minute cues, and
 `docs\presentation\faq.md` for the last 15 minutes. Local rehearsal evidence is
 in `artifacts\demo-validation\rehearsal-report.md`; final handoff is
 `artifacts\final-handoff.md`.
 
-The same deck is also maintained as Markdown in `presentation\slides.md` and
+The same deck is also maintained as Markdown in `docs\presentation\slides.md` and
 rebuilt autonomously with [Marp](https://marp.app/): the `Presentation` workflow
 regenerates `NovaSteel-Oral-Defense.pdf`, the speaker-note PDF and
 `NovaSteel-Oral-Defense.pptx` on every change and publishes the web deck to
-GitHub Pages. See [`presentation\README.md`](presentation/README.md).
+GitHub Pages. See [`docs\presentation\README.md`](docs/presentation/README.md).
 
 ## Validated proof
 
@@ -326,9 +327,9 @@ the difference is scope, not a shortfall against the model.
 | `fabric` | Fabric REST/CLI assets, KQL, Lakehouse, notebooks, pipeline, semantic model |
 | `tests` | Contract, simulator, backend, integration, E2E, infra, knowledge, and presentation tests |
 | `tools\validation` | Local validation, feed/security scans, SBOM, PPTX validation |
-| `docs` | Architecture, operations, runbook, presentation, research, and the bilingual illustrated application guide |
+| `docs` | Architecture, operations, runbook, research, and the bilingual illustrated application guide |
+| `docs\presentation` | Defense material — slide plan, FAQ, proof of execution, app guide, and the Marp deck source (`slides.md`, `theme.css`) built to HTML/PDF/PPTX by the `Presentation` workflow |
 | `artifacts` | Local validation, rehearsal, fallback, and final-handoff evidence |
-| `presentation` | Marp deck source (`slides.md`, `theme.css`) built to HTML/PDF/PPTX by the `Presentation` workflow |
 
 ## Cloud deployment
 

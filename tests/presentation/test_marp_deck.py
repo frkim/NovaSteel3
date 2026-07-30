@@ -1,7 +1,7 @@
-"""Structural validation for the Marp deck under ``presentation/``.
+"""Structural validation for the Marp deck under ``docs/presentation/``.
 
 The deck is generated in CI (``.github/workflows/presentation.yml``) straight from
-``presentation/slides.md``. These checks keep that source buildable and keep the
+``docs/presentation/slides.md``. These checks keep that source buildable and keep the
 35-minute speaking budget honest before a single browser is started.
 """
 
@@ -13,7 +13,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
-PRESENTATION = ROOT / "presentation"
+PRESENTATION = ROOT / "docs" / "presentation"
 SLIDES = PRESENTATION / "slides.md"
 THEME = PRESENTATION / "theme.css"
 
@@ -231,10 +231,10 @@ def test_presentation_workflow_publishes_every_built_document_as_an_artifact() -
 
     assert "actions/upload-artifact@" in upload
     for document in (
-        "presentation/dist/index.html",
-        "presentation/dist/NovaSteel-Oral-Defense.pdf",
-        "presentation/dist/NovaSteel-Oral-Defense-notes.pdf",
-        "presentation/dist/NovaSteel-Oral-Defense.pptx",
+        "docs/presentation/dist/index.html",
+        "docs/presentation/dist/NovaSteel-Oral-Defense.pdf",
+        "docs/presentation/dist/NovaSteel-Oral-Defense-notes.pdf",
+        "docs/presentation/dist/NovaSteel-Oral-Defense.pptx",
     ):
         assert document in upload
     assert "if-no-files-found: error" in upload
@@ -249,11 +249,11 @@ def test_presentation_workflow_publishes_the_deck_at_the_pages_root() -> None:
     assemble = workflow.split("- name: Assemble the Pages site", 1)[1]
     assemble = assemble.split("- name: Configure Pages", 1)[0]
 
-    assert "-o ../_site/index.html" in assemble
-    assert "cp images/* ../_site/images/" in assemble
-    assert "dist/NovaSteel-Oral-Defense.pptx ../_site/" in assemble
-    assert "../_site/.nojekyll" in assemble
-    assert "../_site/deck/index.html" in assemble, "keep the old /deck/ URL working"
+    assert "-o ../../_site/index.html" in assemble
+    assert "cp images/* ../../_site/images/" in assemble
+    assert "dist/NovaSteel-Oral-Defense.pptx ../../_site/" in assemble
+    assert "../../_site/.nojekyll" in assemble
+    assert "../../_site/deck/index.html" in assemble, "keep the old /deck/ URL working"
     assert "path: _site" in workflow
 
 
