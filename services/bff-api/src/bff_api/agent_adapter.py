@@ -88,6 +88,26 @@ class OperationsAgentAdapter:
         """
         return bool(os.environ.get(self._endpoint_env, "").strip())
 
+    def _build_service(self) -> Any:
+        """Construct the runtime for the operations project.
+
+        ``FoundryAgentService`` takes a project *endpoint*, not a project name: one
+        class serves both projects and the endpoint is what selects between them.
+        The model and knowledge-base configuration are read from the environment
+        the same way the orchestrator's own hosting path reads them, so a turn
+        served through the BFF and a turn served by the reconciler resolve to the
+        same agent definition.
+        """
+        from knowledge_orchestrator.agent_service import (
+            DEFAULT_MODEL,
+            ENV_CHAT_DEPLOYMENT,
+        )
+
+        return self._service_cls(
+            project_endpoint=os.environ.get(self._endpoint_env, "").strip(),
+            model=os.environ.get(ENV_CHAT_DEPLOYMENT, DEFAULT_MODEL),
+        )
+
     def ask(
         self,
         *,
@@ -124,12 +144,14 @@ class OperationsAgentAdapter:
         registry = build_registry(
             user=user, services=services, correlation_id=correlation_id
         )
-        service = self._service_cls(project=self._project)
+        context = _caller_scope_context(user, services)
+        service = self._build_service()
         result = service.run(
             question,
             agent_name=name,
             conversation_id=conversation_id,
             registry=registry,
+            context=context,
         )
 
         tool_calls = [
@@ -172,6 +194,34 @@ def _decode_arguments(raw: Any) -> dict[str, Any]:
     except (TypeError, ValueError):
         return {}
     return decoded if isinstance(decoded, dict) else {}
+
+
+def _caller_scope_context(user: Any, services: Any) -> str:
+    """Return the compact server-validated scope block supplied to operations agents."""
+    sites = sorted(str(site) for site in getattr(user, "plant_scope", frozenset()))
+    assets_by_site: dict[str, list[str]] = {site: [] for site in sites}
+    repository = services.repository
+
+    for asset in repository.furnaces():
+        asset_id = str(asset.get("assetId") or "").strip()
+        if not asset_id:
+            continue
+        site = repository.asset_site(asset_id)
+        if site not in assets_by_site:
+            continue
+        asset_type = str(asset.get("assetType") or "").strip()
+        label = f"{asset_id} ({asset_type})" if asset_type else asset_id
+        assets_by_site[site].append(label)
+
+    lines = [
+        "Caller scope (server-validated):",
+        f"- Authorized sites: {', '.join(sites) or 'none'}",
+        "- Tool assets by site:",
+    ]
+    for site in sites:
+        assets = sorted(set(assets_by_site[site]))
+        lines.append(f"  - {site}: {', '.join(assets) if assets else 'none'}")
+    return "\n".join(lines)
 
 
 __all__ = ["OperationsAgentAdapter"]
