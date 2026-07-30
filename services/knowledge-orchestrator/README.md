@@ -134,6 +134,29 @@ The hosted agent's instructions embed the *canonical* decline sentence produced 
 same `enforce_answer_citations` check as local ones, and a paraphrased refusal
 would be rejected as an ungrounded answer.
 
+## Foundry project model
+
+The service targets the **Foundry project model** end to end, never the classic
+hub-based one:
+
+* Agents are addressed through a project endpoint,
+  `https://<account>.services.ai.azure.com/api/projects/<project>`, with
+  `AIProjectClient(endpoint=...)` — not a hub connection string, and not
+  `Microsoft.MachineLearningServices/workspaces`. An account endpoint is rejected
+  up front by `agent_service_status()` rather than 404-ing on the first agent call.
+* Inference uses the versionless OpenAI **v1** route, `/openai/v1/chat/completions`
+  and `/openai/v1/embeddings`, with the deployment carried as `model` in the body.
+  The classic `/openai/deployments/<name>/…?api-version=<date>` path is gone, and
+  with it the recurring chore of bumping a dated API version.
+* Tokens are acquired for the Foundry audience `https://ai.azure.com/.default` —
+  the same audience `AIProjectClient` uses, so agents and inference share one
+  token. Role assignments are unchanged (*Cognitive Services OpenAI User*).
+
+`foundry_endpoints.py` is the single place that encodes this. It also rewrites a
+classic `*.cognitiveservices.azure.com` / `*.openai.azure.com` host onto the
+Foundry `*.services.ai.azure.com` one, so an older deployment or a stale `.env`
+keeps working instead of failing at the first call.
+
 ## Online search (Web IQ / web search)
 
 When the Copilot chat "Online Search" toggle is on, `copilot/online_provider.py`
@@ -174,13 +197,13 @@ portal's Tracing and Monitoring blades.
 
 | Variable | Default | Effect |
 |---|---|---|
-| `FOUNDRY_ENDPOINT` | *(unset)* | Foundry account endpoint for inference. Unset ⇒ local fixture agent. |
-| `FOUNDRY_PROJECT_ENDPOINT` | *(unset)* | Project endpoint for Agent Service. Unset ⇒ agents are not hosted. |
+| `FOUNDRY_ENDPOINT` | *(unset)* | Foundry account endpoint for inference, e.g. `https://<account>.services.ai.azure.com`. A classic `*.cognitiveservices.azure.com` / `*.openai.azure.com` host is accepted and rewritten. Unset ⇒ local fixture agent. |
+| `FOUNDRY_PROJECT_ENDPOINT` | *(unset)* | Foundry **project** endpoint for Agent Service, `https://<account>.services.ai.azure.com/api/projects/<project>`. Unset (or an account endpoint) ⇒ agents are not hosted. |
 | `FOUNDRY_CHAT_DEPLOYMENT` | `gpt-5.4-mini` | Standard-tier chat/extraction deployment. |
 | `FOUNDRY_REASONING_DEPLOYMENT` | `gpt-5.5` | High-reasoning-tier deployment. |
 | `FOUNDRY_EMBED_DEPLOYMENT` | `text-embedding-3-large` | Deployment used for integrated vectorization. |
 | `FOUNDRY_KNOWLEDGE_BASE` | `novasteel-procedures-kb` | Foundry IQ knowledge base name. |
-| `FOUNDRY_API_VERSION` | *(pinned in code)* | Override the Agent Service API version. |
+| `FOUNDRY_TOKEN_SCOPE` | `https://ai.azure.com/.default` | Entra audience for the Foundry data plane. Override for sovereign clouds only. |
 | `AI_SEARCH_ENDPOINT` | *(unset)* | AI Search endpoint. Unset ⇒ in-memory procedure store. |
 | `AI_SEARCH_INDEX` | `novasteel-procedures` | Procedure index name. |
 | `PROCEDURE_STORE_MODE` | *(unset)* | `local` forces the in-memory store even if an endpoint is set. |

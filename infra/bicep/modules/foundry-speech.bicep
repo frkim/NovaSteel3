@@ -24,6 +24,9 @@ param cognitiveServicesPrivateDnsZoneId string
 @description('Private DNS zone resource ID for privatelink.openai.azure.com (used by some Foundry model deployment routes).')
 param openAiPrivateDnsZoneId string
 
+@description('Private DNS zone resource ID for privatelink.services.ai.azure.com — the Foundry-model hostname that serves the project endpoint and the OpenAI v1 route.')
+param aiServicesPrivateDnsZoneId string
+
 @description('Log Analytics workspace resource ID for diagnostic logs.')
 param logAnalyticsWorkspaceId string
 
@@ -153,6 +156,16 @@ resource foundryPrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateD
         name: 'privatelink-openai-azure-com'
         properties: {
           privateDnsZoneId: openAiPrivateDnsZoneId
+        }
+      }
+      // The Foundry-model hostname. The project endpoint the orchestrator talks to
+      // (`https://<account>.services.ai.azure.com/api/projects/<project>`) and the
+      // OpenAI v1 inference route both resolve here, so omitting this zone leaves
+      // Agent Service unreachable from the VNet even though the account is private.
+      {
+        name: 'privatelink-services-ai-azure-com'
+        properties: {
+          privateDnsZoneId: aiServicesPrivateDnsZoneId
         }
       }
     ]
@@ -358,7 +371,10 @@ resource embeddingDeployment 'Microsoft.CognitiveServices/accounts/deployments@2
 
 output foundryAccountId string = foundryAccount.id
 output foundryAccountName string = foundryAccount.name
-output foundryEndpoint string = foundryAccount.properties.?endpoint ?? ''
+@description('Foundry-model account endpoint. Deliberately NOT `properties.endpoint`: that returns the legacy `<name>.cognitiveservices.azure.com` host inherited from the classic Azure OpenAI/Cognitive Services surface. The Foundry project model is served from `<name>.services.ai.azure.com`, which is the host that carries the project endpoint (`/api/projects/<project>`) and the versionless OpenAI v1 inference route (`/openai/v1/...`) the services call.')
+output foundryEndpoint string = 'https://${foundryName}.services.ai.azure.com'
+@description('Legacy Azure OpenAI-compatible endpoint (`<name>.cognitiveservices.azure.com`). Kept only for diagnostics and for tools that still require the classic host; application configuration must use `foundryEndpoint`.')
+output foundryLegacyOpenAiEndpoint string = foundryAccount.properties.?endpoint ?? ''
 output speechAccountId string = speechAccount.id
 output speechAccountName string = speechAccount.name
 output speechEndpoint string = speechAccount.properties.?endpoint ?? ''

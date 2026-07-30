@@ -296,7 +296,7 @@ The chat displays "Enterprise data protection applies to this chat." The claim i
 
 | Property | Control |
 |---|---|
-| No credential leaves the tenant | The browser calls only `bff-api`; the model is an Azure-hosted Foundry deployment reached with managed identity over `https://cognitiveservices.azure.com/.default`. No key, no consumer endpoint. |
+| No credential leaves the tenant | The browser calls only `bff-api`; the model is an Azure-hosted Foundry deployment reached with managed identity over the Foundry audience `https://ai.azure.com/.default`. No key, no consumer endpoint. |
 | Prompts are not used for training | Azure OpenAI/Foundry contractual position for enterprise deployments; no consumer service is in the path. |
 | No new personal-data store | Conversation history is in-process, owner-scoped, capped, and dropped on restart. Nothing is written to OneLake, Eventhouse, or any durable store (solution architecture ADR-012). |
 | No audio processing | Dictation uses the browser Web Speech API. Audio never reaches NovaSteel, so §13's consent obligations are not triggered by the chat. |

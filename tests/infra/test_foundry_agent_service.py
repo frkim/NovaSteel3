@@ -264,6 +264,66 @@ def test_capability_host_deploys_after_the_byo_rbac(main: str) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Project model — Foundry resource + project, never a classic hub
+# ---------------------------------------------------------------------------
+
+
+def test_no_classic_hub_workspaces_anywhere() -> None:
+    """A hub-based ("classic") project is `MachineLearningServices/workspaces`.
+
+    The whole estate is on the Foundry project model
+    (`CognitiveServices/accounts` + `accounts/projects`), so a hub appearing
+    anywhere means something was authored against the old shape.
+    """
+    for path in sorted(BICEP_DIR.rglob("*.bicep")):
+        assert "Microsoft.MachineLearningServices" not in read_text(path), (
+            f"{path.name} declares a classic AI hub workspace; the Foundry project "
+            "model uses Microsoft.CognitiveServices/accounts/projects"
+        )
+
+
+def test_project_resources_use_a_project_capable_api_version(
+    foundry_agents: str, capability_host: str
+) -> None:
+    """`accounts/projects` does not exist before 2025-04-01-preview."""
+    for source in (foundry_agents, capability_host):
+        for match in re.finditer(r"'Microsoft\.CognitiveServices/[^@]+@([^']+)'", source):
+            assert match.group(1) >= "2025-04-01-preview", (
+                f"{match.group(0)} predates the Foundry project model"
+            )
+
+
+def test_foundry_endpoint_is_the_project_model_host(foundry_speech: str) -> None:
+    """`properties.endpoint` returns the classic `cognitiveservices.azure.com` host.
+
+    The Foundry project model — project endpoint and the OpenAI v1 route — is served
+    from `services.ai.azure.com`, and that is what the apps are configured with.
+    """
+    assert (
+        "output foundryEndpoint string = 'https://${foundryName}.services.ai.azure.com'"
+        in foundry_speech
+    )
+
+
+def test_foundry_private_endpoint_resolves_the_project_model_host(
+    foundry_speech: str,
+) -> None:
+    """Without this zone the project endpoint is unreachable from the VNet."""
+    network = code_of(MODULES_DIR / "network.bicep")
+    assert "privatelink.services.ai.azure.com" in network
+    assert re.search(r"aiServices: privateDnsZones\[\d+\]\.id", network)
+    assert "aiServicesPrivateDnsZoneId" in foundry_speech
+    assert "privatelink-services-ai-azure-com" in foundry_speech
+
+
+def test_project_endpoint_output_targets_the_project_not_the_account(
+    foundry_agents: str,
+) -> None:
+    assert "/api/projects/${projectName}" in foundry_agents
+    assert ".services.ai.azure.com" in foundry_agents
+
+
+# ---------------------------------------------------------------------------
 # Wiring
 # ---------------------------------------------------------------------------
 

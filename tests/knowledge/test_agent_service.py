@@ -207,6 +207,24 @@ def test_agent_service_enabled_with_endpoint(monkeypatch):
     assert status.project_endpoint == "https://x.services.ai.azure.com/api/projects/p"
 
 
+def test_agent_service_rejects_an_account_endpoint(monkeypatch):
+    """Agents live on a project. An account endpoint would 404 on the first call."""
+    monkeypatch.setenv(ENV_PROJECT_ENDPOINT, "https://x.services.ai.azure.com")
+    status = agent_service_status()
+    assert status.enabled is False
+    assert "project endpoint" in status.reason
+
+
+def test_agent_service_rewrites_a_classic_host(monkeypatch):
+    """The Foundry project model is served from services.ai.azure.com."""
+    monkeypatch.setenv(
+        ENV_PROJECT_ENDPOINT, "https://x.cognitiveservices.azure.com/api/projects/p"
+    )
+    status = agent_service_status()
+    assert status.enabled is True
+    assert status.project_endpoint == "https://x.services.ai.azure.com/api/projects/p"
+
+
 def test_host_agents_degrades_when_sdk_missing(monkeypatch):
     monkeypatch.setenv(
         ENV_PROJECT_ENDPOINT, "https://x.services.ai.azure.com/api/projects/p"

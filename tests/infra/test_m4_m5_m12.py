@@ -232,7 +232,11 @@ class TestBffTableStorage:
 
     def test_network_outputs_table_dns_zone_id(self) -> None:
         src = read_text(MODULES_DIR / "network.bicep")
-        assert "table: privateDnsZones[6].id" in src, (
+        # Index-agnostic on purpose: the zone list grows (e.g. when
+        # privatelink.services.ai.azure.com was added for the Foundry project
+        # endpoint), and pinning an ordinal here turns an unrelated addition into a
+        # false failure. What matters is that the table zone is exported at all.
+        assert re.search(r"table: privateDnsZones\[\d+\]\.id", src), (
             "network.bicep must output the table private DNS zone ID"
         )
 

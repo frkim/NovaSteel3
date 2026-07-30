@@ -430,6 +430,7 @@ module foundrySpeech 'modules/foundry-speech.bicep' = {
     privateEndpointSubnetId: network.outputs.subnetIds.aiPrivateEndpoints
     cognitiveServicesPrivateDnsZoneId: network.outputs.privateDnsZoneIds.cognitiveServices
     openAiPrivateDnsZoneId: network.outputs.privateDnsZoneIds.openAi
+    aiServicesPrivateDnsZoneId: network.outputs.privateDnsZoneIds.aiServices
     logAnalyticsWorkspaceId: monitoring.outputs.logAnalyticsWorkspaceId
     foundryAgentServiceManuallyValidated: foundryAgentServiceManuallyValidated
     foundryRoleAssignments: [

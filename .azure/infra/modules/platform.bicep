@@ -522,7 +522,10 @@ output appInsightsId string = applicationInsights.id
 output appInsightsName string = applicationInsights.name
 output aiServicesId string = deployAiServices ? (aiServices.?id ?? '') : ''
 output aiServicesName string = deployAiServices ? (aiServices.?name ?? '') : ''
-output aiServicesEndpoint string = deployAiServices ? (aiServices.?properties.?endpoint ?? '') : ''
+@description('Foundry-model account endpoint. Deliberately NOT `properties.endpoint`, which returns the legacy `<name>.cognitiveservices.azure.com` host from the classic Azure OpenAI surface: the Foundry project model is served from `<name>.services.ai.azure.com`, the host that carries both the project endpoint and the versionless OpenAI v1 inference route.')
+output aiServicesEndpoint string = deployAiServices ? 'https://${aiServicesName}.services.ai.azure.com' : ''
+@description('Legacy Azure OpenAI-compatible endpoint. Diagnostics only — application configuration uses `aiServicesEndpoint`.')
+output aiServicesLegacyOpenAiEndpoint string = deployAiServices ? (aiServices.?properties.?endpoint ?? '') : ''
 output chatDeploymentName string = deployAiServices && deployModelDeployments ? chatModelName : ''
 output reasoningDeploymentName string = deployAiServices && deployModelDeployments ? reasoningModelName : ''
 output embeddingDeploymentName string = deployAiServices && deployModelDeployments ? embeddingModelName : ''
