@@ -486,3 +486,7 @@
     justify-content: space-between;
     padding: var(--ns-space-s) var(--ns-space-m);
 }
+
+:global([data-theme="dark"]) .shell {
+    background: linear-gradient(180deg, #111b2f 0%, #192742 100%) fixed no-repeat;
+}
