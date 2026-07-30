@@ -11,7 +11,7 @@ footer: 'AI advises, humans decide'
 
 <div class="tag">Oral Defense</div>
 
-# NovaSteel — AI-Powered <span class="grad">Steel Production</span> Optimization
+# <span style="color: #fff;">NovaSteel</span> — AI-Powered <span class="grad">Steel Production</span> Optimization
 
 <div class="hero-line"></div>
 
@@ -345,9 +345,11 @@ And nothing leaves that stack without a human accepting, modifying, or rejecting
 <div class="split right-wide">
 <div>
 
-- Physics-informed model on silver thermal/cooling features
-- Drivers: heat-flux slope, spatial contrast, cooling residual
-- Advisory only → acknowledge → CMMS work order
+- **Implemented in solution:** Silver thermal/cooling features are scored daily by the Python `scoring-worker`
+- Output written as P10/P50/P90, confidence, and top drivers to governed data + audit
+- Portal flow is advisory only: acknowledge alert → open CMMS work order
+- **AI in simple terms:** it estimates "days left" from wear patterns, like a health forecast for lining
+- It gives a range (best/likely/worst), not one magic number, so planners can act safely
 
 </div>
 <div>
@@ -382,9 +384,11 @@ The engineer stays accountable: they acknowledge the alert and it links to a CMM
 <div class="split right-wide">
 <div>
 
-- Day-ahead price + grid carbon + production constraints
-- Moves **only eligible flexible loads**
-- Human accepts / modifies / rejects with reason code
+- **Implemented in solution:** Gold data provides prices, carbon, production targets, and hard constraints
+- Python `optimizer-worker` solves a MILP (PuLP + CBC) and returns a feasible schedule option
+- Result is reviewed in the portal and stored with accept/modify/reject reason code
+- **AI in simple terms:** it is a smart planner that shifts only flexible work away from expensive hours
+- Hard rules are never broken (required tonnage, locked tasks, and equipment limits)
 
 </div>
 <div>
@@ -420,9 +424,11 @@ Those are single-scenario evidence, not banked savings — realized savings are 
 <div class="split">
 <div>
 
-- Predicts meeting automotive-grade spec **before first lab result**
-- Full genealogy: heat → slab → coil → sample → shipment
-- **No automatic recipe/setpoint write** — what-if only
+- **Implemented in solution:** Genealogy + process features are prepared in silver/gold and scored by Python services
+- The model outputs spec risk plus bounded what-if correction suggestions per heat/coil
+- UI shows predicted first-pass yield impact before the first lab confirmation arrives
+- **AI in simple terms:** it recognizes combinations that looked like past defect patterns
+- **No automatic recipe/setpoint write** — recommendations stay what-if until a human decides
 
 </div>
 <div>
@@ -452,10 +458,11 @@ That distinction matters: this is a what-if recommendation, not an automatic wri
 <div class="split">
 <div>
 
-- Consent-aware Speech **Fast Transcription**
-- Foundry drafts structured procedure:
-  trigger → action → rationale → risk
-- **Source citations** to transcript segments
+- **Implemented in solution:** Consent state machine gates recording, then Speech Fast Transcription creates text
+- Foundry Agent Service drafts a structured procedure (trigger → action → rationale → risk)
+- Every statement links back to transcript citations; draft remains versioned and traceable
+- **AI in simple terms:** it is a first-draft assistant that turns expert talk into a usable checklist
+- Publication still requires human approval; unapproved drafts never become live instructions
 
 </div>
 <div>
@@ -966,37 +973,6 @@ Phase 2: guarded write-back to CMMS/MES — human-approved, bounded, reversible.
 
 <!-- _class: tight backup -->
 
-# Appendix — Deployment, Capacity & Scale
-
-<div class="split">
-<div>
-
-- Capacity: **F2** baseline; **F4** only on measured contention; **F8** pre-approved burst
-- Cost control: 01:00 Logic App pause (non-prod); ARM suspend/resume
-- Production **never** auto-paused
-- Consumers on **Pro/PPU** — we never buy F64 for licensing
-
-</div>
-<div>
-
-| Stage | Scope |
-|---|---|
-| **Demonstration** | Defense demonstration (today) |
-| **Phase 1** | One-site shadow pilot (read-only) |
-| **Phase 2+** | Human-approved write-back after gates |
-
-- Scale: same event/API contract for **4 countries**
-- Region: Sweden Central primary; West Europe = tested contingency
-
-</div>
-</div>
-
-<!-- ⏱ 0:00 · Appendix slide. We start on the smallest Fabric SKU, F2, move to F4 only if measured contention demands it, and keep F8 pre-approved as a demo-day burst — each step doubles the hourly rate, so the portal dialog demands a reason and writes it to the audit trail. We do not buy F64 just for viewer licensing; consumers sit on Pro or PPU. A nightly one-a.m. Logic App safely pauses non-production capacity using the official ARM suspend operation, and production is never auto-paused. Scaling to four countries is a capacity and per-plant-relay decision, not a redesign. -->
-
----
-
-<!-- _class: tight backup -->
-
 # Appendix — Who Is Accountable
 
 | Activity | CISO org | Platform admin | Data scientist | OT/ICS engineer | DPO | RAI board |
@@ -1090,3 +1066,85 @@ Burned error budget triggers a change freeze until root cause is addressed.
 </div>
 
 <!-- ⏱ 0:00 · Appendix slide. Every number I quote on stage is pinned to a seed and reproducible bit-for-bit, so you can regenerate the run yourself. If the live environment misbehaves, there are five rehearsed fallback levels down to a static proof pack, and I will always tell you which level you are watching. -->
+
+---
+
+<!-- _class: tight backup -->
+
+# Appendix — Reusing the NovaSteel Pattern for Glass Plants
+
+<div class="split">
+<div>
+
+**What stays the same (high reuse)**
+
+- Same two-stream data foundation: hot telemetry + governed history in Fabric
+- Same portal pattern: Blazor shell + React MFE + Power BI personas
+- Same compute pattern: Python scoring/optimizer workers + append-only audit
+- Same governance baseline: EU residency, managed identity, RAI gates, human approval
+
+**What changes for glass**
+
+- Asset model: furnaces, forehearth, lehr, forming lines
+- KPIs: kWh/ton glass, pull-rate stability, cullet ratio, defect ppm
+- Feature set: melt profile, viscosity proxies, annealing curve, vision defects
+
+</div>
+<div>
+
+| Steel capability | Glass equivalent |
+|---|---|
+| Lining RUL | Refractory campaign and forehearth wear forecasting |
+| Energy dispatch | Electric boosting + batch timing optimization |
+| In-line quality risk | Bubble/cord/thickness/optical defect risk |
+| Knowledge capture | Shift handover + troubleshooting playbooks |
+
+<span class="pill blue">REUSE</span> Platform and controls stay; process models and KPIs are swapped to glass physics.
+
+</div>
+</div>
+
+<!-- ⏱ 0:00 · Appendix slide. The point is reuse by architecture pattern: keep the governed data core, deterministic compute, portal experience and control framework, then swap only industry semantics — assets, KPIs and physics features. For glass the same blueprint supports forehearth wear, pull-rate stability, energy dispatch, and defect prevention without redesigning the platform. -->
+
+---
+
+<!-- _class: tight backup -->
+
+# Appendix — vNext: Two-way Control with Microsoft Adaptive Cloud
+
+<div class="split right-wide">
+<div>
+
+**Goal**
+
+- Enable selected closed-loop actions for low-risk, repetitive workloads
+
+**Adaptive Cloud implementation**
+
+- **Azure Arc** manages edge Kubernetes lifecycle and policy at plant sites
+- **Azure IoT Operations** provides edge MQTT, OPC UA integration, and local dataflows
+- **Azure IoT Hub** provides cloud command channel, device identity, twins, and jobs
+- **Fabric + AI services** provide prediction/optimization and policy decision context
+
+**Safe control loop**
+
+1. AI marks a recommendation as control-eligible for a specific workload
+2. Policy gate checks safety envelope, interlocks, and approval mode
+3. Command is sent through IoT Hub / IoT Operations to the target edge connector/device
+4. Device acknowledgement + telemetry close the loop into an append-only audit trail
+
+**Guardrail**
+
+- Start in human-confirmed mode; move to bounded autonomy only where formally approved.
+
+</div>
+<div>
+
+![w:610](images/adaptive-cloud-iot-operations.png)
+
+<span class="pill orange">vNext</span> OT safety systems remain authoritative; AI can act only inside predefined control envelopes.
+
+</div>
+</div>
+
+<!-- ⏱ 0:00 · Appendix slide. This is a forward-looking control architecture: Arc-managed edge, IoT Operations for local protocol/runtime, IoT Hub for identity and cloud command, and policy-gated AI decisions. Start with human-confirmed actions, then expand only to bounded autonomous loops where safety, interlocks, and governance approvals are explicit. -->

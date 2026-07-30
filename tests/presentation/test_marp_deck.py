@@ -18,7 +18,7 @@ SLIDES = PRESENTATION / "slides.md"
 THEME = PRESENTATION / "theme.css"
 
 MAIN_SLIDE_COUNT = 22
-BACKUP_SLIDE_COUNT = 13
+BACKUP_SLIDE_COUNT = 14
 MIN_TALK_SECONDS = 34 * 60
 MAX_TALK_SECONDS = 35 * 60
 
@@ -110,7 +110,7 @@ def test_deck_carries_a_compliance_slide_instead_of_the_deployment_slide() -> No
         assert regulation in compliance[0], f"the compliance slide must name {regulation}"
 
     assert not any("# Deployment, Capacity & Scale" in slide for slide in main)
-    assert any("Appendix — Deployment, Capacity & Scale" in slide for slide in backup)
+    assert not any("Appendix — Deployment, Capacity & Scale" in slide for slide in backup)
 
 
 def test_demo_handoff_announces_a_ten_minute_demonstration() -> None:
