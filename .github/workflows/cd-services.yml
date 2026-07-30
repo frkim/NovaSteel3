@@ -22,6 +22,7 @@ on:
           - scoring-worker
           - ingest-relay
           - knowledge-orchestrator
+          - portal-shell
       image:
         description: Immutable approved container image digest
         required: true
@@ -78,6 +79,7 @@ jobs:
       SCORING_CONTAINER_APP: ${{ vars.SCORING_CONTAINER_APP }}
       INGEST_RELAY_CONTAINER_APP: ${{ vars.INGEST_RELAY_CONTAINER_APP }}
       KNOWLEDGE_CONTAINER_APP: ${{ vars.KNOWLEDGE_CONTAINER_APP }}
+      PORTAL_CONTAINER_APP: ${{ vars.PORTAL_CONTAINER_APP }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
@@ -98,6 +100,7 @@ jobs:
             scoring-worker) app="$SCORING_CONTAINER_APP" ;;
             ingest-relay) app="$INGEST_RELAY_CONTAINER_APP" ;;
             knowledge-orchestrator) app="$KNOWLEDGE_CONTAINER_APP" ;;
+            portal-shell) app="$PORTAL_CONTAINER_APP" ;;
           esac
           test -n "$CONTAINER_RESOURCE_GROUP"
           test -n "$app"
