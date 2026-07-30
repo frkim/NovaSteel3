@@ -13,7 +13,6 @@ tested is our loop, not the wire format.
 
 from __future__ import annotations
 
-import importlib.util
 import json
 
 import pytest
@@ -32,8 +31,15 @@ ENDPOINT = "https://x.services.ai.azure.com/api/projects/p"
 
 # Building an SDK `FunctionTool` needs the optional `azure` extra, which the
 # offline suite does not install. Only the assertions that reach that call skip.
+# Guarded import, not `importlib.util.find_spec`: find_spec imports the parent
+# package, so it raises at collection time when `azure.ai` is absent.
+try:  # pragma: no cover - depends on which extras are installed
+    from azure.ai.projects.models import FunctionTool as _FunctionTool
+except Exception:  # pragma: no cover
+    _FunctionTool = None
+
 requires_sdk = pytest.mark.skipif(
-    importlib.util.find_spec("azure.ai.projects") is None,
+    _FunctionTool is None,
     reason="azure-ai-projects is an optional extra; the SDK object cannot be built without it",
 )
 

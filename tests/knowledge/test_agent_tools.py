@@ -7,7 +7,6 @@ behaviour and the strict-schema shape that Foundry validates against.
 
 from __future__ import annotations
 
-import importlib.util
 import json
 
 import pytest
@@ -26,8 +25,17 @@ from knowledge_orchestrator.agent_tools import (
 # library and pytest (see the service README), which is how CI runs it. Only the
 # handful of assertions that build a real SDK object need the optional `azure`
 # extra, so they skip rather than fail where it is absent.
+#
+# This is a guarded import rather than `importlib.util.find_spec`, because
+# find_spec imports the parent package and so raises ModuleNotFoundError -- at
+# collection time, failing the whole module -- when `azure.ai` is missing.
+try:  # pragma: no cover - depends on which extras are installed
+    from azure.ai.projects.models import FunctionTool as _FunctionTool
+except Exception:  # pragma: no cover
+    _FunctionTool = None
+
 requires_sdk = pytest.mark.skipif(
-    importlib.util.find_spec("azure.ai.projects") is None,
+    _FunctionTool is None,
     reason="azure-ai-projects is an optional extra; the SDK object cannot be built without it",
 )
 
