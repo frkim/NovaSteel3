@@ -1,0 +1,4 @@
+# Pinned test dependencies for the GitHub Actions workflow validation suite.
+# Restored only from the approved Microsoft feed (see pip.conf). Never public PyPI.
+pytest==9.1.1
+PyYAML==6.0.3
