@@ -60,7 +60,7 @@ $params = Get-Content $ParameterFile -Raw | ConvertFrom-Json -Depth 50
 
 $capacityResourceId = '/subscriptions/3377065c-bf76-4767-a982-32bce4ffb592/resourceGroups/rg-novasteelv3-demo-sc/providers/Microsoft.Fabric/capacities/novasteelv3fabric'
 $clusterUri         = 'https://trd-q10bnypm07cdfv120p.z8.kusto.fabric.microsoft.com'
-$kqlDatabase        = 'kql-novasteelv3-operations'
+$kqlDatabase        = '7c3ab91a-c8ac-4658-83b5-f500dad946ec'
 $coreLakehouseId    = '623b4455-5c28-4235-8138-883d69a5810d'
 $landingLakehouseId = 'f03d1c6b-fad8-4992-819f-f66fc4f01001'
 

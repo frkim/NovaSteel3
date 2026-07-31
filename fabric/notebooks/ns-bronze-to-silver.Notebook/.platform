@@ -2,7 +2,7 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
   "metadata": {
     "type": "Notebook",
-    "displayName": "ns-bronze-to-silver",
+    "displayName": "v3-bronze-to-silver",
     "description": "Validate, deduplicate, normalize, SCD-resolve, and quarantine bronze events."
   },
   "config": {

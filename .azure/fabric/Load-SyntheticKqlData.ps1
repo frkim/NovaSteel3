@@ -163,7 +163,7 @@ for ($i = 0; $i -lt 10; $i++) {
     $qid   = "NS-DEMO-QR-$($i.ToString('D4'))"
     $eid   = "NS-DEMO-QE-$($i.ToString('D4'))"
     $reason= $qReasons[$i % 5]
-    $qRows.Add("$qid,$t,$eid,$t,$t,NS-DEMO-GW-$pi,$plant,${assets[$pi]},novasteel.telemetry.v1,1,$reason,Automated quarantine rule QR-$(($i%5)+1),Celsius,bar,,{},NS-DEMO-CORR-QR-$i,SYNTHETIC,DEMO-NONPERSONAL,$scenario,100")
+    $qRows.Add("$qid,$t,$eid,$t,$t,NS-DEMO-GW-$pi,$plant,$($assets[$pi]),novasteel.telemetry.v1,1,$reason,Automated quarantine rule QR-$(($i%5)+1),Celsius,bar,,{},NS-DEMO-CORR-QR-$i,SYNTHETIC,DEMO-NONPERSONAL,$scenario,100")
 }
 $qCsv  = $qRows -join "`n"
 Invoke-KqlCommand -Label "Insert $($qRows.Count) quarantine rows" -Csl ".ingest inline into table ingest_quarantine_hot <|`n$qCsv"

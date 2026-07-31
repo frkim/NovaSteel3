@@ -40,7 +40,7 @@
       "id": "edb908bb-4d3b-4b62-80ad-8937ebe302b4"
     },
     "kqlOperations": {
-      "displayName": "kql-novasteelv3-operations",
+      "displayName": "kql-ns-operations",
       "id": "7c3ab91a-c8ac-4658-83b5-f500dad946ec"
     },
     "eventstreamTelemetry": {

@@ -190,13 +190,13 @@
 // Materialized views
 // -----------------------------------------------------------------------------
 
-.create-or-alter materialized-view with (backfill=false, autoUpdateSchema=true) mv_telemetry_latest_by_signal on table telemetry_hot
+.create-or-alter materialized-view with (autoUpdateSchema=true) mv_telemetry_latest_by_signal on table telemetry_hot
 {
     telemetry_hot
     | summarize arg_max(event_ts, *) by plant_id, asset_id, sensor_id, signal_code
 }
 
-.create-or-alter materialized-view with (backfill=false) mv_telemetry_1m on table telemetry_hot
+.create-or-alter materialized-view mv_telemetry_1m on table telemetry_hot
 {
     telemetry_hot
     | summarize
@@ -208,25 +208,25 @@
       by bin(event_ts, 1m), plant_id, asset_id, signal_code, unit
 }
 
-.create-or-alter materialized-view with (backfill=false, autoUpdateSchema=true) mv_alarm_current on table alarm_hot
+.create-or-alter materialized-view with (autoUpdateSchema=true) mv_alarm_current on table alarm_hot
 {
     alarm_hot
     | summarize arg_max(event_ts, *) by alarm_id
 }
 
-.create-or-alter materialized-view with (backfill=false, autoUpdateSchema=true) mv_gateway_latest on table gateway_health_hot
+.create-or-alter materialized-view with (autoUpdateSchema=true) mv_gateway_latest on table gateway_health_hot
 {
     gateway_health_hot
     | summarize arg_max(event_ts, *) by plant_id, gateway_id, source_id
 }
 
-.create-or-alter materialized-view with (backfill=false, autoUpdateSchema=true) mv_model_latest on table model_inference_hot
+.create-or-alter materialized-view with (autoUpdateSchema=true) mv_model_latest on table model_inference_hot
 {
     model_inference_hot
     | summarize arg_max(feature_snapshot_ts, *) by plant_id, asset_id, component_id, model_id
 }
 
-.create-or-alter materialized-view with (backfill=false) mv_quarantine_15m on table ingest_quarantine_hot
+.create-or-alter materialized-view mv_quarantine_15m on table ingest_quarantine_hot
 {
     ingest_quarantine_hot
     | summarize quarantined_count=count()
