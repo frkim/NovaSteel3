@@ -1,0 +1,43 @@
+{
+  "id": "e4589aeb-4e81-59c9-b43c-010e332c76d0",
+  "dataBindingConfiguration": {
+    "dataBindingType": "TimeSeries",
+    "timestampColumnName": "scored_at",
+    "propertyBindings": [
+      {
+        "sourceColumnName": "asset_id",
+        "targetPropertyId": "30031"
+      },
+      {
+        "sourceColumnName": "scored_at",
+        "targetPropertyId": "30041"
+      },
+      {
+        "sourceColumnName": "rul_days",
+        "targetPropertyId": "30042"
+      },
+      {
+        "sourceColumnName": "rul_days_low",
+        "targetPropertyId": "30043"
+      },
+      {
+        "sourceColumnName": "rul_days_high",
+        "targetPropertyId": "30044"
+      },
+      {
+        "sourceColumnName": "risk_score",
+        "targetPropertyId": "30045"
+      },
+      {
+        "sourceColumnName": "confidence",
+        "targetPropertyId": "30046"
+      }
+    ],
+    "sourceTableProperties": {
+      "sourceType": "LakehouseTable",
+      "workspaceId": "3d9c0b49-5201-4914-8149-06071b529918",
+      "itemId": "623b4455-5c28-4235-8138-883d69a5810d",
+      "sourceTableName": "onto_asset_health"
+    }
+  }
+}

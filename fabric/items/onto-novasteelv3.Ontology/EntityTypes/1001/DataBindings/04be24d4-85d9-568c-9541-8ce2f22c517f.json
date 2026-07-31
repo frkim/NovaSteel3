@@ -1,0 +1,47 @@
+{
+  "id": "04be24d4-85d9-568c-9541-8ce2f22c517f",
+  "dataBindingConfiguration": {
+    "dataBindingType": "TimeSeries",
+    "timestampColumnName": "metric_ts",
+    "propertyBindings": [
+      {
+        "sourceColumnName": "plant_id",
+        "targetPropertyId": "30011"
+      },
+      {
+        "sourceColumnName": "metric_ts",
+        "targetPropertyId": "30021"
+      },
+      {
+        "sourceColumnName": "energy_gj",
+        "targetPropertyId": "30022"
+      },
+      {
+        "sourceColumnName": "electricity_mwh",
+        "targetPropertyId": "30023"
+      },
+      {
+        "sourceColumnName": "energy_cost_eur",
+        "targetPropertyId": "30024"
+      },
+      {
+        "sourceColumnName": "total_co2e_t",
+        "targetPropertyId": "30025"
+      },
+      {
+        "sourceColumnName": "crude_steel_tons",
+        "targetPropertyId": "30026"
+      },
+      {
+        "sourceColumnName": "good_tons",
+        "targetPropertyId": "30027"
+      }
+    ],
+    "sourceTableProperties": {
+      "sourceType": "LakehouseTable",
+      "workspaceId": "3d9c0b49-5201-4914-8149-06071b529918",
+      "itemId": "623b4455-5c28-4235-8138-883d69a5810d",
+      "sourceTableName": "onto_plant_daily"
+    }
+  }
+}

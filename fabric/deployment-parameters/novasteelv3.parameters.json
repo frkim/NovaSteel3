@@ -59,6 +59,10 @@
       "displayName": "v3-initialize-lakehouses",
       "id": "05a68a3a-aff4-4c1a-b2cc-833feabb2f87"
     },
+    "notebookOntologyBindings": {
+      "displayName": "v3-ontology-bindings",
+      "id": "7dc229b4-061d-4db6-bb78-e66dda7c5c03"
+    },
     "notebookLoadReferenceData": {
       "displayName": "v3-load-reference-data",
       "id": "943bcd97-807e-455d-a02c-70c827e00df3"
@@ -110,6 +114,14 @@
     "dataAgent": {
       "displayName": "da-novasteelv3",
       "id": "8d05f5f4-5e31-4180-90e9-bfa84ba7127d"
+    },
+    "ontology": {
+      "displayName": "onto_novasteelv3",
+      "id": "851e6dd0-7bb1-441f-a9e8-79bb6d2bb3b1"
+    },
+    "ontologyGraphModel": {
+      "displayName": "onto_novasteelv3_graph_851e6dd07bb1441fa9e879bb6d2bb3b1",
+      "id": "6c8ece6b-7f51-4de9-bdf9-ced0b8655288"
     }
   },
   "onelake": {
@@ -138,6 +150,7 @@
     "deployPipelines": true,
     "deploySemanticModel": true,
     "semanticModelBindingValidated": true,
-    "deployDataAgent": true
+    "deployDataAgent": true,
+    "deployOntology": true
   }
 }

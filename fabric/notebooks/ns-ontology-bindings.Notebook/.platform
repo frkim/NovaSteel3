@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Notebook",
+    "displayName": "v3-ontology-bindings",
+    "description": "Materialize the nine purpose-built onto_* Delta serving tables (four static entities, three time series, two relationships) in lh_novasteelv3_core that a Fabric IQ Ontology item binds to, casting silver string timestamps to real TimestampType and synthesizing single-column entity keys."
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "63000000-0000-4630-8630-000000000015"
+  }
+}

@@ -116,6 +116,25 @@
       ]
     },
     {
+      "key": "notebookOntologyBindings",
+      "type": "Notebook",
+      "displayName": "v3-ontology-bindings",
+      "description": "Materialize the nine purpose-built onto_* Delta serving tables in lh_novasteelv3_core (four static entities, three time series, two relationships) that a Fabric IQ Ontology item binds to, casting silver string timestamps to real TimestampType.",
+      "restCollection": "/notebooks",
+      "sourceDirectory": "notebooks/ns-ontology-bindings.Notebook",
+      "definitionFormat": "ipynb",
+      "definitionParts": ["notebook-content.py", ".platform"],
+      "createWithoutDefinition": false,
+      "cliDeployable": true,
+      "bindingGate": null,
+      "deploymentOption": "deployNotebooks",
+      "dependencies": ["coreLakehouse", "notebookSilverToGold", "notebookDemoScoring"],
+      "manualGates": [
+        "Run after silver/gold and demo scoring so dim_*, fact_telemetry, fact_furnace_rul and the daily facts are populated.",
+        "Table and column names are FROZEN: the Fabric IQ Ontology definition is authored against exactly these onto_* names."
+      ]
+    },
+    {
       "key": "notebookSeedBronzeFromPack",
       "type": "Notebook",
       "displayName": "v3-seed-bronze-from-pack",
@@ -348,6 +367,33 @@
       ]
     },
     {
+      "key": "ontology",
+      "type": "Ontology",
+      "displayName": "onto_novasteelv3",
+      "description": "Fabric IQ ontology — AI-facing semantic layer between the gold star schema and the data agent. Plant, Asset, Sensor and Grade entity types with hasAsset/hasSensor relationships, bound to the onto_* serving tables.",
+      "restCollection": "/items",
+      "sourceDirectory": "items/onto-novasteelv3.Ontology",
+      "definitionFormat": null,
+      "definitionParts": [
+        "definition.json",
+        ".platform",
+        "EntityTypes/**/*.json",
+        "RelationshipTypes/**/*.json"
+      ],
+      "createWithoutDefinition": false,
+      "cliDeployable": false,
+      "bindingGate": null,
+      "deploymentOption": "deployOntology",
+      "dependencies": ["coreLakehouse", "notebookOntologyBindings"],
+      "manualGates": [
+        "Ontology is a preview item type — confirm it is enabled in the target tenant before deployment.",
+        "Item display names reject hyphens; use letters, numbers and underscores only.",
+        "Run the ns-ontology-bindings notebook first so the onto_* tables exist with real timestamp columns.",
+        "Deploy with .azure/fabric/Deploy-Ontology.ps1, then trigger a RefreshGraph job on the companion GraphModel and verify node/edge counts with the GQL query API.",
+        "Avoid GQL reserved words when naming relationship types (for example 'contains' fails to parse unqualified)."
+      ]
+    },
+    {
       "key": "dataAgent",
       "type": "DataAgent",
       "displayName": "da-novasteelv3",
@@ -360,9 +406,11 @@
       "cliDeployable": true,
       "bindingGate": null,
       "deploymentOption": "deployDataAgent",
-      "dependencies": ["kqlOperations", "coreLakehouse"],
+      "dependencies": ["kqlOperations", "coreLakehouse", "semanticModel", "ontology"],
       "manualGates": [
         "Verify the DataAgent item type is available in the target Fabric tenant before deployment.",
+        "Attach the ontology's companion GraphModel as a 'graph' datasource; the datasource schema has no 'ontology' type.",
+        "updateDefinition is all-or-nothing — resend every existing part or the omitted ones are dropped.",
         "Review the agent's natural language query scope and data classification before enabling in production."
       ]
     }

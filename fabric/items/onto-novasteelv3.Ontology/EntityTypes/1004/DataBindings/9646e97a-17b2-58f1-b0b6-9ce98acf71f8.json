@@ -1,0 +1,26 @@
+{
+  "id": "9646e97a-17b2-58f1-b0b6-9ce98acf71f8",
+  "dataBindingConfiguration": {
+    "dataBindingType": "NonTimeSeries",
+    "propertyBindings": [
+      {
+        "sourceColumnName": "grade_code",
+        "targetPropertyId": "30071"
+      },
+      {
+        "sourceColumnName": "grade_family",
+        "targetPropertyId": "30072"
+      },
+      {
+        "sourceColumnName": "high_grade_flag",
+        "targetPropertyId": "30073"
+      }
+    ],
+    "sourceTableProperties": {
+      "sourceType": "LakehouseTable",
+      "workspaceId": "3d9c0b49-5201-4914-8149-06071b529918",
+      "itemId": "623b4455-5c28-4235-8138-883d69a5810d",
+      "sourceTableName": "onto_grade"
+    }
+  }
+}

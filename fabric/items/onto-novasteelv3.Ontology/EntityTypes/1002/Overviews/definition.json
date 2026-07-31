@@ -1,0 +1,16 @@
+{
+  "widgets": [
+    {
+      "type": "lineChart",
+      "yAxisPropertyId": "30042",
+      "id": "9758fdd2-f3f7-5c71-a9bb-8e86dbf03efa",
+      "title": "Remaining useful life (days)"
+    }
+  ],
+  "settings": {
+    "type": "fixedTime",
+    "fixedTimeRange": "Last30Days",
+    "interval": "OneDay",
+    "aggregation": "Average"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "id": "bb9bc4f5-ba50-51f3-8f10-a0e5d6ba58b2",
+  "dataBindingConfiguration": {
+    "dataBindingType": "NonTimeSeries",
+    "propertyBindings": [
+      {
+        "sourceColumnName": "plant_id",
+        "targetPropertyId": "30011"
+      },
+      {
+        "sourceColumnName": "plant_name",
+        "targetPropertyId": "30012"
+      },
+      {
+        "sourceColumnName": "country_code",
+        "targetPropertyId": "30013"
+      },
+      {
+        "sourceColumnName": "time_zone",
+        "targetPropertyId": "30014"
+      },
+      {
+        "sourceColumnName": "route",
+        "targetPropertyId": "30015"
+      }
+    ],
+    "sourceTableProperties": {
+      "sourceType": "LakehouseTable",
+      "workspaceId": "3d9c0b49-5201-4914-8149-06071b529918",
+      "itemId": "623b4455-5c28-4235-8138-883d69a5810d",
+      "sourceTableName": "onto_plant"
+    }
+  }
+}

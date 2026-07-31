@@ -1,0 +1,42 @@
+{
+  "id": "7d5e895f-2b55-5a68-b5ae-1973325e1a7d",
+  "dataBindingConfiguration": {
+    "dataBindingType": "NonTimeSeries",
+    "propertyBindings": [
+      {
+        "sourceColumnName": "asset_id",
+        "targetPropertyId": "30031"
+      },
+      {
+        "sourceColumnName": "plant_id",
+        "targetPropertyId": "30032"
+      },
+      {
+        "sourceColumnName": "asset_type",
+        "targetPropertyId": "30033"
+      },
+      {
+        "sourceColumnName": "area",
+        "targetPropertyId": "30034"
+      },
+      {
+        "sourceColumnName": "line_id",
+        "targetPropertyId": "30035"
+      },
+      {
+        "sourceColumnName": "criticality",
+        "targetPropertyId": "30036"
+      },
+      {
+        "sourceColumnName": "commissioned_state",
+        "targetPropertyId": "30037"
+      }
+    ],
+    "sourceTableProperties": {
+      "sourceType": "LakehouseTable",
+      "workspaceId": "3d9c0b49-5201-4914-8149-06071b529918",
+      "itemId": "623b4455-5c28-4235-8138-883d69a5810d",
+      "sourceTableName": "onto_asset"
+    }
+  }
+}
