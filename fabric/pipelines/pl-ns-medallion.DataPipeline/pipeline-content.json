@@ -24,11 +24,36 @@
         }
       },
       {
-        "name": "Bronze_to_Silver",
+        "name": "Load_Reference_Data",
         "type": "TridentNotebook",
         "dependsOn": [
           {
             "activity": "Initialize_Lakehouses",
+            "dependencyConditions": ["Succeeded"]
+          }
+        ],
+        "policy": {
+          "timeout": "0.01:00:00",
+          "retry": 1,
+          "retryIntervalInSeconds": 60,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "typeProperties": {
+          "notebookId": "{{item.notebookLoadReferenceData.id}}",
+          "workspaceId": "{{workspace.dataCore.id}}",
+          "parameters": {
+            "ENVIRONMENT": { "value": "{{environment}}", "type": "string" },
+            "CORE_TABLES_URI": { "value": "{{onelake.coreTablesUri}}", "type": "string" }
+          }
+        }
+      },
+      {
+        "name": "Bronze_to_Silver",
+        "type": "TridentNotebook",
+        "dependsOn": [
+          {
+            "activity": "Load_Reference_Data",
             "dependencyConditions": ["Succeeded"]
           }
         ],

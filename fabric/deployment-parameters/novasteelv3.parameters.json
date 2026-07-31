@@ -63,6 +63,10 @@
       "displayName": "v3-load-reference-data",
       "id": "943bcd97-807e-455d-a02c-70c827e00df3"
     },
+    "notebookSeedBronzeFromPack": {
+      "displayName": "v3-seed-bronze-from-pack",
+      "id": "86ec3acd-3dd3-4519-84ab-32eeaf0641a2"
+    },
     "notebookLoadOperationalEnvelopes": {
       "displayName": "v3-load-operational-envelopes",
       "id": "f5a9e09c-72c8-48d3-b348-86ed51e18cf0"

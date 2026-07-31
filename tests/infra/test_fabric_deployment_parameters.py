@@ -66,31 +66,26 @@ def test_live_workspace_parameters_record_every_deployed_item_id() -> None:
     """The live parameter file is the map back to the real estate.
 
     An item with a blank id cannot be re-targeted by a redeployment or torn down
-    by a cleanup script, so a blank here is a loose end rather than a detail. The
-    semantic model is the one legitimate exception: ``deploySemanticModel`` is
-    false, so it has deliberately never been created.
+    by a cleanup script, so a blank here is a loose end rather than a detail.
+    Every item in the novasteelv3 workspace, semantic model included, is now
+    deployed, so there is no legitimate blank left.
     """
     parameters = _load(PARAMETERS_ROOT / "novasteelv3.parameters.json")
     items = parameters["items"]
 
     unresolved = {key for key, value in items.items() if not value["id"].strip()}
 
-    assert unresolved == {"semanticOperations"}, (
-        "Unexpected items without a deployed id: "
-        f"{sorted(unresolved - {'semanticOperations'})}"
-    )
-    assert parameters["deploymentOptions"]["deploySemanticModel"] is False
+    assert not unresolved, f"Items without a deployed id: {sorted(unresolved)}"
+    assert parameters["deploymentOptions"]["deploySemanticModel"] is True
 
 
 def test_eventstream_parameters_match_the_authored_item() -> None:
     """The Eventstream is deployed, so its identity must be pinned here.
 
     Its Eventhouse destinations resolve ``{{item.kqlOperations.displayName}}``
-    from this file rather than from the catalogue, which is what lets the
-    catalogue keep the generic ``kql-ns-operations`` name while the live database
-    is ``kql-novasteelv3-operations``. If those two ever drift apart the stream
-    routes into a database that does not exist and the hot tables stay empty
-    without erroring.
+    from this file rather than from the catalogue, so the two must name the same
+    database. If they ever drift apart the stream routes into a database that
+    does not exist and the hot tables stay empty without erroring.
     """
     parameters = _load(PARAMETERS_ROOT / "novasteelv3.parameters.json")
     eventstream = parameters["items"]["eventstreamTelemetry"]
@@ -101,4 +96,10 @@ def test_eventstream_parameters_match_the_authored_item() -> None:
 
     definition = json.dumps(_load(authored_dir / "eventstream.json"))
     if "{{item.kqlOperations.displayName}}" in definition:
-        assert parameters["items"]["kqlOperations"]["displayName"] == "kql-novasteelv3-operations"
+        catalogue = _load(PARAMETERS_ROOT / "novasteelv3.items-manifest.json")
+        catalogued = next(
+            item["displayName"]
+            for item in catalogue["supportedItems"]
+            if item["key"] == "kqlOperations"
+        )
+        assert parameters["items"]["kqlOperations"]["displayName"] == catalogued

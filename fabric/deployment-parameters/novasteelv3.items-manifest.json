@@ -62,7 +62,7 @@
     {
       "key": "kqlOperations",
       "type": "KQLDatabase",
-      "displayName": "kql-novasteelv3-operations",
+      "displayName": "kql-ns-operations",
       "description": "Isolated novasteelv3 hot telemetry, alarms, gateway health, inference, and quarantine.",
       "restCollection": "/kqlDatabases",
       "sourceDirectory": "items/kql-ns-operations.KQLDatabase",
@@ -113,6 +113,25 @@
       "manualGates": [
         "Upload the reference CSVs to Files/reference-data/ before running (tools/fabric/Load-AnalyticalGold.ps1 -Layer reference).",
         "Must run before v3-bronze-to-silver: every event is quarantined as UNKNOWN_ASSET (DQ-REF-001) while the dimensions are empty."
+      ]
+    },
+    {
+      "key": "notebookSeedBronzeFromPack",
+      "type": "Notebook",
+      "displayName": "v3-seed-bronze-from-pack",
+      "description": "Expand the committed operational envelope pack into landing.bronze_event_envelope so the medallion has every event family, not just the thin telemetry slice the Eventstream captured. Idempotent MERGE on event_id.",
+      "restCollection": "/notebooks",
+      "sourceDirectory": "notebooks/ns-seed-bronze-from-pack.Notebook",
+      "definitionFormat": "ipynb",
+      "definitionParts": ["notebook-content.py", ".platform"],
+      "createWithoutDefinition": false,
+      "cliDeployable": true,
+      "bindingGate": null,
+      "deploymentOption": "deployNotebooks",
+      "dependencies": ["landingLakehouse", "coreLakehouse", "notebookInitialize"],
+      "manualGates": [
+        "Upload the NDJSON pack to Files/operational-envelopes/ before running (tools/fabric/Load-AnalyticalGold.ps1 -Layer operational).",
+        "Demo/dev/test only: it replays a deterministic pack into the landing zone that the Eventstream also writes to."
       ]
     },
     {
@@ -360,9 +379,9 @@
       "key": "rtiDashboard",
       "assetType": "KQLDashboard",
       "sourcePath": "fabric/rti/dashboard-spec.json",
-      "reason": "Queries and visual metadata are portable, but datasource IDs, dashboard layout/export format, and permissions must be validated from a tenant-exported KQL dashboard definition against the novasteelv3 kql-novasteelv3-operations database before API deployment.",
+      "reason": "Queries and visual metadata are portable, but datasource IDs, dashboard layout/export format, and permissions must be validated from a tenant-exported KQL dashboard definition against the novasteelv3 kql-ns-operations database before API deployment.",
       "completionEvidence": [
-        "All queries in fabric/rti/dashboard-queries.kql run against kql-novasteelv3-operations.",
+        "All queries in fabric/rti/dashboard-queries.kql run against kql-ns-operations.",
         "Freshness, gateway state, active alarms, model score, and quarantine visuals render in the novasteelv3 workspace only.",
         "A tenant-exported definition is checked in before enabling automated import."
       ]
