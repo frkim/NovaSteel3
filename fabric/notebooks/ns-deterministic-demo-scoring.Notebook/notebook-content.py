@@ -55,8 +55,13 @@ def upsert(frame: DataFrame, table_name: str, keys) -> int:
 
 require_resolved("ENVIRONMENT", ENVIRONMENT)
 require_resolved("CORE_TABLES_URI", CORE_TABLES_URI)
-if ENVIRONMENT not in {"dev", "test", "demo"}:
-    raise ValueError("Deterministic demo scoring is hard-disabled outside dev/test/demo")
+_ENV_ALLOWED_SUFFIXES = ("dev", "test", "demo")
+_env_normalized = ENVIRONMENT.strip().lower()
+if not any(_env_normalized == t or _env_normalized.endswith("-" + t) for t in _ENV_ALLOWED_SUFFIXES):
+    raise ValueError(
+        "Deterministic demo scoring is hard-disabled outside dev/test/demo "
+        f"(got ENVIRONMENT={ENVIRONMENT!r})"
+    )
 
 telemetry = read("fact_telemetry")
 if telemetry.where(F.col("data_classification") != "SYNTHETIC").limit(1).count() > 0:

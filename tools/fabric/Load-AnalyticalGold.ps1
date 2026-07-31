@@ -119,17 +119,32 @@ if ($useAzcopy) {
         azcopy copy "$($f.FullName)" "$dest" --overwrite=true --from-to=LocalBlob | Out-Null
     }
 } else {
-    Write-Host 'azcopy not found; uploading via az storage fs (AAD login)...'
+    # OneLake does not support the Blob endpoint that `az storage fs file upload`
+    # targets (it fails with EndpointUnsupportedAccountFeatures). Use the ADLS
+    # Gen2 DFS REST API directly: create -> append -> flush.
+    Write-Host 'azcopy not found; uploading via OneLake DFS REST (AAD login)...'
+    $dfsToken = az account get-access-token --resource 'https://storage.azure.com' --query accessToken -o tsv
+    if (-not $dfsToken) { throw 'Could not acquire a storage.azure.com token via az.' }
+    $dfsHeaders = @{ Authorization = "Bearer $dfsToken"; 'x-ms-version' = '2023-11-03' }
+    $uploadFailures = @()
     foreach ($f in $files) {
-        $relPath = "$coreLakehouse/Files/$FilesSubPath/$($f.Name)"
+        $target = "$oneLakeDfs/$($f.Name)"
         Write-Host "  -> $($f.Name)"
-        az storage fs file upload `
-            --account-name onelake `
-            --file-system $workspaceId `
-            --path $relPath `
-            --source "$($f.FullName)" `
-            --auth-mode login `
-            --overwrite true | Out-Null
+        try {
+            Invoke-RestMethod -Uri "${target}?resource=file" -Method PUT -Headers $dfsHeaders -ErrorAction Stop | Out-Null
+            $bytes = [System.IO.File]::ReadAllBytes($f.FullName)
+            if ($bytes.Length -gt 0) {
+                Invoke-RestMethod -Uri "${target}?action=append&position=0" -Method PATCH -Headers $dfsHeaders `
+                    -Body $bytes -ContentType 'application/octet-stream' -ErrorAction Stop | Out-Null
+            }
+            Invoke-RestMethod -Uri "${target}?action=flush&position=$($bytes.Length)" -Method PATCH -Headers $dfsHeaders -ErrorAction Stop | Out-Null
+        }
+        catch {
+            $uploadFailures += "$($f.Name): $($_.Exception.Message)"
+        }
+    }
+    if ($uploadFailures.Count -gt 0) {
+        throw "Upload failed for $($uploadFailures.Count) file(s):`n  " + ($uploadFailures -join "`n  ")
     }
 }
 Write-Host "Uploaded $($files.Count) file(s) to Files/$FilesSubPath."

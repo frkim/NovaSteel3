@@ -99,8 +99,13 @@ def upsert_on_event_id(frame, table_name: str) -> int:
 
 require_resolved("ENVIRONMENT", ENVIRONMENT)
 require_resolved("CORE_TABLES_URI", CORE_TABLES_URI)
-if ENVIRONMENT not in {"dev", "test", "demo"}:
-    raise ValueError("Operational demo-data load is hard-disabled outside dev/test/demo")
+_ENV_ALLOWED_SUFFIXES = ("dev", "test", "demo")
+_env_normalized = ENVIRONMENT.strip().lower()
+if not any(_env_normalized == t or _env_normalized.endswith("-" + t) for t in _ENV_ALLOWED_SUFFIXES):
+    raise ValueError(
+        "Operational demo-data load is hard-disabled outside dev/test/demo "
+        f"(got ENVIRONMENT={ENVIRONMENT!r})"
+    )
 
 written = {}
 for table_name in OPERATIONAL_DATASETS:

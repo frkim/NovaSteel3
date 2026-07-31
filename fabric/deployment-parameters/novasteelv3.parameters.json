@@ -59,6 +59,14 @@
       "displayName": "v3-initialize-lakehouses",
       "id": "05a68a3a-aff4-4c1a-b2cc-833feabb2f87"
     },
+    "notebookLoadOperationalEnvelopes": {
+      "displayName": "v3-load-operational-envelopes",
+      "id": "f5a9e09c-72c8-48d3-b348-86ed51e18cf0"
+    },
+    "notebookLoadAnalyticalGold": {
+      "displayName": "v3-load-analytical-gold",
+      "id": "6a1bc15c-7414-4c8d-a1f0-cb3b31009bec"
+    },
     "notebookBronzeToSilver": {
       "displayName": "v3-bronze-to-silver",
       "id": "67b8d7fd-e2cb-42a7-a9a2-80dd6012af3a"

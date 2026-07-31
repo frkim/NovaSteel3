@@ -97,6 +97,44 @@
       ]
     },
     {
+      "key": "notebookLoadOperationalEnvelopes",
+      "type": "Notebook",
+      "displayName": "v3-load-operational-envelopes",
+      "description": "Idempotently load the operational simulator-envelope datasets (uploaded to OneLake Files as NDJSON) into lh_novasteelv3_core Delta tables that the BFF reads when BFF_DATA_SOURCE=fabric.",
+      "restCollection": "/notebooks",
+      "sourceDirectory": "notebooks/ns-load-operational-envelopes.Notebook",
+      "definitionFormat": "fabricGitSource",
+      "definitionParts": ["notebook-content.py", ".platform"],
+      "createWithoutDefinition": false,
+      "cliDeployable": true,
+      "bindingGate": null,
+      "deploymentOption": "deployNotebooks",
+      "dependencies": ["coreLakehouse", "notebookInitialize"],
+      "manualGates": [
+        "Upload the NDJSON pack to Files/operational-envelopes/ before running (tools/fabric/Load-AnalyticalGold.ps1 -Layer operational).",
+        "The nine dataset names must stay in sync with simulator/fabric_operational.OPERATIONAL_DATASETS and bff_api.fabric_source.KNOWN_DATASETS."
+      ]
+    },
+    {
+      "key": "notebookLoadAnalyticalGold",
+      "type": "Notebook",
+      "displayName": "v3-load-analytical-gold",
+      "description": "Idempotently load the multi-month analytical gold facts (uploaded to OneLake Files) into lh_novasteelv3_core Delta tables.",
+      "restCollection": "/notebooks",
+      "sourceDirectory": "notebooks/ns-load-analytical-gold.Notebook",
+      "definitionFormat": "fabricGitSource",
+      "definitionParts": ["notebook-content.py", ".platform"],
+      "createWithoutDefinition": false,
+      "cliDeployable": true,
+      "bindingGate": null,
+      "deploymentOption": "deployNotebooks",
+      "dependencies": ["coreLakehouse", "notebookInitialize"],
+      "manualGates": [
+        "Upload the gold CSV pack to Files/analytical-gold/<scenario>/ before running (tools/fabric/Load-AnalyticalGold.ps1).",
+        "Idempotency keys must stay in sync with simulator/analytics.py::IDEMPOTENCY_KEYS and contracts/data/gold.v2.json."
+      ]
+    },
+    {
       "key": "notebookBronzeToSilver",
       "type": "Notebook",
       "displayName": "v3-bronze-to-silver",
@@ -220,6 +258,7 @@
       "sourceDirectory": "semantic-model/sm-ns-operations.SemanticModel",
       "definitionFormat": "TMDL",
       "definitionParts": [
+        ".platform",
         "definition.pbism",
         "definition/database.tmdl",
         "definition/model.tmdl",
