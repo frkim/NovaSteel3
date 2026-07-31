@@ -73,7 +73,13 @@ class OperationalLoaderNotebookConformanceTests(unittest.TestCase):
         self.assertIn("target.`{EVENT_ID_COLUMN}` = source.`{EVENT_ID_COLUMN}`", self.source)
 
     def test_environment_is_guarded(self):
-        self.assertIn('ENVIRONMENT not in {"dev", "test", "demo"}', self.source)
+        # Deployed environment names are qualified (e.g. "novasteelv3-demo"), so
+        # the guard accepts the bare token or a "-<token>" suffix, nothing else.
+        self.assertIn('_ENV_ALLOWED_SUFFIXES = ("dev", "test", "demo")', self.source)
+        self.assertIn(
+            'if not any(_env_normalized == t or _env_normalized.endswith("-" + t)',
+            self.source,
+        )
 
 
 if __name__ == "__main__":

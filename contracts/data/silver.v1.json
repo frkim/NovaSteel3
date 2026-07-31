@@ -66,9 +66,9 @@
     },
     {
       "name": "dim_sensor",
-      "grain": "SCD2 version of a sensor.",
+      "grain": "SCD2 version of a sensor channel (sensor_id x signal_code).",
       "primaryKey": ["sensor_key"],
-      "idempotencyKey": ["sensor_id", "valid_from"],
+      "idempotencyKey": ["sensor_id", "signal_code", "valid_from"],
       "slowlyChangingDimension": 2
     },
     {

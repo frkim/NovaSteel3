@@ -97,6 +97,25 @@
       ]
     },
     {
+      "key": "notebookLoadReferenceData",
+      "type": "Notebook",
+      "displayName": "v3-load-reference-data",
+      "description": "Idempotently load the simulator-owned reference dimensions (dim_plant, dim_asset, dim_sensor, dim_grade, dim_calendar) from OneLake Files into lh_novasteelv3_core. Bronze-to-silver quarantines every event as UNKNOWN_ASSET until these are populated.",
+      "restCollection": "/notebooks",
+      "sourceDirectory": "notebooks/ns-load-reference-data.Notebook",
+      "definitionFormat": "ipynb",
+      "definitionParts": ["notebook-content.py", ".platform"],
+      "createWithoutDefinition": false,
+      "cliDeployable": true,
+      "bindingGate": null,
+      "deploymentOption": "deployNotebooks",
+      "dependencies": ["coreLakehouse", "notebookInitialize"],
+      "manualGates": [
+        "Upload the reference CSVs to Files/reference-data/ before running (tools/fabric/Load-AnalyticalGold.ps1 -Layer reference).",
+        "Must run before v3-bronze-to-silver: every event is quarantined as UNKNOWN_ASSET (DQ-REF-001) while the dimensions are empty."
+      ]
+    },
+    {
       "key": "notebookLoadOperationalEnvelopes",
       "type": "Notebook",
       "displayName": "v3-load-operational-envelopes",
@@ -147,7 +166,7 @@
       "cliDeployable": true,
       "bindingGate": null,
       "deploymentOption": "deployNotebooks",
-      "dependencies": ["notebookInitialize"],
+      "dependencies": ["notebookInitialize", "notebookLoadReferenceData"],
       "manualGates": [
         "Validate event-time SCD joins, unit registry, watermark, and replay behavior with a fixed demo batch."
       ]

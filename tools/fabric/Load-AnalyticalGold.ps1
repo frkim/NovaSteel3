@@ -39,7 +39,7 @@
 [CmdletBinding()]
 param(
     [string]$ParametersFile = (Join-Path $PSScriptRoot '..\..\fabric\deployment-parameters\novasteelv3.parameters.json'),
-    [ValidateSet('gold', 'operational')]
+    [ValidateSet('gold', 'operational', 'reference')]
     [string]$Layer = 'gold',
     [string]$RunDir,
     [string]$ScenarioId = 'analytical-programme-24m',
@@ -61,12 +61,18 @@ function Assert-Command($name) {
 Assert-Command az
 
 # Layer defaults: 'gold' lands the eight fact_* tables (semantic model / Power BI);
-# 'operational' lands the nine envelope tables the BFF reads (BFF_DATA_SOURCE=fabric).
+# 'operational' lands the nine envelope tables the BFF reads (BFF_DATA_SOURCE=fabric);
+# 'reference' lands the dimensions that bronze-to-silver resolves every event against.
 if ($Layer -eq 'operational') {
     if (-not $RunDir)           { $RunDir = (Join-Path $PSScriptRoot '..\..\output\operational-envelopes') }
     if (-not $FilesSubPath)     { $FilesSubPath = 'operational-envelopes' }
     if (-not $NotebookParamKey) { $NotebookParamKey = 'notebookLoadOperationalEnvelopes' }
     $generateHint = "python -m simulator generate-operational"
+} elseif ($Layer -eq 'reference') {
+    if (-not $RunDir)           { $RunDir = (Join-Path $PSScriptRoot '..\..\output\reference-data') }
+    if (-not $FilesSubPath)     { $FilesSubPath = 'reference-data' }
+    if (-not $NotebookParamKey) { $NotebookParamKey = 'notebookLoadReferenceData' }
+    $generateHint = "python -m simulator generate-reference"
 } else {
     if (-not $RunDir)           { $RunDir = (Join-Path $PSScriptRoot '..\..\output\analytical-programme-24m') }
     if (-not $FilesSubPath)     { $FilesSubPath = "analytical-gold/$ScenarioId" }

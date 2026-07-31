@@ -287,7 +287,11 @@ telemetry_resolved = (
     )
     .join(
         sensor_dim,
+        # The registry grain is (sensor_id, signal_code): the generator truncates
+        # the signal code to four characters when building a furnace sensor_id, so
+        # one sensor_id carries several channels with different canonical units.
         (F.col("event.sensor_id") == F.col("sensor.sensor_id"))
+        & (F.col("event.signal_code") == F.col("sensor.signal_code"))
         & (F.col("event.event_ts") >= F.col("sensor.valid_from"))
         & (F.col("sensor.valid_to").isNull() | (F.col("event.event_ts") < F.col("sensor.valid_to"))),
         "left",

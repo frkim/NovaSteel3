@@ -121,6 +121,48 @@ JSON string — a lossless round trip proven by
 in [`tools/fabric/README.md`](../tools/fabric/README.md)
 (`Load-AnalyticalGold.ps1 -Layer operational`).
 
+### Reference (dimension) data — what makes the medallion pipeline non-empty
+
+The medallion `bronze -> silver` notebook resolves every event to a surrogate
+key by joining it, on a valid-time predicate, against four dimension tables in
+`lh_novasteelv3_core` — `dim_plant`, `dim_asset`, `dim_sensor`, `dim_grade` —
+and quarantines the row as `UNKNOWN_ASSET` (rule `DQ-REF-001`) whenever a join
+misses. `ns-initialize-lakehouses` only creates those tables **empty**, so until
+they are populated every event is quarantined and every silver/gold fact table
+stays empty. The simulator owns this reference data because it owns the
+identifiers that appear in the events (the `plant_id`/`asset_id` estate in
+`config.py` and the `sensor_id` strings `generator.py` constructs). Emit it with:
+
+```powershell
+python -m simulator.cli generate-reference
+# -> output\reference-data\{dim_plant,dim_asset,dim_sensor,dim_grade,dim_calendar}.csv
+#    plus manifest.json + checksums.json
+```
+
+Output is all-string CSV (header row, comma-separated, written with Python's
+`csv` module / RFC 4180 quoting), with columns and order matching the deployed
+core Delta DDL exactly. Every row is a single `INITIAL_LOAD` slowly-changing
+version: `valid_from = 2020-01-01T00:00:00Z` (at or before the earliest possible
+event), `valid_to` empty (NULL / current), `is_current = true`, `version = 1`.
+Surrogate `*_key` columns are **deterministic** — the 1-based ordinal of the
+row's natural key in sorted order — so two runs are byte-identical.
+
+`dim_sensor` reproduces every `sensor_id` construction rule in `generator.py`.
+The non-obvious one: furnace hearth-sector instruments use
+`f"LUX-BF-01-{signal_code.upper()[:4]}-H{sector}"`, so signals that share a
+four-character prefix collapse onto one physical sensor per sector —
+`HEAR` (hearth shell temperature / refractory estimate), `COOL` (cooling-water
+inlet / outlet / flow) and `LOCA` (local heat flux) — three sensors per sector,
+not six. Rolling stands (`LUX-HSM-01-{R1,R2,F1..F7}`) and the coiling pyrometer
+(`LUX-HSM-01-COIL-TC-01`) likewise each get one row; the first signal in emit
+order supplies the canonical `signal_code`/`canonical_unit` and the
+`hard_min`/`hard_max`/`sample_period_ms` from `SIGNAL_REGISTRY`. `dim_calendar`
+is a contiguous daily calendar per plant from 2024-01-01 through 2027-12-31.
+
+Loading is documented in [`tools/fabric/README.md`](../tools/fabric/README.md)
+(`Load-AnalyticalGold.ps1 -Layer reference`, notebook
+`fabric/notebooks/ns-load-reference-data.Notebook`).
+
 ## CLI reference
 
 ```powershell
@@ -129,6 +171,7 @@ python -m simulator.cli demo [--out output\demo] [--format ndjson|csv|json]
 python -m simulator.cli validate --run-dir output\lining [--only contract physics scenario checksum contract-schema]
 python -m simulator.cli checksum --run-dir output\lining [--verify]
 python -m simulator.cli reset --out output\lining
+python -m simulator.cli generate-reference [--out output\reference-data]
 python -m simulator.cli publish --run-dir output\lining --sink-url https://<eventstream-custom-endpoint-or-local-bff>/ingest `
     [--datasets telemetry energy_interval ...] [--batch-size 10] [--rate 20] [--token-env NOVASTEEL_SINK_TOKEN] `
     [--replay-duplicate-fraction 0.05]

@@ -7,6 +7,8 @@ generate         Generate one scenario's datasets to a local output directory.
 demo             One-command fast full-demo generation (alias for
                  ``generate --scenario demo-full --fast``).
 publish          Paced live publish of a generated dataset to an HTTP sink.
+generate-reference  Emit the reference (dimension) data the medallion
+                 bronze-to-silver notebook resolves every event against.
 validate         Run contract/physics/scenario-assertion validators against a run.
 checksum         Recompute/verify a run's checksums.json.
 reset            Delete a run's generated output (never touches manifests).
@@ -30,6 +32,7 @@ from simulator.analytics import (
     load_analytical_manifest,
 )
 from simulator.fabric_operational import export_operational_pack
+from simulator.reference_data import export_reference_data
 from simulator.validators import contract_schema as contract_schema_validator
 from simulator.validators.contract import validate_envelopes
 from simulator.validators.gold_contract import validate_analytical_run
@@ -101,6 +104,15 @@ def cmd_generate_operational(args: argparse.Namespace) -> int:
     print(f"Exported operational envelope tables from {pack_dir} into {out_dir}")
     for name, count in result["row_counts"].items():
         print(f"  {name}: {count} rows")
+    return 0
+
+
+def cmd_generate_reference(args: argparse.Namespace) -> int:
+    out_dir = Path(args.out) if args.out else DEFAULT_OUT_ROOT / "reference-data"
+    result = export_reference_data(out_dir)
+    print(f"Generated reference (dimension) data into {out_dir}")
+    for name in result.row_counts:
+        print(f"  {name}: {result.row_counts[name]} rows")
     return 0
 
 
@@ -290,6 +302,13 @@ def build_parser() -> argparse.ArgumentParser:
     p_gen_op.add_argument("--out", default=None,
                           help="Output directory (default output/operational-envelopes)")
     p_gen_op.set_defaults(func=cmd_generate_operational)
+
+    p_gen_ref = sub.add_parser("generate-reference",
+                               help="Generate the reference (dimension) data the medallion "
+                                    "bronze-to-silver notebook resolves every event against")
+    p_gen_ref.add_argument("--out", default=None,
+                           help="Output directory (default output/reference-data)")
+    p_gen_ref.set_defaults(func=cmd_generate_reference)
 
     p_pub = sub.add_parser("publish", help="Paced publish of a generated run to an HTTP sink")
     p_pub.add_argument("--run-dir", required=True)
