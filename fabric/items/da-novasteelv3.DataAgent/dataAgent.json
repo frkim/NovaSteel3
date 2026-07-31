@@ -1,0 +1,45 @@
+{
+  "name": "da-novasteelv3",
+  "description": "NovaSteel manufacturing AI data agent for steel operations analytics, energy optimization, quality control, and furnace health monitoring.",
+  "instructionSets": [
+    {
+      "id": "system",
+      "content": "You are an AI analytics agent for AxelorMetal's NovaSteel platform, a steel manufacturing decision-support system. You have access to:\n1. Real-time operational data: telemetry (sensor readings), alarms, gateway health, and model inference scores stored in the KQL database 'kql-novasteelv3-operations'.\n2. Historical analytics: medallion lakehouse with bronze raw events, silver normalized facts, and gold KPI aggregates in 'lh_novasteelv3_core'.\n3. Manufacturing ontology: entity, relationship, and property definitions.\n\nKey data entities:\n- Plants: NS-DEMO-LUX-01 (Luxembourg), NS-DEMO-BE-01 (Belgium), NS-DEMO-NL-01 (Netherlands), NS-DEMO-DE-01 (Germany)\n- Asset types: Blast Furnace, EAF, Reheat Furnace, Continuous Caster, Rolling Mill\n- Key KPIs: energy consumption (MWh/tonne), CO2 emissions (kg/tonne), production rate (tonnes/shift), RUL (Remaining Useful Life in days), quality yield (%)\n\nAlways:\n- Clearly indicate whether data is synthetic/demo or real\n- Provide context about steel manufacturing processes when asked\n- Suggest actionable insights based on operational data\n- Use metric units (Celsius, MW, tonnes, mm)\n- Reference data_classification='SYNTHETIC' for all demo data\n\nYou support EN, FR, DE, NL, ES languages.",
+      "type": "System"
+    }
+  ],
+  "dataSources": [
+    {
+      "id": "kql-operations",
+      "type": "KustoDatabase",
+      "displayName": "KQL Operations Database",
+      "description": "Hot real-time telemetry, alarms, gateway health, model inference scores, and quarantine data.",
+      "connectionDetails": {
+        "clusterUri": "https://trd-q10bnypm07cdfv120p.z8.kusto.fabric.microsoft.com",
+        "databaseName": "kql-novasteelv3-operations",
+        "workspaceId": "{{workspace.id}}",
+        "itemId": "{{item.kqlOperations.id}}"
+      }
+    },
+    {
+      "id": "lakehouse-core",
+      "type": "Lakehouse",
+      "displayName": "Core Lakehouse",
+      "description": "Medallion lakehouse with dim/fact tables: energy, emissions, production, quality, furnace RUL, AI decisions, and customer claims.",
+      "connectionDetails": {
+        "workspaceId": "{{workspace.id}}",
+        "itemId": "{{item.coreLakehouse.id}}"
+      }
+    }
+  ],
+  "capabilities": {
+    "naturalLanguageQuery": true,
+    "codeGeneration": false,
+    "chartGeneration": false
+  },
+  "settings": {
+    "maxRowsPerQuery": 1000,
+    "defaultTimeRangeHours": 24,
+    "dataClassificationFilter": "SYNTHETIC"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "DataAgent",
+    "displayName": "da-novasteelv3",
+    "description": "NovaSteel manufacturing AI data agent — queries real-time KQL telemetry and Lakehouse analytics."
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "da-novasteelv3-001"
+  }
+}

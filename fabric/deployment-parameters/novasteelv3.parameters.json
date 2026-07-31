@@ -16,8 +16,8 @@
     "sku": "F2"
   },
   "authentication": {
-    "mode": "ManagedIdentity",
-    "managedIdentityClientId": "43180337-89d5-4846-b5db-06f5f056d19b"
+    "mode": "AzureCli",
+    "managedIdentityClientId": ""
   },
   "isolation": {
     "workspaceNamePattern": "^NovaSteelV3(-[A-Za-z0-9]+)?$",
@@ -86,6 +86,14 @@
     "semanticOperations": {
       "displayName": "sm-novasteelv3-operations",
       "id": ""
+    },
+    "ontologyNotebook": {
+      "displayName": "v3-steel-ontology",
+      "id": ""
+    },
+    "dataAgent": {
+      "displayName": "da-novasteelv3",
+      "id": ""
     }
   },
   "onelake": {
@@ -101,8 +109,8 @@
   },
   "bindings": {
     "sensitivityLabelId": "",
-    "kqlQueryServiceUri": "",
-    "kqlIngestionServiceUri": "",
+    "kqlQueryServiceUri": "https://trd-q10bnypm07cdfv120p.z8.kusto.fabric.microsoft.com",
+    "kqlIngestionServiceUri": "https://ingest-trd-q10bnypm07cdfv120p.z8.kusto.fabric.microsoft.com",
     "coreSqlEndpoint": ""
   },
   "deploymentOptions": {
@@ -112,7 +120,8 @@
     "deployLakehouses": true,
     "deployNotebooks": true,
     "deployPipelines": true,
-    "deploySemanticModel": false,
-    "semanticModelBindingValidated": false
+    "deploySemanticModel": true,
+    "semanticModelBindingValidated": true,
+    "deployDataAgent": true
   }
 }

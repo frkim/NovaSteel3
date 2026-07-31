@@ -120,7 +120,9 @@
         "notebookDataQuality": { "$ref": "#/$defs/namedResource" },
         "pipelineMedallion": { "$ref": "#/$defs/namedResource" },
         "pipelineDemoScoring": { "$ref": "#/$defs/namedResource" },
-        "semanticOperations": { "$ref": "#/$defs/namedResource" }
+        "semanticOperations": { "$ref": "#/$defs/namedResource" },
+        "ontologyNotebook": { "$ref": "#/$defs/namedResource" },
+        "dataAgent": { "$ref": "#/$defs/namedResource" }
       }
     },
     "onelake": {
@@ -187,7 +189,8 @@
         "deployNotebooks": { "type": "boolean" },
         "deployPipelines": { "type": "boolean" },
         "deploySemanticModel": { "type": "boolean" },
-        "semanticModelBindingValidated": { "type": "boolean" }
+        "semanticModelBindingValidated": { "type": "boolean" },
+        "deployDataAgent": { "type": "boolean" }
       }
     }
   },

@@ -251,6 +251,43 @@
         "Confirm every report consumer has Pro/PPU/trial below F64.",
         "Apply sensitivity label and test refresh/query before setting semanticModelBindingValidated=true."
       ]
+    },
+    {
+      "key": "ontologyNotebook",
+      "type": "Notebook",
+      "displayName": "v3-steel-ontology",
+      "description": "NovaSteel manufacturing domain ontology — entity, relationship and property tables for steel making.",
+      "restCollection": "/notebooks",
+      "sourceDirectory": "notebooks/ns-steel-ontology.Notebook",
+      "definitionFormat": "fabricGitSource",
+      "definitionParts": ["notebook-content.py", ".platform"],
+      "createWithoutDefinition": false,
+      "cliDeployable": true,
+      "bindingGate": null,
+      "deploymentOption": "deployNotebooks",
+      "dependencies": ["notebookSilverToGold"],
+      "manualGates": [
+        "Attach or authorize the novasteelv3 core Lakehouse for the notebook execution identity."
+      ]
+    },
+    {
+      "key": "dataAgent",
+      "type": "DataAgent",
+      "displayName": "da-novasteelv3",
+      "description": "NovaSteel manufacturing AI data agent — queries real-time KQL telemetry and Lakehouse analytics.",
+      "restCollection": "/dataAgents",
+      "sourceDirectory": "items/da-novasteelv3.DataAgent",
+      "definitionFormat": null,
+      "definitionParts": ["dataAgent.json", ".platform"],
+      "createWithoutDefinition": false,
+      "cliDeployable": true,
+      "bindingGate": null,
+      "deploymentOption": "deployDataAgent",
+      "dependencies": ["kqlOperations", "coreLakehouse"],
+      "manualGates": [
+        "Verify the DataAgent item type is available in the target Fabric tenant before deployment.",
+        "Review the agent's natural language query scope and data classification before enabling in production."
+      ]
     }
   ],
   "excludedItems": [
