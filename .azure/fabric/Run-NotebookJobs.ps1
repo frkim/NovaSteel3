@@ -8,7 +8,7 @@ param(
     [string]$WorkspaceId    = '3d9c0b49-5201-4914-8149-06071b529918',
     [string]$LandingTablesUri = '',
     [string]$CoreTablesUri    = '',
-    [string[]]$NotebookDisplayNames = @(
+    [string[]]$NotebookDisplayName = @(
         'v3-initialize-lakehouses',
         'v3-steel-ontology',
         'v3-bronze-to-silver',
@@ -53,14 +53,11 @@ if (-not $CoreTablesUri -or $CoreTablesUri.Contains('<')) {
     }
 }
 
-# List all notebooks in the workspace
-$notebooksResponse = Invoke-NsFabricRequest -Method GET -Path "/workspaces/$WorkspaceId/notebooks" -Token $token
-$allNotebooks = @($notebooksResponse.value)
-
 $results = [System.Collections.Generic.List[pscustomobject]]::new()
 
-foreach ($nbName in $NotebookDisplayNames) {
-    $nb = $allNotebooks | Where-Object { $_.displayName -ieq $nbName } | Select-Object -First 1
+foreach ($nbName in $NotebookDisplayName) {
+    Write-Host "[$(Get-Date -Format 'HH:mm:ss')] Looking up notebook: $nbName" -ForegroundColor DarkCyan
+    $nb = Find-NsItem -WorkspaceId $WorkspaceId -DisplayName $nbName -Type 'Notebook' -Token $token
     if ($null -eq $nb) {
         Write-Warning "Notebook '$nbName' not found in workspace. Skipping."
         $results.Add([pscustomobject]@{ Notebook = $nbName; Status = 'NOT_FOUND'; Duration = 'N/A' })
@@ -144,6 +141,7 @@ foreach ($nbName in $NotebookDisplayNames) {
             Write-Host "  ...status: $status"
             if ($status -match '^(Succeeded|Completed|Success)$') { $finalStatus = 'SUCCESS'; break }
             if ($status -match '^(Failed|Cancelled|Canceled)$')   { $finalStatus = 'FAILED';  break }
+            if ($status -eq 'Deduped') { Write-Host "  Job deduplicated (another instance running)."; $finalStatus = 'SUCCESS'; break }
         }
         if ($finalStatus -eq 'UNKNOWN') { $finalStatus = 'TIMEOUT' }
 

@@ -6,7 +6,7 @@
 [CmdletBinding()]
 param(
     [string]$ClusterUri   = 'https://trd-q10bnypm07cdfv120p.z8.kusto.fabric.microsoft.com',
-    [string]$DatabaseName = 'kql-novasteelv3-operations',
+    [string]$DatabaseName = '7c3ab91a-c8ac-4658-83b5-f500dad946ec',
     [switch]$WhatIf
 )
 
@@ -75,8 +75,7 @@ for ($pi = 0; $pi -lt $plants.Count; $pi++) {
     }
 }
 $telCsv  = $telRows -join "`n"
-$telCols = 'event_id:string,event_ts:datetime,ingest_ts:datetime,source_id:string,plant_id:string,asset_id:string,sequence:long,correlation_id:string,schema_name:string,schema_version:int,data_classification:string,privacy_label:string,scenario_id:string,seed:long,generator_version:string,clock_mode:string,sensor_id:string,signal_code:string,value:real,unit:string,quality:string,uncertainty:real,sample_period_ms:long,payload:dynamic'
-Invoke-KqlCommand -Label "Insert $($telRows.Count) telemetry rows" -Csl ".ingest inline into table telemetry_hot with (format='csv', csvMappingKind='ByColumnName', csvMapping='[$(($telCols -split ',') | ForEach-Object { $col=$_ -split ':'; "{`"Column`":`"$($col[0])`",`"DataType`":`"$($col[1])`"}" } -join ',')]') <|`n$telCsv"
+Invoke-KqlCommand -Label "Insert $($telRows.Count) telemetry rows" -Csl ".ingest inline into table telemetry_hot <|`n$telCsv"
 
 # ---------------------------------------------------------------------------
 # alarm_hot  (30 rows)
@@ -101,8 +100,7 @@ for ($i = 0; $i -lt 30; $i++) {
     $alarmRows.Add("$eid,$aid,$tid,$t,$t,NS-DEMO-GW-$pi,$plant,$asset,$at,$sev,Alarm: $at,Auto-detected deviation,$state,$thr,$obs,Celsius,0.92,SYSTEM,NS-DEMO-MON,high-confidence,NS-DEMO-WO-$($i.ToString('D3')),NS-DEMO-CORR-ALM-$i,novasteel.alarm.v1,1,SYNTHETIC,DEMO-NONPERSONAL,$scenario,100,{}")
 }
 $alarmCsv  = $alarmRows -join "`n"
-$alarmCols = 'event_id:string,alarm_id:string,transition_id:string,event_ts:datetime,ingest_ts:datetime,source_id:string,plant_id:string,asset_id:string,alarm_type:string,severity:string,title:string,message:string,state:string,threshold:real,observed_value:real,unit:string,confidence:real,actor_type:string,actor_id:string,reason:string,work_order_id:string,correlation_id:string,schema_name:string,schema_version:int,data_classification:string,privacy_label:string,scenario_id:string,seed:long,payload:dynamic'
-Invoke-KqlCommand -Label "Insert $($alarmRows.Count) alarm rows" -Csl ".ingest inline into table alarm_hot with (format='csv', csvMappingKind='ByColumnName', csvMapping='[$(($alarmCols -split ',') | ForEach-Object { $col=$_ -split ':'; "{`"Column`":`"$($col[0])`",`"DataType`":`"$($col[1])`"}" } -join ',')]') <|`n$alarmCsv"
+Invoke-KqlCommand -Label "Insert $($alarmRows.Count) alarm rows" -Csl ".ingest inline into table alarm_hot <|`n$alarmCsv"
 
 # ---------------------------------------------------------------------------
 # gateway_health_hot  (20 rows)
@@ -118,11 +116,10 @@ for ($i = 0; $i -lt 20; $i++) {
     $t     = Ts($i * 15 - 300)
     $lag   = if ($cs -eq 'Degraded') { 5500 + $i * 100 } else { 150 + $i * 10 }
     $eid   = "NS-DEMO-GH-$($i.ToString('D4'))"
-    $gwRows.Add("$eid,$t,$t,$t,NS-DEMO-SRC-$pi,$gw,$plant,$cs,0,$($1000+$i * 10),${i},,$lag,12,0,0,NS-DEMO-CORR-GH-$i,novasteel.gateway-health.v1,1,SYNTHETIC,DEMO-NONPERSONAL,$scenario,100,{}")
+    $gwRows.Add("$eid,$t,$t,$t,NS-DEMO-SRC-$pi,$gw,$plant,$cs,0,$(1000 + $i * 10),${i},,$lag,12,0,0,NS-DEMO-CORR-GH-$i,novasteel.gateway-health.v1,1,SYNTHETIC,DEMO-NONPERSONAL,$scenario,100,{}")
 }
 $gwCsv  = $gwRows -join "`n"
-$gwCols = 'event_id:string,event_ts:datetime,ingest_ts:datetime,heartbeat_ts:datetime,source_id:string,gateway_id:string,plant_id:string,connection_state:string,partition_id:string,last_sequence:long,queue_depth:long,oldest_buffered_event:datetime,event_time_lag_ms:long,clock_offset_ms:long,duplicate_count:long,publish_retry_count:long,correlation_id:string,schema_name:string,schema_version:int,data_classification:string,privacy_label:string,scenario_id:string,seed:long,payload:dynamic'
-Invoke-KqlCommand -Label "Insert $($gwRows.Count) gateway_health rows" -Csl ".ingest inline into table gateway_health_hot with (format='csv', csvMappingKind='ByColumnName', csvMapping='[$(($gwCols -split ',') | ForEach-Object { $col=$_ -split ':'; "{`"Column`":`"$($col[0])`",`"DataType`":`"$($col[1])`"}" } -join ',')]') <|`n$gwCsv"
+Invoke-KqlCommand -Label "Insert $($gwRows.Count) gateway_health rows" -Csl ".ingest inline into table gateway_health_hot <|`n$gwCsv"
 
 # ---------------------------------------------------------------------------
 # model_inference_hot  (50 rows — RUL and quality scores)
@@ -151,8 +148,7 @@ for ($i = 0; $i -lt 50; $i++) {
     $miRows.Add("$eid,$iid,$t,$t,$t,$t,$plant,$asset,$comp,novasteel-rul-v2,2.0.0,$pt,$p10,$p50,$p90,$lmm,$risk,$sev,$qrisk,$fpyld,0.87,[],HIGH,NS-DEMO-CORR-MI-$i,novasteel.model-inference.v1,1,SYNTHETIC,DEMO-NONPERSONAL,$scenario,100,{}")
 }
 $miCsv  = $miRows -join "`n"
-$miCols = 'event_id:string,inference_id:string,event_ts:datetime,ingest_ts:datetime,feature_snapshot_ts:datetime,scored_at:datetime,plant_id:string,asset_id:string,component_id:string,model_id:string,model_version:string,prediction_type:string,remaining_useful_life_days_p10:real,remaining_useful_life_days_p50:real,remaining_useful_life_days_p90:real,estimated_minimum_lining_mm:real,risk_score:real,severity:string,quality_risk_score:real,predicted_first_pass_yield:real,confidence:real,top_factors:dynamic,label:string,correlation_id:string,schema_name:string,schema_version:int,data_classification:string,privacy_label:string,scenario_id:string,seed:long,payload:dynamic'
-Invoke-KqlCommand -Label "Insert $($miRows.Count) model_inference rows" -Csl ".ingest inline into table model_inference_hot with (format='csv', csvMappingKind='ByColumnName', csvMapping='[$(($miCols -split ',') | ForEach-Object { $col=$_ -split ':'; "{`"Column`":`"$($col[0])`",`"DataType`":`"$($col[1])`"}" } -join ',')]') <|`n$miCsv"
+Invoke-KqlCommand -Label "Insert $($miRows.Count) model_inference rows" -Csl ".ingest inline into table model_inference_hot <|`n$miCsv"
 
 # ---------------------------------------------------------------------------
 # ingest_quarantine_hot  (10 rows)
@@ -170,7 +166,8 @@ for ($i = 0; $i -lt 10; $i++) {
     $qRows.Add("$qid,$t,$eid,$t,$t,NS-DEMO-GW-$pi,$plant,${assets[$pi]},novasteel.telemetry.v1,1,$reason,Automated quarantine rule QR-$(($i%5)+1),Celsius,bar,,{},NS-DEMO-CORR-QR-$i,SYNTHETIC,DEMO-NONPERSONAL,$scenario,100")
 }
 $qCsv  = $qRows -join "`n"
-$qCols = 'quarantine_id:string,quarantined_at:datetime,event_id:string,event_ts:datetime,ingest_ts:datetime,source_id:string,plant_id:string,asset_id:string,schema_name:string,schema_version:int,quarantine_reason:string,quarantine_detail:string,expected_unit:string,observed_unit:string,duplicate_of_event_id:string,original_payload:dynamic,correlation_id:string,data_classification:string,privacy_label:string,scenario_id:string,seed:long'
-Invoke-KqlCommand -Label "Insert $($qRows.Count) quarantine rows" -Csl ".ingest inline into table ingest_quarantine_hot with (format='csv', csvMappingKind='ByColumnName', csvMapping='[$(($qCols -split ',') | ForEach-Object { $col=$_ -split ':'; "{`"Column`":`"$($col[0])`",`"DataType`":`"$($col[1])`"}" } -join ',')]') <|`n$qCsv"
+Invoke-KqlCommand -Label "Insert $($qRows.Count) quarantine rows" -Csl ".ingest inline into table ingest_quarantine_hot <|`n$qCsv"
 
 Write-Host "[$(Get-Date -Format 'HH:mm:ss')] Synthetic KQL data load complete." -ForegroundColor Green
+
+

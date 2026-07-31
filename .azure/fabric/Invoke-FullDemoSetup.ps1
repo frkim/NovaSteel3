@@ -31,14 +31,16 @@
 [CmdletBinding()]
 param(
     [string]$ParameterFile     = '',
+    [string]$ManifestFile      = '',
     [string]$WorkspaceId       = '3d9c0b49-5201-4914-8149-06071b529918',
     [switch]$PauseCapacityAtEnd,
     [switch]$SkipCapacityResume,
-    [switch]$SkipDeploy,
+    [Alias('SkipItemDeployment')][switch]$SkipDeploy,
     [switch]$SkipKqlSchema,
     [switch]$SkipKqlData,
     [switch]$SkipNotebooks,
-    [switch]$WhatIf
+    [switch]$SkipDataAgent,
+    [Alias('DryRun')][switch]$WhatIf
 )
 
 Set-StrictMode -Version Latest
@@ -59,6 +61,8 @@ $params = Get-Content $ParameterFile -Raw | ConvertFrom-Json -Depth 50
 $capacityResourceId = '/subscriptions/3377065c-bf76-4767-a982-32bce4ffb592/resourceGroups/rg-novasteelv3-demo-sc/providers/Microsoft.Fabric/capacities/novasteelv3fabric'
 $clusterUri         = 'https://trd-q10bnypm07cdfv120p.z8.kusto.fabric.microsoft.com'
 $kqlDatabase        = 'kql-novasteelv3-operations'
+$coreLakehouseId    = '623b4455-5c28-4235-8138-883d69a5810d'
+$landingLakehouseId = 'f03d1c6b-fad8-4992-819f-f66fc4f01001'
 
 $summary = [ordered]@{}
 
@@ -68,13 +72,12 @@ function Step([string]$Name, [scriptblock]$Action) {
     try {
         & $Action
         $dur = [Math]::Round(([DateTimeOffset]::UtcNow - $t0).TotalSeconds)
-        $summary[$Name] = "OK (${dur}s)"
-        Write-Host "=== $Name: DONE in ${dur}s ===" -ForegroundColor Green
+        $summary[$Name] = "DONE ($dur`s)"
+        Write-Host "=== $Name`: DONE in $dur`s ===" -ForegroundColor Green
     } catch {
         $dur = [Math]::Round(([DateTimeOffset]::UtcNow - $t0).TotalSeconds)
-        $summary[$Name] = "FAILED (${dur}s): $($_.Exception.Message.Substring(0,[Math]::Min(120,$_.Exception.Message.Length)))"
-        Write-Error "=== $Name: FAILED after ${dur}s: $($_.Exception.Message)"
-        throw
+        $summary[$Name] = "FAILED ($dur`s): $($_.Exception.Message.Substring(0,[Math]::Min(120,$_.Exception.Message.Length)))"
+        Write-Warning "=== $Name`: FAILED after $dur`s: $($_.Exception.Message)"
     }
 }
 
@@ -119,12 +122,32 @@ if (-not $SkipDeploy) {
             '-ParameterFile', $ParameterFile,
             '-WorkspaceId',   $WorkspaceId
         )
+        if ($ManifestFile) { $deployArgs += '-ManifestFile', $ManifestFile }
         if ($WhatIf) { $deployArgs += '-WhatIf' }
         Write-Host "Calling: $deployScript $($deployArgs -join ' ')"
         & pwsh -NoProfile -NonInteractive -File $deployScript @deployArgs
         if ($LASTEXITCODE -ne 0) { throw "Deploy-NovaSteelV3FabricAssets.ps1 exited with code $LASTEXITCODE" }
     }
 }
+
+# Read deployed lakehouse IDs from state file (fallback to hardcoded defaults)
+$stateFile = Join-Path $here 'deployment-state\novasteelv3.json'
+if (Test-Path $stateFile) {
+    try {
+        $state = Get-Content $stateFile -Raw | ConvertFrom-Json -Depth 20
+        if ($state.items.coreLakehouse.id)    { $coreLakehouseId    = $state.items.coreLakehouse.id }
+        if ($state.items.landingLakehouse.id) { $landingLakehouseId = $state.items.landingLakehouse.id }
+        if ($state.workspace.id)              { $WorkspaceId         = $state.workspace.id }
+        Write-Host "[$(Get-Date -Format 'HH:mm:ss')] Loaded state: workspace=$WorkspaceId core=$coreLakehouseId landing=$landingLakehouseId"
+    } catch {
+        Write-Warning "Could not parse state file $stateFile — using hardcoded defaults. Error: $($_.Exception.Message)"
+    }
+}
+
+$coreLandingUri    = "abfss://$WorkspaceId@onelake.dfs.fabric.microsoft.com/$landingLakehouseId/Tables"
+$coreTablesUri     = "abfss://$WorkspaceId@onelake.dfs.fabric.microsoft.com/$coreLakehouseId/Tables"
+Write-Host "Landing URI: $coreLandingUri"
+Write-Host "Core URI:    $coreTablesUri"
 
 # ---------------------------------------------------------------------------
 # 3. Apply KQL schema
@@ -136,7 +159,7 @@ if (-not $SkipKqlSchema) {
             '-ClusterUri',   $clusterUri,
             '-DatabaseName', $kqlDatabase
         )
-        if ($WhatIf) { $schemaArgs += '-WhatIf' }
+        if ($WhatIf) { Write-Host "[WhatIf] Would run: $schemaScript $($schemaArgs -join ' ')"; return }
         Write-Host "Calling: $schemaScript $($schemaArgs -join ' ')"
         & pwsh -NoProfile -NonInteractive -File $schemaScript @schemaArgs
         if ($LASTEXITCODE -ne 0) { throw "Apply-KqlSchema.ps1 exited with code $LASTEXITCODE" }
@@ -153,7 +176,7 @@ if (-not $SkipKqlData) {
             '-ClusterUri',   $clusterUri,
             '-DatabaseName', $kqlDatabase
         )
-        if ($WhatIf) { $dataArgs += '-WhatIf' }
+        if ($WhatIf) { Write-Host "[WhatIf] Would run: $dataScript $($dataArgs -join ' ')"; return }
         Write-Host "Calling: $dataScript $($dataArgs -join ' ')"
         & pwsh -NoProfile -NonInteractive -File $dataScript @dataArgs
         if ($LASTEXITCODE -ne 0) { throw "Load-SyntheticKqlData.ps1 exited with code $LASTEXITCODE" }
@@ -166,7 +189,11 @@ if (-not $SkipKqlData) {
 if (-not $SkipNotebooks) {
     Step '5-Run-Notebooks' {
         $nbScript = Join-Path $here 'Run-NotebookJobs.ps1'
-        $nbArgs   = @('-WorkspaceId', $WorkspaceId)
+        $nbArgs   = @(
+            '-WorkspaceId',      $WorkspaceId,
+            '-LandingTablesUri', $coreLandingUri,
+            '-CoreTablesUri',    $coreTablesUri
+        )
         if ($WhatIf) { $nbArgs += '-WhatIf' }
         Write-Host "Calling: $nbScript $($nbArgs -join ' ')"
         & pwsh -NoProfile -NonInteractive -File $nbScript @nbArgs
@@ -204,7 +231,7 @@ Write-Host "`n========================================" -ForegroundColor Cyan
 Write-Host "  NovaSteel V3 Demo Setup — Summary" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 foreach ($k in $summary.Keys) {
-    $color = if ($summary[$k] -like 'OK*') { 'Green' } else { 'Red' }
+    $color = if ($summary[$k] -like 'DONE*') { 'Green' } else { 'Red' }
     Write-Host ("  {0,-30} {1}" -f $k, $summary[$k]) -ForegroundColor $color
 }
 Write-Host "========================================`n" -ForegroundColor Cyan
