@@ -106,9 +106,10 @@ tools\fabric\Load-AnalyticalGold.ps1 -Layer operational -ResumeCapacity -RunNote
 ```
 
 The `-Layer operational` switch uploads to `Files/operational-envelopes/` and runs
-`fabric/notebooks/ns-load-operational-envelopes.Notebook`, which writes each dataset
-as a Delta table named exactly as the BFF expects and MERGEs on `event_id`
-(the `manifest` table is overwritten wholesale). Once loaded, set on the BFF:
+`fabric/notebooks/ns-seed-bronze-from-pack.Notebook`, which now both seeds
+`landing.bronze_event_envelope` and writes each operational dataset as a Delta
+table named exactly as the BFF expects, MERGEd on `event_id` (the `manifest` table
+is overwritten wholesale). Once loaded, set on the BFF:
 
 ```
 BFF_DATA_SOURCE=fabric

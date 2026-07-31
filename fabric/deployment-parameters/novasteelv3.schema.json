@@ -117,7 +117,6 @@
         "notebookOntologyBindings": { "$ref": "#/$defs/namedResource" },
         "notebookLoadReferenceData": { "$ref": "#/$defs/namedResource" },
         "notebookSeedBronzeFromPack": { "$ref": "#/$defs/namedResource" },
-        "notebookLoadOperationalEnvelopes": { "$ref": "#/$defs/namedResource" },
         "notebookLoadAnalyticalGold": { "$ref": "#/$defs/namedResource" },
         "notebookBronzeToSilver": { "$ref": "#/$defs/namedResource" },
         "notebookSilverToGold": { "$ref": "#/$defs/namedResource" },
@@ -126,7 +125,6 @@
         "pipelineMedallion": { "$ref": "#/$defs/namedResource" },
         "pipelineDemoScoring": { "$ref": "#/$defs/namedResource" },
         "semanticOperations": { "$ref": "#/$defs/namedResource" },
-        "ontologyNotebook": { "$ref": "#/$defs/namedResource" },
         "dataAgent": { "$ref": "#/$defs/namedResource" },
         "ontology": { "$ref": "#/$defs/namedResource" },
         "ontologyGraphModel": { "$ref": "#/$defs/namedResource" }

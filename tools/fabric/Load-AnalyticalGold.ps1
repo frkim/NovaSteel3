@@ -61,12 +61,12 @@ function Assert-Command($name) {
 Assert-Command az
 
 # Layer defaults: 'gold' lands the eight fact_* tables (semantic model / Power BI);
-# 'operational' lands the nine envelope tables the BFF reads (BFF_DATA_SOURCE=fabric);
+# 'operational' seeds bronze and lands the nine envelope tables the BFF reads (BFF_DATA_SOURCE=fabric);
 # 'reference' lands the dimensions that bronze-to-silver resolves every event against.
 if ($Layer -eq 'operational') {
     if (-not $RunDir)           { $RunDir = (Join-Path $PSScriptRoot '..\..\output\operational-envelopes') }
     if (-not $FilesSubPath)     { $FilesSubPath = 'operational-envelopes' }
-    if (-not $NotebookParamKey) { $NotebookParamKey = 'notebookLoadOperationalEnvelopes' }
+    if (-not $NotebookParamKey) { $NotebookParamKey = 'notebookSeedBronzeFromPack' }
     $generateHint = "python -m simulator generate-operational"
 } elseif ($Layer -eq 'reference') {
     if (-not $RunDir)           { $RunDir = (Join-Path $PSScriptRoot '..\..\output\reference-data') }

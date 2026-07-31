@@ -71,10 +71,6 @@
       "displayName": "v3-seed-bronze-from-pack",
       "id": "86ec3acd-3dd3-4519-84ab-32eeaf0641a2"
     },
-    "notebookLoadOperationalEnvelopes": {
-      "displayName": "v3-load-operational-envelopes",
-      "id": "f5a9e09c-72c8-48d3-b348-86ed51e18cf0"
-    },
     "notebookLoadAnalyticalGold": {
       "displayName": "v3-load-analytical-gold",
       "id": "6a1bc15c-7414-4c8d-a1f0-cb3b31009bec"
@@ -106,10 +102,6 @@
     "semanticOperations": {
       "displayName": "sm-novasteelv3-operations",
       "id": "6f104805-a4c4-481f-a0ad-d624fccc7ce0"
-    },
-    "ontologyNotebook": {
-      "displayName": "v3-steel-ontology",
-      "id": "e57436a3-4070-4b62-8cd5-619a6723589a"
     },
     "dataAgent": {
       "displayName": "da-novasteelv3",

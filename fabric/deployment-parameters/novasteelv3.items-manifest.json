@@ -67,12 +67,18 @@
       "restCollection": "/kqlDatabases",
       "sourceDirectory": "items/kql-ns-operations.KQLDatabase",
       "definitionFormat": null,
-      "definitionParts": ["DatabaseProperties.json", "DatabaseSchema.kql", ".platform"],
+      "definitionParts": [
+        "DatabaseProperties.json",
+        "DatabaseSchema.kql",
+        ".platform"
+      ],
       "createWithoutDefinition": false,
       "cliDeployable": true,
       "bindingGate": null,
       "deploymentOption": "deployEventhouseAndKql",
-      "dependencies": ["eventhouseOperations"],
+      "dependencies": [
+        "eventhouseOperations"
+      ],
       "manualGates": [
         "Measure retention/cache cost and adjust the novasteelv3 retention values before enabling long-lived demos.",
         "Confirm KQL query/ingestion endpoints and item identity support before any non-demo use."
@@ -86,12 +92,18 @@
       "restCollection": "/notebooks",
       "sourceDirectory": "notebooks/ns-initialize-lakehouses.Notebook",
       "definitionFormat": "ipynb",
-      "definitionParts": ["notebook-content.py", ".platform"],
+      "definitionParts": [
+        "notebook-content.py",
+        ".platform"
+      ],
       "createWithoutDefinition": false,
       "cliDeployable": true,
       "bindingGate": null,
       "deploymentOption": "deployNotebooks",
-      "dependencies": ["landingLakehouse", "coreLakehouse"],
+      "dependencies": [
+        "landingLakehouse",
+        "coreLakehouse"
+      ],
       "manualGates": [
         "Attach or authorize the novasteelv3 landing/core Lakehouses for the notebook execution identity."
       ]
@@ -104,12 +116,18 @@
       "restCollection": "/notebooks",
       "sourceDirectory": "notebooks/ns-load-reference-data.Notebook",
       "definitionFormat": "ipynb",
-      "definitionParts": ["notebook-content.py", ".platform"],
+      "definitionParts": [
+        "notebook-content.py",
+        ".platform"
+      ],
       "createWithoutDefinition": false,
       "cliDeployable": true,
       "bindingGate": null,
       "deploymentOption": "deployNotebooks",
-      "dependencies": ["coreLakehouse", "notebookInitialize"],
+      "dependencies": [
+        "coreLakehouse",
+        "notebookInitialize"
+      ],
       "manualGates": [
         "Upload the reference CSVs to Files/reference-data/ before running (tools/fabric/Load-AnalyticalGold.ps1 -Layer reference).",
         "Must run before v3-bronze-to-silver: every event is quarantined as UNKNOWN_ASSET (DQ-REF-001) while the dimensions are empty."
@@ -123,12 +141,19 @@
       "restCollection": "/notebooks",
       "sourceDirectory": "notebooks/ns-ontology-bindings.Notebook",
       "definitionFormat": "ipynb",
-      "definitionParts": ["notebook-content.py", ".platform"],
+      "definitionParts": [
+        "notebook-content.py",
+        ".platform"
+      ],
       "createWithoutDefinition": false,
       "cliDeployable": true,
       "bindingGate": null,
       "deploymentOption": "deployNotebooks",
-      "dependencies": ["coreLakehouse", "notebookSilverToGold", "notebookDemoScoring"],
+      "dependencies": [
+        "coreLakehouse",
+        "notebookSilverToGold",
+        "notebookDemoScoring"
+      ],
       "manualGates": [
         "Run after silver/gold and demo scoring so dim_*, fact_telemetry, fact_furnace_rul and the daily facts are populated.",
         "Table and column names are FROZEN: the Fabric IQ Ontology definition is authored against exactly these onto_* names."
@@ -142,34 +167,22 @@
       "restCollection": "/notebooks",
       "sourceDirectory": "notebooks/ns-seed-bronze-from-pack.Notebook",
       "definitionFormat": "ipynb",
-      "definitionParts": ["notebook-content.py", ".platform"],
+      "definitionParts": [
+        "notebook-content.py",
+        ".platform"
+      ],
       "createWithoutDefinition": false,
       "cliDeployable": true,
       "bindingGate": null,
       "deploymentOption": "deployNotebooks",
-      "dependencies": ["landingLakehouse", "coreLakehouse", "notebookInitialize"],
+      "dependencies": [
+        "landingLakehouse",
+        "coreLakehouse",
+        "notebookInitialize"
+      ],
       "manualGates": [
         "Upload the NDJSON pack to Files/operational-envelopes/ before running (tools/fabric/Load-AnalyticalGold.ps1 -Layer operational).",
         "Demo/dev/test only: it replays a deterministic pack into the landing zone that the Eventstream also writes to."
-      ]
-    },
-    {
-      "key": "notebookLoadOperationalEnvelopes",
-      "type": "Notebook",
-      "displayName": "v3-load-operational-envelopes",
-      "description": "Idempotently load the operational simulator-envelope datasets (uploaded to OneLake Files as NDJSON) into lh_novasteelv3_core Delta tables that the BFF reads when BFF_DATA_SOURCE=fabric.",
-      "restCollection": "/notebooks",
-      "sourceDirectory": "notebooks/ns-load-operational-envelopes.Notebook",
-      "definitionFormat": "ipynb",
-      "definitionParts": ["notebook-content.py", ".platform"],
-      "createWithoutDefinition": false,
-      "cliDeployable": true,
-      "bindingGate": null,
-      "deploymentOption": "deployNotebooks",
-      "dependencies": ["coreLakehouse", "notebookInitialize"],
-      "manualGates": [
-        "Upload the NDJSON pack to Files/operational-envelopes/ before running (tools/fabric/Load-AnalyticalGold.ps1 -Layer operational).",
-        "The nine dataset names must stay in sync with simulator/fabric_operational.OPERATIONAL_DATASETS and bff_api.fabric_source.KNOWN_DATASETS."
       ]
     },
     {
@@ -180,12 +193,18 @@
       "restCollection": "/notebooks",
       "sourceDirectory": "notebooks/ns-load-analytical-gold.Notebook",
       "definitionFormat": "ipynb",
-      "definitionParts": ["notebook-content.py", ".platform"],
+      "definitionParts": [
+        "notebook-content.py",
+        ".platform"
+      ],
       "createWithoutDefinition": false,
       "cliDeployable": true,
       "bindingGate": null,
       "deploymentOption": "deployNotebooks",
-      "dependencies": ["coreLakehouse", "notebookInitialize"],
+      "dependencies": [
+        "coreLakehouse",
+        "notebookInitialize"
+      ],
       "manualGates": [
         "Upload the gold CSV pack to Files/analytical-gold/<scenario>/ before running (tools/fabric/Load-AnalyticalGold.ps1).",
         "Idempotency keys must stay in sync with simulator/analytics.py::IDEMPOTENCY_KEYS and contracts/data/gold.v2.json."
@@ -199,12 +218,18 @@
       "restCollection": "/notebooks",
       "sourceDirectory": "notebooks/ns-bronze-to-silver.Notebook",
       "definitionFormat": "ipynb",
-      "definitionParts": ["notebook-content.py", ".platform"],
+      "definitionParts": [
+        "notebook-content.py",
+        ".platform"
+      ],
       "createWithoutDefinition": false,
       "cliDeployable": true,
       "bindingGate": null,
       "deploymentOption": "deployNotebooks",
-      "dependencies": ["notebookInitialize", "notebookLoadReferenceData"],
+      "dependencies": [
+        "notebookInitialize",
+        "notebookLoadReferenceData"
+      ],
       "manualGates": [
         "Validate event-time SCD joins, unit registry, watermark, and replay behavior with a fixed demo batch."
       ]
@@ -217,12 +242,17 @@
       "restCollection": "/notebooks",
       "sourceDirectory": "notebooks/ns-silver-to-gold.Notebook",
       "definitionFormat": "ipynb",
-      "definitionParts": ["notebook-content.py", ".platform"],
+      "definitionParts": [
+        "notebook-content.py",
+        ".platform"
+      ],
       "createWithoutDefinition": false,
       "cliDeployable": true,
       "bindingGate": null,
       "deploymentOption": "deployNotebooks",
-      "dependencies": ["notebookBronzeToSilver"],
+      "dependencies": [
+        "notebookBronzeToSilver"
+      ],
       "manualGates": [
         "Business owners must sign off KPI definitions before any non-demo reporting."
       ]
@@ -235,12 +265,17 @@
       "restCollection": "/notebooks",
       "sourceDirectory": "notebooks/ns-deterministic-demo-scoring.Notebook",
       "definitionFormat": "ipynb",
-      "definitionParts": ["notebook-content.py", ".platform"],
+      "definitionParts": [
+        "notebook-content.py",
+        ".platform"
+      ],
       "createWithoutDefinition": false,
       "cliDeployable": true,
       "bindingGate": null,
       "deploymentOption": "deployNotebooks",
-      "dependencies": ["coreLakehouse"],
+      "dependencies": [
+        "coreLakehouse"
+      ],
       "manualGates": [
         "Run only against SYNTHETIC data; this rule-based scorer is not a promoted production model.",
         "A production model requires MLflow evaluation, model card, drift gates, and RAI approval."
@@ -254,12 +289,17 @@
       "restCollection": "/notebooks",
       "sourceDirectory": "notebooks/ns-validate-data-quality.Notebook",
       "definitionFormat": "ipynb",
-      "definitionParts": ["notebook-content.py", ".platform"],
+      "definitionParts": [
+        "notebook-content.py",
+        ".platform"
+      ],
       "createWithoutDefinition": false,
       "cliDeployable": true,
       "bindingGate": null,
       "deploymentOption": "deployNotebooks",
-      "dependencies": ["notebookSilverToGold"],
+      "dependencies": [
+        "notebookSilverToGold"
+      ],
       "manualGates": [
         "A run is demo-ready only when contract, physics, and scenario assertions pass."
       ]
@@ -272,7 +312,10 @@
       "restCollection": "/dataPipelines",
       "sourceDirectory": "pipelines/pl-ns-medallion.DataPipeline",
       "definitionFormat": null,
-      "definitionParts": ["pipeline-content.json", ".platform"],
+      "definitionParts": [
+        "pipeline-content.json",
+        ".platform"
+      ],
       "createWithoutDefinition": false,
       "cliDeployable": true,
       "bindingGate": null,
@@ -296,12 +339,18 @@
       "restCollection": "/dataPipelines",
       "sourceDirectory": "pipelines/pl-ns-demo-scoring.DataPipeline",
       "definitionFormat": null,
-      "definitionParts": ["pipeline-content.json", ".platform"],
+      "definitionParts": [
+        "pipeline-content.json",
+        ".platform"
+      ],
       "createWithoutDefinition": false,
       "cliDeployable": true,
       "bindingGate": null,
       "deploymentOption": "deployPipelines",
-      "dependencies": ["notebookDemoScoring", "notebookDataQuality"],
+      "dependencies": [
+        "notebookDemoScoring",
+        "notebookDataQuality"
+      ],
       "manualGates": [
         "Keep this pipeline disabled outside the synthetic novasteelv3 demo workspace."
       ]
@@ -340,7 +389,9 @@
       "cliDeployable": true,
       "bindingGate": "semanticModelBindingValidated",
       "deploymentOption": "deploySemanticModel",
-      "dependencies": ["coreLakehouse"],
+      "dependencies": [
+        "coreLakehouse"
+      ],
       "manualGates": [
         "Validate the Direct Lake source binding against the novasteelv3 core Lakehouse SQL endpoint.",
         "Validate RLS/persona plant scope using test identities; UI hiding is not authorization.",
@@ -349,28 +400,10 @@
       ]
     },
     {
-      "key": "ontologyNotebook",
-      "type": "Notebook",
-      "displayName": "v3-steel-ontology",
-      "description": "NovaSteel manufacturing domain ontology — entity, relationship and property tables for steel making.",
-      "restCollection": "/notebooks",
-      "sourceDirectory": "notebooks/ns-steel-ontology.Notebook",
-      "definitionFormat": "ipynb",
-      "definitionParts": ["notebook-content.py", ".platform"],
-      "createWithoutDefinition": false,
-      "cliDeployable": true,
-      "bindingGate": null,
-      "deploymentOption": "deployNotebooks",
-      "dependencies": ["notebookSilverToGold"],
-      "manualGates": [
-        "Attach or authorize the novasteelv3 core Lakehouse for the notebook execution identity."
-      ]
-    },
-    {
       "key": "ontology",
       "type": "Ontology",
       "displayName": "onto_novasteelv3",
-      "description": "Fabric IQ ontology — AI-facing semantic layer between the gold star schema and the data agent. Plant, Asset, Sensor and Grade entity types with hasAsset/hasSensor relationships, bound to the onto_* serving tables.",
+      "description": "Fabric IQ ontology \u2014 AI-facing semantic layer between the gold star schema and the data agent. Plant, Asset, Sensor and Grade entity types with hasAsset/hasSensor relationships, bound to the onto_* serving tables.",
       "restCollection": "/items",
       "sourceDirectory": "items/onto-novasteelv3.Ontology",
       "definitionFormat": null,
@@ -384,9 +417,12 @@
       "cliDeployable": false,
       "bindingGate": null,
       "deploymentOption": "deployOntology",
-      "dependencies": ["coreLakehouse", "notebookOntologyBindings"],
+      "dependencies": [
+        "coreLakehouse",
+        "notebookOntologyBindings"
+      ],
       "manualGates": [
-        "Ontology is a preview item type — confirm it is enabled in the target tenant before deployment.",
+        "Ontology is a preview item type \u2014 confirm it is enabled in the target tenant before deployment.",
         "Item display names reject hyphens; use letters, numbers and underscores only.",
         "Run the ns-ontology-bindings notebook first so the onto_* tables exist with real timestamp columns.",
         "Deploy with .azure/fabric/Deploy-Ontology.ps1, then trigger a RefreshGraph job on the companion GraphModel and verify node/edge counts with the GQL query API.",
@@ -397,20 +433,28 @@
       "key": "dataAgent",
       "type": "DataAgent",
       "displayName": "da-novasteelv3",
-      "description": "NovaSteel manufacturing AI data agent — queries real-time KQL telemetry and Lakehouse analytics.",
+      "description": "NovaSteel manufacturing AI data agent \u2014 queries real-time KQL telemetry and Lakehouse analytics.",
       "restCollection": "/dataAgents",
       "sourceDirectory": "items/da-novasteelv3.DataAgent",
       "definitionFormat": null,
-      "definitionParts": ["dataAgent.json", ".platform"],
+      "definitionParts": [
+        "dataAgent.json",
+        ".platform"
+      ],
       "createWithoutDefinition": true,
       "cliDeployable": true,
       "bindingGate": null,
       "deploymentOption": "deployDataAgent",
-      "dependencies": ["kqlOperations", "coreLakehouse", "semanticModel", "ontology"],
+      "dependencies": [
+        "kqlOperations",
+        "coreLakehouse",
+        "semanticModel",
+        "ontology"
+      ],
       "manualGates": [
         "Verify the DataAgent item type is available in the target Fabric tenant before deployment.",
         "Attach the ontology's companion GraphModel as a 'graph' datasource; the datasource schema has no 'ontology' type.",
-        "updateDefinition is all-or-nothing — resend every existing part or the omitted ones are dropped.",
+        "updateDefinition is all-or-nothing \u2014 resend every existing part or the omitted ones are dropped.",
         "Review the agent's natural language query scope and data classification before enabling in production."
       ]
     }

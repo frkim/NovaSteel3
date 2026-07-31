@@ -3,7 +3,7 @@
   "metadata": {
     "type": "Notebook",
     "displayName": "v3-seed-bronze-from-pack",
-    "description": "Expand the committed operational envelope pack into landing.bronze_event_envelope so the medallion has every event family, not just the thin telemetry slice the Eventstream captured. Idempotent MERGE on event_id."
+    "description": "Expand the committed operational envelope pack into landing.bronze_event_envelope and load the BFF-facing operational envelope Delta tables in core. Idempotent MERGE on event_id; manifest is overwritten."
   },
   "config": {
     "version": "2.0",

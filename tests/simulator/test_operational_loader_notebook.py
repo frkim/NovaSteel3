@@ -1,5 +1,5 @@
-"""Conformance tests binding the operational loader notebook
-(``fabric/notebooks/ns-load-operational-envelopes.Notebook``) to the
+"""Conformance tests binding the consolidated bronze/operational loader notebook
+(``fabric/notebooks/ns-seed-bronze-from-pack.Notebook``) to the
 simulator's operational shaping and the BFF's expectations.
 
 No Spark runs locally, so instead of executing the notebook these tests parse
@@ -25,7 +25,7 @@ from simulator.fabric_operational import (
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-NOTEBOOK = (REPO_ROOT / "fabric" / "notebooks" / "ns-load-operational-envelopes.Notebook"
+NOTEBOOK = (REPO_ROOT / "fabric" / "notebooks" / "ns-seed-bronze-from-pack.Notebook"
             / "notebook-content.py")
 
 

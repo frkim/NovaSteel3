@@ -14,8 +14,9 @@ This is the second of the two analytical/operational layers that live in
 The source of truth for the operational layer is the committed simulator pack
 ``services/bff-api/fixtures/demo-full/`` (nine NDJSON envelope streams plus
 ``manifest.json``). This module reshapes those envelopes into loader-ready rows
-and the loader (``fabric/notebooks/ns-load-operational-envelopes.Notebook``)
-writes them as Delta tables named exactly after the datasets.
+and the consolidated loader
+(``fabric/notebooks/ns-seed-bronze-from-pack.Notebook``) writes them as Delta
+tables named exactly after the datasets.
 
 Row shape -- why the *JSON-document* column, not a flat row
 -----------------------------------------------------------
