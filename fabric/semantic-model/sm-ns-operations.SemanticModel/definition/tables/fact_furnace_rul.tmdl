@@ -1,4 +1,4 @@
-table fact_furnace_rul
+﻿table fact_furnace_rul
 	column inference_id
 		dataType: string
 		isKey
@@ -70,5 +70,6 @@ table fact_furnace_rul
 	partition fact_furnace_rul = entity
 		mode: directLake
 		source
+			expressionSource: DatabaseQuery
 			entityName: fact_furnace_rul
 			schemaName: dbo

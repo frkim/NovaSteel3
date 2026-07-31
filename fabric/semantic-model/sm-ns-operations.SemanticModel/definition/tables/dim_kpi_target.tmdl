@@ -1,4 +1,4 @@
-table dim_kpi_target
+﻿table dim_kpi_target
 	measure 'Total Energy GJ' = SUM('fact_energy_daily'[energy_gj])
 		formatString: #,0.00
 		displayFolder: Energy
@@ -163,5 +163,6 @@ table dim_kpi_target
 	partition dim_kpi_target = entity
 		mode: directLake
 		source
+			expressionSource: DatabaseQuery
 			entityName: dim_kpi_target
 			schemaName: dbo

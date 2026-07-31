@@ -1,4 +1,4 @@
-table fact_platform_usage
+﻿table fact_platform_usage
 	column week_start
 		dataType: dateTime
 		formatString: yyyy-MM-dd
@@ -28,5 +28,6 @@ table fact_platform_usage
 	partition fact_platform_usage = entity
 		mode: directLake
 		source
+			expressionSource: DatabaseQuery
 			entityName: fact_platform_usage
 			schemaName: dbo

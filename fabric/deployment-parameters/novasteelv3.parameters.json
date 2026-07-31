@@ -77,23 +77,23 @@
     },
     "pipelineMedallion": {
       "displayName": "pl-novasteelv3-medallion",
-      "id": "cb0e67b3-4e3d-4260-92cf-986fd4922d0e"
+      "id": "0021f29d-810d-4d6a-87f9-d111e7b187cf"
     },
     "pipelineDemoScoring": {
       "displayName": "pl-novasteelv3-demo-scoring",
-      "id": "7b98d9f4-5df2-4d4f-be73-7fa82523d468"
+      "id": "a568fc62-974a-4f63-bdb0-7bfc83dc29c2"
     },
     "semanticOperations": {
       "displayName": "sm-novasteelv3-operations",
-      "id": ""
+      "id": "6f104805-a4c4-481f-a0ad-d624fccc7ce0"
     },
     "ontologyNotebook": {
       "displayName": "v3-steel-ontology",
-      "id": ""
+      "id": "e57436a3-4070-4b62-8cd5-619a6723589a"
     },
     "dataAgent": {
       "displayName": "da-novasteelv3",
-      "id": ""
+      "id": "8d05f5f4-5e31-4180-90e9-bfa84ba7127d"
     }
   },
   "onelake": {
@@ -111,7 +111,7 @@
     "sensitivityLabelId": "",
     "kqlQueryServiceUri": "https://trd-q10bnypm07cdfv120p.z8.kusto.fabric.microsoft.com",
     "kqlIngestionServiceUri": "https://ingest-trd-q10bnypm07cdfv120p.z8.kusto.fabric.microsoft.com",
-    "coreSqlEndpoint": ""
+    "coreSqlEndpoint": "n3vzjhk62qcu7pa32c55eqqvme-jefzypibkiketakjaydrwuuzda.datawarehouse.fabric.microsoft.com"
   },
   "deploymentOptions": {
     "createOrBindWorkspace": true,

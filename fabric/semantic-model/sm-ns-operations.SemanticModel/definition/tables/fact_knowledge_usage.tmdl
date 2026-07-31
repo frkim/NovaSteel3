@@ -1,4 +1,4 @@
-table fact_knowledge_usage
+﻿table fact_knowledge_usage
 	column query_date
 		dataType: dateTime
 		formatString: yyyy-MM-dd
@@ -23,5 +23,6 @@ table fact_knowledge_usage
 	partition fact_knowledge_usage = entity
 		mode: directLake
 		source
+			expressionSource: DatabaseQuery
 			entityName: fact_knowledge_usage
 			schemaName: dbo

@@ -39,5 +39,6 @@ table fact_emissions_daily
 	partition fact_emissions_daily = entity
 		mode: directLake
 		source
+			expressionSource: DatabaseQuery
 			entityName: fact_emissions_daily
 			schemaName: dbo

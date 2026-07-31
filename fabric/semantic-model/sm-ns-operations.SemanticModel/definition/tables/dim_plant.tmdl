@@ -23,5 +23,6 @@ table dim_plant
 	partition dim_plant = entity
 		mode: directLake
 		source
+			expressionSource: DatabaseQuery
 			entityName: dim_plant
 			schemaName: dbo

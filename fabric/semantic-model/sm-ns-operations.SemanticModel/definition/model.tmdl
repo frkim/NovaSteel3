@@ -1,4 +1,4 @@
-model Model
+﻿model Model
 	culture: en-US
 	defaultPowerBIDataSourceVersion: powerBI_V3
 	sourceQueryCulture: en-US
@@ -23,3 +23,11 @@ ref table fact_customer_claim
 ref table fact_knowledge_procedure
 ref table fact_knowledge_usage
 ref table fact_platform_usage
+
+expression DatabaseQuery
+	kind: M
+	expression =
+			let
+					Source = Sql.Database("n3vzjhk62qcu7pa32c55eqqvme-jefzypibkiketakjaydrwuuzda.datawarehouse.fabric.microsoft.com", "lh_novasteelv3_core")
+			in
+					Source

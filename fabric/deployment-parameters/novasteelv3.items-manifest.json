@@ -279,7 +279,7 @@
       "sourceDirectory": "items/da-novasteelv3.DataAgent",
       "definitionFormat": null,
       "definitionParts": ["dataAgent.json", ".platform"],
-      "createWithoutDefinition": false,
+      "createWithoutDefinition": true,
       "cliDeployable": true,
       "bindingGate": null,
       "deploymentOption": "deployDataAgent",
