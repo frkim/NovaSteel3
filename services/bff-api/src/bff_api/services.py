@@ -9,12 +9,12 @@ from typing import Any, Mapping
 
 from .adapters import AuditStorePort, IdempotencyStorePort
 from .adapters.factory import create_audit_store, create_idempotency_store
+from .agent_adapter import OperationsAgentAdapter
 from .auth import Authenticator
 from .capacity import CapacityAdapter, LocalCapacityAdapter, UnconfiguredArmCapacityAdapter
 from .config import Settings
 from .copilot_adapter import CopilotAdapter
 from .device_adapter import DeviceAdapter
-from .dispatch_port import bind_dispatch_agent
 from .events import AlertEventBuffer
 from .knowledge_adapter import KnowledgeAdapter
 from .privacy_adapter import PrivacyAdapter
@@ -52,6 +52,7 @@ class BffServices:
     devices: DeviceAdapter
     optimizer: EnergyDispatchOptimizer = field(default_factory=EnergyDispatchOptimizer)
     scorer: ScoringWorker = field(default_factory=ScoringWorker)
+    agents: OperationsAgentAdapter = field(default_factory=OperationsAgentAdapter)
     recommendations: dict[str, dict[str, Any]] = field(default_factory=dict)
     forecasts: dict[str, tuple[dict[str, Any], str]] = field(default_factory=dict)
 
@@ -75,7 +76,7 @@ class BffServices:
             )
         knowledge = KnowledgeAdapter(demo_mode=settings.is_demo_mode)
         copilot = CopilotAdapter()
-        services = cls(
+        return cls(
             settings=settings,
             repository=repository,
             authenticator=Authenticator(settings),
@@ -92,11 +93,6 @@ class BffServices:
             ),
             devices=DeviceAdapter(demo_mode=settings.is_demo_mode),
         )
-        # Late binding, not a constructor argument: the dispatch port needs the fully
-        # assembled services (optimizer + repository + audit), which do not exist until
-        # this instance does.
-        bind_dispatch_agent(services)
-        return services
 
     def lining_forecast(self, *, asset_id: str, correlation_id: str) -> dict[str, Any]:
         cached = self.forecasts.get(asset_id)

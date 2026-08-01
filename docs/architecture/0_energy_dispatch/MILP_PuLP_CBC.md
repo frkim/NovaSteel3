@@ -116,31 +116,31 @@ for the conversational layer.
 
 ## 4. Deploying the optimizer into an agent — relevant? What benefits?
 
-**Highly relevant — and it is now implemented.**
-See [`services/knowledge-orchestrator/src/knowledge_orchestrator/energy_agent.py`](../../../services/knowledge-orchestrator/src/knowledge_orchestrator/energy_agent.py)
-and `ensure_energy_dispatch_agent()` in
-[`agent_service.py`](../../../services/knowledge-orchestrator/src/knowledge_orchestrator/agent_service.py).
+**Highly relevant — and the platform already does it.** The decision is recorded as
+**ADR-019** in [solution-architecture.md](../solution-architecture.md), which asked this
+exact question and answered it deliberately.
 
 ### The principle
 
 > **The agent is the interface. The MILP is the decision engine. Never swap them.**
 
-The language model does *not* compute the schedule. It calls the optimizer as a **tool**,
-then explains the result in natural language. The allow-list in
-[`tools.py`](../../../services/knowledge-orchestrator/src/knowledge_orchestrator/tools.py)
-gives the `energy-dispatch` agent exactly four capabilities —
-`read_energy_context`, `forecast_demand`, `simulate_schedule`, `propose_recommendation` —
-and `commit_schedule` / `approve_recommendation` sit in `FORBIDDEN_TOOL_NAMES`, which no
-agent identity may ever hold.
+The key move in ADR-019 is what it *refused*: the calculations do **not** move into the
+agent. They stay in Python and are *exposed to* agents as client-side function tools. The
+language model does not compute the schedule — it calls `simulate_energy_dispatch` as a
+tool, and then explains the result. A deny-by-default registry in
+[`agent_tools.py`](../../../services/knowledge-orchestrator/src/knowledge_orchestrator/agent_tools.py)
+refuses any tool not declared on that agent's own definition, so there is no `commit` or
+`approve` tool to reach.
 
 ```mermaid
 flowchart TD
-  U["Plant operator<br/>'Can we cut cost tonight without delaying order 4471?'"] --> A["Energy-dispatch agent<br/>Foundry Agent Service · LLM"]
-  A -->|"tool call: simulate_schedule"| O["Optimizer worker<br/>PuLP / CBC MILP"]
+  U["Plant operator<br/>'Can we cut cost tonight without delaying order 4471?'"] --> A["novasteel-energy-advisor<br/>Foundry Agent Service · operations project"]
+  A -->|"tool call: simulate_energy_dispatch"| T["Tool body in bff-api<br/>re-applies caller roles + plant scope"]
+  T --> O["Optimizer worker<br/>PuLP / CBC MILP"]
   O -->|"proven-optimal schedule<br/>+ cost/CO2 deltas + solver name"| A
-  A --> R["propose_recommendation<br/>status = PENDING_APPROVAL"]
+  A --> R["PROPOSAL_PENDING_HUMAN_APPROVAL<br/>+ modelVersion + auditRef"]
   R --> H["Human accept / modify / reject<br/>with reason code"]
-  H --> M["commit_schedule<br/>policy-gated, never the agent"]
+  H --> M["commit route<br/>policy-gated, never the agent"]
   style O fill:#d5e8d4,stroke:#82b366
   style H fill:#ffe6cc,stroke:#d79b00
 ```
@@ -148,23 +148,21 @@ flowchart TD
 ### Benefits
 
 1. **Natural-language access to a rigorous engine.** Operators ask in plain
-   French/English instead of filling a parameter form. The agent maps "keep the urgent
-   order safe" onto `urgent=true` and "don't move anything more than an hour" onto
-   `maxHoldMinutes=60`.
+   French/English instead of filling a parameter form. The agent maps "don't move
+   anything more than an hour" onto `maxShiftMinutes=60`.
 2. **Conversational what-if loops.** "What if I allow two hours of shift?" re-runs the
    solve and compares. Each run is still a proven-optimal MILP, not a model's guess.
 3. **Explanation layer.** MILP emits numbers; the agent turns them into "we saved
    €1,240 and 3.1 t CO₂ by moving four non-urgent batches into the 02:00–04:00 wind
    window, with the urgent automotive coil untouched."
-4. **Orchestration across tools.** `forecast_demand` → `simulate_schedule` →
-   `propose_recommendation` in one conversation, and the dispatch → RUL handoff in
-   [`handoff.py`](../../../services/knowledge-orchestrator/src/knowledge_orchestrator/handoff.py)
-   when a cheap schedule would push a furnace past its remaining useful life.
+4. **Composition across advisors.** The energy advisor and the maintenance advisor
+   (`lining_rul_forecast`) can be reasoned about together — "if I delay this batch, what
+   does it do to the hearth?" — which no single screen answers today.
 5. **Safety is structural, not prompted.** Because the model never *computes* the
    answer, a hallucination cannot produce an infeasible schedule — the worst case is
    odd tool arguments, and the MILP constraints still hold. Combined with the
-   propose-only permission and the human `commit_schedule` gate, the architecture is
-   EU-AI-Act-defensible.
+   propose-only boundary (ADR-006, ADR-007) and the human commit gate, the architecture
+   is EU-AI-Act-defensible.
 6. **Platform-owned observability.** Foundry Agent Service emits OpenTelemetry GenAI
    spans — model, tokens, tool calls, latency — into the same Application Insights
    workspace as the worker's own dispatch metrics, with no extra instrumentation.
@@ -172,12 +170,15 @@ flowchart TD
 ### Caveats we hold ourselves to
 
 - The agent **must not** generate or "adjust" the schedule itself. Determinism and
-  auditability die the moment it does. The hosted instructions say so explicitly and the
-  tool executor is the only path to a number.
+  auditability die the moment it does. The instructions say so and the tool is the only
+  path to a number.
 - **Log both layers:** the agent's tool-call arguments *and* the MILP solve
   inputs/outputs, so an audit can replay the exact solve.
 - **Keep the propose/approve split.** The agent proposes; a human commits. That boundary
   is what makes the whole thing deployable in a real plant.
+- **The chat panel is not the door.** ADR-011 gives the Copilot chat no tools at all;
+  routing dispatch questions from the chat into the optimizer would silently revoke that
+  guarantee. Tool-calling agents are reached through `POST /v1/agents/ask` instead.
 
 ---
 
@@ -185,12 +186,11 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-  MFE["analytics-mfe<br/>Copilot panel"] --> BFF["bff-api<br/>/v1/copilot/chat"]
-  BFF --> CS["CopilotService<br/>dispatch-intent routing"]
-  CS -->|dispatch request| EA["Energy-dispatch agent<br/>Foundry Agent Service<br/>(local deterministic fallback)"]
-  CS -->|everything else| CC["Copilot chat agent"]
-  EA -->|"function tool"| DP["DispatchPort"]
-  DP --> BS["BffServices.simulate_energy<br/>audit + RBAC + repository"]
+  MFE["analytics-mfe"] --> BFF["bff-api<br/>POST /v1/agents/ask"]
+  BFF --> AD["OperationsAgentAdapter<br/>binds tools to the caller's UserContext"]
+  AD --> EA["novasteel-energy-advisor<br/>Foundry Agent Service<br/>(operations project)"]
+  EA -->|"function_call"| TB["Tool body in bff_api/agent_tools.py<br/>require_any_role + require_site"]
+  TB --> BS["BffServices.simulate_energy<br/>audit + repository"]
   BS --> OPT["EnergyDispatchOptimizer<br/>MILP_CBC → heuristic"]
 ```
 
@@ -198,31 +198,30 @@ flowchart LR
 |---|---|
 | MILP model | `optimizer_worker/milp.py` |
 | Strategy switch + savings maths | `optimizer_worker/service.py` |
-| Tool allow-list / forbidden names | `knowledge_orchestrator/tools.py` |
-| Agent tools, schemas, executor, instructions | `knowledge_orchestrator/energy_agent.py` |
-| Foundry hosting + client-side tool loop | `knowledge_orchestrator/agent_service.py` |
-| Copilot-panel routing | `knowledge_orchestrator/copilot/service.py` |
-| In-process port to the optimizer | `bff_api/dispatch_port.py` (bound in `bff_api/services.py`) |
-| Foundry project, BYO stores, App Insights | `infra/bicep/modules/foundry-agents.bicep` |
+| Agent roster (declared as data) | `knowledge_orchestrator/agent_manifest.py` |
+| Tool schemas + deny-by-default registry | `knowledge_orchestrator/agent_tools.py` |
+| Release-time reconciliation of the roster | `knowledge_orchestrator/agent_reconciler.py` |
+| Tool *bodies*, scoped to the caller | `bff_api/agent_tools.py` |
+| Run loop + caller-scope context | `bff_api/agent_adapter.py` |
+| Foundry projects, BYO stores, App Insights | `infra/bicep/modules/foundry-agents.bicep` |
 
 ### Environment
 
 | Variable | Effect |
 |---|---|
-| `FOUNDRY_PROJECT_ENDPOINT` | Set → agents are hosted in Foundry Agent Service. Unset → deterministic local agents. |
+| `FOUNDRY_PROJECT_ENDPOINT` | Knowledge project — agents that read untrusted content. |
+| `FOUNDRY_OPERATIONS_PROJECT_ENDPOINT` | Operations project — the tool-calling advisors, including this one. |
 | `FOUNDRY_AGENT_SERVICE_MODE=local` | Explicit override, forces local agents. |
-| `FOUNDRY_CHAT_DEPLOYMENT` | Model behind the hosted agents (default `gpt-5.4-mini`). |
-| `COPILOT_ENERGY_AGENT_MODE=off` | Disables dispatch routing in the Copilot panel. |
-| `COPILOT_ENERGY_AGENT_MODE=local` | Keeps routing on but forces the deterministic local agent. |
+| `FOUNDRY_CHAT_DEPLOYMENT` | Model behind the hosted agents. |
 
 ### One design note worth keeping
 
-The tool schemas make `site` **optional**, and the orchestrator never supplies a
-default. A model asked for a plant code will confidently invent a plausible one;
-the plant identifier belongs to the deployment, so `BffDispatchPort` resolves a
-blank site from the configured data namespace. The general rule this follows —
-*never ask the model for a value that a service already knows* — is worth
-applying to every tool schema, not just this one.
+A model asked for a plant code will confidently invent a plausible one. The schema lets
+it propose a `site`, but the proposal is never trusted: the tool body resolves and
+validates it against the caller's plant scope with `require_site`, so an invented plant
+identifier is refused rather than solved. The general rule — *never let the model's
+answer be the authority on a value a service already owns* — is worth applying to every
+tool schema, not just this one.
 
 Dependencies resolve only from the protected feed
 (`https://packagefeedproxy.microsoft.io/pypi/simple`) — see

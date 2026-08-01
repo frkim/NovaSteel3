@@ -6,7 +6,7 @@
     "mode": "Indexed",
     "metadata": {
       "category": "NovaSteel Guardrails",
-      "source": "docs/security/security-governance-and-threat-model.md §4.1, §5"
+      "source": "docs/tech/security-governance-and-threat-model.md §4.1, §5"
     },
     "parameters": {
       "effect": {

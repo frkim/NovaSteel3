@@ -1,4 +1,8 @@
 # Knowledge orchestrator dependencies.
 # Core service uses only the standard library for offline mode;
 # azure-monitor-opentelemetry enables optional observability.
+# Agent runtime: azure-ai-projects provides Foundry agent definitions;
+# openai runs the OpenAI-compatible Responses API loop.
+azure-ai-projects==2.2.0
 azure-monitor-opentelemetry==1.8.9
+openai==2.44.0

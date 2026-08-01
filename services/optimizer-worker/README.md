@@ -25,13 +25,14 @@ The movable-load-only view is exposed additively as `rawFlexibleCostPct` and
 
 ## Agent access
 
-The optimizer is also reachable in natural language through the energy-dispatch
-agent (`knowledge_orchestrator/energy_agent.py`), hosted in Azure AI Foundry
-Agent Service and surfaced in the platform's Copilot panel. The agent is the
-*interface*; this worker remains the *decision engine* — the model calls
-`simulate_schedule` as a function tool and never computes a schedule itself.
-The agent has no tool for approving or committing, so the propose-only property
-above still holds when a planner asks for a schedule by typing. See
+The optimizer is also reachable in natural language through the energy advisor
+(`novasteel-energy-advisor`, declared in `knowledge_orchestrator/agent_manifest.py`),
+hosted in Azure AI Foundry Agent Service and reached through `POST /v1/agents/ask`.
+The agent is the *interface*; this worker remains the *decision engine* — the model
+calls `simulate_energy_dispatch` as a function tool and never computes a schedule
+itself. The tool body runs in the BFF under the caller's validated identity, and the
+agent has no tool for approving or committing, so the propose-only property above
+still holds when a planner asks for a schedule by typing. See
 [MILP_PuLP_CBC.md](../../docs/architecture/0_energy_dispatch/MILP_PuLP_CBC.md).
 
 ## Dependencies

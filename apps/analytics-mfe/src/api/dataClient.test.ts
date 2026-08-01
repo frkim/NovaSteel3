@@ -78,7 +78,7 @@ describe('DataClient offline fixture fallback', () => {
     const result = await client.simulateEnergy({ maxShiftMinutes: 120, maxConcurrentBatches: 2 })
     const rec = result.value
     expect(result.source).toBe('fixture')
-    // Whole-dispatch basis, matching docs/implementation/api-contracts.md and
+    // Whole-dispatch basis, matching docs/tech/api-contracts.md and
     // the runbook. An offline walkthrough must never quote a second number.
     expect(rec.savings.costPct).toBe(7.25)
     expect(rec.savings.costEur).toBe(2688.7)

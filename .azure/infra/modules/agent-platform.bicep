@@ -58,12 +58,21 @@ param bffPrincipalId string = ''
 var searchServiceName = '${resourcePrefix}-srch-${nameSuffix}'
 var cosmosAccountName = '${resourcePrefix}-cosmos-${nameSuffix}'
 var projectName = '${resourcePrefix}-proj'
+var operationsProjectName = '${resourcePrefix}-ops-proj'
 var searchConnectionName = '${resourcePrefix}-conn-search'
 var cosmosConnectionName = '${resourcePrefix}-conn-cosmos'
 var storageConnectionName = '${resourcePrefix}-conn-storage'
+// Connection names are unique per Foundry ACCOUNT, not per project: the service
+// rejects a second project reusing a name with "already exist, and can only be
+// updated by the workspace that created it". The operations project therefore
+// needs its own names even though it points at the same three backing stores.
+var operationsSearchConnectionName = '${resourcePrefix}-ops-conn-search'
+var operationsCosmosConnectionName = '${resourcePrefix}-ops-conn-cosmos'
+var operationsStorageConnectionName = '${resourcePrefix}-ops-conn-storage'
 var appInsightsConnectionName = '${resourcePrefix}-conn-appinsights'
 var accountCapabilityHostName = '${resourcePrefix}-account-caphost'
 var projectCapabilityHostName = '${resourcePrefix}-project-caphost'
+var operationsProjectCapabilityHostName = '${resourcePrefix}-ops-project-caphost'
 
 var searchIndexDataContributorRoleDefinitionId = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '8ebe5a00-799e-43f5-93ac-243d3dce84a7')
 var searchServiceContributorRoleDefinitionId = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7ca78c08-252a-4471-8644-bb5ff32d4ba0')
@@ -156,6 +165,11 @@ resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2024-12-01-preview
         isZoneRedundant: false
       }
     ]
+    // Pinned to the value the live account already carries. It is a no-op on a
+    // single-region account, but leaving it unset makes every deployment of this
+    // module flip it back to false — gratuitous churn on an account shared with
+    // the agent thread storage.
+    enableAutomaticFailover: true
     publicNetworkAccess: 'Enabled'
     // Requested, but NOT guaranteed: the management-group Modify policy
     // `cosmosdb_publicnetwork_modify` overwrites this with 'Disabled' on every
@@ -227,6 +241,88 @@ resource cosmosConnection 'Microsoft.CognitiveServices/accounts/projects/connect
 resource storageConnection 'Microsoft.CognitiveServices/accounts/projects/connections@2025-04-01-preview' = {
   parent: project
   name: storageConnectionName
+  properties: {
+    category: 'AzureStorageAccount'
+    target: storageAccount.properties.primaryEndpoints.blob
+    authType: 'AAD'
+    isSharedToAll: true
+    metadata: {
+      ApiType: 'Azure'
+      ResourceId: storageAccount.id
+      location: location
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Operations project — the tool-calling trust boundary
+// ---------------------------------------------------------------------------
+// A Foundry agent can only call the tools declared on its own definition, and a
+// definition belongs to exactly one project. The project above hosts the agents that
+// read untrusted content (approved procedures, interview transcripts, web results)
+// and hold no tool that can reach a NovaSteel calculation. This second project hosts
+// the agents that do call function tools — energy dispatch simulation, lining RUL
+// forecasts. Keeping them apart means a prompt injected into a retrieved procedure
+// has no path to `simulate_energy_dispatch`, because no agent that reads procedures
+// was ever given that tool.
+//
+// Everything else is shared with the knowledge project: same account, same Search,
+// Cosmos, Storage and Application Insights. The boundary being bought here is over
+// tool reachability, not data at rest, and a second set of backing stores would
+// double the demo cost for no gain. The Search connection exists only because the
+// capability-host contract requires a vector store; no agent in this project uses it.
+resource operationsProject 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-preview' = {
+  parent: aiServices
+  name: operationsProjectName
+  location: location
+  tags: tags
+  identity: {
+    type: 'SystemAssigned'
+  }
+  properties: {
+    displayName: 'NovaSteel v3 demo operations agents'
+    description: 'Hosts the tool-calling operations agents. Their tools call the audited deterministic services; every result is a proposal requiring human approval (ADR-006, ADR-007).'
+  }
+}
+
+#disable-next-line BCP081
+resource operationsSearchConnection 'Microsoft.CognitiveServices/accounts/projects/connections@2025-04-01-preview' = {
+  parent: operationsProject
+  name: operationsSearchConnectionName
+  properties: {
+    category: 'CognitiveSearch'
+    target: 'https://${searchService.name}.search.windows.net'
+    authType: 'AAD'
+    isSharedToAll: true
+    metadata: {
+      ApiType: 'Azure'
+      ResourceId: searchService.id
+      location: location
+    }
+  }
+}
+
+#disable-next-line BCP081
+resource operationsCosmosConnection 'Microsoft.CognitiveServices/accounts/projects/connections@2025-04-01-preview' = {
+  parent: operationsProject
+  name: operationsCosmosConnectionName
+  properties: {
+    category: 'CosmosDB'
+    target: cosmosAccount.properties.documentEndpoint
+    authType: 'AAD'
+    isSharedToAll: true
+    metadata: {
+      ApiType: 'Azure'
+      ResourceId: cosmosAccount.id
+      location: location
+    }
+  }
+}
+
+#disable-next-line BCP081
+resource operationsStorageConnection 'Microsoft.CognitiveServices/accounts/projects/connections@2025-04-01-preview' = {
+  parent: operationsProject
+  name: operationsStorageConnectionName
   properties: {
     category: 'AzureStorageAccount'
     target: storageAccount.properties.primaryEndpoints.blob
@@ -375,6 +471,79 @@ resource projectStorageBlobDataOwner 'Microsoft.Authorization/roleAssignments@20
 // Capability hosts — the switch that actually turns Agent Service on
 // ---------------------------------------------------------------------------
 
+// The same six grants as the knowledge project, for the operations identity. The
+// capability host provisions its own enterprise_memory database and blob containers
+// as this identity, so they must exist before it is created.
+resource operationsProjectSearchIndexDataContributor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(searchService.id, operationsProject.id, searchIndexDataContributorRoleDefinitionId)
+  scope: searchService
+  properties: {
+    principalId: operationsProject.identity.principalId
+    principalType: 'ServicePrincipal'
+    roleDefinitionId: searchIndexDataContributorRoleDefinitionId
+  }
+}
+
+resource operationsProjectSearchServiceContributor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(searchService.id, operationsProject.id, searchServiceContributorRoleDefinitionId)
+  scope: searchService
+  properties: {
+    principalId: operationsProject.identity.principalId
+    principalType: 'ServicePrincipal'
+    roleDefinitionId: searchServiceContributorRoleDefinitionId
+  }
+}
+
+resource operationsProjectCosmosOperator 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(cosmosAccount.id, operationsProject.id, cosmosDbOperatorRoleDefinitionId)
+  scope: cosmosAccount
+  properties: {
+    principalId: operationsProject.identity.principalId
+    principalType: 'ServicePrincipal'
+    roleDefinitionId: cosmosDbOperatorRoleDefinitionId
+  }
+}
+
+resource operationsProjectCosmosDataContributor 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2024-12-01-preview' = {
+  parent: cosmosAccount
+  name: guid(cosmosAccount.id, operationsProject.id, 'sql-data-contributor')
+  properties: {
+    principalId: operationsProject.identity.principalId
+    roleDefinitionId: '${cosmosAccount.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002'
+    scope: cosmosAccount.id
+  }
+}
+
+resource operationsProjectStorageAccountContributor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(storageAccount.id, operationsProject.id, storageAccountContributorRoleDefinitionId)
+  scope: storageAccount
+  properties: {
+    principalId: operationsProject.identity.principalId
+    principalType: 'ServicePrincipal'
+    roleDefinitionId: storageAccountContributorRoleDefinitionId
+  }
+}
+
+resource operationsProjectStorageBlobDataOwner 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(storageAccount.id, operationsProject.id, storageBlobDataOwnerRoleDefinitionId)
+  scope: storageAccount
+  properties: {
+    principalId: operationsProject.identity.principalId
+    principalType: 'ServicePrincipal'
+    roleDefinitionId: storageBlobDataOwnerRoleDefinitionId
+  }
+}
+
+resource operationsProjectMonitoringMetricsPublisher 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(applicationInsights.id, operationsProject.id, monitoringMetricsPublisherRoleDefinitionId)
+  scope: applicationInsights
+  properties: {
+    principalId: operationsProject.identity.principalId
+    principalType: 'ServicePrincipal'
+    roleDefinitionId: monitoringMetricsPublisherRoleDefinitionId
+  }
+}
+
 #disable-next-line BCP081
 resource accountCapabilityHost 'Microsoft.CognitiveServices/accounts/capabilityHosts@2025-04-01-preview' = if (agentServiceManuallyValidated) {
   parent: aiServices
@@ -416,6 +585,40 @@ resource projectCapabilityHost 'Microsoft.CognitiveServices/accounts/projects/ca
   ]
 }
 
+// Serialised behind the knowledge project's host: both share the account-level
+// capability host, and provisioning them concurrently races on it.
+#disable-next-line BCP081
+resource operationsProjectCapabilityHost 'Microsoft.CognitiveServices/accounts/projects/capabilityHosts@2025-04-01-preview' = if (agentServiceManuallyValidated) {
+  parent: operationsProject
+  name: operationsProjectCapabilityHostName
+  properties: {
+    #disable-next-line BCP037
+    capabilityHostKind: 'Agents'
+    vectorStoreConnections: [
+      operationsSearchConnectionName
+    ]
+    threadStorageConnections: [
+      operationsCosmosConnectionName
+    ]
+    storageConnections: [
+      operationsStorageConnectionName
+    ]
+  }
+  dependsOn: [
+    accountCapabilityHost
+    projectCapabilityHost
+    operationsSearchConnection
+    operationsCosmosConnection
+    operationsStorageConnection
+    operationsProjectSearchIndexDataContributor
+    operationsProjectSearchServiceContributor
+    operationsProjectCosmosOperator
+    operationsProjectCosmosDataContributor
+    operationsProjectStorageAccountContributor
+    operationsProjectStorageBlobDataOwner
+  ]
+}
+
 output searchServiceId string = searchService.id
 output searchServiceName string = searchService.name
 output searchEndpoint string = 'https://${searchService.name}.search.windows.net'
@@ -426,6 +629,9 @@ output projectName string = project.name
 // The data-plane endpoint the knowledge orchestrator uses to create agents, threads
 // and runs. There is no ARM type for an agent definition.
 output projectEndpoint string = 'https://${aiServicesName}.services.ai.azure.com/api/projects/${projectName}'
+output operationsProjectId string = operationsProject.id
+output operationsProjectName string = operationsProject.name
+output operationsProjectEndpoint string = 'https://${aiServicesName}.services.ai.azure.com/api/projects/${operationsProjectName}'
 output procedureIndexName string = 'novasteel-procedures'
 output knowledgeBaseName string = 'novasteel-procedures-kb'
 output agentServiceReady bool = agentServiceManuallyValidated

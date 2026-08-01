@@ -424,7 +424,7 @@ Per the assignment format, the solution is presented in a **1-hour defense**: **
 
 | Segment | Duration | Content |
 |---|---|---|
-| Slides: problem, personas, architecture, Fabric, AI, governance, data, deployment | 35 min | [Oral-defense plan](../presentation/oral-defense-and-slide-plan.md), slides 1–20 |
+| Slides: problem, personas, architecture, Fabric, AI, governance, data, deployment | 35 min | [Oral-defense plan](../presentation/archives/oral-defense-and-slide-plan.md), slides 1–20 |
 | **Live demo** | **10 min** | DM-1 → DM-6 per §15/§19.3 |
 | FAQ / defense | 15 min | [Oral-defense FAQ](../presentation/faq.md); validation gates and follow-ups |
 

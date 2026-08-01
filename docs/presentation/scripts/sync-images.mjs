@@ -39,6 +39,7 @@ const assets = [
   [join(generatedDir, "steelworks-hero.png"), "steelworks-hero.png"],
   [join(generatedDir, "thermal-map.png"), "thermal-map.png"],
   ...[
+    "adaptive-cloud-iot-operations.png",
     "command-center-overview.png",
     "energy-optimization-spot-price-schedule.png",
     "furnace-health-lining-forecast.png",

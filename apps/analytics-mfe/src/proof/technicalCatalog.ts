@@ -2,7 +2,7 @@
  * Technical rating-grid catalog — the single source of truth for the
  * "Technical Requirements" screen.
  *
- * Each entry answers one criterion of `docs/tech/rating_grid.md` with a
+ * Each entry answers one criterion of `docs/usecase/rating_grid.md` with a
  * self-assessed score, the evidence that supports it, the gap that keeps it
  * from a 5, and the concrete work that would close that gap. The narrative
  * long-form version lives in `docs/tech/technical-analysis.md`; this file is
@@ -177,7 +177,7 @@ export const TECH_REQUIREMENTS: TechRequirement[] = [
     evidence: [
       {
         kind: 'doc',
-        label: 'docs/security/security-governance-and-threat-model.md',
+        label: 'docs/tech/security-governance-and-threat-model.md',
         detail: 'STRIDE threat model, control mapping, and the residual-risk register.',
       },
       {
@@ -237,10 +237,10 @@ export const TECH_REQUIREMENTS: TechRequirement[] = [
     evidence: [
       {
         kind: 'doc',
-        label: 'docs/presentation/oral-defense-and-slide-plan.md',
+        label: 'docs/presentation/archives/oral-defense-and-slide-plan.md',
         detail: '26 slides with per-slide timing against the 30/15/15 split.',
       },
-      { kind: 'doc', label: 'docs/presentation/fiche-repetition-presentateur.md', detail: 'Presenter rehearsal sheet.' },
+      { kind: 'doc', label: 'docs/presentation/archives/fiche-repetition-presentateur.md', detail: 'Presenter rehearsal sheet.' },
       { kind: 'doc', label: 'docs/presentation/faq.md', detail: 'Prepared answers for the 15-minute FAQ.' },
       {
         kind: 'code',
@@ -543,7 +543,7 @@ export const TECH_REQUIREMENTS: TechRequirement[] = [
     howMet:
       'The same content is prepared for three audiences. Executives get a 26-slide deck and a French executive summary that lead with cost and compliance. A technical jury gets the architecture, threat model, API contracts and this rating-grid analysis, plus 45-plus pages of anticipated FAQ. Someone who knows nothing about steelmaking gets the in-app Help Assistant, which explains any element on screen in plain language, optionally in English and French side by side. Every screen is stamped with the use-case reference it answers, so the thread from brief to pixel is never lost.',
     evidence: [
-      { kind: 'doc', label: 'docs/presentation/oral-defense-and-slide-plan.md', detail: '26 slides with timing.' },
+      { kind: 'doc', label: 'docs/presentation/archives/oral-defense-and-slide-plan.md', detail: '26 slides with timing.' },
       { kind: 'doc', label: 'docs/presentation/faq.md', detail: 'Anticipated jury questions with prepared answers.' },
       { kind: 'doc', label: 'docs/presentation/resume-executif-fr.md', detail: 'French executive summary.' },
       { kind: 'doc', label: 'docs/tech/technical-analysis.md', detail: 'This rating-grid analysis, in long form.' },

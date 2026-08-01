@@ -226,7 +226,7 @@ class TestBffTableStorage:
 
     def test_table_private_dns_zone_in_network_module(self) -> None:
         src = read_text(MODULES_DIR / "network.bicep")
-        assert "privatelink.table.core.windows.net" in src, (
+        assert re.search(r"privatelink\.table\.core\.windows\.net", src), (
             "network.bicep must declare the privatelink.table.core.windows.net DNS zone"
         )
 

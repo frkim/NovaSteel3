@@ -97,7 +97,7 @@ def test_search_exposes_the_index_and_knowledge_base_name_contract(ai_search: st
 
 def test_search_private_dns_zone_is_registered(main: str) -> None:
     network = code_of(MODULES_DIR / "network.bicep")
-    assert "privatelink.search.windows.net" in network
+    assert re.search(r"privatelink\.search\.windows\.net", network)
     assert "privatelink.documents.azure.com" in network
     assert "search: privateDnsZones" in network
     assert "cosmosDb: privateDnsZones" in network
@@ -176,7 +176,9 @@ def test_byo_connections_exist_for_standard_agent_setup(
 
 def test_byo_connections_use_entra_not_keys(foundry_agents: str) -> None:
     assert "authType: 'AAD'" in foundry_agents
-    assert foundry_agents.count("authType: 'AAD'") == 3
+    # Three BYO connections (Search, Cosmos, Storage) per project, and the module
+    # provisions two projects.
+    assert foundry_agents.count("authType: 'AAD'") == 6
 
 
 def test_application_insights_connection_links_agent_telemetry(
@@ -310,7 +312,7 @@ def test_foundry_private_endpoint_resolves_the_project_model_host(
 ) -> None:
     """Without this zone the project endpoint is unreachable from the VNet."""
     network = code_of(MODULES_DIR / "network.bicep")
-    assert "privatelink.services.ai.azure.com" in network
+    assert re.search(r"privatelink\.services\.ai\.azure\.com", network)
     assert re.search(r"aiServices: privateDnsZones\[\d+\]\.id", network)
     assert "aiServicesPrivateDnsZoneId" in foundry_speech
     assert "privatelink-services-ai-azure-com" in foundry_speech
@@ -320,7 +322,99 @@ def test_project_endpoint_output_targets_the_project_not_the_account(
     foundry_agents: str,
 ) -> None:
     assert "/api/projects/${projectName}" in foundry_agents
-    assert ".services.ai.azure.com" in foundry_agents
+    assert re.search(r"\.services\.ai\.azure\.com", foundry_agents)
+
+
+# ---------------------------------------------------------------------------
+# The operations project — the second trust boundary
+# ---------------------------------------------------------------------------
+
+
+def test_a_separate_operations_project_exists(foundry_agents: str) -> None:
+    """Two projects, not one project with more agents.
+
+    An agent can only call the tools declared on its own definition in its own
+    project, so a prompt injected into a retrieved procedure (knowledge project) has
+    no path to the dispatch optimizer (operations project). Collapsing these into one
+    project would erase that boundary.
+    """
+    assert "var operationsProjectName = 'proj-novasteel-ops-${environment}'" in foundry_agents
+    assert foundry_agents.count("Microsoft.CognitiveServices/accounts/projects@") == 2
+
+
+def test_the_operations_project_has_its_own_identity_and_byo_stores(
+    foundry_agents: str,
+) -> None:
+    """The capability-host contract requires all three connections on every project
+    that hosts agents, even though no operations agent retrieves documents."""
+    block = foundry_agents.split("resource operationsProject ", 1)[1]
+    assert "SystemAssigned" in block
+    for category in ("CognitiveSearch", "CosmosDB", "AzureStorageAccount"):
+        assert f"category: '{category}'" in block
+
+
+def test_the_operations_project_holds_its_own_search_roles(foundry_agents: str) -> None:
+    """RBAC is per project identity; the knowledge project's grants do not carry."""
+    for role in (
+        "8ebe5a00-799e-43f5-93ac-243d3dce84a7",  # Index Data Contributor
+        "7ca78c08-252a-4471-8644-bb5ff32d4ba0",  # Service Contributor
+    ):
+        assert f"guid(searchServiceId, operationsProject.id, '{role}')" in foundry_agents
+
+
+def test_the_operations_project_gets_the_same_byo_rbac(main: str) -> None:
+    assert "module foundryOpsAgentRbac 'modules/foundry-agent-rbac.bicep'" in main
+    block_start = main.index("module foundryOpsAgentRbac")
+    block = main[block_start : block_start + 1200]
+    assert "foundryAgents.outputs.operationsProjectPrincipalId" in block
+
+
+def test_the_second_capability_host_does_not_recreate_the_account_one(
+    main: str, capability_host: str
+) -> None:
+    """A capability host is immutable and the account-level one is shared across
+    projects, so the second invocation must skip it or the deployment conflicts."""
+    assert "param deployAccountCapabilityHost bool = true" in capability_host
+    assert (
+        "resource accountCapabilityHost 'Microsoft.CognitiveServices/accounts/"
+        "capabilityHosts@2025-04-01-preview' = if (deployAccountCapabilityHost)"
+        in capability_host
+    )
+    block_start = main.index("module foundryOpsAgentCapabilityHost")
+    block = main[block_start : block_start + 1200]
+    assert "deployAccountCapabilityHost: false" in block
+
+
+def test_the_two_capability_hosts_are_serialised(main: str) -> None:
+    """Two concurrent capability-host creations on one account race each other."""
+    block_start = main.index("module foundryOpsAgentCapabilityHost")
+    block = main[block_start : block_start + 1200]
+    assert "dependsOn" in block
+    assert "foundryAgentCapabilityHost" in block
+
+
+def test_the_operations_endpoint_reaches_the_apps(main: str) -> None:
+    assert (
+        "foundryOperationsProjectEndpoint: foundryAgents.outputs.operationsProjectEndpoint"
+        in main
+    )
+    containerapps = code_of(MODULES_DIR / "containerapps.bicep")
+    assert "FOUNDRY_OPERATIONS_PROJECT_ENDPOINT" in containerapps
+    # The BFF hosts the tool implementations, the orchestrator hosts the runtime.
+    block_start = containerapps.index("FOUNDRY_OPERATIONS_PROJECT_ENDPOINT")
+    block = containerapps[max(0, block_start - 600) : block_start]
+    assert "bff-api" in block
+    assert "knowledge-orchestrator" in block
+
+
+def test_the_operations_project_endpoint_is_a_project_model_host(
+    foundry_agents: str,
+) -> None:
+    assert (
+        "output operationsProjectEndpoint string = "
+        "'https://${foundryAccountName}.services.ai.azure.com/api/projects/"
+        "${operationsProjectName}'" in foundry_agents
+    )
 
 
 # ---------------------------------------------------------------------------

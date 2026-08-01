@@ -82,11 +82,11 @@ documented:
   (screen S-23, [dashboard-specification.md](ux/dashboard-specification.md)).
 - **GDPR Art. 17 erasure** — 4-store targeting (hard delete / pseudonymization /
   tombstone); hash-chained audit log invariant preserved through erasure
-  (§25.1, [security-governance-and-threat-model.md](security/security-governance-and-threat-model.md)).
+  (§25.1, [security-governance-and-threat-model.md](tech/security-governance-and-threat-model.md)).
 - **Grounded RAG with safety pipeline** — hybrid BM25+cosine retrieval, RRF
   fusion, content-term overlap guard, citation enforcement, PII redaction,
   dual Azure Content Safety screens, structured decline (FR-KNW-08;
-  §4.7, [api-contracts.md](implementation/api-contracts.md)).
+  §4.7, [api-contracts.md](tech/api-contracts.md)).
 
 Two findings from `docs/_upgrade/` are now **closed**:
 
@@ -161,19 +161,19 @@ See [the rehearsal report](../artifacts/demo-validation/rehearsal-report.md),
 | Audience | Start here | Then read |
 |---|---|---|
 | Newcomer to the app or to steel making | [Illustrated application guide (EN)](presentation/assets/app-guide/en/README.md) / [(FR)](presentation/assets/app-guide/fr/LISEZMOI.md) | [Use case](usecase/usecase.md), [proof of execution](presentation/proof_of_execution.md) |
-| Defense panel / presenter | [Root handoff](../README.md) and the [defense material index](presentation/README.md) | [Proof of execution](presentation/proof_of_execution.md), [technical analysis](tech/technical-analysis.md), [runbook](demo/demo-runbook.md), [slide plan](presentation/oral-defense-and-slide-plan.md), [FAQ](presentation/faq.md) |
-| Product owner | [Requirements](specs/solution-requirements.md) | [Personas](personas/personas-and-journeys.md), [UX specification](ux/dashboard-specification.md) |
+| Defense panel / presenter | [Root handoff](../README.md) and the [defense material index](presentation/README.md) | [Proof of execution](presentation/proof_of_execution.md), [technical analysis](tech/technical-analysis.md), [runbook](demo/demo-runbook.md), [slide plan](presentation/archives/oral-defense-and-slide-plan.md), [FAQ](presentation/faq.md) |
+| Product owner | [Requirements](business/solution-requirements.md) | [Personas](business/personas-and-journeys.md), [UX specification](ux/dashboard-specification.md) |
 | Solution/data architect | [Solution architecture](architecture/solution-architecture.md) | [Deployment topology](architecture/deployment-topology.md), [Fabric assets](../fabric/README.md) |
-| Application engineer | [Root quick start](../README.md) | [API contracts](implementation/api-contracts.md), [implementation guide](implementation/implementation-guide.md) |
-| Security, DPO, OT, platform engineer | [Security governance](security/security-governance-and-threat-model.md) | [Operations](operations/operations-and-cost.md), [deployment topology](architecture/deployment-topology.md), [compliance analyses](business/compliance/README.md) |
-| Programme manager / delivery lead | [Implementation process](business/project/implementation-process.md) | [Agentic development and SDLC](business/project/agentic-development.md), [compliance roadmap](business/compliance/compliance-roadmap.md) |
+| Application engineer | [Root quick start](../README.md) | [API contracts](tech/api-contracts.md), [implementation guide](implementation/implementation-guide.md) |
+| Security, DPO, OT, platform engineer | [Security governance](tech/security-governance-and-threat-model.md) | [Operations](operations/operations-and-cost.md), [deployment topology](architecture/deployment-topology.md), [compliance analyses](business/compliance/README.md) |
+| Programme manager / delivery lead | [Implementation process](business/implementation-process.md) | [Agentic development and SDLC](business/agentic-development.md), [compliance roadmap](business/compliance/compliance-roadmap.md) |
 | Data/simulator engineer | [Synthetic-data specification](data/synthetic-data-and-simulators.md) | [Simulator README](../simulator/README.md), [contracts](../contracts) |
 
 ## Defense clock and assets
 
 | Clock | Segment | Asset |
 |---|---|---|
-| 00:00–35:00 | Architecture, value and compliance narrative | [Plan](presentation/oral-defense-and-slide-plan.md) and `docs\presentation\NovaSteel-Oral-Defense.pptx` |
+| 00:00–35:00 | Architecture, value and compliance narrative | [Plan](presentation/archives/oral-defense-and-slide-plan.md) and `docs\presentation\archives\NovaSteel-Oral-Defense.pptx` |
 | 35:00–45:00 | Six-moment deterministic persona demo | [Runbook](demo/demo-runbook.md) and `..\artifacts\demo-validation\drive_demo.py` |
 | 45:00–60:00 | Moderated FAQ / validation-gate discussion | [FAQ](presentation/faq.md), [proof of execution](presentation/proof_of_execution.md) and [technical analysis](tech/technical-analysis.md) |
 
@@ -191,17 +191,17 @@ PPTX. See the [presentation folder index](presentation/README.md).
 
 | Area | Primary artifacts |
 |---|---|
-| Business | [Use case](usecase/usecase.md), [requirements](specs/solution-requirements.md), [personas](personas/personas-and-journeys.md) |
+| Business | [Use case](usecase/usecase.md), [requirements](business/solution-requirements.md), [personas](business/personas-and-journeys.md) |
 | Business & compliance | [Regulatory compliance analyses](business/compliance/README.md) — [EU AI Act](business/compliance/eu-ai-act.md), [EU ETS](business/compliance/eu-ets.md), [IEC 62443](business/compliance/iec-62443.md), [other regulations](business/compliance/other-regulations.md), [roadmap](business/compliance/compliance-roadmap.md) |
-| Delivery method | [Implementation process](business/project/implementation-process.md), [agentic development and SDLC](business/project/agentic-development.md) |
-| Architecture | [Solution architecture](architecture/solution-architecture.md), [deployment topology](architecture/deployment-topology.md), [editable diagrams](diagrams/README.md) |
-| Implementation | [Root quick start](../README.md), [implementation guide](implementation/implementation-guide.md), [API contracts](implementation/api-contracts.md) |
+| Delivery method | [Implementation process](business/implementation-process.md), [agentic development and SDLC](business/agentic-development.md) |
+| Architecture | [Solution architecture](architecture/solution-architecture.md), [deployment topology](architecture/deployment-topology.md), [editable diagrams](architecture/diagrams/README.md) |
+| Implementation | [Root quick start](../README.md), [implementation guide](implementation/implementation-guide.md), [API contracts](tech/api-contracts.md) |
 | Data/Fabric | [Synthetic data](data/synthetic-data-and-simulators.md), [Fabric README](../fabric/README.md), [Fabric research](research/fabric-platform.md), [Fabric-Brain mapping](architecture/fabric-brain-mapping.md) |
 | Experience | [Illustrated application guide](presentation/assets/app-guide/en/README.md), [UX spec §9.7](ux/dashboard-specification.md#97-dockview-workspace-model-all-screens), [UX spec §12.11](ux/dashboard-specification.md#1211-axelormetal-corporate-website-company-website-s-24), [Solution architecture ADR-014](architecture/solution-architecture.md#adr-014--two-level-dockview-workspace-with-jsx-derived-panels) |
-| Defense / presentation | [Folder index](presentation/README.md), [slide plan](presentation/oral-defense-and-slide-plan.md), [FAQ](presentation/faq.md), [proof of execution](presentation/proof_of_execution.md), [Marp deck source](presentation/slides.md), [French executive summary](presentation/resume-executif-fr.md) |
-| Device Operations | [Synthetic data §13](data/synthetic-data-and-simulators.md#13-device-simulator-estate), [UX spec §12.9–12.10](ux/dashboard-specification.md), [API contracts §4.12](implementation/api-contracts.md#412-device-operations), [Operations §12](operations/operations-and-cost.md) |
-| Security/operations | [Security governance](security/security-governance-and-threat-model.md), [operations](operations/operations-and-cost.md), [package-feed policy](tech/security_requirement.md) |
-| Rating grid | [Rubric](tech/rating_grid.md), [technical analysis](tech/technical-analysis.md), in-app **Technical Requirements** screen (`/{site}/technical-requirements/criteria`) |
+| Defense / presentation | [Folder index](presentation/README.md), [slide plan](presentation/archives/oral-defense-and-slide-plan.md), [FAQ](presentation/faq.md), [proof of execution](presentation/proof_of_execution.md), [Marp deck source](presentation/slides.md), [French executive summary](presentation/resume-executif-fr.md) |
+| Device Operations | [Synthetic data §13](data/synthetic-data-and-simulators.md#13-device-simulator-estate), [UX spec §12.9–12.10](ux/dashboard-specification.md), [API contracts §4.12](tech/api-contracts.md#412-device-operations), [Operations §12](operations/operations-and-cost.md) |
+| Security/operations | [Security governance](tech/security-governance-and-threat-model.md), [operations](operations/operations-and-cost.md), [package-feed policy](tech/security_requirement.md) |
+| Rating grid | [Rubric](usecase/rating_grid.md), [technical analysis](tech/technical-analysis.md), in-app **Technical Requirements** screen (`/{site}/technical-requirements/criteria`) |
 | Validation | [Validation report](validation-report.md), [local evidence](../artifacts/validation/final/evidence-manifest.json), [rehearsal report](../artifacts/demo-validation/rehearsal-report.md) |
 
 ## Remaining production gates

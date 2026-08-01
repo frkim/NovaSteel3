@@ -35,7 +35,7 @@ tests/simulator/.tmp/*
 # Only the optimised web renditions under apps/portal-shell/wwwroot/media are
 # committed. See docs/images/README.md to regenerate them.
 # The logo sources in docs/images/logo/ are small and ARE tracked, matching
-# docs/AxelorMetal-web/logo/.
+# docs/business/axelormetal/logo/.
 /docs/images/*.png
 /docs/images/*.jpg
 /docs/images/*.jpeg

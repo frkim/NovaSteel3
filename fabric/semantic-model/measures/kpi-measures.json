@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "source": "docs/specs/solution-requirements.md#13-kpi-catalog-definitions--formulas",
+  "source": "docs/business/solution-requirements.md#13-kpi-catalog-definitions--formulas",
   "model": "sm-ns-operations",
   "measures": [
     {

@@ -37,7 +37,7 @@ import {
 } from '../../proof/technicalCatalog'
 
 const ANALYSIS_URL = `${GITHUB_REPO_URL}/blob/main/docs/tech/technical-analysis.md`
-const RUBRIC_URL = `${GITHUB_REPO_URL}/blob/main/docs/tech/rating_grid.md`
+const RUBRIC_URL = `${GITHUB_REPO_URL}/blob/main/docs/usecase/rating_grid.md`
 
 const CATEGORY_ICON: Record<TechCategory, typeof ArchitectureOutlinedIcon> = {
   design: ArchitectureOutlinedIcon,

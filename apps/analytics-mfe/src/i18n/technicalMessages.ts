@@ -2,7 +2,7 @@
  * Technical rating-grid message catalogs.
  *
  * The criterion names and the "excellent" bar are NOT translated: they are
- * quotations from `docs/tech/rating_grid.md`, and a jury comparing the screen
+ * quotations from `docs/usecase/rating_grid.md`, and a jury comparing the screen
  * against the rubric must see the same words. Only the chrome is localized.
  */
 type Catalog = Record<string, string>
@@ -48,7 +48,7 @@ const EN: Catalog = {
   'tech.evidence.test': 'Test',
   'tech.empty': 'No criterion matches that search.',
   'tech.legend':
-    'Self-assessed against docs/tech/rating_grid.md. Every score below 5 states its gap and the work that would close it.',
+    'Self-assessed against docs/usecase/rating_grid.md. Every score below 5 states its gap and the work that would close it.',
   'tech.source': 'Full analysis',
 }
 
@@ -93,7 +93,7 @@ const FR: Catalog = {
   'tech.evidence.test': 'Test',
   'tech.empty': 'Aucun crit\u00e8re ne correspond \u00e0 cette recherche.',
   'tech.legend':
-    "Auto-\u00e9valuation au regard de docs/tech/rating_grid.md. Chaque note inf\u00e9rieure \u00e0 5 indique sa lacune et le travail qui la comblerait.",
+    "Auto-\u00e9valuation au regard de docs/usecase/rating_grid.md. Chaque note inf\u00e9rieure \u00e0 5 indique sa lacune et le travail qui la comblerait.",
   'tech.source': 'Analyse compl\u00e8te',
 }
 
@@ -138,7 +138,7 @@ const DE: Catalog = {
   'tech.evidence.test': 'Test',
   'tech.empty': 'Kein Kriterium entspricht dieser Suche.',
   'tech.legend':
-    'Selbstbewertung anhand von docs/tech/rating_grid.md. Jede Punktzahl unter 5 nennt ihre L\u00fccke und die Arbeit, die sie schlie\u00dfen w\u00fcrde.',
+    'Selbstbewertung anhand von docs/usecase/rating_grid.md. Jede Punktzahl unter 5 nennt ihre L\u00fccke und die Arbeit, die sie schlie\u00dfen w\u00fcrde.',
   'tech.source': 'Vollst\u00e4ndige Analyse',
 }
 
@@ -183,7 +183,7 @@ const NL: Catalog = {
   'tech.evidence.test': 'Test',
   'tech.empty': 'Geen criterium komt overeen met die zoekopdracht.',
   'tech.legend':
-    'Zelfbeoordeling tegen docs/tech/rating_grid.md. Elke score onder 5 benoemt het hiaat en het werk dat het zou dichten.',
+    'Zelfbeoordeling tegen docs/usecase/rating_grid.md. Elke score onder 5 benoemt het hiaat en het werk dat het zou dichten.',
   'tech.source': 'Volledige analyse',
 }
 
@@ -228,7 +228,7 @@ const ES: Catalog = {
   'tech.evidence.test': 'Prueba',
   'tech.empty': 'Ning\u00fan criterio coincide con esa b\u00fasqueda.',
   'tech.legend':
-    'Autoevaluaci\u00f3n frente a docs/tech/rating_grid.md. Toda puntuaci\u00f3n inferior a 5 declara su carencia y el trabajo que la cerrar\u00eda.',
+    'Autoevaluaci\u00f3n frente a docs/usecase/rating_grid.md. Toda puntuaci\u00f3n inferior a 5 declara su carencia y el trabajo que la cerrar\u00eda.',
   'tech.source': 'An\u00e1lisis completo',
 }
 

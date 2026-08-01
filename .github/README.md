@@ -66,7 +66,13 @@ explicit `::error::` naming any variable that is missing.
 | `cd-infra.yml` | Manual dispatch per environment | `bicep build` → what-if → `az deployment sub create` |
 | `cd-services.yml` | Manual dispatch per environment | Rolls the built images onto the Container Apps |
 | `cd-fabric-items.yml` | Manual dispatch per environment | Synchronises Fabric SaaS items through the Fabric REST API |
+| `presentation.yml` | PR / push touching `docs/presentation/**` | Builds the Marp oral-defense deck and best-effort publishes it to GitHub Pages |
 
 `ci-build-services.yml` needs `ACR_LOGIN_SERVER` in addition to the variables
-above, and builds with `--build-arg PIP_INDEX_URL` pointing at the protected
-feed so no public registry is contacted.
+above. Every `services/*/Dockerfile` writes `/etc/pip.conf` with the protected
+index as its only source, so no public registry is contacted during the build.
+
+`tests/workflows/` validates these workflows themselves (trigger filters,
+`needs` graph, SHA pins, `persist-credentials: false`, and the ban on splicing
+`inputs.*` or `github.event.*` into `run:` scripts). It runs in the `ci.yml`
+`workflow-lint` job on every pull request and push.

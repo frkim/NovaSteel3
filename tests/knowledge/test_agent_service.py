@@ -37,6 +37,32 @@ from knowledge_orchestrator.foundry_iq import (
 )
 from knowledge_orchestrator.search_store import ENV_SEARCH_ENDPOINT, ENV_SEARCH_INDEX
 
+try:  # pragma: no cover - depends on which extras are installed
+    from azure.ai.projects.models import MCPTool as _ProjectsMCPTool
+    from azure.ai.projects.models import WebSearchTool as _ProjectsWebSearchTool
+except Exception:  # pragma: no cover
+    _ProjectsMCPTool = None
+    _ProjectsWebSearchTool = None
+
+requires_sdk = pytest.mark.skipif(
+    _ProjectsMCPTool is None or _ProjectsWebSearchTool is None,
+    reason="azure-ai-projects is an optional extra; platform tools cannot be built without it",
+)
+
+
+def _unary(fn):
+    """Adapt a ``self``-only stub to ``ensure_agent(self, spec, registry=None)``.
+
+    ``host_agents`` walks the manifest and calls ``ensure_agent`` once per spec, so
+    the stubs below take the extra arguments and ignore them. Keeping the stubs
+    themselves ``self``-only keeps each test's intent legible.
+    """
+
+    def _wrapped(self, spec=None, registry=None):
+        return fn(self)
+
+    return _wrapped
+
 
 @pytest.fixture(autouse=True)
 def _clean_env(monkeypatch):
@@ -121,7 +147,7 @@ def test_default_allowed_domains_are_standards_bodies(monkeypatch):
     config = knowledge_base_config_from_env()
     assert config is not None
     assert config.allowed_domains == DEFAULT_ALLOWED_DOMAINS
-    assert "iso.org" in config.allowed_domains
+    assert any(d == "iso.org" for d in config.allowed_domains)
 
 
 def test_allowed_domains_override(monkeypatch):
@@ -233,7 +259,7 @@ def test_host_agents_degrades_when_sdk_missing(monkeypatch):
     def _boom(self):
         raise ImportError("azure-ai-projects is not installed")
 
-    monkeypatch.setattr(FoundryAgentService, "ensure_procedure_agent", _boom)
+    monkeypatch.setattr(FoundryAgentService, "ensure_agent", _unary(_boom))
     status = host_agents()
     assert status.enabled is False
     assert "SDK unavailable" in status.reason
@@ -247,7 +273,7 @@ def test_host_agents_degrades_on_unreachable_project(monkeypatch):
     def _boom(self):
         raise RuntimeError("connection refused")
 
-    monkeypatch.setattr(FoundryAgentService, "ensure_procedure_agent", _boom)
+    monkeypatch.setattr(FoundryAgentService, "ensure_agent", _unary(_boom))
     status = host_agents()
     assert status.enabled is False
     assert "connection refused" in status.reason
@@ -263,7 +289,7 @@ def test_procedure_agent_uses_five_series_mini_by_default(monkeypatch):
         captured["model"] = self.model
         return agent_service.HostedAgent(name="a", agent_id="1", model=self.model)
 
-    monkeypatch.setattr(FoundryAgentService, "ensure_procedure_agent", _capture)
+    monkeypatch.setattr(FoundryAgentService, "ensure_agent", _unary(_capture))
     host_agents()
     assert captured["model"].startswith("gpt-5")
     assert "mini" in captured["model"]
@@ -280,7 +306,7 @@ def test_procedure_agent_model_follows_chat_deployment(monkeypatch):
         captured["model"] = self.model
         return agent_service.HostedAgent(name="a", agent_id="1", model=self.model)
 
-    monkeypatch.setattr(FoundryAgentService, "ensure_procedure_agent", _capture)
+    monkeypatch.setattr(FoundryAgentService, "ensure_agent", _unary(_capture))
     host_agents()
     assert captured["model"] == "gpt-5-mini"
 
@@ -303,9 +329,18 @@ def test_knowledge_tool_points_at_the_knowledge_base_mcp_endpoint(monkeypatch):
         def __init__(self, **kwargs):
             captured.update(kwargs)
 
-    module = types.ModuleType("azure.ai.agents.models")
+    azure_module = types.ModuleType("azure")
+    ai_module = types.ModuleType("azure.ai")
+    projects_module = types.ModuleType("azure.ai.projects")
+    module = types.ModuleType("azure.ai.projects.models")
     module.MCPTool = _MCPTool
-    monkeypatch.setitem(sys.modules, "azure.ai.agents.models", module)
+    projects_module.models = module
+    ai_module.projects = projects_module
+    azure_module.ai = ai_module
+    monkeypatch.setitem(sys.modules, "azure", azure_module)
+    monkeypatch.setitem(sys.modules, "azure.ai", ai_module)
+    monkeypatch.setitem(sys.modules, "azure.ai.projects", projects_module)
+    monkeypatch.setitem(sys.modules, "azure.ai.projects.models", module)
 
     config = KnowledgeBaseConfig(
         search_endpoint="https://srch-test.search.windows.net",
@@ -324,6 +359,48 @@ def test_knowledge_tool_points_at_the_knowledge_base_mcp_endpoint(monkeypatch):
     assert captured["allowed_tools"] == ["knowledge_base_retrieve"]
     # An operator on a plant floor cannot answer an approval dialog.
     assert captured["require_approval"] == "never"
+
+
+@requires_sdk
+def test_builtin_agent_tools_are_real_projects_sdk_models():
+    """The release reconciler must build the new Foundry project tool models.
+
+    The offline test above stubs the SDK import so CI can run without Azure extras;
+    this one uses the installed package when present and would have caught importing
+    the classic ``azure.ai.agents`` models instead.
+    """
+    config = KnowledgeBaseConfig(
+        search_endpoint="https://srch-test.search.windows.net",
+        index_name="novasteel-procedures",
+        knowledge_base_name="novasteel-procedures-kb",
+    )
+    service = FoundryAgentService(
+        project_endpoint="https://x.services.ai.azure.com/api/projects/p",
+        knowledge_base=config,
+    )
+
+    procedure_tools, procedure_names = service._resolve_tools(
+        agent_service.agent_spec(agent_service.PROCEDURE_AGENT_NAME)
+    )
+    web_tools, web_names = service._resolve_tools(
+        agent_service.agent_spec(agent_service.WEB_SEARCH_AGENT_NAME)
+    )
+
+    assert procedure_names == KNOWLEDGE_MCP_ALLOWED_TOOLS
+    assert len(procedure_tools) == 1
+    assert isinstance(procedure_tools[0], _ProjectsMCPTool)
+    assert procedure_tools[0].as_dict() == {
+        "server_label": "novasteel_procedures",
+        "server_url": config.mcp_url,
+        "require_approval": "never",
+        "allowed_tools": ["knowledge_base_retrieve"],
+        "type": "mcp",
+    }
+
+    assert web_names == ("web_search",)
+    assert len(web_tools) == 1
+    assert isinstance(web_tools[0], _ProjectsWebSearchTool)
+    assert web_tools[0].as_dict() == {"type": "web_search"}
 
 
 def test_procedure_agent_instructions_enforce_grounding():

@@ -15,7 +15,7 @@ footer: 'AI advises, humans decide'
 
 <div class="tag">Oral Defense</div>
 
-# NovaSteel — AI-Powered <span class="grad">Steel Production</span> Optimization
+# <span style="color: #fff;">NovaSteel</span> — AI-Powered <span class="grad">Steel Production</span> Optimization
 
 <div class="hero-line"></div>
 
@@ -124,7 +124,7 @@ Today's demo will show the platform producing these kinds of outputs on syntheti
 <div>
 
 - One **Microsoft Fabric** core unifies production, energy, emissions, quality, maintenance & knowledge
-- Four AI capabilities: lining RUL · energy dispatch · quality risk · knowledge capture
+- Four AI capabilities: energy dispatch · lining RUL · quality risk · knowledge capture
 - Persona dashboards for **8 roles**, EU-hosted, audited end to end
 - **Decision support** — a human approves; the platform never actuates equipment
 
@@ -179,8 +179,8 @@ If any of these is a problem for you, stop me now, because I won't trade them aw
 | Persona | Dashboard | Key job-to-be-done |
 |---|---|---|
 | Plant Manager | Site Command Center | Single-page operational truth |
-| Reliability Engineer | Furnace Lining RUL | €8M failure → planned intervention |
 | Energy Manager | Dispatch Optimization | Move flexible load off price peaks |
+| Reliability Engineer | Furnace Lining RUL | €8M failure → planned intervention |
 | Quality Engineer | In-line Quality | Catch drift before it ships |
 | Sustainability Officer | ETS Cockpit | Own the −22% carbon target |
 | Knowledge Engineer | GenAI Capture Studio | Preserve retiring expertise |
@@ -188,7 +188,7 @@ If any of these is a problem for you, stop me now, because I won't trade them aw
 | Furnace Operator | Health Monitor + Knowledge | Daily decision context |
 
 <!-- ⏱ 1:25 · The platform serves eight roles, not one.
-The Plant Manager wants everything on one page she can defend. The Reliability Engineer wants an eight-million-euro failure turned into a planned intervention. The Energy Manager wants to move flexible load off price peaks. The Quality Engineer wants to catch drift before it ships and prove genealogy heat-by-heat.
+The Plant Manager wants everything on one page she can defend. The Energy Manager wants to move flexible load off price peaks. The Reliability Engineer wants an eight-million-euro failure turned into a planned intervention. The Quality Engineer wants to catch drift before it ships and prove genealogy heat-by-heat.
 The Sustainability Officer owns the twenty-two-percent carbon target and ETS exposure. The Knowledge Engineer wants a retiring expert's judgment captured before it's gone.
 In the demo I'll walk these as tabs, in the order a real operating day would touch them. -->
 
@@ -221,7 +221,7 @@ In the demo I'll walk these as tabs, in the order a real operating day would tou
 <div class="arrow">▲▼ features & labels ▲▼ predictions, recommendations, audit facts</div>
 <div class="lane purple"><div class="lane-tag">AI & app<br>services</div><div class="nodes">
 <div class="node purple"><b>Python FastAPI BFF</b><span>domain APIs · read-only adapters to KQL + gold</span></div>
-<div class="node purple"><b>Scoring / optimizer workers</b><span>RUL · MILP dispatch · quality risk</span></div>
+<div class="node purple"><b>Scoring / optimizer workers</b><span>MILP dispatch · RUL · quality risk</span></div>
 <div class="node purple"><b>Foundry (EU) + Speech</b><span>explain & transcribe · restricted OpenAPI tools</span></div>
 </div></div>
 <div class="arrow">▼ HTTPS + Entra access token — the browser never holds a workload credential</div>
@@ -299,15 +299,15 @@ On identity: Fabric's Event Hubs connector uses a shared key, which our security
 # The Four AI Capabilities
 
 <div class="cards four">
-<div class="card teal"><div class="card-num">RUL</div><h3>Lining RUL</h3><p>Physics-informed Python model, daily scoring</p></div>
 <div class="card orange"><div class="card-num">ENERGY</div><h3>Energy Dispatch</h3><p>Deterministic Python optimizer, constraint-aware</p></div>
+<div class="card teal"><div class="card-num">RUL</div><h3>Lining RUL</h3><p>Physics-informed Python model, daily scoring</p></div>
 <div class="card purple"><div class="card-num">QUALITY</div><h3>Quality Risk</h3><p>Python model over genealogy features</p></div>
 <div class="card green"><div class="card-num">KNOWLEDGE</div><h3>Knowledge Capture</h3><p>Azure Speech + Foundry Agent Service</p></div>
 </div>
 
 **ADR-006:** Python is authoritative for math · Foundry explains/retrieves, never decides or commits
 
-<!-- ⏱ 1:10 · Four capabilities, one principle that I'll defend hard: the deterministic, testable Python services compute the answer — remaining useful life, feasible dispatch, quality risk.
+<!-- ⏱ 1:10 · Four capabilities, one principle that I'll defend hard: the deterministic, testable Python services compute the answer — feasible dispatch, remaining useful life, quality risk.
 The generative agent explains, retrieves, and orchestrates approved tool calls; it never invents a schedule, relaxes a constraint, or makes a commitment.
 That's ADR-006, and it's why a language model being confidently wrong can't hurt a furnace here. -->
 
@@ -321,15 +321,15 @@ That's ADR-006, and it's why a language model being confidently wrong can't hurt
 
 <div class="flow">
 <div class="lane teal"><div class="lane-tag">Features<br>governed gold</div><div class="nodes">
-<div class="node teal"><b>Thermal & cooling</b><span>heat-flux slope, spatial contrast, cooling residual</span></div>
 <div class="node teal"><b>Dispatch inputs</b><span>day-ahead price, grid carbon, production & maintenance constraints</span></div>
+<div class="node teal"><b>Thermal & cooling</b><span>heat-flux slope, spatial contrast, cooling residual</span></div>
 <div class="node teal"><b>Genealogy</b><span>heat → slab → coil → sample → shipment</span></div>
 <div class="node teal"><b>Consented transcripts</b><span>PII auto-redacted to <code>[REDACTED:{KIND}]</code></span></div>
 </div></div>
 <div class="arrow">▼ Direct Lake / read-only adapters — features and labels, never raw OT credentials</div>
 <div class="lane purple"><div class="lane-tag">Deterministic core<br>Python decides</div><div class="nodes">
-<div class="node purple"><b>Lining RUL</b><span>physics-informed regression → P10/P50/P90 + confidence · daily scoring</span></div>
 <div class="node purple"><b>Energy dispatch</b><span>MILP (PuLP + CBC) → feasible schedule · greedy fallback, labelled in UI</span></div>
+<div class="node purple"><b>Lining RUL</b><span>physics-informed regression → P10/P50/P90 + confidence · daily scoring</span></div>
 <div class="node purple"><b>Quality risk</b><span>genealogy model → spec probability + bounded what-if</span></div>
 </div></div>
 <div class="arrow">▼ recommendation object: value, drivers, confidence, model version, constraints honoured</div>
@@ -347,47 +347,10 @@ That's ADR-006, and it's why a language model being confidently wrong can't hurt
 </div>
 
 <!-- ⏱ 2:05 · Now the same picture for the AI, because "we use AI" is not an architecture.
-Bottom layer up: every model reads governed gold features — thermal and cooling signals, dispatch inputs, the full heat-slab-coil genealogy, and consented, PII-redacted transcripts. No model gets a raw OT credential.
-The deterministic core is Python and it is the only thing that decides. Lining life is a physics-informed regression that emits P10, P50 and P90 with a confidence. Dispatch is a mixed-integer linear program solved with PuLP and CBC, with a deterministic greedy heuristic as a labelled fallback — never a silent one. Quality risk is a model over genealogy features.
+Bottom layer up: every model reads governed gold features — dispatch inputs, thermal and cooling signals, the full heat-slab-coil genealogy, and consented, PII-redacted transcripts. No model gets a raw OT credential.
+The deterministic core is Python and it is the only thing that decides. Dispatch is a mixed-integer linear program solved with PuLP and CBC, with a deterministic greedy heuristic as a labelled fallback — never a silent one. Lining life is a physics-informed regression that emits P10, P50 and P90 with a confidence. Quality risk is a model over genealogy features.
 Only then does language enter: Speech transcribes under an explicit consent state machine, and the Foundry agent in the EU Data Zone drafts and explains, with every claim cited to a transcript segment, behind Prompt Shields and a read-or-simulate tool allow-list.
 And nothing leaves that stack without a human accepting, modifying, or rejecting it with a reason code, written to an append-only trail. That is the whole trust argument in one diagram. -->
-
----
-
-<!-- _class: tight -->
-<!-- _header: '' -->
-<!-- _footer: '' -->
-
-# Deep Dive: Furnace Lining Remaining Useful Life
-
-![w:960](images/furnace-health-lining-forecast.png)
-
-<div class="split right-wide">
-<div>
-
-- Physics-informed model on silver thermal/cooling features
-- Drivers: heat-flux slope, spatial contrast, cooling residual
-- Advisory only → acknowledge → CMMS work order
-
-</div>
-<div>
-
-| Metric | Value |
-|---|---|
-| P50 RUL | ~20 d (19.65) |
-| P10 / P90 | 18.69 / 20.61 |
-| Risk score | 0.90 |
-| Confidence | 0.78 |
-| Rating | `HIGH` |
-
-<span class="pill blue">🔬 EVIDENCE</span> Synthetic scenario result
-
-</div>
-</div>
-
-<!-- ⏱ 1:45 · This is the capability that turns an eight-million-euro surprise into a planned intervention.
-The model is physics-informed — constrained by heat-flux and cooling physics, not a black box fitting noise. On our warning scenario it estimates a P50 remaining life of about twenty days with a tight band — P10 nineteen, P90 twenty-one — a confidence of zero-point-seven-eight from an r-squared of zero-point-eight-eight, and three named drivers.
-The engineer stays accountable: they acknowledge the alert and it links to a CMMS work order. The platform does not touch the furnace, and pilot scoring is daily — I'm not promising real-time inference as an MVP feature. -->
 
 ---
 
@@ -402,9 +365,11 @@ The engineer stays accountable: they acknowledge the alert and it links to a CMM
 <div class="split right-wide">
 <div>
 
-- Day-ahead price + grid carbon + production constraints
-- Moves **only eligible flexible loads**
-- Human accepts / modifies / rejects with reason code
+- **Implemented in solution:** Gold data provides prices, carbon, production targets, and hard constraints
+- Python `optimizer-worker` solves a MILP (PuLP + CBC) and returns a feasible schedule option
+- Result is reviewed in the portal and stored with accept/modify/reject reason code
+- **AI in simple terms:** it is a smart planner that shifts only flexible work away from expensive hours
+- Hard rules are never broken (required tonnage, locked tasks, and equipment limits)
 
 **MILP, not AI** — a mixed-integer linear program (PuLP/CBC). One yes/no variable per
 batch × 15-min slot; hard rules as equations (urgent heats pinned, furnace concurrency
@@ -438,6 +403,45 @@ Those are single-scenario evidence, not banked savings — realized savings are 
 <!-- _header: '' -->
 <!-- _footer: '' -->
 
+# Deep Dive: Furnace Lining Remaining Useful Life
+
+![w:960](images/furnace-health-lining-forecast.png)
+
+<div class="split right-wide">
+<div>
+
+- **Implemented in solution:** Silver thermal/cooling features are scored daily by the Python `scoring-worker`
+- Output written as P10/P50/P90, confidence, and top drivers to governed data + audit
+- Portal flow is advisory only: acknowledge alert → open CMMS work order
+- **AI in simple terms:** it estimates "days left" from wear patterns, like a health forecast for lining
+- It gives a range (best/likely/worst), not one magic number, so planners can act safely
+
+</div>
+<div>
+
+| Metric | Value |
+|---|---|
+| P50 RUL | ~20 d (19.65) |
+| P10 / P90 | 18.69 / 20.61 |
+| Risk score | 0.90 |
+| Confidence | 0.78 |
+| Rating | `HIGH` |
+
+<span class="pill blue">🔬 EVIDENCE</span> Synthetic scenario result
+
+</div>
+</div>
+
+<!-- ⏱ 1:45 · This is the capability that turns an eight-million-euro surprise into a planned intervention.
+The model is physics-informed — constrained by heat-flux and cooling physics, not a black box fitting noise. On our warning scenario it estimates a P50 remaining life of about twenty days with a tight band — P10 nineteen, P90 twenty-one — a confidence of zero-point-seven-eight from an r-squared of zero-point-eight-eight, and three named drivers.
+The engineer stays accountable: they acknowledge the alert and it links to a CMMS work order. The platform does not touch the furnace, and pilot scoring is daily — I'm not promising real-time inference as an MVP feature. -->
+
+---
+
+<!-- _class: tight -->
+<!-- _header: '' -->
+<!-- _footer: '' -->
+
 # Deep Dive: In-line Quality Prediction
 
 ![w:960](images/quality-spc.png)
@@ -445,9 +449,11 @@ Those are single-scenario evidence, not banked savings — realized savings are 
 <div class="split">
 <div>
 
-- Predicts meeting automotive-grade spec **before first lab result**
-- Full genealogy: heat → slab → coil → sample → shipment
-- **No automatic recipe/setpoint write** — what-if only
+- **Implemented in solution:** Genealogy + process features are prepared in silver/gold and scored by Python services
+- The model outputs spec risk plus bounded what-if correction suggestions per heat/coil
+- UI shows predicted first-pass yield impact before the first lab confirmation arrives
+- **AI in simple terms:** it recognizes combinations that looked like past defect patterns
+- **No automatic recipe/setpoint write** — recommendations stay what-if until a human decides
 
 </div>
 <div>
@@ -477,10 +483,11 @@ That distinction matters: this is a what-if recommendation, not an automatic wri
 <div class="split">
 <div>
 
-- Consent-aware Speech **Fast Transcription**
-- Foundry drafts structured procedure:
-  trigger → action → rationale → risk
-- **Source citations** to transcript segments
+- **Implemented in solution:** Consent state machine gates recording, then Speech Fast Transcription creates text
+- Foundry Agent Service drafts a structured procedure (trigger → action → rationale → risk)
+- Every statement links back to transcript citations; draft remains versioned and traceable
+- **AI in simple terms:** it is a first-draft assistant that turns expert talk into a usable checklist
+- Publication still requires human approval; unapproved drafts never become live instructions
 
 </div>
 <div>
@@ -902,7 +909,7 @@ Phase 2: guarded write-back to CMMS/MES — human-approved, bounded, reversible.
 <span class="pill orange">Blast furnace route</span> ore, coke and limestone → pig iron → basic oxygen furnace. <span class="pill blue">Electric arc furnace route</span> scrap and DRI melted with electricity. Both converge on ladle refining, casting, rolling and coating.
 </div>
 
-<!-- ⏱ 0:00 · Appendix slide. AxelorMetal runs both primary routes, so the platform has to speak to both. The integrated route reduces iron ore, coking coal and limestone in the blast furnace into molten pig iron, which the basic oxygen furnace then decarburises into steel. The electric arc furnace route melts scrap and direct-reduced iron with electricity instead — far less embedded carbon, far more exposure to the hourly power price, which is exactly why energy dispatch matters more on that route. From ladle refining onward the two routes share one line: continuous casting into slabs, blooms and billets, then hot and cold rolling, galvanizing and coating. Everything NovaSteel does hangs off four points on this picture — refractory wear inside the furnace, the electricity the furnace pulls, the defect risk introduced at the caster and the mill, and the tacit knowledge that walks out of the gate at shift handover. -->
+<!-- ⏱ 0:00 · Appendix slide. AxelorMetal runs both primary routes, so the platform has to speak to both. The integrated route reduces iron ore, coking coal and limestone in the blast furnace into molten pig iron, which the basic oxygen furnace then decarburises into steel. The electric arc furnace route melts scrap and direct-reduced iron with electricity instead — far less embedded carbon, far more exposure to the hourly power price, which is exactly why energy dispatch matters more on that route. From ladle refining onward the two routes share one line: continuous casting into slabs, blooms and billets, then hot and cold rolling, galvanizing and coating. Everything NovaSteel does hangs off four points on this picture — the electricity the furnace pulls, refractory wear inside the furnace, the defect risk introduced at the caster and the mill, and the tacit knowledge that walks out of the gate at shift handover. -->
 
 ---
 
@@ -1005,37 +1012,6 @@ Phase 2: guarded write-back to CMMS/MES — human-approved, bounded, reversible.
 
 <!-- _class: tight backup -->
 
-# Appendix — Deployment, Capacity & Scale
-
-<div class="split">
-<div>
-
-- Capacity: **F2** baseline; **F4** only on measured contention; **F8** pre-approved burst
-- Cost control: 01:00 Logic App pause (non-prod); ARM suspend/resume
-- Production **never** auto-paused
-- Consumers on **Pro/PPU** — we never buy F64 for licensing
-
-</div>
-<div>
-
-| Stage | Scope |
-|---|---|
-| **Demonstration** | Defense demonstration (today) |
-| **Phase 1** | One-site shadow pilot (read-only) |
-| **Phase 2+** | Human-approved write-back after gates |
-
-- Scale: same event/API contract for **4 countries**
-- Region: Sweden Central primary; West Europe = tested contingency
-
-</div>
-</div>
-
-<!-- ⏱ 0:00 · Appendix slide. We start on the smallest Fabric SKU, F2, move to F4 only if measured contention demands it, and keep F8 pre-approved as a demo-day burst — each step doubles the hourly rate, so the portal dialog demands a reason and writes it to the audit trail. We do not buy F64 just for viewer licensing; consumers sit on Pro or PPU. A nightly one-a.m. Logic App safely pauses non-production capacity using the official ARM suspend operation, and production is never auto-paused. Scaling to four countries is a capacity and per-plant-relay decision, not a redesign. -->
-
----
-
-<!-- _class: tight backup -->
-
 # Appendix — Who Is Accountable
 
 | Activity | CISO org | Platform admin | Data scientist | OT/ICS engineer | DPO | RAI board |
@@ -1102,12 +1078,12 @@ Burned error budget triggers a change freeze until root cause is addressed.
 
 | Output | Expected |
 |---|---|
-| RUL P50 / P10 / P90 | 19.65 / 18.69 / 20.61 d |
-| Risk · confidence | 0.90 · 0.78 (r² 0.88) |
 | Energy-cost cut | −7.25% |
 | Peak | 56.0 → 51.58 MW (−7.89%) |
 | CO₂ | −3.29% |
 | Planned tonnage | 960 t · zero violations |
+| RUL P50 / P10 / P90 | 19.65 / 18.69 / 20.61 d |
+| Risk · confidence | 0.90 · 0.78 (r² 0.88) |
 | Quality what-if | ~88% → ~95% first-pass |
 
 </div>
@@ -1115,7 +1091,7 @@ Burned error budget triggers a change freeze until root cause is addressed.
 
 **Named scenarios**
 
-`240726` lining warning · `240727` energy spike · `240728` quality drift · `240729` outage & recovery
+`240727` energy spike · `240726` lining warning · `240728` quality drift · `240729` outage & recovery
 
 **Five-level fallback ladder**
 
@@ -1129,3 +1105,179 @@ Burned error budget triggers a change freeze until root cause is addressed.
 </div>
 
 <!-- ⏱ 0:00 · Appendix slide. Every number I quote on stage is pinned to a seed and reproducible bit-for-bit, so you can regenerate the run yourself. If the live environment misbehaves, there are five rehearsed fallback levels down to a static proof pack, and I will always tell you which level you are watching. -->
+
+---
+
+<!-- _class: tight backup -->
+
+# Appendix — Reusing the NovaSteel Pattern for Glass Plants
+
+<div class="split">
+<div>
+
+**What stays the same (high reuse)**
+
+- Same two-stream data foundation: hot telemetry + governed history in Fabric
+- Same portal pattern: Blazor shell + React MFE + Power BI personas
+- Same compute pattern: Python scoring/optimizer workers + append-only audit
+- Same governance baseline: EU residency, managed identity, RAI gates, human approval
+
+**What changes for glass**
+
+- Asset model: furnaces, forehearth, lehr, forming lines
+- KPIs: kWh/ton glass, pull-rate stability, cullet ratio, defect ppm
+- Feature set: melt profile, viscosity proxies, annealing curve, vision defects
+
+</div>
+<div>
+
+| Steel capability | Glass equivalent |
+|---|---|
+| Lining RUL | Refractory campaign and forehearth wear forecasting |
+| Energy dispatch | Electric boosting + batch timing optimization |
+| In-line quality risk | Bubble/cord/thickness/optical defect risk |
+| Knowledge capture | Shift handover + troubleshooting playbooks |
+
+<span class="pill blue">REUSE</span> Platform and controls stay; process models and KPIs are swapped to glass physics.
+
+</div>
+</div>
+
+<!-- ⏱ 0:00 · Appendix slide. The point is reuse by architecture pattern: keep the governed data core, deterministic compute, portal experience and control framework, then swap only industry semantics — assets, KPIs and physics features. For glass the same blueprint supports forehearth wear, pull-rate stability, energy dispatch, and defect prevention without redesigning the platform. -->
+
+---
+
+<!-- _class: tight backup -->
+
+# Appendix — vNext: Two-way Control with Microsoft Adaptive Cloud
+
+<div class="split right-wide">
+<div>
+
+**Goal**
+
+- Enable selected closed-loop actions for low-risk, repetitive workloads
+
+**Adaptive Cloud implementation**
+
+- **Azure Arc** manages edge Kubernetes lifecycle and policy at plant sites
+- **Azure IoT Operations** provides edge MQTT, OPC UA integration, and local dataflows
+- **Azure IoT Hub** provides cloud command channel, device identity, twins, and jobs
+- **Fabric + AI services** provide prediction/optimization and policy decision context
+
+**Safe control loop**
+
+1. AI marks a recommendation as control-eligible for a specific workload
+2. Policy gate checks safety envelope, interlocks, and approval mode
+3. Command is sent through IoT Hub / IoT Operations to the target edge connector/device
+4. Device acknowledgement + telemetry close the loop into an append-only audit trail
+
+**Guardrail**
+
+- Start in human-confirmed mode; move to bounded autonomy only where formally approved.
+
+</div>
+<div>
+
+![w:610](images/adaptive-cloud-iot-operations.png)
+
+<span class="pill orange">vNext</span> OT safety systems remain authoritative; AI can act only inside predefined control envelopes.
+
+</div>
+</div>
+
+<!-- ⏱ 0:00 · Appendix slide. This is a forward-looking control architecture: Arc-managed edge, IoT Operations for local protocol/runtime, IoT Hub for identity and cloud command, and policy-gated AI decisions. Start with human-confirmed actions, then expand only to bounded autonomous loops where safety, interlocks, and governance approvals are explicit. -->
+
+---
+
+<!-- _class: tight backup -->
+
+# Appendix — Why We Do Not Write to the Furnace
+
+<div class="split">
+<div>
+
+**Design choice, not missing feature**
+
+- Furnace setpoints and interlocks remain in OT safety layers (Purdue L0-L2)
+- Cloud-to-OT direct actuation would cross the IEC 62443 boundary by design
+- With synthetic data, we cannot evidence high-risk control duties to production standard
+
+</div>
+<div>
+
+**What the platform writes today**
+
+- Approved dispatch decisions
+- CMMS work orders from lining alerts
+- Approved knowledge procedures
+- Append-only, hash-chained audit facts
+
+<span class="pill green">SAFETY</span> The platform advises and records decisions; OT control systems stay authoritative.
+
+</div>
+</div>
+
+<!-- ⏱ 0:00 · Appendix slide. This is an intentional safety boundary. We automate decision quality and traceability, but direct furnace actuation stays with existing OT control and safety systems. -->
+
+---
+
+<!-- _class: tight backup -->
+
+# Appendix — Why Not Azure IoT Hub — or IoT Operations?
+
+<div class="split">
+<div>
+
+**Current baseline (this solution)**
+
+- Event Hubs + identity relay + Fabric Eventstream
+- Optimized for analytics ingestion, governance, and deterministic replay
+- Lowest integration overhead for the current advisory-only scope
+
+</div>
+<div>
+
+**When IoT Hub / IoT Operations becomes the right choice**
+
+- Need bidirectional device command and control loops
+- Need edge-native protocol mediation and local autonomy
+- Need fleet operations with device twins, jobs, and lifecycle orchestration
+
+Today they are roadmap capabilities, not required for the validated MVP boundary.
+
+</div>
+</div>
+
+<!-- ⏱ 0:00 · Appendix slide. We did not reject IoT Hub or IoT Operations as bad options; we deferred them because this release is advisory-first and analytics-centric. They become first-class in vNext closed-loop control. -->
+
+---
+
+<!-- _class: tight backup -->
+
+# Appendix — Why Fabric — and Why Not a Parallel Lake, Databricks, or Snowflake?
+
+<div class="split">
+<div>
+
+**Fabric fits the operating model**
+
+- One governed estate for hot + historical analytics
+- OneLake lineage and Direct Lake semantic consistency
+- Native Power BI and audit-friendly data contracts
+
+</div>
+<div>
+
+**Why not the alternatives in this architecture**
+
+- A parallel lake duplicates data and trust boundaries (explicitly rejected by ADR-001)
+- Extra cross-platform stitching increases latency and governance complexity
+- More copies means harder reconciliation and weaker audit posture
+
+<span class="pill blue">DECISION</span> Keep one governed estate, two clocks (operational + historical), no parallel lake.
+
+</div>
+</div>
+
+<!-- ⏱ 0:00 · Appendix slide. The architecture decision is about governance and operating simplicity, not vendor branding: one governed estate, minimal copies, and one semantic truth for KPI and audit evidence. -->

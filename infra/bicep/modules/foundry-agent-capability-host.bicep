@@ -34,6 +34,12 @@ param cosmosConnectionName string
 @description('Name of the project connection to the agent storage account (file uploads).')
 param storageConnectionName string
 
+@description('''Create the account-level capability host. Exactly one invocation of this
+module per Foundry account must set this to true; the account host is shared by every
+project on the account, so the second and later invocations pass false and take an
+ordering dependency on the first.''')
+param deployAccountCapabilityHost bool = true
+
 resource foundryAccount 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' existing = {
   name: foundryAccountName
 }
@@ -43,7 +49,7 @@ resource project 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-previ
   name: projectName
 }
 
-resource accountCapabilityHost 'Microsoft.CognitiveServices/accounts/capabilityHosts@2025-04-01-preview' = {
+resource accountCapabilityHost 'Microsoft.CognitiveServices/accounts/capabilityHosts@2025-04-01-preview' = if (deployAccountCapabilityHost) {
   parent: foundryAccount
   name: 'caphost-account'
   properties: {

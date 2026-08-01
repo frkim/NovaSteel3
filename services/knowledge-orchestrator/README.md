@@ -9,7 +9,7 @@ draft → review → approved procedure, with append-only auditing.
 > unapproved transcripts never become operational instruction. Every consequential
 > AI output is grounded and append-only auditable. See
 > `docs/architecture/solution-architecture.md` §4.3 and
-> `docs/security/security-governance-and-threat-model.md` §12–13.
+> `docs/tech/security-governance-and-threat-model.md` §12–13.
 
 ## Layout
 
@@ -31,7 +31,10 @@ services/knowledge-orchestrator/
 │   ├── adapter_factory.py     # selects Azure vs local agent from environment
 │   ├── search_store.py        # Azure AI Search procedure store (APPROVED-only) + local fallback
 │   ├── foundry_iq.py          # Foundry IQ knowledge sources/base over the procedure index
-│   ├── agent_service.py       # Foundry Agent Service hosting (procedure agent, web search)
+│   ├── agent_service.py       # Foundry Agent Service hosting + Responses-API run loop
+│   ├── agent_manifest.py      # declarative agent roster (2 projects, 4 agents)
+│   ├── agent_tools.py         # function-tool schemas + deny-by-default ToolRegistry
+│   ├── agent_reconciler.py    # release-time `apply` for the manifest (CLI, --dry-run)
 │   ├── telemetry.py           # OpenTelemetry setup, GenAI/agent/retrieval spans, JSON logging
 │   ├── evaluation.py          # offline evaluation scorecard
 │   ├── app.py                 # OPTIONAL FastAPI wiring (import-guarded)
@@ -134,6 +137,80 @@ The hosted agent's instructions embed the *canonical* decline sentence produced 
 same `enforce_answer_citations` check as local ones, and a paraphrased refusal
 would be rejected as an ungrounded answer.
 
+## The agent roster: two projects, four agents (ADR-019)
+
+Agents are declared once, in `agent_manifest.py`, and split across **two Foundry
+projects in the same Foundry account**:
+
+| Project | Endpoint variable | Agent | Tools |
+|---|---|---|---|
+| `knowledge` | `FOUNDRY_PROJECT_ENDPOINT` | `novasteel-procedure-agent` | Foundry IQ knowledge base (MCP) |
+| `knowledge` | `FOUNDRY_PROJECT_ENDPOINT` | `novasteel-web-search-agent` | `web_search` |
+| `operations` | `FOUNDRY_OPERATIONS_PROJECT_ENDPOINT` | `novasteel-energy-advisor` | `simulate_energy_dispatch` |
+| `operations` | `FOUNDRY_OPERATIONS_PROJECT_ENDPOINT` | `novasteel-maintenance-advisor` | `lining_rul_forecast` |
+
+The split is a **trust boundary, not a namespace**. An agent can only call the
+tools declared on its own definition in its own project, so a prompt injected into
+a retrieved procedure has no path to the dispatch optimizer: the agent that read it
+has no such tool and cannot acquire one at runtime. Knowledge agents retrieve and
+never calculate; operations agents calculate and never retrieve.
+
+### Function tools are the ADR-006 boundary in code
+
+`agent_tools.py` holds the JSON schemas and a per-request, deny-by-default
+`ToolRegistry`. The tool *bodies* live in the BFF (`bff_api/agent_tools.py`)
+because that is where the caller is known — a hosted agent runs as the project
+managed identity, so an emitted `function_call` carries no caller identity at all.
+Each body therefore closes over the request's already-validated `UserContext` and
+re-applies the same role and site checks the equivalent REST route applies. The
+model may *propose* a site; only the BFF decides whether the caller may have it.
+
+Tools are **client-side** rather than server-side OpenAPI/MCP tools for two
+reasons: the production estate runs `publicNetworkAccess: 'Disabled'` with no
+inbound path from Foundry into the VNet, and a client-side tool executes inside the
+original request scope, which is what makes the authorization above possible.
+
+Every tool result is the same audited, version-pinned payload the REST route
+returns, carrying `modelVersion` and `auditRef` and marked
+`PROPOSAL_PENDING_HUMAN_APPROVAL` / `FORECAST_FOR_HUMAN_DECISION`. The agent
+explains a number it did not compute and cannot commit (ADR-006, ADR-007).
+
+### Runs use the Responses API, not threads
+
+With `azure-ai-projects` 2.x, agent *definitions* go through
+`AIProjectClient.agents.create_version(...)`, but agent *runs* go through the
+OpenAI-compatible surface: `client.get_openai_client()` →
+`conversations.create()` + `responses.create(..., extra_body={"agent_reference":
+…})`. There is no `threads`/`messages`/`runs` surface on this client. `run()`
+drives a bounded function-call loop (`MAX_TOOL_ITERATIONS`), executing each
+`function_call` locally and resubmitting a `function_call_output`.
+
+Conversations are held **server-side by Foundry**, which is a deliberate exception
+to ADR-012's in-process rule; `delete_conversation()` is the erasure hook.
+
+### Applying the manifest
+
+Agents are **not** ARM resources, so Bicep provisions the projects, connections,
+capability hosts and RBAC, and the roster is applied as a data-plane step at
+release time — not lazily on a user's first request, which would make the
+definition that answers a question depend on which pod served it.
+
+```powershell
+# From services/knowledge-orchestrator, with $env:PYTHONPATH="src".
+python -m knowledge_orchestrator.agent_reconciler --dry-run
+python -m knowledge_orchestrator.agent_reconciler --project operations
+python -m knowledge_orchestrator.agent_reconciler          # every project
+```
+
+A project whose endpoint is not configured is reported as `skipped`, not failed —
+an estate that deploys only one project must still be reconcilable. A single
+malformed agent is reported as `failed` while the rest of the roster is applied.
+The exit code is non-zero if anything failed.
+
+The BFF exposes the operations agents at `GET /v1/copilot/agents` (the roster, plus
+whether the project is configured) and `POST /v1/copilot/agent`. These are separate
+from `/v1/copilot/chat`, which remains the tool-free grounded chat of ADR-011.
+
 ## Foundry project model
 
 The service targets the **Foundry project model** end to end, never the classic
@@ -199,6 +276,7 @@ portal's Tracing and Monitoring blades.
 |---|---|---|
 | `FOUNDRY_ENDPOINT` | *(unset)* | Foundry account endpoint for inference, e.g. `https://<account>.services.ai.azure.com`. A classic `*.cognitiveservices.azure.com` / `*.openai.azure.com` host is accepted and rewritten. Unset ⇒ local fixture agent. |
 | `FOUNDRY_PROJECT_ENDPOINT` | *(unset)* | Foundry **project** endpoint for Agent Service, `https://<account>.services.ai.azure.com/api/projects/<project>`. Unset (or an account endpoint) ⇒ agents are not hosted. |
+| `FOUNDRY_OPERATIONS_PROJECT_ENDPOINT` | *(unset)* | Foundry project endpoint for the **operations** project, which hosts the tool-calling agents. Unset ⇒ `POST /v1/copilot/agent` returns 503. Never falls back to the knowledge project (ADR-019). |
 | `FOUNDRY_CHAT_DEPLOYMENT` | `gpt-5.4-mini` | Standard-tier chat/extraction deployment. |
 | `FOUNDRY_REASONING_DEPLOYMENT` | `gpt-5.5` | High-reasoning-tier deployment. |
 | `FOUNDRY_EMBED_DEPLOYMENT` | `text-embedding-3-large` | Deployment used for integrated vectorization. |
@@ -252,6 +330,10 @@ mounts the optional FastAPI app in `app.py`.
 - **Restricted tools**: agents may call only `search_approved_procedures` /
   `write_draft_procedure` (knowledge) or read/forecast/simulate/propose (energy);
   approve/publish/commit/delete are never agent-callable. — `tools.py`
+- **Agent function tools** are deny-by-default per request, capped in argument size,
+  and re-apply the caller's roles and plant scope inside the tool body, because a
+  hosted agent runs as the project identity and its function calls carry no caller
+  identity. — `agent_tools.py`, `bff_api/agent_tools.py`
 - **Workflow**: agents create `DRAFT` only; approval requires `Knowledge.Publisher`,
   an `expectedVersion` check (409 on stale), and yields an immutable APPROVED
   version. — `procedure_workflow.py`

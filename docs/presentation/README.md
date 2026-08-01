@@ -26,7 +26,7 @@ the PDF (with and without speaker notes) and the PowerPoint package.
 
 | File | Role |
 |---|---|
-| `slides.md` | The deck source. 22 timed slides for a 35-minute talk plus 14 FAQ/appendix backup slides. |
+| `slides.md` | The deck source. 22 timed slides for a 35-minute talk plus 18 FAQ/appendix backup slides. |
 | `theme.css` | The `novasteel` Marp theme (brand palette, card grid, split layout, chips). |
 | `marp.config.mjs` | Renders emoji as text so the build never depends on the Twemoji CDN. |
 | `package.json` | Marp CLI dependency and the `html`/`pdf`/`pdf-notes`/`pptx`/`verify`/`build` targets. |
