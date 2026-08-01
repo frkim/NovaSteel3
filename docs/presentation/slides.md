@@ -371,6 +371,11 @@ And nothing leaves that stack without a human accepting, modifying, or rejecting
 - **AI in simple terms:** it is a smart planner that shifts only flexible work away from expensive hours
 - Hard rules are never broken (required tonnage, locked tasks, and equipment limits)
 
+**MILP, not AI** — a mixed-integer linear program (PuLP/CBC). One yes/no variable per
+batch × 15-min slot; hard rules as equations (urgent heats pinned, furnace concurrency
+capped); objective = weighted cost + CO₂. Returns the **proven** cheapest legal
+schedule, single-threaded and deterministic. The agent explains it — it never computes it.
+
 </div>
 <div>
 
