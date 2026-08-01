@@ -1,0 +1,57 @@
+{
+  "id": "1009",
+  "namespace": "usertypes",
+  "baseEntityTypeId": null,
+  "name": "AlarmType",
+  "entityIdParts": [
+    "30121"
+  ],
+  "displayNamePropertyId": "30122",
+  "namespaceType": "Custom",
+  "visibility": "Visible",
+  "properties": [
+    {
+      "id": "30121",
+      "name": "AlarmTypeId",
+      "redefines": null,
+      "baseTypeNamespaceType": null,
+      "valueType": "String"
+    },
+    {
+      "id": "30122",
+      "name": "AlarmTypeName",
+      "redefines": null,
+      "baseTypeNamespaceType": null,
+      "valueType": "String"
+    },
+    {
+      "id": "30123",
+      "name": "DefaultSeverity",
+      "redefines": null,
+      "baseTypeNamespaceType": null,
+      "valueType": "String"
+    },
+    {
+      "id": "30124",
+      "name": "AlarmDomain",
+      "redefines": null,
+      "baseTypeNamespaceType": null,
+      "valueType": "String"
+    },
+    {
+      "id": "30125",
+      "name": "ObservedCount",
+      "redefines": null,
+      "baseTypeNamespaceType": null,
+      "valueType": "BigInt"
+    },
+    {
+      "id": "30126",
+      "name": "AlarmDescription",
+      "redefines": null,
+      "baseTypeNamespaceType": null,
+      "valueType": "String"
+    }
+  ],
+  "timeseriesProperties": []
+}

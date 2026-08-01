@@ -1,0 +1,12 @@
+{
+  "namespace": "usertypes",
+  "id": "2007",
+  "name": "measures",
+  "namespaceType": "Custom",
+  "source": {
+    "entityTypeId": "1003"
+  },
+  "target": {
+    "entityTypeId": "1008"
+  }
+}

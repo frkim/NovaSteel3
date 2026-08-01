@@ -1,0 +1,50 @@
+{
+  "id": "363742c5-b0d4-5f98-a708-d9a775e09cc5",
+  "dataBindingConfiguration": {
+    "dataBindingType": "NonTimeSeries",
+    "propertyBindings": [
+      {
+        "sourceColumnName": "class_id",
+        "targetPropertyId": "30081"
+      },
+      {
+        "sourceColumnName": "class_name",
+        "targetPropertyId": "30082"
+      },
+      {
+        "sourceColumnName": "parent_class_id",
+        "targetPropertyId": "30083"
+      },
+      {
+        "sourceColumnName": "is_abstract",
+        "targetPropertyId": "30084"
+      },
+      {
+        "sourceColumnName": "domain",
+        "targetPropertyId": "30085"
+      },
+      {
+        "sourceColumnName": "process_stage",
+        "targetPropertyId": "30086"
+      },
+      {
+        "sourceColumnName": "route_scope",
+        "targetPropertyId": "30087"
+      },
+      {
+        "sourceColumnName": "class_description",
+        "targetPropertyId": "30088"
+      },
+      {
+        "sourceColumnName": "asset_type_match",
+        "targetPropertyId": "30089"
+      }
+    ],
+    "sourceTableProperties": {
+      "sourceType": "LakehouseTable",
+      "workspaceId": "3d9c0b49-5201-4914-8149-06071b529918",
+      "itemId": "623b4455-5c28-4235-8138-883d69a5810d",
+      "sourceTableName": "onto_equipment_class"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "3e5c2113-9e82-5bef-a8c6-43eb17d7dca9",
+  "dataBindingTable": {
+    "sourceType": "LakehouseTable",
+    "workspaceId": "3d9c0b49-5201-4914-8149-06071b529918",
+    "itemId": "623b4455-5c28-4235-8138-883d69a5810d",
+    "sourceTableName": "onto_rel_step_produces"
+  },
+  "sourceKeyRefBindings": [
+    {
+      "sourceColumnName": "step_id",
+      "targetPropertyId": "30091"
+    }
+  ],
+  "targetKeyRefBindings": [
+    {
+      "sourceColumnName": "product_id",
+      "targetPropertyId": "30101"
+    }
+  ]
+}

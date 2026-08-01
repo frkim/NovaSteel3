@@ -1,0 +1,34 @@
+{
+  "id": "9444ec88-5cdc-5a90-80c5-b3c427f26b83",
+  "dataBindingConfiguration": {
+    "dataBindingType": "NonTimeSeries",
+    "propertyBindings": [
+      {
+        "sourceColumnName": "product_id",
+        "targetPropertyId": "30101"
+      },
+      {
+        "sourceColumnName": "product_name",
+        "targetPropertyId": "30102"
+      },
+      {
+        "sourceColumnName": "product_form",
+        "targetPropertyId": "30103"
+      },
+      {
+        "sourceColumnName": "semifinished",
+        "targetPropertyId": "30104"
+      },
+      {
+        "sourceColumnName": "product_description",
+        "targetPropertyId": "30105"
+      }
+    ],
+    "sourceTableProperties": {
+      "sourceType": "LakehouseTable",
+      "workspaceId": "3d9c0b49-5201-4914-8149-06071b529918",
+      "itemId": "623b4455-5c28-4235-8138-883d69a5810d",
+      "sourceTableName": "onto_product"
+    }
+  }
+}

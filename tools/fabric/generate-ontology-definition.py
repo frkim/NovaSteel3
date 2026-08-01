@@ -5,6 +5,21 @@ binding, relationship type and contextualization) exactly mirroring the shape
 the Fabric item-definition API expects. Deploy-Ontology.ps1 walks this tree and
 base64-encodes each file into a definition part, so what is in git is exactly
 what is deployed.
+
+Two layers live in the one ontology:
+
+* the instance layer (Plant / Asset / Sensor / Grade), bound to the operational
+  serving tables, which answers "what is happening";
+* the knowledge model (EquipmentClass / ProcessStep / ProductType / Signal /
+  AlarmType), a curated vocabulary that answers "what kind of thing is this and
+  what does it do".
+
+`instanceOf` (Asset -> EquipmentClass) and `measures` (Sensor -> Signal) bridge
+them, so a single graph traversal can start at a real asset, generalise to its
+class, reason over the process genealogy, and descend back to instances. That
+bridge is why the knowledge model belongs in this item rather than in standalone
+Delta tables - the retired ns-steel-ontology notebook wrote exactly such tables
+and nothing could reach them.
 """
 from __future__ import annotations
 
@@ -246,6 +261,170 @@ ENTITY_TYPES = [
         ],
         "overview": None,
     },
+    # ---------------------------------------------------------------------
+    # Knowledge model (TBox). Everything above this line is an instance type
+    # bound to operational data; everything below is the enterprise vocabulary
+    # the instances are classified against. Keeping both in one ontology is the
+    # whole point: `instanceOf` and `measures` bridge the two, so the data agent
+    # can resolve a real asset to its class, reason about the class abstractly,
+    # and come back down to instances in a single graph traversal.
+    # ---------------------------------------------------------------------
+    {
+        "id": 1005,
+        "name": "EquipmentClass",
+        "key": 30081,
+        "displayName": 30082,
+        "properties": [
+            prop(30081, "ClassId", "String"),
+            prop(30082, "ClassName", "String"),
+            prop(30083, "ParentClassId", "String"),
+            prop(30084, "IsAbstract", "Boolean"),
+            prop(30085, "ClassDomain", "String"),
+            prop(30086, "ProcessStage", "String"),
+            prop(30087, "RouteScope", "String"),
+            prop(30088, "ClassDescription", "String"),
+            prop(30089, "AssetTypeMatch", "String"),
+        ],
+        "timeseriesProperties": [],
+        "bindings": [
+            {
+                "name": "equipment-class-static",
+                "type": "NonTimeSeries",
+                "table": "onto_equipment_class",
+                "map": [
+                    ("class_id", 30081),
+                    ("class_name", 30082),
+                    ("parent_class_id", 30083),
+                    ("is_abstract", 30084),
+                    ("domain", 30085),
+                    ("process_stage", 30086),
+                    ("route_scope", 30087),
+                    ("class_description", 30088),
+                    ("asset_type_match", 30089),
+                ],
+            }
+        ],
+        "overview": None,
+    },
+    {
+        "id": 1006,
+        "name": "ProcessStep",
+        "key": 30091,
+        "displayName": 30092,
+        "properties": [
+            prop(30091, "StepId", "String"),
+            prop(30092, "StepName", "String"),
+            prop(30093, "StepStage", "String"),
+            prop(30094, "StepDescription", "String"),
+        ],
+        "timeseriesProperties": [],
+        "bindings": [
+            {
+                "name": "process-step-static",
+                "type": "NonTimeSeries",
+                "table": "onto_process_step",
+                "map": [
+                    ("step_id", 30091),
+                    ("step_name", 30092),
+                    ("stage", 30093),
+                    ("step_description", 30094),
+                ],
+            }
+        ],
+        "overview": None,
+    },
+    {
+        "id": 1007,
+        # "Product" alone is a GQL reserved word and cannot be used as a node
+        # label, so the class is named ProductType (it is a TBox class anyway:
+        # Slab / Bloom / Hot Coil, not an individual heat).
+        "name": "ProductType",
+        "key": 30101,
+        "displayName": 30102,
+        "properties": [
+            prop(30101, "ProductId", "String"),
+            prop(30102, "ProductName", "String"),
+            prop(30103, "ProductForm", "String"),
+            prop(30104, "Semifinished", "Boolean"),
+            prop(30105, "ProductDescription", "String"),
+        ],
+        "timeseriesProperties": [],
+        "bindings": [
+            {
+                "name": "product-static",
+                "type": "NonTimeSeries",
+                "table": "onto_product",
+                "map": [
+                    ("product_id", 30101),
+                    ("product_name", 30102),
+                    ("product_form", 30103),
+                    ("semifinished", 30104),
+                    ("product_description", 30105),
+                ],
+            }
+        ],
+        "overview": None,
+    },
+    {
+        "id": 1008,
+        "name": "Signal",
+        "key": 30111,
+        "displayName": 30111,
+        "properties": [
+            prop(30111, "SignalCodeKey", "String"),
+            prop(30112, "SignalType", "String"),
+            prop(30113, "SignalUnit", "String"),
+            prop(30114, "SensorCount", "BigInt"),
+            prop(30115, "SignalDescription", "String"),
+        ],
+        "timeseriesProperties": [],
+        "bindings": [
+            {
+                "name": "signal-static",
+                "type": "NonTimeSeries",
+                "table": "onto_signal",
+                "map": [
+                    ("signal_code", 30111),
+                    ("signal_type", 30112),
+                    ("canonical_unit", 30113),
+                    ("sensor_count", 30114),
+                    ("signal_description", 30115),
+                ],
+            }
+        ],
+        "overview": None,
+    },
+    {
+        "id": 1009,
+        "name": "AlarmType",
+        "key": 30121,
+        "displayName": 30122,
+        "properties": [
+            prop(30121, "AlarmTypeId", "String"),
+            prop(30122, "AlarmTypeName", "String"),
+            prop(30123, "DefaultSeverity", "String"),
+            prop(30124, "AlarmDomain", "String"),
+            prop(30125, "ObservedCount", "BigInt"),
+            prop(30126, "AlarmDescription", "String"),
+        ],
+        "timeseriesProperties": [],
+        "bindings": [
+            {
+                "name": "alarm-type-static",
+                "type": "NonTimeSeries",
+                "table": "onto_alarm_type",
+                "map": [
+                    ("alarm_type_id", 30121),
+                    ("alarm_type_name", 30122),
+                    ("default_severity", 30123),
+                    ("domain", 30124),
+                    ("observed_count", 30125),
+                    ("alarm_description", 30126),
+                ],
+            }
+        ],
+        "overview": None,
+    },
 ]
 
 RELATIONSHIP_TYPES = [
@@ -266,6 +445,96 @@ RELATIONSHIP_TYPES = [
         "table": "onto_rel_asset_sensor",
         "sourceKey": [("asset_id", 30031)],
         "targetKey": [("sensor_uid", 30051)],
+    },
+    # --- Knowledge model edges -------------------------------------------
+    # `specializes` is the class hierarchy (isA); `feeds` is process genealogy.
+    # Both are EquipmentClass -> EquipmentClass, so a traversal can mix them:
+    # "which concrete units are downstream of ironmaking" walks feeds then
+    # specializes down to the leaves.
+    {
+        "id": 2003,
+        "name": "specializes",
+        "source": 1005,
+        "target": 1005,
+        "table": "onto_rel_class_specializes",
+        "sourceKey": [("child_class_id", 30081)],
+        "targetKey": [("parent_class_id", 30081)],
+    },
+    {
+        "id": 2004,
+        "name": "feeds",
+        "source": 1005,
+        "target": 1005,
+        "table": "onto_rel_class_feeds",
+        "sourceKey": [("from_class_id", 30081)],
+        "targetKey": [("to_class_id", 30081)],
+    },
+    {
+        "id": 2005,
+        "name": "executes",
+        "source": 1005,
+        "target": 1006,
+        "table": "onto_rel_class_executes",
+        "sourceKey": [("class_id", 30081)],
+        "targetKey": [("step_id", 30091)],
+    },
+    {
+        "id": 2006,
+        "name": "produces",
+        "source": 1006,
+        "target": 1007,
+        "table": "onto_rel_step_produces",
+        "sourceKey": [("step_id", 30091)],
+        "targetKey": [("product_id", 30101)],
+    },
+    # --- Bridges between the instance layer and the knowledge model ------
+    {
+        "id": 2007,
+        "name": "measures",
+        "source": 1003,
+        "target": 1008,
+        "table": "onto_rel_sensor_measures",
+        "sourceKey": [("sensor_uid", 30051)],
+        "targetKey": [("signal_code", 30111)],
+    },
+    {
+        "id": 2008,
+        "name": "instanceOf",
+        "source": 1002,
+        "target": 1005,
+        "table": "onto_rel_asset_class",
+        "sourceKey": [("asset_id", 30031)],
+        "targetKey": [("class_id", 30081)],
+    },
+    # Instance-level genealogy, derived from dim_asset.parent_asset_id. Named
+    # distinctly from `feeds` so a query is unambiguous about whether it is
+    # asking about real equipment or about the class of equipment.
+    {
+        "id": 2009,
+        "name": "supplies",
+        "source": 1002,
+        "target": 1002,
+        "table": "onto_rel_asset_supplies",
+        "sourceKey": [("from_asset_id", 30031)],
+        "targetKey": [("to_asset_id", 30031)],
+    },
+    {
+        "id": 2010,
+        "name": "triggeredBy",
+        "source": 1009,
+        "target": 1008,
+        "table": "onto_rel_alarm_signal",
+        "sourceKey": [("alarm_type_id", 30121)],
+        "targetKey": [("signal_code", 30111)],
+    },
+    {
+        "id": 2011,
+        "name": "halts",
+        "source": 1009,
+        "target": 1005,
+        "table": "onto_rel_alarm_class",
+        "sourceKey": [("alarm_type_id", 30121)],
+        "targetKey": [("class_id", 30081)],
     },
 ]
 
@@ -288,7 +557,7 @@ def main() -> None:
             "metadata": {
                 "type": "Ontology",
                 "displayName": "onto_novasteelv3",
-                "description": "NovaSteel V3 enterprise vocabulary: the AI-facing semantic layer that grounds the data agent in plants, assets, sensors and grades.",
+                "description": "NovaSteel V3 enterprise vocabulary: plants, assets, sensors and grades, classified against a steelmaking knowledge model of equipment classes, process steps, products, signals and alarm types.",
             },
             "config": {
                 "version": "2.0",

@@ -180,16 +180,42 @@ using the existing `simulator/config.py` constants as parameters).
 ### 4.2 `ontology-agent` + `graph-agent` — governed digital twin structure
 
 **Current state:** NovaSteel includes the Fabric IQ Ontology item
-`onto_novasteelv3` and its GraphModel for instance-level Plant, Asset, Sensor,
-and Grade structure. The graph supports GQL traversals for Plant → Asset →
-Sensor containment. Furnace/heat/coil quality genealogy remains modelled in
-Python fixture code and DAX, and is not represented in the current GraphModel.
+`onto_novasteelv3` and its GraphModel. It now models **two layers joined by a
+bridge**, both native to the ontology item and queryable by GQL through the
+graph:
+
+- **Instance layer (ABox)** — the real synthetic fleet: `Plant -[hasAsset]->
+  Asset -[hasSensor]-> Sensor`, plus `Grade`, and the instance-level process
+  genealogy `Asset -[supplies]-> Asset`
+  (`LUX-BF-01 → LUX-BOF-01 → LUX-CC-01 → LUX-RHF-01 / LUX-HSM-01`).
+- **Knowledge model (TBox)** — a curated steel vocabulary: `EquipmentClass`
+  (with a `specializes` class hierarchy and an `IsAbstract` flag),
+  `ProcessStep`, `ProductType`, `Signal`, and `AlarmType`, wired by the abstract
+  edges `feeds` (process flow between classes), `executes`
+  (EquipmentClass → ProcessStep), `produces` (ProcessStep → ProductType),
+  `triggeredBy` (AlarmType → Signal), and `halts` (AlarmType → EquipmentClass).
+- **Bridge** — `Asset -[instanceOf]-> EquipmentClass` and
+  `Sensor -[measures]-> Signal`, so a query can walk from a real asset up to its
+  class, reason abstractly, and come back down to instances or the tabular
+  facts.
+
+This restores the abstract class / process-genealogy reasoning that briefly
+lived in the retired `ns-steel-ontology` notebook and its standalone
+`ontology_entity` / `ontology_relationship` / `ontology_property` Delta tables.
+Those tables were dropped; the capability is now expressed **inside the ontology
+item** instead of over bespoke SQL tables. The knowledge model also corrects the
+old model's metallurgically wrong `BlastFurnace -feeds-> ContinuousCaster` edge:
+the restored chain is `BlastFurnace → BasicOxygenFurnace → ContinuousCaster →
+ReheatFurnace / RollingMill`, and the "does a blast furnace feed the caster"
+question is answered with the correct two-hop `feeds*1..3` path.
 
 **Benefit:** `ontology-agent` governs the Fabric IQ Ontology definition and
-bindings, while `graph-agent` validates the GraphModel and GQL queries for
-structural twin questions such as which assets belong to a plant and which
-sensors belong to an asset. Additional edge types would be required before
-upstream/downstream quality-defect propagation can move out of Python/DAX.
+bindings, while `graph-agent` validates the GraphModel and GQL queries — both
+for structural twin questions (which assets belong to a plant, which sensors
+belong to an asset) and for abstract knowledge questions (what kind of unit is
+this, what feeds what, what a step produces, which signals trigger the alarm
+that halts a unit). Upstream/downstream instance genealogy is now carried by the
+`supplies` edge rather than only in Python fixture code and DAX.
 
 **Impact on existing architecture:** The Fabric IQ Ontology and GraphModel sit
 alongside the existing Eventhouse and Lakehouse without replacing them. The BFF
@@ -197,10 +223,21 @@ alongside the existing Eventhouse and Lakehouse without replacing them. The BFF
 existing REST contracts are unchanged. Adds governed ontology/graph namespaces
 to the four-workspace topology defined in `fabric/catalog/fabric-items.json`.
 
+**How the knowledge model binds:** the curated TBox seed rows (equipment
+classes, process steps, products, alarm types) plus the data-derived signals are
+materialised by the `ns-ontology-bindings` notebook into managed `onto_*` Delta
+tables (`onto_equipment_class`, `onto_process_step`, `onto_product`,
+`onto_signal`, `onto_alarm_type`, and the `onto_rel_*` edge tables). The Ontology
+item binds its entity and relationship types to those tables, and the GraphModel
+projects them as the node and edge types above. The instance layer continues to
+bind from the gold `dim_*` / `fact_*` tables. No dangling edges are written —
+every relationship row has both endpoints present in its entity tables.
+
 **Indicative effort:** 3–5 days to validate the current
 `onto_novasteelv3`/GraphModel deployment, add a GQL adapter stub for the BFF,
-and model any future genealogy edges explicitly. The structural graph is seeded
-from the existing `simulator/config.py` device/sensor catalog.
+and keep the seed rows and derived signals in sync. The instance graph is seeded
+from the existing `simulator/config.py` device/sensor catalog; the knowledge
+model is a curated vocabulary materialised by `ns-ontology-bindings`.
 
 ### 4.3 `ai-skills-agent` — governed Fabric Data Agent with dual-source routing
 
@@ -319,8 +356,8 @@ then reconnect the BFF/portal.
 
 | Step | Action | Script / agent | Exit criterion |
 |---|---|---|---|
-| 3.1 | Define and validate Fabric IQ Ontology `onto_novasteelv3` (Plant, Asset, Sensor, Grade) | `ontology-agent` | Ontology item, bindings, and GraphModel are deployed and queryable |
-| 3.2 | Build or extend GraphModel and GQL queries | `graph-agent` | Plant → Asset → Sensor containment returns correct results on synthetic data; any genealogy gaps are explicitly documented |
+| 3.1 | Define and validate Fabric IQ Ontology `onto_novasteelv3` — instance layer (Plant, Asset, Sensor, Grade) and knowledge model (EquipmentClass, ProcessStep, ProductType, Signal, AlarmType) | `ontology-agent` | Ontology item, `onto_*` bindings (materialised by `ns-ontology-bindings`), and GraphModel are deployed and queryable |
+| 3.2 | Build or extend GraphModel and GQL queries | `graph-agent` | Instance containment (Plant → Asset → Sensor) and knowledge-model traversals (class `specializes` hierarchy, `feeds` genealogy, `instanceOf` / `measures` bridge) return correct results on synthetic data; any remaining gaps are explicitly documented |
 | 3.3 | Deploy Fabric Data Agent (dual-source KQL + Lakehouse) | `ai-skills-agent` | Data Agent routes telemetry queries to KQL and KPI queries to Direct Lake; responses cite source and sensitivity label |
 | 3.4 | Run DAX BPA and Data Agent evaluation | `ai-skills-analysis-agent` | 24-rule BPA report produced; Data Agent scores ≥ threshold on demo question/answer pairs |
 | 3.5 | Reconnect BFF and portal | `operations-portal-agent` | FastAPI BFF routes `/analytics` and `/knowledge` surface Fabric Data Agent and embed Power BI (user-owns-data, Entra MSAL); RTI dashboard tiles render in the portal |

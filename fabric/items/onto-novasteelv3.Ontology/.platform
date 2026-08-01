@@ -3,7 +3,7 @@
   "metadata": {
     "type": "Ontology",
     "displayName": "onto_novasteelv3",
-    "description": "NovaSteel V3 enterprise vocabulary: the AI-facing semantic layer that grounds the data agent in plants, assets, sensors and grades."
+    "description": "NovaSteel V3 enterprise vocabulary: plants, assets, sensors and grades, classified against a steelmaking knowledge model of equipment classes, process steps, products, signals and alarm types."
   },
   "config": {
     "version": "2.0",

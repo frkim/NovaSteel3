@@ -1,0 +1,12 @@
+{
+  "namespace": "usertypes",
+  "id": "2004",
+  "name": "feeds",
+  "namespaceType": "Custom",
+  "source": {
+    "entityTypeId": "1005"
+  },
+  "target": {
+    "entityTypeId": "1005"
+  }
+}

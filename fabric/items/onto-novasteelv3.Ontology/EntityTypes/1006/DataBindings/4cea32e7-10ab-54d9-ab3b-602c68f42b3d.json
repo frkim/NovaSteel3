@@ -1,0 +1,30 @@
+{
+  "id": "4cea32e7-10ab-54d9-ab3b-602c68f42b3d",
+  "dataBindingConfiguration": {
+    "dataBindingType": "NonTimeSeries",
+    "propertyBindings": [
+      {
+        "sourceColumnName": "step_id",
+        "targetPropertyId": "30091"
+      },
+      {
+        "sourceColumnName": "step_name",
+        "targetPropertyId": "30092"
+      },
+      {
+        "sourceColumnName": "stage",
+        "targetPropertyId": "30093"
+      },
+      {
+        "sourceColumnName": "step_description",
+        "targetPropertyId": "30094"
+      }
+    ],
+    "sourceTableProperties": {
+      "sourceType": "LakehouseTable",
+      "workspaceId": "3d9c0b49-5201-4914-8149-06071b529918",
+      "itemId": "623b4455-5c28-4235-8138-883d69a5810d",
+      "sourceTableName": "onto_process_step"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "namespace": "usertypes",
+  "id": "2009",
+  "name": "supplies",
+  "namespaceType": "Custom",
+  "source": {
+    "entityTypeId": "1002"
+  },
+  "target": {
+    "entityTypeId": "1002"
+  }
+}

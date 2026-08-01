@@ -1,0 +1,50 @@
+{
+  "id": "1008",
+  "namespace": "usertypes",
+  "baseEntityTypeId": null,
+  "name": "Signal",
+  "entityIdParts": [
+    "30111"
+  ],
+  "displayNamePropertyId": "30111",
+  "namespaceType": "Custom",
+  "visibility": "Visible",
+  "properties": [
+    {
+      "id": "30111",
+      "name": "SignalCodeKey",
+      "redefines": null,
+      "baseTypeNamespaceType": null,
+      "valueType": "String"
+    },
+    {
+      "id": "30112",
+      "name": "SignalType",
+      "redefines": null,
+      "baseTypeNamespaceType": null,
+      "valueType": "String"
+    },
+    {
+      "id": "30113",
+      "name": "SignalUnit",
+      "redefines": null,
+      "baseTypeNamespaceType": null,
+      "valueType": "String"
+    },
+    {
+      "id": "30114",
+      "name": "SensorCount",
+      "redefines": null,
+      "baseTypeNamespaceType": null,
+      "valueType": "BigInt"
+    },
+    {
+      "id": "30115",
+      "name": "SignalDescription",
+      "redefines": null,
+      "baseTypeNamespaceType": null,
+      "valueType": "String"
+    }
+  ],
+  "timeseriesProperties": []
+}

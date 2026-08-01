@@ -1,0 +1,43 @@
+{
+  "id": "1006",
+  "namespace": "usertypes",
+  "baseEntityTypeId": null,
+  "name": "ProcessStep",
+  "entityIdParts": [
+    "30091"
+  ],
+  "displayNamePropertyId": "30092",
+  "namespaceType": "Custom",
+  "visibility": "Visible",
+  "properties": [
+    {
+      "id": "30091",
+      "name": "StepId",
+      "redefines": null,
+      "baseTypeNamespaceType": null,
+      "valueType": "String"
+    },
+    {
+      "id": "30092",
+      "name": "StepName",
+      "redefines": null,
+      "baseTypeNamespaceType": null,
+      "valueType": "String"
+    },
+    {
+      "id": "30093",
+      "name": "StepStage",
+      "redefines": null,
+      "baseTypeNamespaceType": null,
+      "valueType": "String"
+    },
+    {
+      "id": "30094",
+      "name": "StepDescription",
+      "redefines": null,
+      "baseTypeNamespaceType": null,
+      "valueType": "String"
+    }
+  ],
+  "timeseriesProperties": []
+}
