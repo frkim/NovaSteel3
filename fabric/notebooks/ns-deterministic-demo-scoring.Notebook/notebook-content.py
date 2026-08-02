@@ -18,6 +18,8 @@ CORE_TABLES_URI = "{{onelake.coreTablesUri}}"
 MODEL_VERSION = "novasteel-demo-deterministic/1.0.0"
 QUALITY_SCENARIO_ID = "quality-drift"
 QUALITY_SEED = 240728
+DEMO_LINING_COMPONENT_ID = "HEARTH-SECTOR-07"
+DEMO_HEAT_FLUX_CUE = "heat_flux_6h_slope"
 
 
 def require_resolved(name: str, value: str) -> None:
@@ -196,7 +198,7 @@ scored = (
                     F.round(F.lit(0.55) * wear, 4).alias("contribution"),
                 ),
                 F.struct(
-                    F.lit("heat_flux_vs_peer_sectors").alias("feature"),
+                    F.lit(DEMO_HEAT_FLUX_CUE).alias("feature"),
                     F.round(
                         F.lit(0.20) * excess(F.col("heat_flux_avg"), F.col("peer_heat_flux")),
                         4,
@@ -213,6 +215,13 @@ scored = (
         ),
     )
 )
+if (
+    scored.where(F.col("component_id") == F.lit(DEMO_LINING_COMPONENT_ID))
+    .limit(1)
+    .count()
+    == 0
+):
+    raise RuntimeError(f"{DEMO_LINING_COMPONENT_ID} demo lining cue was not scored")
 
 rul_inference = scored.select(
     "inference_id",
