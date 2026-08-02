@@ -24,7 +24,7 @@ copies it into the deck's generated `images/` folder at build time.
 
 | Source file | Deck rendition | Subject |
 |---|---|---|
-| `steel process with Blast Furnace and Electric arc furnace.png` | `../presentation/assets/diagrams/steel-process-routes.webp` | Both primary routes on one canvas — the appendix "How a Steel Plant Works" slide |
+| `steel process with Blast Furnace and Electric arc furnace.png` | `../presentation/assets/diagrams/steel-process-routes.webp` | Both primary routes on one canvas — the "How a Steel Mill Works" slide |
 
 ## Uniform figures
 

@@ -106,7 +106,7 @@ artwork. Only the optimised WebP renditions in
 ## Marp deck diagram renditions (committed as WebP)
 
 The Marp deck (`../slides.md`) carries one process diagram of its own, in the
-appendix slide *"How a Steel Plant Works"*. It follows the same policy as the
+opening slide *"How a Steel Mill Works"*. It follows the same policy as the
 Steel Knowledge artwork above: the ~8 MB PNG source stays local and untracked
 under `docs/images/`, and only the optimised WebP rendition is committed.
 

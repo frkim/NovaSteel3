@@ -2,7 +2,7 @@
 
 The deck is generated in CI (``.github/workflows/presentation.yml``) straight from
 ``docs/presentation/slides.md``. These checks keep that source buildable and keep the
-35-minute speaking budget honest before a single browser is started.
+38-minute speaking budget honest before a single browser is started.
 """
 
 from __future__ import annotations
@@ -17,10 +17,10 @@ PRESENTATION = ROOT / "docs" / "presentation"
 SLIDES = PRESENTATION / "slides.md"
 THEME = PRESENTATION / "theme.css"
 
-MAIN_SLIDE_COUNT = 22
-BACKUP_SLIDE_COUNT = 18
-MIN_TALK_SECONDS = 34 * 60
-MAX_TALK_SECONDS = 35 * 60
+MAIN_SLIDE_COUNT = 25
+BACKUP_SLIDE_COUNT = 17
+MIN_TALK_SECONDS = 37 * 60
+MAX_TALK_SECONDS = 39 * 60
 
 NOTE_PATTERN = re.compile(r"<!--(?!\s*_)(.*?)-->", re.DOTALL)
 TIMING_PATTERN = re.compile(r"^\s*⏱\s*(\d+):([0-5]\d)\s*·\s")
@@ -70,7 +70,7 @@ def test_deck_never_mentions_a_phase_zero() -> None:
     assert "Phase 0" not in _read(SLIDES)
 
 
-def test_deck_has_twenty_two_main_slides_and_fifteen_backup_slides() -> None:
+def test_deck_has_twenty_five_main_slides_and_seventeen_backup_slides() -> None:
     _, slides = _front_matter_and_slides()
     assert len(slides) == MAIN_SLIDE_COUNT + BACKUP_SLIDE_COUNT
     assert all("backup" not in _classes(slide) for slide in slides[:MAIN_SLIDE_COUNT])
@@ -85,14 +85,14 @@ def test_every_slide_carries_exactly_one_timed_speaker_note() -> None:
         _duration_seconds(notes[0])
 
 
-def test_main_slides_fit_the_thirty_five_minute_budget() -> None:
+def test_main_slides_fit_the_thirty_eight_minute_budget() -> None:
     _, slides = _front_matter_and_slides()
     durations = [
         _duration_seconds(NOTE_PATTERN.findall(slide)[0]) for slide in slides[:MAIN_SLIDE_COUNT]
     ]
     total = sum(durations)
     assert MIN_TALK_SECONDS <= total <= MAX_TALK_SECONDS, (
-        f"main slides speak for {total // 60}:{total % 60:02d}; the budget is 34:00-35:00"
+        f"main slides speak for {total // 60}:{total % 60:02d}; the budget is 37:00-39:00"
     )
     assert all(duration > 0 for duration in durations)
 

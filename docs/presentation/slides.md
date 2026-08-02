@@ -40,29 +40,36 @@ Today's demo proves the mechanics on synthetic data — it does not claim realiz
 
 ---
 
+<!-- _class: tight -->
+
+# How a Steel Mill Works
+
+![w:760](images/steel-process-routes.webp)
+
+<div class="legend">
+<span class="pill orange">Blast furnace route</span> ore, coke and limestone → pig iron → basic oxygen furnace. <span class="pill blue">Electric arc furnace route</span> scrap and DRI melted with electricity. Both converge on ladle refining, casting, rolling and coating.
+</div>
+
+<!-- ⏱ 1:05 · Before the architecture, thirty seconds on the process itself, because every design choice hangs off this picture.
+AxelorMetal runs both primary routes. The integrated route reduces iron ore, coking coal and limestone in the blast furnace into molten pig iron, which the basic oxygen furnace then decarburises into steel. The electric arc furnace route melts scrap and direct-reduced iron with electricity instead — far less embedded carbon, far more exposure to the hourly power price, which is exactly why energy dispatch matters more on that route.
+From ladle refining onward the two routes share one line: continuous casting into slabs, blooms and billets, then hot and cold rolling, galvanizing and coating.
+Everything NovaSteel does hangs off four points on this picture — the electricity the furnace pulls, refractory wear inside the furnace, the defect risk introduced at the caster and the mill, and the tacit knowledge that walks out of the gate at shift handover. -->
+
+---
+
 # The Business Challenge
 
 <div class="subtitle">A steel estate under pressure on five fronts</div>
 
-<div class="split">
-<div>
+- Luxembourg-based integrated producer · blast furnaces + rolling mills across **4 countries**
+- Regulatory frame: GDPR · EU AI Act · EU ETS
 
-- Luxembourg-based integrated producer
-- Blast furnaces + rolling mills · **4 countries**
-- Regulatory: GDPR · EU AI Act · EU ETS
-
-</div>
-<div>
-
-<div class="cards">
+<div class="cards five">
 <div class="card orange"><div class="card-num">35%</div><h3>Energy cost share</h3><p>No real-time optimization lever</p></div>
 <div class="card teal"><div class="card-num">€8M</div><h3>Lining failure</h3><p>Per event, unpredictable today</p></div>
 <div class="card purple"><div class="card-num">CO₂</div><h3>ETS penalty pressure</h3><p>Carbon as material as energy</p></div>
 <div class="card green"><div class="card-num">Knowledge</div><h3>Operator attrition</h3><p>Retiring experts, irreversible loss</p></div>
-<div class="card blue"><div class="card-num">Yield</div><h3>Automotive-grade yield variability</h3><p>Genealogy must be heat-by-heat</p></div>
-</div>
-
-</div>
+<div class="card blue"><div class="card-num">Yield</div><h3>Grade yield variability</h3><p>Genealogy must be heat-by-heat</p></div>
 </div>
 
 <!-- ⏱ 1:30 · AxelorMetal runs blast furnaces and rolling mills across four EU countries.
@@ -123,9 +130,10 @@ Today's demo will show the platform producing these kinds of outputs on syntheti
 <div class="split">
 <div>
 
-- One **Microsoft Fabric** core unifies production, energy, emissions, quality, maintenance & knowledge
+- One **unified platform** core unifies production, energy, emissions, quality, maintenance & knowledge
+- Instead of scattered data and disconnected tools, **one governed place** where the data, the AI and the decision live together
 - Four AI capabilities: energy dispatch · lining RUL · quality risk · knowledge capture
-- Persona dashboards for **8 roles**, EU-hosted, audited end to end
+- Persona dashboards for **every key role**, EU-hosted, audited end to end
 - **Decision support** — a human approves; the platform never actuates equipment
 
 </div>
@@ -139,18 +147,19 @@ Today's demo will show the platform producing these kinds of outputs on syntheti
 <div class="chain">
 <div class="node blue"><b>Plant signals</b><span>OT / MES / market</span></div>
 <div class="step">›</div>
-<div class="node teal"><b>Fabric core</b><span>governed data spine</span></div>
+<div class="node teal"><b>Unified platform</b><span>governed data spine</span></div>
 <div class="step">›</div>
 <div class="node purple"><b>Four AI capabilities</b><span>Python + constrained GenAI</span></div>
 <div class="step">›</div>
-<div class="node green"><b>Persona experiences</b><span>8 role-specific views</span></div>
+<div class="node green"><b>Persona experiences</b><span>role-specific views</span></div>
 <div class="step">›</div>
 <div class="node orange"><b>Human decision</b><span>approval + audit</span></div>
 </div>
 
 <!-- ⏱ 1:25 · Here is the entire platform in one picture.
-Live plant signals flow into a single Microsoft Fabric data core. On top of that governed core sit four AI capabilities. Those feed persona-specific experiences for eight roles. A human always makes the consequential decision, and every decision is audited.
-The center of gravity is Fabric — I'll spend real time defending why that's the right center, because it's the question this room should press hardest on. -->
+Live plant signals flow into a single, unified platform core. Today AxelorMetal's data and tooling are scattered across historians, spreadsheets, MES exports and separate BI stacks; the whole point of this slide is that they stop being scattered — one governed place where the data, the AI and the decision live together.
+On top of that governed core sit four AI capabilities. Those feed persona-specific experiences. A human always makes the consequential decision, and every decision is audited.
+The center of gravity is that unified core — I'll spend real time defending why Microsoft Fabric is the right implementation of it, because it's the question this room should press hardest on. -->
 
 ---
 
@@ -160,7 +169,7 @@ The center of gravity is Fabric — I'll spend real time defending why that's th
 <div class="card teal"><div class="card-num">01</div><h3>Decision support only</h3><p>No write to PLC, interlock, furnace, or setpoint (ADR-007)</p></div>
 <div class="card purple"><div class="card-num">02</div><h3>EU-only processing</h3><p>Sweden Central; Foundry Data Zone (EU) — ADR-003</p></div>
 <div class="card green"><div class="card-num">03</div><h3>Append-only audit</h3><p>Every consequential AI output is replayable</p></div>
-<div class="card orange"><div class="card-num">04</div><h3>Security</h3><p>No standing secrets — Entra identities, OIDC-federated deploys</p></div>
+<div class="card orange"><div class="card-num">04</div><h3>Secure by design</h3><p>Zero Trust, least privilege, no standing secrets</p></div>
 </div>
 
 > Existing OT safety-instrumented systems stay authoritative. The platform advises; a human decides.
@@ -169,28 +178,27 @@ The center of gravity is Fabric — I'll spend real time defending why that's th
 First and most important: this is decision support. No application, agent, rule, pipeline, or demo control writes to a PLC, a safety interlock, a furnace, or a production setpoint — existing OT safety systems stay authoritative. That is ADR-007.
 Second, EU-only processing: Sweden Central, with Foundry in the EU Data Zone.
 Third, every consequential AI output is auditable end to end — inputs, model version, confidence, rationale, the human decision, and the outcome, append-only.
-Fourth, security: there is no standing secret anywhere to steal. Humans authenticate with Entra, workloads run as managed identities, and deployments federate through GitHub OIDC — four separate authorization planes, so one compromised identity has a contained blast radius.
+Fourth, secure by design: Zero Trust and least privilege throughout, with no standing secret anywhere to steal. Every identity is scoped to exactly one job, so a compromised identity has a contained blast radius.
 If any of these is a problem for you, stop me now, because I won't trade them away. -->
 
 ---
 
 # Who Benefits: Personas & Journeys
 
-| Persona | Dashboard | Key job-to-be-done |
-|---|---|---|
-| Plant Manager | Site Command Center | Single-page operational truth |
-| Energy Manager | Dispatch Optimization | Move flexible load off price peaks |
-| Reliability Engineer | Furnace Lining RUL | €8M failure → planned intervention |
-| Quality Engineer | In-line Quality | Catch drift before it ships |
-| Sustainability Officer | ETS Cockpit | Own the −22% carbon target |
-| Knowledge Engineer | GenAI Capture Studio | Preserve retiring expertise |
-| Executive | Value & ROI Cockpit | Board-level KPI visibility |
-| Furnace Operator | Health Monitor + Knowledge | Daily decision context |
+| Persona | Role | Dashboard | Key job-to-be-done |
+|---|---|---|---|
+| **Elena Duarte** | Furnace Operator | Health Monitor + Knowledge | Daily decision context at the furnace |
+| **Sofia Lindqvist** | Energy Manager | Dispatch Optimization | Move flexible load off price peaks |
+| **Jens Bakker** | Quality Engineer | In-line Quality | Catch drift before it ships |
+| **Amina Haddad** | Sustainability Officer | ETS Cockpit | Own the −22% carbon target |
+| **Pieter Claes** | Knowledge Engineer | GenAI Capture Studio | Preserve retiring expertise |
 
-<!-- ⏱ 1:25 · The platform serves eight roles, not one.
-The Plant Manager wants everything on one page she can defend. The Energy Manager wants to move flexible load off price peaks. The Reliability Engineer wants an eight-million-euro failure turned into a planned intervention. The Quality Engineer wants to catch drift before it ships and prove genealogy heat-by-heat.
-The Sustainability Officer owns the twenty-two-percent carbon target and ETS exposure. The Knowledge Engineer wants a retiring expert's judgment captured before it's gone.
-In the demo I'll walk these as tabs, in the order a real operating day would touch them. -->
+<span class="pill blue">DEMO</span> Marc Weber, Plant Manager, opens the demonstration on the Site Command Center
+
+<!-- ⏱ 1:25 · The platform serves people, not job titles — so every persona has a name, and those names are binding across the deck, the portal and the demo.
+Elena Duarte runs the furnace on shift and wants the decision context for the next four hours, not a monthly report. Sofia Lindqvist manages energy and wants to move flexible load off price peaks. Jens Bakker owns quality and wants to catch drift before it ships, with genealogy provable heat-by-heat.
+Amina Haddad owns the twenty-two-percent carbon target and the ETS exposure. Pieter Claes wants a retiring expert's judgment captured before it walks out of the gate.
+The demonstration opens with Marc Weber, the plant manager, because his Site Command Center is where a real operating day starts — and then I'll walk these five in the order that day would touch them. -->
 
 ---
 
@@ -201,41 +209,36 @@ In the demo I'll walk these as tabs, in the order a real operating day would tou
 # Architecture at a Glance
 
 <div class="flow">
-<div class="lane"><div class="lane-tag">Sites<br>LU · DE · BE · ES</div><div class="nodes">
-<div class="node"><b>PLC · SCADA · historian</b><span>Purdue L0–L2 · no cloud inbound path</span></div>
-<div class="node"><b>Industrial DMZ gateway</b><span>Purdue L3.5 · schema-validating · outbound only</span></div>
+<div class="lane purple"><div class="lane-tag">AI &amp; app<br>services</div><div class="nodes">
+<div class="node purple"><b>Python FastAPI BFF</b><span>domain APIs · read-only adapters to KQL + gold</span></div>
+<div class="node purple"><b>Scoring / optimizer workers</b><span>MILP dispatch · RUL · quality risk</span></div>
+<div class="node purple"><b>Foundry (EU) + Speech</b><span>explain &amp; transcribe · restricted OpenAPI tools</span></div>
 </div></div>
-<div class="arrow">▼ OPC UA · MQTT · historian export → AMQP/TLS, allow-listed egress</div>
-<div class="lane blue"><div class="lane-tag">Azure ingress<br>Sweden Central</div><div class="nodes">
-<div class="node blue"><b>Event Hubs</b><span>raw replay buffer</span></div>
-<div class="node blue"><b>Identity-based relay</b><span>Container App · Entra workload identity, no SAS (ADR-005)</span></div>
-<div class="node blue"><b>MES · ERP · LIMS · CMMS</b><span>Fabric pipelines / copy jobs</span></div>
-</div></div>
-<div class="arrow">▼ Eventstream Custom Endpoint · Entra ID, no shared key</div>
+<div class="arrow">▲ predictions, recommendations, audit facts ▼ features &amp; labels — never raw OT credentials</div>
 <div class="lane teal"><div class="lane-tag">Microsoft Fabric<br>data core</div><div class="nodes">
 <div class="node teal"><b>Eventstream</b><span>es-ns-telemetry-v1</span></div>
 <div class="node teal"><b>Eventhouse / KQL</b><span>hot telemetry · alarms · Activator notify</span></div>
 <div class="node teal"><b>OneLake Lakehouse</b><span>bronze → silver → gold · quarantine</span></div>
 <div class="node teal"><b>Direct Lake model</b><span>one semantic layer → Power BI</span></div>
 </div></div>
-<div class="arrow">▲▼ features & labels ▲▼ predictions, recommendations, audit facts</div>
-<div class="lane purple"><div class="lane-tag">AI & app<br>services</div><div class="nodes">
-<div class="node purple"><b>Python FastAPI BFF</b><span>domain APIs · read-only adapters to KQL + gold</span></div>
-<div class="node purple"><b>Scoring / optimizer workers</b><span>MILP dispatch · RUL · quality risk</span></div>
-<div class="node purple"><b>Foundry (EU) + Speech</b><span>explain & transcribe · restricted OpenAPI tools</span></div>
+<div class="arrow">▲ Eventstream Custom Endpoint · Entra ID, no shared key</div>
+<div class="lane blue"><div class="lane-tag">Azure ingress<br>Sweden Central</div><div class="nodes">
+<div class="node blue"><b>Event Hubs</b><span>raw replay buffer</span></div>
+<div class="node blue"><b>Identity-based relay</b><span>Container App · Entra workload identity, no SAS (ADR-005)</span></div>
+<div class="node blue"><b>MES · ERP · LIMS · CMMS</b><span>Fabric pipelines / copy jobs</span></div>
 </div></div>
-<div class="arrow">▼ HTTPS + Entra access token — the browser never holds a workload credential</div>
-<div class="lane orange"><div class="lane-tag">Experience<br>browser</div><div class="nodes">
-<div class="node orange"><b>Blazor WASM shell (C#)</b><span>MSAL · navigation · host (ADR-004)</span></div>
-<div class="node orange"><b>React / TypeScript MFE</b><span>MUI + D3 + embedded Power BI</span></div>
+<div class="arrow">▲ OPC UA · MQTT · historian export → AMQP/TLS, allow-listed outbound egress</div>
+<div class="lane"><div class="lane-tag">Sites<br>LU · DE · BE · ES</div><div class="nodes">
+<div class="node"><b>Industrial DMZ gateway</b><span>Purdue L3.5 · schema-validating · outbound only</span></div>
+<div class="node"><b>PLC · SCADA · historian</b><span>Purdue L0–L2 · no cloud inbound path</span></div>
 </div></div>
 </div>
 
 <!-- ⏱ 2:20 · This is the whole system on one slide; I'll return to it three times.
-Read it top to bottom. At each site, a gateway in an industrial DMZ terminates OT protocols and only ever emits outbound, schema-validated telemetry — no cloud system ever reaches down into the plant.
-Azure Event Hubs buffers, and a managed-identity relay publishes to Fabric's Eventstream over Entra ID with no shared key; batch systems — MES, ERP, LIMS, CMMS — land on the same contract through Fabric pipelines.
-From there Fabric is the core: hot data in KQL, governed bronze-silver-gold history in OneLake, one Direct Lake semantic model, Power BI, and Activator strictly for notifications.
-Around it: Python services do the math and read Fabric read-only, Foundry and Speech handle language, and the browser is a Blazor shell hosting a React analytics microfrontend that only ever holds a user token. -->
+Read it bottom to top, the way the data actually travels. At each site, controllers and historians sit at Purdue levels zero to two with no inbound path from the cloud, and a gateway in an industrial DMZ terminates OT protocols and only ever emits outbound, schema-validated telemetry — no cloud system ever reaches down into the plant.
+One level up, Azure Event Hubs buffers, and a managed-identity relay publishes to Fabric's Eventstream over Entra ID with no shared key; batch systems — MES, ERP, LIMS, CMMS — land on the same contract through Fabric pipelines.
+Above that Fabric is the core: hot data in KQL, governed bronze-silver-gold history in OneLake, one Direct Lake semantic model, Power BI, and Activator strictly for notifications.
+At the top, Python services do the math and read Fabric read-only, and Foundry and Speech handle language. Features and labels flow down into them; predictions, recommendations and audit facts flow back up. -->
 
 ---
 
@@ -324,7 +327,7 @@ That's ADR-006, and it's why a language model being confidently wrong can't hurt
 <div class="node teal"><b>Dispatch inputs</b><span>day-ahead price, grid carbon, production & maintenance constraints</span></div>
 <div class="node teal"><b>Thermal & cooling</b><span>heat-flux slope, spatial contrast, cooling residual</span></div>
 <div class="node teal"><b>Genealogy</b><span>heat → slab → coil → sample → shipment</span></div>
-<div class="node teal"><b>Consented transcripts</b><span>PII auto-redacted to <code>[REDACTED:{KIND}]</code></span></div>
+<div class="node teal"><b>Consented transcripts</b><span>personal details stripped before use — names, IDs and contacts replaced by neutral placeholders</span></div>
 </div></div>
 <div class="arrow">▼ Direct Lake / read-only adapters — features and labels, never raw OT credentials</div>
 <div class="lane purple"><div class="lane-tag">Deterministic core<br>Python decides</div><div class="nodes">
@@ -347,7 +350,7 @@ That's ADR-006, and it's why a language model being confidently wrong can't hurt
 </div>
 
 <!-- ⏱ 2:05 · Now the same picture for the AI, because "we use AI" is not an architecture.
-Bottom layer up: every model reads governed gold features — dispatch inputs, thermal and cooling signals, the full heat-slab-coil genealogy, and consented, PII-redacted transcripts. No model gets a raw OT credential.
+Bottom layer up: every model reads governed gold features — dispatch inputs, thermal and cooling signals, the full heat-slab-coil genealogy, and consented transcripts whose personal details have been stripped out before anything reaches a model — names, badge numbers and contact details are replaced by neutral placeholders, so the procedure survives and the person is not identifiable. No model gets a raw OT credential.
 The deterministic core is Python and it is the only thing that decides. Dispatch is a mixed-integer linear program solved with PuLP and CBC, with a deterministic greedy heuristic as a labelled fallback — never a silent one. Lining life is a physics-informed regression that emits P10, P50 and P90 with a confidence. Quality risk is a model over genealogy features.
 Only then does language enter: Speech transcribes under an explicit consent state machine, and the Foundry agent in the EU Data Zone drafts and explains, with every claim cited to a transcript segment, behind Prompt Shields and a read-or-simulate tool allow-list.
 And nothing leaves that stack without a human accepting, modifying, or rejecting it with a reason code, written to an append-only trail. That is the whole trust argument in one diagram. -->
@@ -545,8 +548,8 @@ A model response is never authorization. -->
 
 - **No standing secrets** — Entra managed identities
 - Four separate auth planes: Azure RBAC ≠ Fabric ≠ Foundry ≠ app roles
-- Per-plant gateway scoped; browser never gets workload token
-- Supply chain: protected feeds only, SBOM, GitHub OIDC
+- **Zero Trust** — verify explicitly, assume breach, no implicit network trust
+- **Least privilege by default** — every identity scoped to one job, blast radius contained
 
 </div>
 <div>
@@ -562,12 +565,11 @@ A model response is never authorization. -->
 </div>
 </div>
 
-<!-- ⏱ 1:50 · Security is Zero-Trust and least-privilege by construction.
-There are no standing secrets — every workload uses its own Entra managed identity, and Azure RBAC, Fabric roles, Foundry RBAC, and application roles are four separate planes: holding one grants nothing in another.
-The per-plant gateway can produce to its own Event Hub and nothing else. The browser never receives a workload credential.
+<!-- ⏱ 1:50 · Security here is Zero Trust and least privilege by construction, not by policy document.
+Zero Trust means three things concretely: every call is authenticated and authorized on its own merits, nothing is trusted just because it is inside the network, and we design assuming a breach has already happened — so we optimise for containment rather than for a perfect perimeter.
+Least privilege means every identity is scoped to exactly one job and nothing more. There are no standing secrets — every workload uses its own Entra managed identity — and Azure RBAC, Fabric roles, Foundry RBAC and application roles are four separate planes: holding one grants nothing in another. That is what keeps the blast radius of any single compromise small.
 Data is classified, and operator audio is Highly Confidential with DLP and deletion workflows.
-Everything processes in the EU — Sweden Central primary, Foundry in the EU Data Zone.
-The software supply chain is locked to Microsoft-protected feeds — public PyPI and NuGet are unreachable — every build emits an SBOM, and deployment uses GitHub OIDC, not secrets. -->
+Everything processes in the EU — Sweden Central primary, Foundry in the EU Data Zone — and deployments federate through GitHub OIDC, so even the pipeline holds no secret. -->
 
 ---
 
@@ -693,7 +695,7 @@ Be clear about what we are not claiming. We produce audit-grade management infor
 <div>
 
 **Demo sequence:**
-1. Fleet overview → Fabric core
+1. Fleet overview — Marc Weber, Plant Manager
 2. Energy dispatch optimization
 3. Furnace lining RUL alert
 4. Quality prediction & genealogy
@@ -707,8 +709,85 @@ Be clear about what we are not claiming. We produce audit-grade management infor
 > Targets are 14 / 22 / 21 / 8 — the demo proves the mechanics, not the savings.
 
 <!-- ⏱ 0:40 · Now I'll show it live. Everything is synthetic and deterministic — seed two-four-oh-seven-two-five, an accelerated clock so forty-five days compress into seconds.
-I'll move through seven tabs in the order an operating day touches them, and I'll call out target versus evidence as we go.
+I'll move through seven tabs in the order an operating day touches them, starting with Marc Weber's site command centre, and I'll call out target versus evidence as we go.
 Ten minutes, starting now. -->
+
+---
+
+# Conclusion
+
+<div class="cards four">
+<div class="card teal"><div class="card-num">01</div><h3>One governed platform</h3><p>Scattered data and tools replaced by a single EU-hosted estate</p></div>
+<div class="card purple"><div class="card-num">02</div><h3>AI that is accountable</h3><p>Python decides, GenAI explains, a human approves — every output replayable</p></div>
+<div class="card green"><div class="card-num">03</div><h3>Safe by construction</h3><p>Advisory only · outbound-only OT boundary · Zero Trust, least privilege</p></div>
+<div class="card orange"><div class="card-num">04</div><h3>A case that survives haircuts</h3><p>Payback under 12 months even on conservative assumptions</p></div>
+</div>
+
+<div class="split">
+<div>
+
+<span class="pill blue">🔬 EVIDENCE</span> The mechanics work end to end, reproducibly, on synthetic data
+
+</div>
+<div>
+
+<span class="pill orange">🎯 TARGET</span> 14 / 22 / 21 / 8 remain targets until a pilot proves them
+
+</div>
+</div>
+
+> The honesty discipline *is* the trustworthiness.
+
+<!-- ⏱ 1:10 · Let me close on four things, and one distinction.
+First, one governed platform: the scattered historians, spreadsheets and disconnected tools become a single EU-hosted estate with one definition of every KPI.
+Second, AI that is accountable: deterministic Python computes the answer, the language model only explains it, a human approves it, and every consequential output is replayable input by input.
+Third, safe by construction: advisory only, an outbound-only boundary to the plant, Zero Trust and least privilege — safety systems stay authoritative and untouched.
+Fourth, a business case that survives large haircuts: payback under twelve months even on the conservative assumptions in the appendix.
+And the distinction I have kept all morning: what you just watched is evidence that the mechanics work, reproducibly, on synthetic data. Fourteen, twenty-two, twenty-one and eight remain targets until a pilot proves them. That discipline is the trustworthiness. -->
+
+---
+
+<!-- _class: tight -->
+
+# Next Steps
+
+<div class="split">
+<div>
+
+**Immediate — next 30 days**
+
+1. **Assumption workshop** — replace our seven cost assumptions with AxelorMetal actuals
+2. **Site selection** for the Phase 1 pilot (~0.3 Mt line)
+3. **Open the governance gates**: DPIA kick-off, Legal's EU AI Act classification, accredited ETS verifier engagement
+
+**Phase 1 — one-site pilot**
+
+- Read-only integration: historian, MES, CMMS, market feed
+- Shadow scoring, fully logged, **zero operational effect**
+- Auditable **savings ledger** — the mechanism that converts a target into a banked number
+
+</div>
+<div>
+
+| Gate | Owner | Must be closed before |
+|---|---|---|
+| DPIA complete | DPO | Any operator recording |
+| AI Act classification | Legal | Production promotion |
+| OT/ICS sign-off | OT engineering | Any site connection |
+| RAI board approval | RAI board | Any model promotion |
+| Measured capacity | Platform ops | Production sizing |
+
+<span class="pill orange">🎯 DECISION ASKED TODAY</span> Approve the pilot scope and open the gates — not the full rollout
+
+</div>
+</div>
+
+<!-- ⏱ 1:05 · So what do I actually want from you?
+Not a rollout decision. In the next thirty days: a workshop where we replace our seven assumptions with your real numbers, a choice of pilot site, and the opening of three governance gates — the DPIA, Legal's AI Act classification, and an accredited ETS verifier.
+Then Phase 1 is a single site, read-only, with shadow scoring that changes nothing on the floor, and an auditable savings ledger — because that ledger is the only honest mechanism for turning a fourteen-percent target into a banked fourteen percent.
+The right-hand table is the gate list, each with a named owner, and none of them is ours to waive.
+The decision I'm asking for today is narrow: approve the pilot scope and open the gates. Thank you — I'll take your hardest questions now. -->
+
 
 ---
 
@@ -896,20 +975,6 @@ Phase 2: guarded write-back to CMMS/MES — human-approved, bounded, reversible.
 </div>
 
 <!-- ⏱ 0:00 · Backup slide. We name limitations unprompted: synthetic-only data, daily not real-time scoring, Contributor role mitigated by isolation, no automatic BCDR, no cost figure, and real accuracy needs pilot validation. This honesty discipline is the trustworthiness — a vendor who converts every synthetic result into banked savings is the one to distrust. -->
-
----
-
-<!-- _class: tight backup -->
-
-# Appendix — How a Steel Plant Works
-
-![w:840](images/steel-process-routes.webp)
-
-<div class="legend">
-<span class="pill orange">Blast furnace route</span> ore, coke and limestone → pig iron → basic oxygen furnace. <span class="pill blue">Electric arc furnace route</span> scrap and DRI melted with electricity. Both converge on ladle refining, casting, rolling and coating.
-</div>
-
-<!-- ⏱ 0:00 · Appendix slide. AxelorMetal runs both primary routes, so the platform has to speak to both. The integrated route reduces iron ore, coking coal and limestone in the blast furnace into molten pig iron, which the basic oxygen furnace then decarburises into steel. The electric arc furnace route melts scrap and direct-reduced iron with electricity instead — far less embedded carbon, far more exposure to the hourly power price, which is exactly why energy dispatch matters more on that route. From ladle refining onward the two routes share one line: continuous casting into slabs, blooms and billets, then hot and cold rolling, galvanizing and coating. Everything NovaSteel does hangs off four points on this picture — the electricity the furnace pulls, refractory wear inside the furnace, the defect risk introduced at the caster and the mill, and the tacit knowledge that walks out of the gate at shift handover. -->
 
 ---
 
