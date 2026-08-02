@@ -617,7 +617,7 @@ Every flow propagates `correlation_id`; a decision audit record links it to even
 
 ### ADR-011 — The Copilot chat explains, it does not retrieve operational values
 
-**Status:** Accepted; scoped by ADR-019 (the *chat* surface still receives no tools; a separate operations project hosts agents that do).  
+**Status:** Accepted; scoped by ADR-019 (the *chat* surface still receives no tools; a separate operations project hosts agents that do). A narrowing amendment is proposed in [copilot-fabric-data-agent.md](copilot-fabric-data-agent.md) — the chat would gain the Fabric data agent as one additional *grounding source*, still with no tools of its own.  
 **Decision:** The chat agents receive no tools. `knowledge-orchestrator` assembles the grounding material — active screen profile, matched glossary definitions, and, only when the user ticks Online search, a curated corpus of durable public-context entries with official sources. The model answers from that material and the answer carries the sources it used. Live web search is not enabled.  
 **Consequences:** The chat cannot leak a value the caller is not entitled to see, and it cannot cite a page that changed after the demo was rehearsed. It also cannot answer a genuinely novel operational question — that is the dashboard's job, and the answer says so. Extending coverage means extending the glossary and screen profiles, which are reviewable artifacts, rather than widening a model's reach.
 
