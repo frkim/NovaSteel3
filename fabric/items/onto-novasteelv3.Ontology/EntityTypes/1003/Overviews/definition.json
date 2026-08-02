@@ -1,0 +1,16 @@
+{
+  "widgets": [
+    {
+      "type": "lineChart",
+      "yAxisPropertyId": "30062",
+      "id": "1afbccdb-c671-598a-bf7f-b45baaceb437",
+      "title": "Sensor reading"
+    }
+  ],
+  "settings": {
+    "type": "fixedTime",
+    "fixedTimeRange": "Last30Days",
+    "interval": "OneDay",
+    "aggregation": "Average"
+  }
+}

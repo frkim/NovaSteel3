@@ -323,6 +323,146 @@ function Find-NsItem {
     return $null
 }
 
+function ConvertTo-NsNotebookIpynb {
+    <#
+    .SYNOPSIS
+        Converts Fabric's "notebook-content.py" source format into a Jupyter
+        .ipynb document.
+    .DESCRIPTION
+        The Fabric REST API accepts notebook definitions in two formats. The
+        "fabricGitSource" format (the .py representation) is accepted with an
+        HTTP 202 and a long-running operation that reports Succeeded, but the
+        service silently discards every cell: a subsequent getDefinition returns
+        a three-line stub and getDefinition?format=ipynb returns "cells": [].
+        The "ipynb" format round-trips faithfully, so we convert on the fly and
+        deploy notebooks as .ipynb.
+    #>
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][AllowEmptyString()][string]$Content)
+
+    $lines = ($Content -replace "`r`n", "`n") -split "`n"
+    $markerPattern = '^#\s+(CELL|MARKDOWN|METADATA)\s+\*{3,}\s*$'
+
+    $sections = [System.Collections.Generic.List[object]]::new()
+    $currentKind = 'HEADER'
+    $buffer = [System.Collections.Generic.List[string]]::new()
+
+    $flush = {
+        $sections.Add([pscustomobject]@{ Kind = $currentKind; Lines = $buffer.ToArray() })
+        $buffer.Clear()
+    }
+
+    foreach ($line in $lines) {
+        $m = [regex]::Match($line, $markerPattern)
+        if ($m.Success) {
+            & $flush
+            $currentKind = $m.Groups[1].Value
+            continue
+        }
+        $buffer.Add($line)
+    }
+    & $flush
+
+    # Trim blank padding that the .py format inserts around markers.
+    $trim = {
+        param([string[]]$Value)
+        $list = [System.Collections.Generic.List[string]]$Value
+        while ($list.Count -gt 0 -and [string]::IsNullOrWhiteSpace($list[0])) { $list.RemoveAt(0) }
+        while ($list.Count -gt 0 -and [string]::IsNullOrWhiteSpace($list[$list.Count - 1])) { $list.RemoveAt($list.Count - 1) }
+        return , $list.ToArray()
+    }
+
+    $parseMeta = {
+        param([string[]]$Value)
+        $json = ($Value |
+            Where-Object { $_ -match '^#\s?META(\s|$)' } |
+            ForEach-Object { $_ -replace '^#\s?META\s?', '' }) -join "`n"
+        if ([string]::IsNullOrWhiteSpace($json)) { return $null }
+        try { return $json | ConvertFrom-Json -Depth 20 } catch { return $null }
+    }
+
+    $notebookMeta = $null
+    $cells = [System.Collections.Generic.List[object]]::new()
+
+    foreach ($section in $sections) {
+        switch ($section.Kind) {
+            'CELL' {
+                $body = & $trim $section.Lines
+                $source = ConvertTo-NsIpynbSource -Lines $body
+                $cells.Add([ordered]@{
+                    cell_type       = 'code'
+                    source          = $source
+                    execution_count = $null
+                    outputs         = @()
+                    metadata        = [ordered]@{}
+                })
+            }
+            'MARKDOWN' {
+                $body = @(& $trim $section.Lines | ForEach-Object { $_ -replace '^#\s?', '' })
+                $source = ConvertTo-NsIpynbSource -Lines $body
+                $cells.Add([ordered]@{
+                    cell_type = 'markdown'
+                    source    = $source
+                    metadata  = [ordered]@{}
+                })
+            }
+            'METADATA' {
+                $meta = & $parseMeta $section.Lines
+                if ($null -eq $meta) { break }
+                if ($cells.Count -eq 0) {
+                    $notebookMeta = $meta
+                }
+                else {
+                    $cells[$cells.Count - 1].metadata = $meta
+                }
+            }
+        }
+    }
+
+    $kernelName = 'synapse_pyspark'
+    if ($notebookMeta -and $notebookMeta.kernel_info -and $notebookMeta.kernel_info.name) {
+        $kernelName = [string]$notebookMeta.kernel_info.name
+    }
+
+    $metadata = [ordered]@{
+        language_info = [ordered]@{ name = 'python' }
+        kernelspec    = [ordered]@{
+            name         = $kernelName
+            language     = 'Python'
+            display_name = 'Synapse PySpark'
+        }
+    }
+    if ($notebookMeta -and $notebookMeta.PSObject.Properties.Name -contains 'dependencies') {
+        $metadata['dependencies'] = $notebookMeta.dependencies
+    }
+
+    $document = [ordered]@{
+        nbformat       = 4
+        nbformat_minor = 5
+        metadata       = $metadata
+        cells          = $cells.ToArray()
+    }
+    return ($document | ConvertTo-Json -Depth 30 -Compress)
+}
+
+function ConvertTo-NsIpynbSource {
+    <#
+    .SYNOPSIS
+        Renders an array of raw lines as an .ipynb "source" array, where every
+        line except the last carries a trailing newline.
+    #>
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Lines)
+
+    if ($Lines.Count -eq 0) { return @() }
+    $out = [System.Collections.Generic.List[string]]::new()
+    for ($i = 0; $i -lt $Lines.Count; $i++) {
+        if ($i -eq $Lines.Count - 1) { $out.Add($Lines[$i]) }
+        else { $out.Add($Lines[$i] + "`n") }
+    }
+    return , $out.ToArray()
+}
+
 function ConvertTo-NsFabricDefinition {
     [CmdletBinding()]
     param(
@@ -342,15 +482,27 @@ function ConvertTo-NsFabricDefinition {
         foreach ($key in @($Replacements.Keys | Sort-Object Length -Descending)) {
             $content = $content.Replace([string]$key, [string]$Replacements[$key])
         }
+        # Fabric's fabricGitSource parser splits notebooks on literal
+        # "# CELL ********************" lines and TMDL is likewise newline
+        # sensitive. On a Windows checkout with core.autocrlf=true these files
+        # carry CRLF, the markers never match, and Fabric silently accepts the
+        # upload while storing a notebook with ZERO cells. Normalize to LF so
+        # the deployed definition does not depend on the caller's checkout.
+        $content = $content -replace "`r`n", "`n"
         $unresolved = [regex]::Matches($content, '\{\{[^{}]+\}\}') |
             ForEach-Object { $_.Value } |
             Sort-Object -Unique
         if ($unresolved) {
             throw "Unresolved definition tokens in '$fullPath': $($unresolved -join ', ')"
         }
+        $emitPath = ([string]$partPath).Replace('\', '/')
+        if ($Format -eq 'ipynb' -and $emitPath -like '*.py') {
+            $content = ConvertTo-NsNotebookIpynb -Content $content
+            $emitPath = [System.IO.Path]::ChangeExtension($emitPath, 'ipynb')
+        }
         $payload = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($content))
         $parts.Add([ordered]@{
-            path        = ([string]$partPath).Replace('\', '/')
+            path        = $emitPath
             payload     = $payload
             payloadType = 'InlineBase64'
         })
@@ -387,5 +539,7 @@ Export-ModuleMember -Function @(
     'Find-NsWorkspace',
     'Find-NsItem',
     'ConvertTo-NsFabricDefinition',
+    'ConvertTo-NsNotebookIpynb',
+    'ConvertTo-NsIpynbSource',
     'Assert-NsParameterFileHasNoSecrets'
 )

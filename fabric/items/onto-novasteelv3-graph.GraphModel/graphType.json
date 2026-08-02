@@ -1,0 +1,560 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/graphInstance/definition/graphType/1.0.0/schema.json",
+  "nodeTypes": [
+    {
+      "primaryKeyProperties": [
+        "PlantId"
+      ],
+      "alias": "1001",
+      "labels": [
+        "Plant"
+      ],
+      "properties": [
+        {
+          "name": "PlantId",
+          "type": "STRING"
+        },
+        {
+          "name": "PlantName",
+          "type": "STRING"
+        },
+        {
+          "name": "CountryCode",
+          "type": "STRING"
+        },
+        {
+          "name": "TimeZone",
+          "type": "STRING"
+        },
+        {
+          "name": "ProcessRoute",
+          "type": "STRING"
+        }
+      ]
+    },
+    {
+      "primaryKeyProperties": [
+        "AssetId"
+      ],
+      "alias": "1002",
+      "labels": [
+        "Asset"
+      ],
+      "properties": [
+        {
+          "name": "AssetId",
+          "type": "STRING"
+        },
+        {
+          "name": "AssetPlantId",
+          "type": "STRING"
+        },
+        {
+          "name": "AssetType",
+          "type": "STRING"
+        },
+        {
+          "name": "AssetArea",
+          "type": "STRING"
+        },
+        {
+          "name": "LineId",
+          "type": "STRING"
+        },
+        {
+          "name": "Criticality",
+          "type": "STRING"
+        },
+        {
+          "name": "CommissionedState",
+          "type": "STRING"
+        }
+      ]
+    },
+    {
+      "primaryKeyProperties": [
+        "SensorUid"
+      ],
+      "alias": "1003",
+      "labels": [
+        "Sensor"
+      ],
+      "properties": [
+        {
+          "name": "SensorUid",
+          "type": "STRING"
+        },
+        {
+          "name": "SensorId",
+          "type": "STRING"
+        },
+        {
+          "name": "SignalCode",
+          "type": "STRING"
+        },
+        {
+          "name": "SensorAssetId",
+          "type": "STRING"
+        },
+        {
+          "name": "SensorPlantId",
+          "type": "STRING"
+        },
+        {
+          "name": "CanonicalUnit",
+          "type": "STRING"
+        },
+        {
+          "name": "HardMin",
+          "type": "FLOAT"
+        },
+        {
+          "name": "HardMax",
+          "type": "FLOAT"
+        },
+        {
+          "name": "SamplePeriodMs",
+          "type": "INT"
+        }
+      ]
+    },
+    {
+      "primaryKeyProperties": [
+        "GradeCode"
+      ],
+      "alias": "1004",
+      "labels": [
+        "Grade"
+      ],
+      "properties": [
+        {
+          "name": "GradeCode",
+          "type": "STRING"
+        },
+        {
+          "name": "GradeFamily",
+          "type": "STRING"
+        },
+        {
+          "name": "HighGradeFlag",
+          "type": "BOOLEAN"
+        }
+      ]
+    },
+    {
+      "primaryKeyProperties": [
+        "ClassId"
+      ],
+      "alias": "1005",
+      "labels": [
+        "EquipmentClass"
+      ],
+      "properties": [
+        {
+          "name": "ClassId",
+          "type": "STRING"
+        },
+        {
+          "name": "ClassName",
+          "type": "STRING"
+        },
+        {
+          "name": "ParentClassId",
+          "type": "STRING"
+        },
+        {
+          "name": "IsAbstract",
+          "type": "BOOLEAN"
+        },
+        {
+          "name": "ClassDomain",
+          "type": "STRING"
+        },
+        {
+          "name": "ProcessStage",
+          "type": "STRING"
+        },
+        {
+          "name": "RouteScope",
+          "type": "STRING"
+        },
+        {
+          "name": "ClassDescription",
+          "type": "STRING"
+        },
+        {
+          "name": "AssetTypeMatch",
+          "type": "STRING"
+        }
+      ]
+    },
+    {
+      "primaryKeyProperties": [
+        "StepId"
+      ],
+      "alias": "1006",
+      "labels": [
+        "ProcessStep"
+      ],
+      "properties": [
+        {
+          "name": "StepId",
+          "type": "STRING"
+        },
+        {
+          "name": "StepName",
+          "type": "STRING"
+        },
+        {
+          "name": "StepStage",
+          "type": "STRING"
+        },
+        {
+          "name": "StepDescription",
+          "type": "STRING"
+        }
+      ]
+    },
+    {
+      "primaryKeyProperties": [
+        "ProductId"
+      ],
+      "alias": "1007",
+      "labels": [
+        "ProductType"
+      ],
+      "properties": [
+        {
+          "name": "ProductId",
+          "type": "STRING"
+        },
+        {
+          "name": "ProductName",
+          "type": "STRING"
+        },
+        {
+          "name": "ProductForm",
+          "type": "STRING"
+        },
+        {
+          "name": "Semifinished",
+          "type": "BOOLEAN"
+        },
+        {
+          "name": "ProductDescription",
+          "type": "STRING"
+        }
+      ]
+    },
+    {
+      "primaryKeyProperties": [
+        "SignalCodeKey"
+      ],
+      "alias": "1008",
+      "labels": [
+        "Signal"
+      ],
+      "properties": [
+        {
+          "name": "SignalCodeKey",
+          "type": "STRING"
+        },
+        {
+          "name": "SignalType",
+          "type": "STRING"
+        },
+        {
+          "name": "SignalUnit",
+          "type": "STRING"
+        },
+        {
+          "name": "SensorCount",
+          "type": "INT"
+        },
+        {
+          "name": "SignalDescription",
+          "type": "STRING"
+        }
+      ]
+    },
+    {
+      "primaryKeyProperties": [
+        "AlarmTypeId"
+      ],
+      "alias": "1009",
+      "labels": [
+        "AlarmType"
+      ],
+      "properties": [
+        {
+          "name": "AlarmTypeId",
+          "type": "STRING"
+        },
+        {
+          "name": "AlarmTypeName",
+          "type": "STRING"
+        },
+        {
+          "name": "DefaultSeverity",
+          "type": "STRING"
+        },
+        {
+          "name": "AlarmDomain",
+          "type": "STRING"
+        },
+        {
+          "name": "ObservedCount",
+          "type": "INT"
+        },
+        {
+          "name": "AlarmDescription",
+          "type": "STRING"
+        }
+      ]
+    }
+  ],
+  "edgeTypes": [
+    {
+      "sourceNodeType": {
+        "alias": "1001"
+      },
+      "alias": "2001",
+      "destinationNodeType": {
+        "alias": "1002"
+      },
+      "labels": [
+        "hasAsset"
+      ],
+      "properties": [
+        {
+          "name": "plant_id",
+          "type": "STRING"
+        },
+        {
+          "name": "asset_id",
+          "type": "STRING"
+        }
+      ]
+    },
+    {
+      "sourceNodeType": {
+        "alias": "1002"
+      },
+      "alias": "2002",
+      "destinationNodeType": {
+        "alias": "1003"
+      },
+      "labels": [
+        "hasSensor"
+      ],
+      "properties": [
+        {
+          "name": "asset_id",
+          "type": "STRING"
+        },
+        {
+          "name": "sensor_uid",
+          "type": "STRING"
+        }
+      ]
+    },
+    {
+      "sourceNodeType": {
+        "alias": "1005"
+      },
+      "alias": "2003",
+      "destinationNodeType": {
+        "alias": "1005"
+      },
+      "labels": [
+        "specializes"
+      ],
+      "properties": [
+        {
+          "name": "child_class_id",
+          "type": "STRING"
+        },
+        {
+          "name": "parent_class_id",
+          "type": "STRING"
+        }
+      ]
+    },
+    {
+      "sourceNodeType": {
+        "alias": "1005"
+      },
+      "alias": "2004",
+      "destinationNodeType": {
+        "alias": "1005"
+      },
+      "labels": [
+        "feeds"
+      ],
+      "properties": [
+        {
+          "name": "from_class_id",
+          "type": "STRING"
+        },
+        {
+          "name": "to_class_id",
+          "type": "STRING"
+        }
+      ]
+    },
+    {
+      "sourceNodeType": {
+        "alias": "1005"
+      },
+      "alias": "2005",
+      "destinationNodeType": {
+        "alias": "1006"
+      },
+      "labels": [
+        "executes"
+      ],
+      "properties": [
+        {
+          "name": "class_id",
+          "type": "STRING"
+        },
+        {
+          "name": "step_id",
+          "type": "STRING"
+        }
+      ]
+    },
+    {
+      "sourceNodeType": {
+        "alias": "1006"
+      },
+      "alias": "2006",
+      "destinationNodeType": {
+        "alias": "1007"
+      },
+      "labels": [
+        "produces"
+      ],
+      "properties": [
+        {
+          "name": "step_id",
+          "type": "STRING"
+        },
+        {
+          "name": "product_id",
+          "type": "STRING"
+        }
+      ]
+    },
+    {
+      "sourceNodeType": {
+        "alias": "1003"
+      },
+      "alias": "2007",
+      "destinationNodeType": {
+        "alias": "1008"
+      },
+      "labels": [
+        "measures"
+      ],
+      "properties": [
+        {
+          "name": "sensor_uid",
+          "type": "STRING"
+        },
+        {
+          "name": "signal_code",
+          "type": "STRING"
+        }
+      ]
+    },
+    {
+      "sourceNodeType": {
+        "alias": "1002"
+      },
+      "alias": "2008",
+      "destinationNodeType": {
+        "alias": "1005"
+      },
+      "labels": [
+        "instanceOf"
+      ],
+      "properties": [
+        {
+          "name": "asset_id",
+          "type": "STRING"
+        },
+        {
+          "name": "class_id",
+          "type": "STRING"
+        }
+      ]
+    },
+    {
+      "sourceNodeType": {
+        "alias": "1002"
+      },
+      "alias": "2009",
+      "destinationNodeType": {
+        "alias": "1002"
+      },
+      "labels": [
+        "supplies"
+      ],
+      "properties": [
+        {
+          "name": "from_asset_id",
+          "type": "STRING"
+        },
+        {
+          "name": "to_asset_id",
+          "type": "STRING"
+        }
+      ]
+    },
+    {
+      "sourceNodeType": {
+        "alias": "1009"
+      },
+      "alias": "2010",
+      "destinationNodeType": {
+        "alias": "1008"
+      },
+      "labels": [
+        "triggeredBy"
+      ],
+      "properties": [
+        {
+          "name": "alarm_type_id",
+          "type": "STRING"
+        },
+        {
+          "name": "signal_code",
+          "type": "STRING"
+        }
+      ]
+    },
+    {
+      "sourceNodeType": {
+        "alias": "1009"
+      },
+      "alias": "2011",
+      "destinationNodeType": {
+        "alias": "1005"
+      },
+      "labels": [
+        "halts"
+      ],
+      "properties": [
+        {
+          "name": "alarm_type_id",
+          "type": "STRING"
+        },
+        {
+          "name": "class_id",
+          "type": "STRING"
+        }
+      ]
+    }
+  ]
+}

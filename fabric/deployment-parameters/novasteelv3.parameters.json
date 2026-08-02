@@ -59,6 +59,22 @@
       "displayName": "v3-initialize-lakehouses",
       "id": "05a68a3a-aff4-4c1a-b2cc-833feabb2f87"
     },
+    "notebookOntologyBindings": {
+      "displayName": "v3-ontology-bindings",
+      "id": "7dc229b4-061d-4db6-bb78-e66dda7c5c03"
+    },
+    "notebookLoadReferenceData": {
+      "displayName": "v3-load-reference-data",
+      "id": "943bcd97-807e-455d-a02c-70c827e00df3"
+    },
+    "notebookSeedBronzeFromPack": {
+      "displayName": "v3-seed-bronze-from-pack",
+      "id": "86ec3acd-3dd3-4519-84ab-32eeaf0641a2"
+    },
+    "notebookLoadAnalyticalGold": {
+      "displayName": "v3-load-analytical-gold",
+      "id": "6a1bc15c-7414-4c8d-a1f0-cb3b31009bec"
+    },
     "notebookBronzeToSilver": {
       "displayName": "v3-bronze-to-silver",
       "id": "67b8d7fd-e2cb-42a7-a9a2-80dd6012af3a"
@@ -77,23 +93,27 @@
     },
     "pipelineMedallion": {
       "displayName": "pl-novasteelv3-medallion",
-      "id": "cb0e67b3-4e3d-4260-92cf-986fd4922d0e"
+      "id": "0021f29d-810d-4d6a-87f9-d111e7b187cf"
     },
     "pipelineDemoScoring": {
       "displayName": "pl-novasteelv3-demo-scoring",
-      "id": "7b98d9f4-5df2-4d4f-be73-7fa82523d468"
+      "id": "a568fc62-974a-4f63-bdb0-7bfc83dc29c2"
     },
     "semanticOperations": {
       "displayName": "sm-novasteelv3-operations",
-      "id": ""
-    },
-    "ontologyNotebook": {
-      "displayName": "v3-steel-ontology",
-      "id": ""
+      "id": "6f104805-a4c4-481f-a0ad-d624fccc7ce0"
     },
     "dataAgent": {
       "displayName": "da-novasteelv3",
-      "id": ""
+      "id": "8d05f5f4-5e31-4180-90e9-bfa84ba7127d"
+    },
+    "ontology": {
+      "displayName": "onto_novasteelv3",
+      "id": "851e6dd0-7bb1-441f-a9e8-79bb6d2bb3b1"
+    },
+    "ontologyGraphModel": {
+      "displayName": "onto_novasteelv3_graph_851e6dd07bb1441fa9e879bb6d2bb3b1",
+      "id": "6c8ece6b-7f51-4de9-bdf9-ced0b8655288"
     }
   },
   "onelake": {
@@ -111,7 +131,7 @@
     "sensitivityLabelId": "",
     "kqlQueryServiceUri": "https://trd-q10bnypm07cdfv120p.z8.kusto.fabric.microsoft.com",
     "kqlIngestionServiceUri": "https://ingest-trd-q10bnypm07cdfv120p.z8.kusto.fabric.microsoft.com",
-    "coreSqlEndpoint": ""
+    "coreSqlEndpoint": "n3vzjhk62qcu7pa32c55eqqvme-jefzypibkiketakjaydrwuuzda.datawarehouse.fabric.microsoft.com"
   },
   "deploymentOptions": {
     "createOrBindWorkspace": true,
@@ -122,6 +142,7 @@
     "deployPipelines": true,
     "deploySemanticModel": true,
     "semanticModelBindingValidated": true,
-    "deployDataAgent": true
+    "deployDataAgent": true,
+    "deployOntology": true
   }
 }

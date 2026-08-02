@@ -45,5 +45,6 @@ table fact_energy_daily
 	partition fact_energy_daily = entity
 		mode: directLake
 		source
+			expressionSource: DatabaseQuery
 			entityName: fact_energy_daily
 			schemaName: dbo

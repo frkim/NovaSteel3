@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Notebook",
+    "displayName": "v3-seed-bronze-from-pack",
+    "description": "Expand the committed operational envelope pack into landing.bronze_event_envelope and load the BFF-facing operational envelope Delta tables in core. Idempotent MERGE on event_id; manifest is overwritten."
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "63000000-0000-4630-8630-000000000014"
+  }
+}

@@ -10,7 +10,7 @@ param(
     [string]$CoreTablesUri    = '',
     [string[]]$NotebookDisplayName = @(
         'v3-initialize-lakehouses',
-        'v3-steel-ontology',
+        'v3-load-reference-data',
         'v3-bronze-to-silver',
         'v3-silver-to-gold',
         'v3-deterministic-demo-scoring',

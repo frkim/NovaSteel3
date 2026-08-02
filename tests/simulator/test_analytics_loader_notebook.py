@@ -67,8 +67,14 @@ class LoaderNotebookConformanceTests(unittest.TestCase):
                               msg=f"{table}: idempotency key {key} not in loader casts")
 
     def test_environment_is_guarded(self):
-        # Demo-data load must be hard-disabled outside dev/test/demo.
-        self.assertIn('ENVIRONMENT not in {"dev", "test", "demo"}', self.source)
+        # Demo-data load must be hard-disabled outside dev/test/demo. Deployed
+        # environment names are qualified (e.g. "novasteelv3-demo"), so the guard
+        # accepts the bare token or a "-<token>" suffix and rejects anything else.
+        self.assertIn('_ENV_ALLOWED_SUFFIXES = ("dev", "test", "demo")', self.source)
+        self.assertIn(
+            'if not any(_env_normalized == t or _env_normalized.endswith("-" + t)',
+            self.source,
+        )
 
 
 if __name__ == "__main__":

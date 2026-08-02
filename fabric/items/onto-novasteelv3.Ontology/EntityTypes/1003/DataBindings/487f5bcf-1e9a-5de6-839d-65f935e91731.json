@@ -1,0 +1,35 @@
+{
+  "id": "487f5bcf-1e9a-5de6-839d-65f935e91731",
+  "dataBindingConfiguration": {
+    "dataBindingType": "TimeSeries",
+    "timestampColumnName": "reading_ts",
+    "propertyBindings": [
+      {
+        "sourceColumnName": "sensor_uid",
+        "targetPropertyId": "30051"
+      },
+      {
+        "sourceColumnName": "reading_ts",
+        "targetPropertyId": "30061"
+      },
+      {
+        "sourceColumnName": "reading_value",
+        "targetPropertyId": "30062"
+      },
+      {
+        "sourceColumnName": "reading_unit",
+        "targetPropertyId": "30063"
+      },
+      {
+        "sourceColumnName": "source_quality",
+        "targetPropertyId": "30064"
+      }
+    ],
+    "sourceTableProperties": {
+      "sourceType": "LakehouseTable",
+      "workspaceId": "3d9c0b49-5201-4914-8149-06071b529918",
+      "itemId": "623b4455-5c28-4235-8138-883d69a5810d",
+      "sourceTableName": "onto_sensor_reading"
+    }
+  }
+}

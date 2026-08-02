@@ -1,0 +1,12 @@
+{
+  "namespace": "usertypes",
+  "id": "2010",
+  "name": "triggeredBy",
+  "namespaceType": "Custom",
+  "source": {
+    "entityTypeId": "1009"
+  },
+  "target": {
+    "entityTypeId": "1008"
+  }
+}

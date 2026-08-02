@@ -1,4 +1,4 @@
-table fact_ai_decision_audit
+﻿table fact_ai_decision_audit
 	column audit_id
 		dataType: string
 		isKey
@@ -34,5 +34,6 @@ table fact_ai_decision_audit
 	partition fact_ai_decision_audit = entity
 		mode: directLake
 		source
+			expressionSource: DatabaseQuery
 			entityName: fact_ai_decision_audit
 			schemaName: dbo

@@ -1,0 +1,36 @@
+{
+  "id": "1004",
+  "namespace": "usertypes",
+  "baseEntityTypeId": null,
+  "name": "Grade",
+  "entityIdParts": [
+    "30071"
+  ],
+  "displayNamePropertyId": "30071",
+  "namespaceType": "Custom",
+  "visibility": "Visible",
+  "properties": [
+    {
+      "id": "30071",
+      "name": "GradeCode",
+      "redefines": null,
+      "baseTypeNamespaceType": null,
+      "valueType": "String"
+    },
+    {
+      "id": "30072",
+      "name": "GradeFamily",
+      "redefines": null,
+      "baseTypeNamespaceType": null,
+      "valueType": "String"
+    },
+    {
+      "id": "30073",
+      "name": "HighGradeFlag",
+      "redefines": null,
+      "baseTypeNamespaceType": null,
+      "valueType": "Boolean"
+    }
+  ],
+  "timeseriesProperties": []
+}

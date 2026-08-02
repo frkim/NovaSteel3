@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Ontology",
+    "displayName": "onto_novasteelv3",
+    "description": "NovaSteel V3 enterprise vocabulary: plants, assets, sensors and grades, classified against a steelmaking knowledge model of equipment classes, process steps, products, signals and alarm types."
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "00000000-0000-0000-0000-000000000016"
+  }
+}

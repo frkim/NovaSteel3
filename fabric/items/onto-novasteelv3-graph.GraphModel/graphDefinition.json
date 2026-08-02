@@ -1,0 +1,524 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/graphInstance/definition/graphDefinition/1.0.0/schema.json",
+  "nodeTables": [
+    {
+      "nodeTypeAlias": "1001",
+      "id": "e7cbe150-a991-5f67-b903-ecc648134115",
+      "dataSourceName": "623b4455-5c28-4235-8138-883d69a5810d_onto_plant",
+      "propertyMappings": [
+        {
+          "propertyName": "PlantId",
+          "sourceColumn": "plant_id"
+        },
+        {
+          "propertyName": "PlantName",
+          "sourceColumn": "plant_name"
+        },
+        {
+          "propertyName": "CountryCode",
+          "sourceColumn": "country_code"
+        },
+        {
+          "propertyName": "TimeZone",
+          "sourceColumn": "time_zone"
+        },
+        {
+          "propertyName": "ProcessRoute",
+          "sourceColumn": "route"
+        }
+      ]
+    },
+    {
+      "nodeTypeAlias": "1002",
+      "id": "1910720e-6bcf-59ac-b8c2-bae4b88542dc",
+      "dataSourceName": "623b4455-5c28-4235-8138-883d69a5810d_onto_asset",
+      "propertyMappings": [
+        {
+          "propertyName": "AssetId",
+          "sourceColumn": "asset_id"
+        },
+        {
+          "propertyName": "AssetPlantId",
+          "sourceColumn": "plant_id"
+        },
+        {
+          "propertyName": "AssetType",
+          "sourceColumn": "asset_type"
+        },
+        {
+          "propertyName": "AssetArea",
+          "sourceColumn": "area"
+        },
+        {
+          "propertyName": "LineId",
+          "sourceColumn": "line_id"
+        },
+        {
+          "propertyName": "Criticality",
+          "sourceColumn": "criticality"
+        },
+        {
+          "propertyName": "CommissionedState",
+          "sourceColumn": "commissioned_state"
+        }
+      ]
+    },
+    {
+      "nodeTypeAlias": "1003",
+      "id": "6e31e435-6139-57df-b3e4-51fb20268c94",
+      "dataSourceName": "623b4455-5c28-4235-8138-883d69a5810d_onto_sensor",
+      "propertyMappings": [
+        {
+          "propertyName": "SensorUid",
+          "sourceColumn": "sensor_uid"
+        },
+        {
+          "propertyName": "SensorId",
+          "sourceColumn": "sensor_id"
+        },
+        {
+          "propertyName": "SignalCode",
+          "sourceColumn": "signal_code"
+        },
+        {
+          "propertyName": "SensorAssetId",
+          "sourceColumn": "asset_id"
+        },
+        {
+          "propertyName": "SensorPlantId",
+          "sourceColumn": "plant_id"
+        },
+        {
+          "propertyName": "CanonicalUnit",
+          "sourceColumn": "canonical_unit"
+        },
+        {
+          "propertyName": "HardMin",
+          "sourceColumn": "hard_min"
+        },
+        {
+          "propertyName": "HardMax",
+          "sourceColumn": "hard_max"
+        },
+        {
+          "propertyName": "SamplePeriodMs",
+          "sourceColumn": "sample_period_ms"
+        }
+      ]
+    },
+    {
+      "nodeTypeAlias": "1004",
+      "id": "db66103f-442d-5dc1-8a18-d117ffdf12ad",
+      "dataSourceName": "623b4455-5c28-4235-8138-883d69a5810d_onto_grade",
+      "propertyMappings": [
+        {
+          "propertyName": "GradeCode",
+          "sourceColumn": "grade_code"
+        },
+        {
+          "propertyName": "GradeFamily",
+          "sourceColumn": "grade_family"
+        },
+        {
+          "propertyName": "HighGradeFlag",
+          "sourceColumn": "high_grade_flag"
+        }
+      ]
+    },
+    {
+      "nodeTypeAlias": "1005",
+      "id": "9d47da7b-bf86-571d-aa1d-3e4444ca6c73",
+      "dataSourceName": "623b4455-5c28-4235-8138-883d69a5810d_onto_equipment_class",
+      "propertyMappings": [
+        {
+          "propertyName": "ClassId",
+          "sourceColumn": "class_id"
+        },
+        {
+          "propertyName": "ClassName",
+          "sourceColumn": "class_name"
+        },
+        {
+          "propertyName": "ParentClassId",
+          "sourceColumn": "parent_class_id"
+        },
+        {
+          "propertyName": "IsAbstract",
+          "sourceColumn": "is_abstract"
+        },
+        {
+          "propertyName": "ClassDomain",
+          "sourceColumn": "domain"
+        },
+        {
+          "propertyName": "ProcessStage",
+          "sourceColumn": "process_stage"
+        },
+        {
+          "propertyName": "RouteScope",
+          "sourceColumn": "route_scope"
+        },
+        {
+          "propertyName": "ClassDescription",
+          "sourceColumn": "class_description"
+        },
+        {
+          "propertyName": "AssetTypeMatch",
+          "sourceColumn": "asset_type_match"
+        }
+      ]
+    },
+    {
+      "nodeTypeAlias": "1006",
+      "id": "80699ee8-5bb9-5c39-bb58-4123b8985e30",
+      "dataSourceName": "623b4455-5c28-4235-8138-883d69a5810d_onto_process_step",
+      "propertyMappings": [
+        {
+          "propertyName": "StepId",
+          "sourceColumn": "step_id"
+        },
+        {
+          "propertyName": "StepName",
+          "sourceColumn": "step_name"
+        },
+        {
+          "propertyName": "StepStage",
+          "sourceColumn": "stage"
+        },
+        {
+          "propertyName": "StepDescription",
+          "sourceColumn": "step_description"
+        }
+      ]
+    },
+    {
+      "nodeTypeAlias": "1007",
+      "id": "cf381874-7f5d-5a2e-903e-936dad9e088e",
+      "dataSourceName": "623b4455-5c28-4235-8138-883d69a5810d_onto_product",
+      "propertyMappings": [
+        {
+          "propertyName": "ProductId",
+          "sourceColumn": "product_id"
+        },
+        {
+          "propertyName": "ProductName",
+          "sourceColumn": "product_name"
+        },
+        {
+          "propertyName": "ProductForm",
+          "sourceColumn": "product_form"
+        },
+        {
+          "propertyName": "Semifinished",
+          "sourceColumn": "semifinished"
+        },
+        {
+          "propertyName": "ProductDescription",
+          "sourceColumn": "product_description"
+        }
+      ]
+    },
+    {
+      "nodeTypeAlias": "1008",
+      "id": "649553dd-e8f6-5ad8-8a5f-6655746da5b8",
+      "dataSourceName": "623b4455-5c28-4235-8138-883d69a5810d_onto_signal",
+      "propertyMappings": [
+        {
+          "propertyName": "SignalCodeKey",
+          "sourceColumn": "signal_code"
+        },
+        {
+          "propertyName": "SignalType",
+          "sourceColumn": "signal_type"
+        },
+        {
+          "propertyName": "SignalUnit",
+          "sourceColumn": "canonical_unit"
+        },
+        {
+          "propertyName": "SensorCount",
+          "sourceColumn": "sensor_count"
+        },
+        {
+          "propertyName": "SignalDescription",
+          "sourceColumn": "signal_description"
+        }
+      ]
+    },
+    {
+      "nodeTypeAlias": "1009",
+      "id": "193de5c0-b1af-512a-a384-396a9124ccd1",
+      "dataSourceName": "623b4455-5c28-4235-8138-883d69a5810d_onto_alarm_type",
+      "propertyMappings": [
+        {
+          "propertyName": "AlarmTypeId",
+          "sourceColumn": "alarm_type_id"
+        },
+        {
+          "propertyName": "AlarmTypeName",
+          "sourceColumn": "alarm_type_name"
+        },
+        {
+          "propertyName": "DefaultSeverity",
+          "sourceColumn": "default_severity"
+        },
+        {
+          "propertyName": "AlarmDomain",
+          "sourceColumn": "domain"
+        },
+        {
+          "propertyName": "ObservedCount",
+          "sourceColumn": "observed_count"
+        },
+        {
+          "propertyName": "AlarmDescription",
+          "sourceColumn": "alarm_description"
+        }
+      ]
+    }
+  ],
+  "edgeTables": [
+    {
+      "edgeTypeAlias": "2001",
+      "id": "036cd0bf-f7db-536a-ba50-a0a18ea92b95",
+      "edgeIdMapping": null,
+      "dataSourceName": "623b4455-5c28-4235-8138-883d69a5810d_onto_rel_plant_asset",
+      "sourceNodeKeyColumns": [
+        "plant_id"
+      ],
+      "propertyMappings": [
+        {
+          "propertyName": "plant_id",
+          "sourceColumn": "plant_id"
+        },
+        {
+          "propertyName": "asset_id",
+          "sourceColumn": "asset_id"
+        }
+      ],
+      "destinationNodeKeyColumns": [
+        "asset_id"
+      ]
+    },
+    {
+      "edgeTypeAlias": "2002",
+      "id": "7c79f782-5849-5732-b8a0-f1e1221b3430",
+      "edgeIdMapping": null,
+      "dataSourceName": "623b4455-5c28-4235-8138-883d69a5810d_onto_rel_asset_sensor",
+      "sourceNodeKeyColumns": [
+        "asset_id"
+      ],
+      "propertyMappings": [
+        {
+          "propertyName": "asset_id",
+          "sourceColumn": "asset_id"
+        },
+        {
+          "propertyName": "sensor_uid",
+          "sourceColumn": "sensor_uid"
+        }
+      ],
+      "destinationNodeKeyColumns": [
+        "sensor_uid"
+      ]
+    },
+    {
+      "edgeTypeAlias": "2003",
+      "id": "6d030734-27ff-5f96-a1f0-e33600db6488",
+      "edgeIdMapping": null,
+      "dataSourceName": "623b4455-5c28-4235-8138-883d69a5810d_onto_rel_class_specializes",
+      "sourceNodeKeyColumns": [
+        "child_class_id"
+      ],
+      "propertyMappings": [
+        {
+          "propertyName": "child_class_id",
+          "sourceColumn": "child_class_id"
+        },
+        {
+          "propertyName": "parent_class_id",
+          "sourceColumn": "parent_class_id"
+        }
+      ],
+      "destinationNodeKeyColumns": [
+        "parent_class_id"
+      ]
+    },
+    {
+      "edgeTypeAlias": "2004",
+      "id": "f52c011e-cce1-50f1-8e65-d4b1651d5169",
+      "edgeIdMapping": null,
+      "dataSourceName": "623b4455-5c28-4235-8138-883d69a5810d_onto_rel_class_feeds",
+      "sourceNodeKeyColumns": [
+        "from_class_id"
+      ],
+      "propertyMappings": [
+        {
+          "propertyName": "from_class_id",
+          "sourceColumn": "from_class_id"
+        },
+        {
+          "propertyName": "to_class_id",
+          "sourceColumn": "to_class_id"
+        }
+      ],
+      "destinationNodeKeyColumns": [
+        "to_class_id"
+      ]
+    },
+    {
+      "edgeTypeAlias": "2005",
+      "id": "b301056c-c76e-55de-94bf-3fce6514e0b7",
+      "edgeIdMapping": null,
+      "dataSourceName": "623b4455-5c28-4235-8138-883d69a5810d_onto_rel_class_executes",
+      "sourceNodeKeyColumns": [
+        "class_id"
+      ],
+      "propertyMappings": [
+        {
+          "propertyName": "class_id",
+          "sourceColumn": "class_id"
+        },
+        {
+          "propertyName": "step_id",
+          "sourceColumn": "step_id"
+        }
+      ],
+      "destinationNodeKeyColumns": [
+        "step_id"
+      ]
+    },
+    {
+      "edgeTypeAlias": "2006",
+      "id": "1c7f54db-2a29-5e34-be81-626c0bb85fda",
+      "edgeIdMapping": null,
+      "dataSourceName": "623b4455-5c28-4235-8138-883d69a5810d_onto_rel_step_produces",
+      "sourceNodeKeyColumns": [
+        "step_id"
+      ],
+      "propertyMappings": [
+        {
+          "propertyName": "step_id",
+          "sourceColumn": "step_id"
+        },
+        {
+          "propertyName": "product_id",
+          "sourceColumn": "product_id"
+        }
+      ],
+      "destinationNodeKeyColumns": [
+        "product_id"
+      ]
+    },
+    {
+      "edgeTypeAlias": "2007",
+      "id": "3216b12f-da33-585f-bffc-a98ce3e84e7e",
+      "edgeIdMapping": null,
+      "dataSourceName": "623b4455-5c28-4235-8138-883d69a5810d_onto_rel_sensor_measures",
+      "sourceNodeKeyColumns": [
+        "sensor_uid"
+      ],
+      "propertyMappings": [
+        {
+          "propertyName": "sensor_uid",
+          "sourceColumn": "sensor_uid"
+        },
+        {
+          "propertyName": "signal_code",
+          "sourceColumn": "signal_code"
+        }
+      ],
+      "destinationNodeKeyColumns": [
+        "signal_code"
+      ]
+    },
+    {
+      "edgeTypeAlias": "2008",
+      "id": "65e1fc70-1d75-598f-81ca-13a4ff548f80",
+      "edgeIdMapping": null,
+      "dataSourceName": "623b4455-5c28-4235-8138-883d69a5810d_onto_rel_asset_class",
+      "sourceNodeKeyColumns": [
+        "asset_id"
+      ],
+      "propertyMappings": [
+        {
+          "propertyName": "asset_id",
+          "sourceColumn": "asset_id"
+        },
+        {
+          "propertyName": "class_id",
+          "sourceColumn": "class_id"
+        }
+      ],
+      "destinationNodeKeyColumns": [
+        "class_id"
+      ]
+    },
+    {
+      "edgeTypeAlias": "2009",
+      "id": "dc0dff7c-f6ef-55b4-a633-719b14142eee",
+      "edgeIdMapping": null,
+      "dataSourceName": "623b4455-5c28-4235-8138-883d69a5810d_onto_rel_asset_supplies",
+      "sourceNodeKeyColumns": [
+        "from_asset_id"
+      ],
+      "propertyMappings": [
+        {
+          "propertyName": "from_asset_id",
+          "sourceColumn": "from_asset_id"
+        },
+        {
+          "propertyName": "to_asset_id",
+          "sourceColumn": "to_asset_id"
+        }
+      ],
+      "destinationNodeKeyColumns": [
+        "to_asset_id"
+      ]
+    },
+    {
+      "edgeTypeAlias": "2010",
+      "id": "6ef7777e-ff0a-5edd-97bd-14b8ef97db71",
+      "edgeIdMapping": null,
+      "dataSourceName": "623b4455-5c28-4235-8138-883d69a5810d_onto_rel_alarm_signal",
+      "sourceNodeKeyColumns": [
+        "alarm_type_id"
+      ],
+      "propertyMappings": [
+        {
+          "propertyName": "alarm_type_id",
+          "sourceColumn": "alarm_type_id"
+        },
+        {
+          "propertyName": "signal_code",
+          "sourceColumn": "signal_code"
+        }
+      ],
+      "destinationNodeKeyColumns": [
+        "signal_code"
+      ]
+    },
+    {
+      "edgeTypeAlias": "2011",
+      "id": "42e0bd53-3277-5003-929b-8e667ea5c232",
+      "edgeIdMapping": null,
+      "dataSourceName": "623b4455-5c28-4235-8138-883d69a5810d_onto_rel_alarm_class",
+      "sourceNodeKeyColumns": [
+        "alarm_type_id"
+      ],
+      "propertyMappings": [
+        {
+          "propertyName": "alarm_type_id",
+          "sourceColumn": "alarm_type_id"
+        },
+        {
+          "propertyName": "class_id",
+          "sourceColumn": "class_id"
+        }
+      ],
+      "destinationNodeKeyColumns": [
+        "class_id"
+      ]
+    }
+  ]
+}

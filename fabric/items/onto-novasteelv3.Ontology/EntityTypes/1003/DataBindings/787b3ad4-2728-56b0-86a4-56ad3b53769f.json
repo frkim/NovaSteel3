@@ -1,0 +1,50 @@
+{
+  "id": "787b3ad4-2728-56b0-86a4-56ad3b53769f",
+  "dataBindingConfiguration": {
+    "dataBindingType": "NonTimeSeries",
+    "propertyBindings": [
+      {
+        "sourceColumnName": "sensor_uid",
+        "targetPropertyId": "30051"
+      },
+      {
+        "sourceColumnName": "sensor_id",
+        "targetPropertyId": "30052"
+      },
+      {
+        "sourceColumnName": "signal_code",
+        "targetPropertyId": "30053"
+      },
+      {
+        "sourceColumnName": "asset_id",
+        "targetPropertyId": "30054"
+      },
+      {
+        "sourceColumnName": "plant_id",
+        "targetPropertyId": "30055"
+      },
+      {
+        "sourceColumnName": "canonical_unit",
+        "targetPropertyId": "30056"
+      },
+      {
+        "sourceColumnName": "hard_min",
+        "targetPropertyId": "30057"
+      },
+      {
+        "sourceColumnName": "hard_max",
+        "targetPropertyId": "30058"
+      },
+      {
+        "sourceColumnName": "sample_period_ms",
+        "targetPropertyId": "30059"
+      }
+    ],
+    "sourceTableProperties": {
+      "sourceType": "LakehouseTable",
+      "workspaceId": "3d9c0b49-5201-4914-8149-06071b529918",
+      "itemId": "623b4455-5c28-4235-8138-883d69a5810d",
+      "sourceTableName": "onto_sensor"
+    }
+  }
+}

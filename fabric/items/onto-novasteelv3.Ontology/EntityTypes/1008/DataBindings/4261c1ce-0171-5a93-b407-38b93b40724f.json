@@ -1,0 +1,34 @@
+{
+  "id": "4261c1ce-0171-5a93-b407-38b93b40724f",
+  "dataBindingConfiguration": {
+    "dataBindingType": "NonTimeSeries",
+    "propertyBindings": [
+      {
+        "sourceColumnName": "signal_code",
+        "targetPropertyId": "30111"
+      },
+      {
+        "sourceColumnName": "signal_type",
+        "targetPropertyId": "30112"
+      },
+      {
+        "sourceColumnName": "canonical_unit",
+        "targetPropertyId": "30113"
+      },
+      {
+        "sourceColumnName": "sensor_count",
+        "targetPropertyId": "30114"
+      },
+      {
+        "sourceColumnName": "signal_description",
+        "targetPropertyId": "30115"
+      }
+    ],
+    "sourceTableProperties": {
+      "sourceType": "LakehouseTable",
+      "workspaceId": "3d9c0b49-5201-4914-8149-06071b529918",
+      "itemId": "623b4455-5c28-4235-8138-883d69a5810d",
+      "sourceTableName": "onto_signal"
+    }
+  }
+}

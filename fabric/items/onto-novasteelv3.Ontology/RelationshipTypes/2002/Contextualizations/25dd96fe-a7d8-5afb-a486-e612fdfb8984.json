@@ -1,0 +1,21 @@
+{
+  "id": "25dd96fe-a7d8-5afb-a486-e612fdfb8984",
+  "dataBindingTable": {
+    "sourceType": "LakehouseTable",
+    "workspaceId": "3d9c0b49-5201-4914-8149-06071b529918",
+    "itemId": "623b4455-5c28-4235-8138-883d69a5810d",
+    "sourceTableName": "onto_rel_asset_sensor"
+  },
+  "sourceKeyRefBindings": [
+    {
+      "sourceColumnName": "asset_id",
+      "targetPropertyId": "30031"
+    }
+  ],
+  "targetKeyRefBindings": [
+    {
+      "sourceColumnName": "sensor_uid",
+      "targetPropertyId": "30051"
+    }
+  ]
+}

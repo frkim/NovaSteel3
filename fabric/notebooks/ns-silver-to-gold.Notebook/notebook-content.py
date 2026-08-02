@@ -21,6 +21,37 @@ RUN_ID = ""
 CORE_TABLES_URI = "{{onelake.coreTablesUri}}"
 CALCULATION_VERSION = "novasteel-gold/1.0.0"
 
+# Ownership boundary between the two authorities that write the gold facts.
+#
+# The 24-month analytical programme (simulator/analytics.py, loaded by
+# v3-load-analytical-gold) is gold-grain BY CONTRACT -- see contracts/data/
+# gold.v2.json: it "emits gold facts directly from the scenario and runs NO
+# SCD2 dimension load". There is no event-level source for it, so it cannot be
+# replayed through bronze/silver. It is therefore the sole authority for every
+# date up to and including its scenario end_date.
+#
+# This medallion is the authority for everything AFTER that date. Without the
+# boundary both paths MERGE the same natural keys and the last writer wins,
+# which silently replaces programme rows with rows derived from a partial event
+# window -- e.g. a single day's fact_energy_daily landing at ~0.5 GJ/t against
+# ~5.0 GJ/t for its neighbours.
+#
+# Must match simulator/manifests/analytical/analytical-programme-24m.json::end_date.
+PROGRAMME_END_DATE = "2026-07-29"
+
+# The date column that decides which side of the boundary a gold row falls on.
+BOUNDARY_DATE_COLUMN = {
+    "fact_production_shift": "shift_date",
+    "fact_energy_daily": "date_key",
+    "fact_emissions_daily": "date_key",
+    "fact_quality_yield": "date_key",
+    "fact_furnace_rul": "scored_date",
+    "fact_ai_decision_audit": "recorded_date",
+    "fact_dispatch_recommendation": "recommendation_date",
+}
+
+skipped = {}
+
 
 def require_resolved(name: str, value: str) -> None:
     if not value or value.startswith("{{"):
@@ -39,7 +70,20 @@ def read(table_name: str) -> DataFrame:
     return spark.read.format("delta").load(path(table_name))
 
 
+def enforce_ownership(frame: DataFrame, table_name: str) -> DataFrame:
+    """Drop rows the analytical programme owns, so the two paths never collide."""
+    column = BOUNDARY_DATE_COLUMN.get(table_name)
+    if not PROGRAMME_END_DATE or column is None or column not in frame.columns:
+        skipped[table_name] = 0
+        return frame
+    boundary = F.to_date(F.lit(PROGRAMME_END_DATE))
+    owned = frame.where(F.to_date(F.col(column)) > boundary)
+    skipped[table_name] = frame.count() - owned.count()
+    return owned
+
+
 def upsert(frame: DataFrame, table_name: str, keys) -> int:
+    frame = enforce_ownership(frame, table_name)
     if frame.rdd.isEmpty():
         return 0
     source = frame.dropDuplicates(list(keys))
@@ -388,7 +432,9 @@ print(
         "run_id": RUN_ID,
         "environment": ENVIRONMENT,
         "calculation_version": CALCULATION_VERSION,
+        "programme_end_date": PROGRAMME_END_DATE,
         "written": written,
+        "skipped_owned_by_programme": skipped,
         "recorded_at": datetime.now(timezone.utc).isoformat(),
     }
 )

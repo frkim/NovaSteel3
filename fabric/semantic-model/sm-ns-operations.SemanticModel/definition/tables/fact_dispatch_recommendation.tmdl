@@ -1,4 +1,4 @@
-table fact_dispatch_recommendation
+﻿table fact_dispatch_recommendation
 	column recommendation_id
 		dataType: string
 		isKey
@@ -46,5 +46,6 @@ table fact_dispatch_recommendation
 	partition fact_dispatch_recommendation = entity
 		mode: directLake
 		source
+			expressionSource: DatabaseQuery
 			entityName: fact_dispatch_recommendation
 			schemaName: dbo

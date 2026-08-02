@@ -1,0 +1,21 @@
+{
+  "id": "417d64c5-1953-5545-b5a7-24df2082d086",
+  "dataBindingTable": {
+    "sourceType": "LakehouseTable",
+    "workspaceId": "3d9c0b49-5201-4914-8149-06071b529918",
+    "itemId": "623b4455-5c28-4235-8138-883d69a5810d",
+    "sourceTableName": "onto_rel_class_specializes"
+  },
+  "sourceKeyRefBindings": [
+    {
+      "sourceColumnName": "child_class_id",
+      "targetPropertyId": "30081"
+    }
+  ],
+  "targetKeyRefBindings": [
+    {
+      "sourceColumnName": "parent_class_id",
+      "targetPropertyId": "30081"
+    }
+  ]
+}

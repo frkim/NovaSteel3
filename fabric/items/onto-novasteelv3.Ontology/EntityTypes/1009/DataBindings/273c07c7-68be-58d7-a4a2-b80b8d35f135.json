@@ -1,0 +1,38 @@
+{
+  "id": "273c07c7-68be-58d7-a4a2-b80b8d35f135",
+  "dataBindingConfiguration": {
+    "dataBindingType": "NonTimeSeries",
+    "propertyBindings": [
+      {
+        "sourceColumnName": "alarm_type_id",
+        "targetPropertyId": "30121"
+      },
+      {
+        "sourceColumnName": "alarm_type_name",
+        "targetPropertyId": "30122"
+      },
+      {
+        "sourceColumnName": "default_severity",
+        "targetPropertyId": "30123"
+      },
+      {
+        "sourceColumnName": "domain",
+        "targetPropertyId": "30124"
+      },
+      {
+        "sourceColumnName": "observed_count",
+        "targetPropertyId": "30125"
+      },
+      {
+        "sourceColumnName": "alarm_description",
+        "targetPropertyId": "30126"
+      }
+    ],
+    "sourceTableProperties": {
+      "sourceType": "LakehouseTable",
+      "workspaceId": "3d9c0b49-5201-4914-8149-06071b529918",
+      "itemId": "623b4455-5c28-4235-8138-883d69a5810d",
+      "sourceTableName": "onto_alarm_type"
+    }
+  }
+}

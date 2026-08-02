@@ -24,5 +24,6 @@ table dim_calendar
 	partition dim_calendar = entity
 		mode: directLake
 		source
+			expressionSource: DatabaseQuery
 			entityName: dim_calendar
 			schemaName: dbo

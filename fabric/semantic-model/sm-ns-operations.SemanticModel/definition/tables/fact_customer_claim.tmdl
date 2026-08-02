@@ -1,4 +1,4 @@
-table fact_customer_claim
+﻿table fact_customer_claim
 	column claim_date
 		dataType: dateTime
 		formatString: yyyy-MM-dd
@@ -23,5 +23,6 @@ table fact_customer_claim
 	partition fact_customer_claim = entity
 		mode: directLake
 		source
+			expressionSource: DatabaseQuery
 			entityName: fact_customer_claim
 			schemaName: dbo

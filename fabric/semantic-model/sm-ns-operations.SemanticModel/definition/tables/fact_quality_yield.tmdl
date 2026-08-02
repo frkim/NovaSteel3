@@ -1,4 +1,4 @@
-table fact_quality_yield
+﻿table fact_quality_yield
 	column date_key
 		dataType: dateTime
 		formatString: yyyy-MM-dd
@@ -48,5 +48,6 @@ table fact_quality_yield
 	partition fact_quality_yield = entity
 		mode: directLake
 		source
+			expressionSource: DatabaseQuery
 			entityName: fact_quality_yield
 			schemaName: dbo

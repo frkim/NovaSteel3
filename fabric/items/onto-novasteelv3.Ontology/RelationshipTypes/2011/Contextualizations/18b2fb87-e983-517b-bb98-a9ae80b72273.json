@@ -1,0 +1,21 @@
+{
+  "id": "18b2fb87-e983-517b-bb98-a9ae80b72273",
+  "dataBindingTable": {
+    "sourceType": "LakehouseTable",
+    "workspaceId": "3d9c0b49-5201-4914-8149-06071b529918",
+    "itemId": "623b4455-5c28-4235-8138-883d69a5810d",
+    "sourceTableName": "onto_rel_alarm_class"
+  },
+  "sourceKeyRefBindings": [
+    {
+      "sourceColumnName": "alarm_type_id",
+      "targetPropertyId": "30121"
+    }
+  ],
+  "targetKeyRefBindings": [
+    {
+      "sourceColumnName": "class_id",
+      "targetPropertyId": "30081"
+    }
+  ]
+}

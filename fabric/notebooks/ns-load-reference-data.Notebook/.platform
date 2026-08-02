@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Notebook",
+    "displayName": "v3-load-reference-data",
+    "description": "Idempotently load the simulator-owned reference dimensions (dim_plant, dim_asset, dim_sensor, dim_grade, dim_calendar) from OneLake Files into lh_novasteelv3_core. Bronze-to-silver quarantines every event as UNKNOWN_ASSET until these are populated."
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "63000000-0000-4630-8630-000000000013"
+  }
+}

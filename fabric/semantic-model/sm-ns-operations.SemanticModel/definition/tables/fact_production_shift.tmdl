@@ -53,5 +53,6 @@ table fact_production_shift
 	partition fact_production_shift = entity
 		mode: directLake
 		source
+			expressionSource: DatabaseQuery
 			entityName: fact_production_shift
 			schemaName: dbo

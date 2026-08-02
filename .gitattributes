@@ -6,3 +6,11 @@ services/bff-api/fixtures/** text eol=lf
 
 # NDJSON is a line-delimited wire format; keep it LF everywhere.
 *.ndjson text eol=lf
+
+# Fabric item definitions are uploaded verbatim to the Fabric REST API. The
+# fabricGitSource notebook parser splits on literal "# CELL ****" lines and
+# TMDL is newline sensitive, so a CRLF checkout makes Fabric store a notebook
+# with zero cells while still reporting a successful deployment. Pin to LF.
+fabric/notebooks/**/notebook-content.py text eol=lf
+fabric/**/*.tmdl text eol=lf
+fabric/**/.platform text eol=lf

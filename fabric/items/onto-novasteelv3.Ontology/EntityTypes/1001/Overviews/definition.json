@@ -1,0 +1,16 @@
+{
+  "widgets": [
+    {
+      "type": "lineChart",
+      "yAxisPropertyId": "30022",
+      "id": "3d4318e4-7f95-523c-a98e-f215ab9796d6",
+      "title": "Daily energy (GJ)"
+    }
+  ],
+  "settings": {
+    "type": "fixedTime",
+    "fixedTimeRange": "Last30Days",
+    "interval": "OneDay",
+    "aggregation": "Average"
+  }
+}

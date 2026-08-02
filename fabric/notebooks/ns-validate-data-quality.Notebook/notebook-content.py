@@ -19,6 +19,18 @@ RUN_ID = ""
 LANDING_TABLES_URI = "{{onelake.landingTablesUri}}"
 CORE_TABLES_URI = "{{onelake.coreTablesUri}}"
 
+# Ownership boundary between the analytical programme and this medallion.
+# Must match ns-silver-to-gold.Notebook::PROGRAMME_END_DATE and
+# simulator/manifests/analytical/analytical-programme-24m.json::end_date.
+PROGRAMME_END_DATE = "2026-07-29"
+MEDALLION_CALCULATION_VERSION = "novasteel-gold/1.0.0"
+PROGRAMME_OWNED_FACTS = {
+    "fact_energy_daily": "date_key",
+    "fact_emissions_daily": "date_key",
+    "fact_quality_yield": "date_key",
+    "fact_production_shift": "shift_date",
+}
+
 
 def require_resolved(name: str, value: str) -> None:
     if not value or value.startswith("{{"):
@@ -240,6 +252,32 @@ if exists(CORE_TABLES_URI, "fact_quality_measurement") and exists(
             ordering_failure,
             threshold=0,
             metric=ordering_failure,
+        )
+    )
+
+# DQ-GOLD-004: the analytical programme and this medallion must never write the
+# same gold rows. Both MERGE on the same natural keys, so an overlap silently
+# replaces a programme row with one derived from a partial event window. Any row
+# inside the programme window carrying the medallion's calculation_version is
+# proof the ownership boundary in ns-silver-to-gold leaked.
+for fact_name, date_column in PROGRAMME_OWNED_FACTS.items():
+    if not exists(CORE_TABLES_URI, fact_name):
+        continue
+    fact = read(CORE_TABLES_URI, fact_name)
+    if "calculation_version" not in fact.columns:
+        continue
+    intruders = fact.where(
+        (F.to_date(F.col(date_column)) <= F.to_date(F.lit(PROGRAMME_END_DATE)))
+        & (F.col("calculation_version") == F.lit(MEDALLION_CALCULATION_VERSION))
+    ).count()
+    rows.append(
+        result(
+            fact_name,
+            "DQ-GOLD-004",
+            fact.count(),
+            intruders,
+            threshold=0,
+            metric=intruders,
         )
     )
 

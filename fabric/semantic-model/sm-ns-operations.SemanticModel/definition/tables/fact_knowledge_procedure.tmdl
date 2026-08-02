@@ -1,4 +1,4 @@
-table fact_knowledge_procedure
+﻿table fact_knowledge_procedure
 	column procedure_id
 		dataType: string
 		summarizeBy: none
@@ -22,5 +22,6 @@ table fact_knowledge_procedure
 	partition fact_knowledge_procedure = entity
 		mode: directLake
 		source
+			expressionSource: DatabaseQuery
 			entityName: fact_knowledge_procedure
 			schemaName: dbo

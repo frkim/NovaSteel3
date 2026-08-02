@@ -15,6 +15,7 @@ from delta.tables import DeltaTable
 from pyspark.sql import DataFrame, Window
 from pyspark.sql import functions as F
 from pyspark.sql.types import (
+    ArrayType,
     BooleanType,
     DoubleType,
     LongType,
@@ -94,12 +95,24 @@ def merge_delta(frame: DataFrame, root: str, table_name: str, keys) -> int:
 
 
 def payload_column(frame: DataFrame):
+    # Bronze can carry the payload in either shape: the Eventstream lands a
+    # `payload` struct/string, while file-seeded rows carry `payload_json`. Both
+    # columns coexist once the two paths have written to the table, so coalesce
+    # rather than picking one. `payload_json` wins because the Eventstream's
+    # inferred struct only has the telemetry-shaped fields - serialising it for
+    # an energy or alarm event silently drops everything except `type`.
+    candidates = []
     if "payload_json" in frame.columns:
-        return F.col("payload_json")
-    if "payload" not in frame.columns:
+        candidates.append(F.col("payload_json"))
+    if "payload" in frame.columns:
+        payload_type = dict(frame.dtypes).get("payload", "")
+        candidates.append(
+            F.col("payload").cast("string") if payload_type == "string"
+            else F.to_json(F.col("payload"))
+        )
+    if not candidates:
         return F.lit("{}")
-    payload_type = dict(frame.dtypes).get("payload", "")
-    return F.col("payload").cast("string") if payload_type == "string" else F.to_json(F.col("payload"))
+    return F.coalesce(*candidates) if len(candidates) > 1 else candidates[0]
 
 
 def quarantine_rows(frame: DataFrame, condition, reason: str, rule_id: str, detail: str) -> DataFrame:
@@ -287,7 +300,11 @@ telemetry_resolved = (
     )
     .join(
         sensor_dim,
+        # The registry grain is (sensor_id, signal_code): the generator truncates
+        # the signal code to four characters when building a furnace sensor_id, so
+        # one sensor_id carries several channels with different canonical units.
         (F.col("event.sensor_id") == F.col("sensor.sensor_id"))
+        & (F.col("event.signal_code") == F.col("sensor.signal_code"))
         & (F.col("event.event_ts") >= F.col("sensor.valid_from"))
         & (F.col("sensor.valid_to").isNull() | (F.col("event.event_ts") < F.col("sensor.valid_to"))),
         "left",
@@ -475,26 +492,53 @@ alarm_schema = StructType(
         StructField("state", StringType()),
         StructField("alarm_type", StringType()),
         StructField("confidence", DoubleType()),
+        # Field names the simulator actually emits (see the alarm payload built
+        # alongside the demo RUL alert): alert_id/status/reason instead of
+        # alarm_id/state/alarm_type, and no transition identifier at all.
+        StructField("alert_id", StringType()),
+        StructField("status", StringType()),
+        StructField("reason", StringType()),
+        StructField("transitioned_at", StringType()),
     ]
 )
-alarms = (
+alarm_envelopes = (
     deduplicated.where(F.col("schema_name") == "novasteel.alarm.v1")
     .withColumn("_payload", F.from_json("payload_json", alarm_schema))
     .select("*", "_payload.*")
     .drop("_payload")
-    .select(
-        "alarm_id",
+    .withColumn("alarm_id", F.coalesce("alarm_id", "alert_id"))
+    .withColumn("state", F.coalesce("state", "status"))
+    .withColumn("alarm_type", F.coalesce("alarm_type", "reason"))
+    .withColumn(
+        # A transition is identified by the alarm plus the moment it changed
+        # state; hash them so re-ingesting the same envelope is idempotent.
         "transition_id",
-        "event_ts",
-        F.to_date("event_ts").alias("event_date"),
-        "plant_id",
-        "asset_id",
-        "severity",
-        "state",
-        "alarm_type",
-        "confidence",
-        "correlation_id",
+        F.coalesce(
+            "transition_id",
+            F.sha2(
+                F.concat_ws(
+                    "|",
+                    F.col("alarm_id"),
+                    F.col("state"),
+                    F.coalesce(F.col("transitioned_at"), F.col("event_ts").cast("string")),
+                ),
+                256,
+            ),
+        ),
     )
+)
+alarms = alarm_envelopes.select(
+    "alarm_id",
+    "transition_id",
+    "event_ts",
+    F.to_date("event_ts").alias("event_date"),
+    "plant_id",
+    "asset_id",
+    "severity",
+    "state",
+    "alarm_type",
+    "confidence",
+    "correlation_id",
 )
 alarm_parse_invalid = (
     F.col("alarm_id").isNull()
@@ -504,12 +548,7 @@ alarm_parse_invalid = (
     | F.col("alarm_type").isNull()
 )
 alarm_quarantine = quarantine_rows(
-    (
-        deduplicated.where(F.col("schema_name") == "novasteel.alarm.v1")
-        .withColumn("_payload", F.from_json("payload_json", alarm_schema))
-        .select("*", "_payload.*")
-        .drop("_payload")
-    ),
+    alarm_envelopes,
     alarm_parse_invalid,
     "SCHEMA_INVALID",
     "DQ-ENV-001",
@@ -533,6 +572,14 @@ energy_schema = StructType(
         StructField("cost_eur", DoubleType()),
         StructField("co2e_t", DoubleType()),
         StructField("source_version", StringType()),
+        # contracts/events/energy-interval.v1.schema.json is the authority for
+        # what the simulator actually emits; the silver column names above are
+        # the warehouse-side vocabulary, so read both and normalise below.
+        StructField("consumption_mwh", DoubleType()),
+        StructField("price", DoubleType()),
+        StructField("demand", DoubleType()),
+        StructField("demand_unit", StringType()),
+        StructField("grid_carbon_intensity_kgco2e_per_mwh", DoubleType()),
     ]
 )
 energy_envelopes = (
@@ -540,14 +587,44 @@ energy_envelopes = (
     .withColumn("_payload", F.from_json("payload_json", energy_schema))
     .select("*", "_payload.*")
     .drop("_payload")
+    .withColumn("energy_mwh", F.coalesce("energy_mwh", "consumption_mwh"))
+    .withColumn(
+        "spot_price_eur_per_mwh", F.coalesce("spot_price_eur_per_mwh", "price")
+    )
+    .withColumn(
+        "grid_carbon_kg_per_mwh",
+        F.coalesce("grid_carbon_kg_per_mwh", "grid_carbon_intensity_kgco2e_per_mwh"),
+    )
+    .withColumn(
+        "energy_gj", F.coalesce("energy_gj", F.col("energy_mwh") * F.lit(3.6))
+    )
+    .withColumn(
+        "cost_eur",
+        F.coalesce("cost_eur", F.col("energy_mwh") * F.col("spot_price_eur_per_mwh")),
+    )
+    .withColumn(
+        "co2e_t",
+        F.coalesce(
+            "co2e_t",
+            F.col("energy_mwh") * F.col("grid_carbon_kg_per_mwh") / F.lit(1000.0),
+        ),
+    )
+    .withColumn(
+        "energy_type",
+        F.coalesce(
+            "energy_type",
+            F.when(F.col("demand_unit") == "MW", F.lit("ELECTRICITY")),
+            F.lit("ELECTRICITY"),
+        ),
+    )
 )
-energy_parse_invalid = F.col("meter_id").isNull() | F.col("energy_gj").isNull()
+energy_parse_invalid = F.col("meter_id").isNull() | F.col("energy_mwh").isNull()
 energy_quarantine = quarantine_rows(
     energy_envelopes,
     energy_parse_invalid,
     "SCHEMA_INVALID",
     "DQ-ENV-001",
-    "Energy payload is missing meter_id or energy_gj.",
+    "Energy payload is missing meter_id or a consumption reading.",
 )
 energy_valid = energy_envelopes.where(~energy_parse_invalid).select(
     "meter_id",
@@ -645,6 +722,30 @@ model_schema = StructType(
         StructField("confidence", DoubleType()),
         StructField("top_factors_json", StringType()),
         StructField("feature_snapshot_ref", StringType()),
+        # The simulator nests the quantiles under `prediction` and emits the
+        # drivers as a `top_factors` array; there is no flat prediction_type /
+        # prediction_value / p50 in the envelope.
+        StructField("label", StringType()),
+        StructField(
+            "prediction",
+            StructType([
+                StructField("estimated_minimum_lining_mm", DoubleType()),
+                StructField("remaining_useful_life_days_p10", DoubleType()),
+                StructField("remaining_useful_life_days_p50", DoubleType()),
+                StructField("remaining_useful_life_days_p90", DoubleType()),
+                StructField("risk_score", DoubleType()),
+                StructField("severity", StringType()),
+            ]),
+        ),
+        StructField(
+            "top_factors",
+            ArrayType(
+                StructType([
+                    StructField("feature", StringType()),
+                    StructField("contribution", DoubleType()),
+                ])
+            ),
+        ),
     ]
 )
 model_envelopes = (
@@ -652,6 +753,31 @@ model_envelopes = (
     .withColumn("_payload", F.from_json("payload_json", model_schema))
     .select("*", "_payload.*")
     .drop("_payload")
+    .withColumn("p10", F.coalesce("p10", "prediction.remaining_useful_life_days_p10"))
+    .withColumn("p50", F.coalesce("p50", "prediction.remaining_useful_life_days_p50"))
+    .withColumn("p90", F.coalesce("p90", "prediction.remaining_useful_life_days_p90"))
+    .withColumn("risk_score", F.coalesce("risk_score", "prediction.risk_score"))
+    .withColumn(
+        "prediction_type",
+        F.coalesce(
+            "prediction_type",
+            F.when(
+                F.col("prediction.remaining_useful_life_days_p50").isNotNull(),
+                F.lit("remaining_useful_life"),
+            ),
+        ),
+    )
+    .withColumn("prediction_value", F.coalesce("prediction_value", F.col("p50")))
+    .withColumn(
+        "unit",
+        F.coalesce(
+            "unit",
+            F.when(F.col("prediction_type") == "remaining_useful_life", F.lit("d")),
+        ),
+    )
+    .withColumn(
+        "top_factors_json", F.coalesce("top_factors_json", F.to_json("top_factors"))
+    )
 )
 model_parse_invalid = (
     F.col("inference_id").isNull()

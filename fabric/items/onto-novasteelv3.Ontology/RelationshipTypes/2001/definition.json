@@ -1,0 +1,12 @@
+{
+  "namespace": "usertypes",
+  "id": "2001",
+  "name": "hasAsset",
+  "namespaceType": "Custom",
+  "source": {
+    "entityTypeId": "1001"
+  },
+  "target": {
+    "entityTypeId": "1002"
+  }
+}

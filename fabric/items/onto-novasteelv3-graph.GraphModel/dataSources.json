@@ -1,0 +1,145 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/graphInstance/definition/dataSources/1.0.0/schema.json",
+  "dataSources": [
+    {
+      "name": "623b4455-5c28-4235-8138-883d69a5810d_onto_plant",
+      "type": "DeltaTable",
+      "properties": {
+        "path": "abfss://3d9c0b49-5201-4914-8149-06071b529918@onelake.pbidedicated.windows.net/623b4455-5c28-4235-8138-883d69a5810d/Tables/onto_plant"
+      }
+    },
+    {
+      "name": "623b4455-5c28-4235-8138-883d69a5810d_onto_asset",
+      "type": "DeltaTable",
+      "properties": {
+        "path": "abfss://3d9c0b49-5201-4914-8149-06071b529918@onelake.pbidedicated.windows.net/623b4455-5c28-4235-8138-883d69a5810d/Tables/onto_asset"
+      }
+    },
+    {
+      "name": "623b4455-5c28-4235-8138-883d69a5810d_onto_sensor",
+      "type": "DeltaTable",
+      "properties": {
+        "path": "abfss://3d9c0b49-5201-4914-8149-06071b529918@onelake.pbidedicated.windows.net/623b4455-5c28-4235-8138-883d69a5810d/Tables/onto_sensor"
+      }
+    },
+    {
+      "name": "623b4455-5c28-4235-8138-883d69a5810d_onto_grade",
+      "type": "DeltaTable",
+      "properties": {
+        "path": "abfss://3d9c0b49-5201-4914-8149-06071b529918@onelake.pbidedicated.windows.net/623b4455-5c28-4235-8138-883d69a5810d/Tables/onto_grade"
+      }
+    },
+    {
+      "name": "623b4455-5c28-4235-8138-883d69a5810d_onto_equipment_class",
+      "type": "DeltaTable",
+      "properties": {
+        "path": "abfss://3d9c0b49-5201-4914-8149-06071b529918@onelake.pbidedicated.windows.net/623b4455-5c28-4235-8138-883d69a5810d/Tables/onto_equipment_class"
+      }
+    },
+    {
+      "name": "623b4455-5c28-4235-8138-883d69a5810d_onto_process_step",
+      "type": "DeltaTable",
+      "properties": {
+        "path": "abfss://3d9c0b49-5201-4914-8149-06071b529918@onelake.pbidedicated.windows.net/623b4455-5c28-4235-8138-883d69a5810d/Tables/onto_process_step"
+      }
+    },
+    {
+      "name": "623b4455-5c28-4235-8138-883d69a5810d_onto_product",
+      "type": "DeltaTable",
+      "properties": {
+        "path": "abfss://3d9c0b49-5201-4914-8149-06071b529918@onelake.pbidedicated.windows.net/623b4455-5c28-4235-8138-883d69a5810d/Tables/onto_product"
+      }
+    },
+    {
+      "name": "623b4455-5c28-4235-8138-883d69a5810d_onto_signal",
+      "type": "DeltaTable",
+      "properties": {
+        "path": "abfss://3d9c0b49-5201-4914-8149-06071b529918@onelake.pbidedicated.windows.net/623b4455-5c28-4235-8138-883d69a5810d/Tables/onto_signal"
+      }
+    },
+    {
+      "name": "623b4455-5c28-4235-8138-883d69a5810d_onto_alarm_type",
+      "type": "DeltaTable",
+      "properties": {
+        "path": "abfss://3d9c0b49-5201-4914-8149-06071b529918@onelake.pbidedicated.windows.net/623b4455-5c28-4235-8138-883d69a5810d/Tables/onto_alarm_type"
+      }
+    },
+    {
+      "name": "623b4455-5c28-4235-8138-883d69a5810d_onto_rel_plant_asset",
+      "type": "DeltaTable",
+      "properties": {
+        "path": "abfss://3d9c0b49-5201-4914-8149-06071b529918@onelake.pbidedicated.windows.net/623b4455-5c28-4235-8138-883d69a5810d/Tables/onto_rel_plant_asset"
+      }
+    },
+    {
+      "name": "623b4455-5c28-4235-8138-883d69a5810d_onto_rel_asset_sensor",
+      "type": "DeltaTable",
+      "properties": {
+        "path": "abfss://3d9c0b49-5201-4914-8149-06071b529918@onelake.pbidedicated.windows.net/623b4455-5c28-4235-8138-883d69a5810d/Tables/onto_rel_asset_sensor"
+      }
+    },
+    {
+      "name": "623b4455-5c28-4235-8138-883d69a5810d_onto_rel_class_specializes",
+      "type": "DeltaTable",
+      "properties": {
+        "path": "abfss://3d9c0b49-5201-4914-8149-06071b529918@onelake.pbidedicated.windows.net/623b4455-5c28-4235-8138-883d69a5810d/Tables/onto_rel_class_specializes"
+      }
+    },
+    {
+      "name": "623b4455-5c28-4235-8138-883d69a5810d_onto_rel_class_feeds",
+      "type": "DeltaTable",
+      "properties": {
+        "path": "abfss://3d9c0b49-5201-4914-8149-06071b529918@onelake.pbidedicated.windows.net/623b4455-5c28-4235-8138-883d69a5810d/Tables/onto_rel_class_feeds"
+      }
+    },
+    {
+      "name": "623b4455-5c28-4235-8138-883d69a5810d_onto_rel_class_executes",
+      "type": "DeltaTable",
+      "properties": {
+        "path": "abfss://3d9c0b49-5201-4914-8149-06071b529918@onelake.pbidedicated.windows.net/623b4455-5c28-4235-8138-883d69a5810d/Tables/onto_rel_class_executes"
+      }
+    },
+    {
+      "name": "623b4455-5c28-4235-8138-883d69a5810d_onto_rel_step_produces",
+      "type": "DeltaTable",
+      "properties": {
+        "path": "abfss://3d9c0b49-5201-4914-8149-06071b529918@onelake.pbidedicated.windows.net/623b4455-5c28-4235-8138-883d69a5810d/Tables/onto_rel_step_produces"
+      }
+    },
+    {
+      "name": "623b4455-5c28-4235-8138-883d69a5810d_onto_rel_sensor_measures",
+      "type": "DeltaTable",
+      "properties": {
+        "path": "abfss://3d9c0b49-5201-4914-8149-06071b529918@onelake.pbidedicated.windows.net/623b4455-5c28-4235-8138-883d69a5810d/Tables/onto_rel_sensor_measures"
+      }
+    },
+    {
+      "name": "623b4455-5c28-4235-8138-883d69a5810d_onto_rel_asset_class",
+      "type": "DeltaTable",
+      "properties": {
+        "path": "abfss://3d9c0b49-5201-4914-8149-06071b529918@onelake.pbidedicated.windows.net/623b4455-5c28-4235-8138-883d69a5810d/Tables/onto_rel_asset_class"
+      }
+    },
+    {
+      "name": "623b4455-5c28-4235-8138-883d69a5810d_onto_rel_asset_supplies",
+      "type": "DeltaTable",
+      "properties": {
+        "path": "abfss://3d9c0b49-5201-4914-8149-06071b529918@onelake.pbidedicated.windows.net/623b4455-5c28-4235-8138-883d69a5810d/Tables/onto_rel_asset_supplies"
+      }
+    },
+    {
+      "name": "623b4455-5c28-4235-8138-883d69a5810d_onto_rel_alarm_signal",
+      "type": "DeltaTable",
+      "properties": {
+        "path": "abfss://3d9c0b49-5201-4914-8149-06071b529918@onelake.pbidedicated.windows.net/623b4455-5c28-4235-8138-883d69a5810d/Tables/onto_rel_alarm_signal"
+      }
+    },
+    {
+      "name": "623b4455-5c28-4235-8138-883d69a5810d_onto_rel_alarm_class",
+      "type": "DeltaTable",
+      "properties": {
+        "path": "abfss://3d9c0b49-5201-4914-8149-06071b529918@onelake.pbidedicated.windows.net/623b4455-5c28-4235-8138-883d69a5810d/Tables/onto_rel_alarm_class"
+      }
+    }
+  ]
+}

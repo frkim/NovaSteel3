@@ -158,30 +158,73 @@ def upsert(frame: DataFrame, table_name: str, keys) -> int:
 
 require_resolved("ENVIRONMENT", ENVIRONMENT)
 require_resolved("CORE_TABLES_URI", CORE_TABLES_URI)
-if ENVIRONMENT not in {"dev", "test", "demo"}:
-    raise ValueError("Analytical demo-data load is hard-disabled outside dev/test/demo")
+_ENV_ALLOWED_SUFFIXES = ("dev", "test", "demo")
+_env_normalized = ENVIRONMENT.strip().lower()
+if not any(_env_normalized == t or _env_normalized.endswith("-" + t) for t in _ENV_ALLOWED_SUFFIXES):
+    raise ValueError(
+        "Analytical demo-data load is hard-disabled outside dev/test/demo "
+        f"(got ENVIRONMENT={ENVIRONMENT!r})"
+    )
 
 written = {}
+failures = {}
 for table_name, keys in IDEMPOTENCY_KEYS.items():
     source_path = files_path(table_name)
     try:
-        raw = spark.read.option("header", True).option("mode", "FAILFAST").csv(source_path)
+        # `escape` must be the double-quote: the packs are written by Python's
+        # csv.writer, which escapes a quote inside a quoted field by doubling it
+        # (RFC 4180). Spark defaults `escape` to a backslash, so JSON-bearing
+        # columns such as fact_furnace_rul.top_factors_json fail to parse.
+        raw = (
+            spark.read.option("header", True)
+            .option("quote", '"')
+            .option("escape", '"')
+            .option("mode", "FAILFAST")
+            .csv(source_path)
+        )
+        frame = cast_frame(raw, table_name)
+        written[table_name] = upsert(frame, table_name, keys)
     except Exception as exc:  # noqa: BLE001 - surface a clear per-table message
-        written[table_name] = f"skipped ({exc.__class__.__name__})"
-        continue
-    frame = cast_frame(raw, table_name)
-    written[table_name] = upsert(frame, table_name, keys)
+        # Record and keep going: one malformed dataset must not hide the state of
+        # the other seven, and the audit table below is the only durable place a
+        # failure is visible (the Fabric Jobs API reports a generic
+        # "System_Cancelled_Session_Statements_Failed" with no Python detail).
+        detail = f"{exc.__class__.__name__}: {exc}"
+        failures[table_name] = detail
+        written[table_name] = f"failed ({exc.__class__.__name__})"
+
+# Persist the per-table outcome so it can be read straight from OneLake.
+audit_rows = [
+    (
+        table_name,
+        "failed" if table_name in failures else "loaded",
+        int(written[table_name]) if isinstance(written[table_name], int) else None,
+        failures.get(table_name, "")[:4000],
+        datetime.now(timezone.utc).isoformat(),
+    )
+    for table_name in IDEMPOTENCY_KEYS
+]
+spark.createDataFrame(
+    audit_rows,
+    "table_name string, status string, row_count long, error string, recorded_at string",
+).write.format("delta").mode("overwrite").option("overwriteSchema", "true").save(
+    table_path("gold_load_audit")
+)
 
 print(
     {
-        "status": "loaded",
+        "status": "loaded" if not failures else "partial",
         "environment": ENVIRONMENT,
         "files_subpath": FILES_SUBPATH,
         "core_files_uri": core_files_uri(),
         "written": written,
+        "failures": failures,
         "recorded_at": datetime.now(timezone.utc).isoformat(),
     }
 )
+
+if failures:
+    raise RuntimeError(f"Analytical gold load failed for {sorted(failures)}; see gold_load_audit")
 
 # METADATA ********************
 # META {

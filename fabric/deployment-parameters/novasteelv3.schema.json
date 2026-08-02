@@ -114,6 +114,10 @@
         "landingLakehouse": { "$ref": "#/$defs/namedResource" },
         "coreLakehouse": { "$ref": "#/$defs/namedResource" },
         "notebookInitialize": { "$ref": "#/$defs/namedResource" },
+        "notebookOntologyBindings": { "$ref": "#/$defs/namedResource" },
+        "notebookLoadReferenceData": { "$ref": "#/$defs/namedResource" },
+        "notebookSeedBronzeFromPack": { "$ref": "#/$defs/namedResource" },
+        "notebookLoadAnalyticalGold": { "$ref": "#/$defs/namedResource" },
         "notebookBronzeToSilver": { "$ref": "#/$defs/namedResource" },
         "notebookSilverToGold": { "$ref": "#/$defs/namedResource" },
         "notebookDemoScoring": { "$ref": "#/$defs/namedResource" },
@@ -121,8 +125,9 @@
         "pipelineMedallion": { "$ref": "#/$defs/namedResource" },
         "pipelineDemoScoring": { "$ref": "#/$defs/namedResource" },
         "semanticOperations": { "$ref": "#/$defs/namedResource" },
-        "ontologyNotebook": { "$ref": "#/$defs/namedResource" },
-        "dataAgent": { "$ref": "#/$defs/namedResource" }
+        "dataAgent": { "$ref": "#/$defs/namedResource" },
+        "ontology": { "$ref": "#/$defs/namedResource" },
+        "ontologyGraphModel": { "$ref": "#/$defs/namedResource" }
       }
     },
     "onelake": {
@@ -190,7 +195,8 @@
         "deployPipelines": { "type": "boolean" },
         "deploySemanticModel": { "type": "boolean" },
         "semanticModelBindingValidated": { "type": "boolean" },
-        "deployDataAgent": { "type": "boolean" }
+        "deployDataAgent": { "type": "boolean" },
+        "deployOntology": { "type": "boolean" }
       }
     }
   },

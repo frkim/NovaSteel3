@@ -1,5 +1,5 @@
-"""Conformance tests binding the operational loader notebook
-(``fabric/notebooks/ns-load-operational-envelopes.Notebook``) to the
+"""Conformance tests binding the consolidated bronze/operational loader notebook
+(``fabric/notebooks/ns-seed-bronze-from-pack.Notebook``) to the
 simulator's operational shaping and the BFF's expectations.
 
 No Spark runs locally, so instead of executing the notebook these tests parse
@@ -25,7 +25,7 @@ from simulator.fabric_operational import (
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-NOTEBOOK = (REPO_ROOT / "fabric" / "notebooks" / "ns-load-operational-envelopes.Notebook"
+NOTEBOOK = (REPO_ROOT / "fabric" / "notebooks" / "ns-seed-bronze-from-pack.Notebook"
             / "notebook-content.py")
 
 
@@ -73,7 +73,13 @@ class OperationalLoaderNotebookConformanceTests(unittest.TestCase):
         self.assertIn("target.`{EVENT_ID_COLUMN}` = source.`{EVENT_ID_COLUMN}`", self.source)
 
     def test_environment_is_guarded(self):
-        self.assertIn('ENVIRONMENT not in {"dev", "test", "demo"}', self.source)
+        # Deployed environment names are qualified (e.g. "novasteelv3-demo"), so
+        # the guard accepts the bare token or a "-<token>" suffix, nothing else.
+        self.assertIn('_ENV_ALLOWED_SUFFIXES = ("dev", "test", "demo")', self.source)
+        self.assertIn(
+            'if not any(_env_normalized == t or _env_normalized.endswith("-" + t)',
+            self.source,
+        )
 
 
 if __name__ == "__main__":

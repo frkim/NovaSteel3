@@ -1,4 +1,4 @@
-table fact_model_evaluation
+﻿table fact_model_evaluation
 	column evaluation_date
 		dataType: dateTime
 		formatString: yyyy-MM-dd
@@ -43,5 +43,6 @@ table fact_model_evaluation
 	partition fact_model_evaluation = entity
 		mode: directLake
 		source
+			expressionSource: DatabaseQuery
 			entityName: fact_model_evaluation
 			schemaName: dbo

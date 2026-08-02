@@ -10,7 +10,7 @@
 
 # CELL ********************
 from delta.tables import DeltaTable
-from pyspark.sql import DataFrame
+from pyspark.sql import DataFrame, Window
 from pyspark.sql import functions as F
 
 ENVIRONMENT = "{{environment}}"
@@ -18,6 +18,8 @@ CORE_TABLES_URI = "{{onelake.coreTablesUri}}"
 MODEL_VERSION = "novasteel-demo-deterministic/1.0.0"
 QUALITY_SCENARIO_ID = "quality-drift"
 QUALITY_SEED = 240728
+DEMO_LINING_COMPONENT_ID = "HEARTH-SECTOR-07"
+DEMO_HEAT_FLUX_CUE = "heat_flux_6h_slope"
 
 
 def require_resolved(name: str, value: str) -> None:
@@ -53,55 +55,114 @@ def upsert(frame: DataFrame, table_name: str, keys) -> int:
     return source.count()
 
 
+def replace_model_rows(frame: DataFrame, table_name: str, keys) -> int:
+    """Upsert, after dropping any earlier rows this demo model wrote.
+
+    The scoring formula and its grain can change between runs, so a plain MERGE
+    on inference_id would leave stale scores behind under a new inference_id.
+    Only rows carrying this notebook's model_version are removed, which never
+    touches the simulator-produced pack rows.
+    """
+    target_path = path(table_name)
+    if DeltaTable.isDeltaTable(spark, target_path):
+        DeltaTable.forPath(spark, target_path).delete(
+            F.col("model_version") == F.lit(MODEL_VERSION)
+        )
+    return upsert(frame, table_name, keys)
+
+
 require_resolved("ENVIRONMENT", ENVIRONMENT)
 require_resolved("CORE_TABLES_URI", CORE_TABLES_URI)
-if ENVIRONMENT not in {"dev", "test", "demo"}:
-    raise ValueError("Deterministic demo scoring is hard-disabled outside dev/test/demo")
+_ENV_ALLOWED_SUFFIXES = ("dev", "test", "demo")
+_env_normalized = ENVIRONMENT.strip().lower()
+if not any(_env_normalized == t or _env_normalized.endswith("-" + t) for t in _ENV_ALLOWED_SUFFIXES):
+    raise ValueError(
+        "Deterministic demo scoring is hard-disabled outside dev/test/demo "
+        f"(got ENVIRONMENT={ENVIRONMENT!r})"
+    )
 
 telemetry = read("fact_telemetry")
 if telemetry.where(F.col("data_classification") != "SYNTHETIC").limit(1).count() > 0:
     raise ValueError("Deterministic demo scoring refuses non-SYNTHETIC telemetry")
 
-features = telemetry.groupBy("plant_id", "asset_id", "scenario_id", "seed").agg(
+# Lining RUL is scored per hearth sector, not per furnace: the generator degrades
+# a single sector, and averaging across the whole hearth hides it. The sector is
+# the trailing "-H<nn>" segment of the sensor_id (generator.py builds it as
+# f"LUX-BF-01-{signal_code.upper()[:4]}-H{sector}").
+furnace = telemetry.where(F.col("asset_id").like("%-BF-%")).withColumn(
+    "sector", F.regexp_extract("sensor_id", r"-H(\d{2})$", 1)
+).where(F.col("sector") != "")
+
+sector_features = furnace.groupBy(
+    "plant_id", "asset_id", "scenario_id", "seed", "sector"
+).agg(
     F.max("event_ts").alias("feature_snapshot_ts"),
-    F.avg(
-        F.when(F.col("signal_code") == "hearth_shell_temperature", F.col("value"))
-    ).alias("shell_temp_avg"),
-    F.avg(
-        F.when(F.col("signal_code") == "local_heat_flux", F.col("value"))
-    ).alias("heat_flux_avg"),
-    F.avg(
-        F.when(F.col("signal_code") == "cooling_water_flow", F.col("value"))
-    ).alias("cooling_flow_avg"),
-    F.max(
-        F.when(F.col("signal_code") == "hearth_shell_temperature", F.col("value"))
-    ).alias("shell_temp_max"),
+    F.avg(F.when(F.col("signal_code") == "hearth_refractory_estimate", F.col("value")))
+    .alias("refractory_mm"),
+    F.avg(F.when(F.col("signal_code") == "local_heat_flux", F.col("value")))
+    .alias("heat_flux_avg"),
+    F.avg(F.when(F.col("signal_code") == "hearth_shell_temperature", F.col("value")))
+    .alias("shell_temp_avg"),
+    F.max(F.when(F.col("signal_code") == "hearth_shell_temperature", F.col("value")))
+    .alias("shell_temp_max"),
+    F.avg(F.when(F.col("signal_code") == "cooling_water_flow", F.col("value")))
+    .alias("cooling_flow_avg"),
+    F.avg(F.when(F.col("signal_code") == "cooling_water_outlet_temperature", F.col("value")))
+    .alias("cooling_outlet_avg"),
+    F.avg(F.when(F.col("signal_code") == "cooling_water_inlet_temperature", F.col("value")))
+    .alias("cooling_inlet_avg"),
 )
-features = features.where(F.col("asset_id").like("%-BF-%"))
-if features.rdd.isEmpty():
+if sector_features.rdd.isEmpty():
     raise RuntimeError("No synthetic furnace telemetry is available for demo scoring")
 
+# Peers are the other sectors of the same hearth in the same run, so the score is
+# self-calibrating: it compares a sector against its siblings instead of against
+# hard-coded magnitudes that drift whenever the physics models are retuned.
+peers = Window.partitionBy("plant_id", "asset_id", "scenario_id", "seed")
+delta_t = F.col("cooling_outlet_avg") - F.col("cooling_inlet_avg")
+
+featured = (
+    sector_features.withColumn("cooling_delta_t", delta_t)
+    .withColumn("peer_heat_flux", F.avg("heat_flux_avg").over(peers))
+    .withColumn("peer_delta_t", F.avg("cooling_delta_t").over(peers))
+)
+
+# Remaining lining life as a fraction of the usable refractory band. The band is
+# the declared instrument range in simulator/config.SIGNAL_REGISTRY: a new hearth
+# measures ~950 mm and 280 mm is the campaign-end minimum.
+REFRACTORY_NEW_MM = 950.0
+REFRACTORY_MIN_MM = 280.0
+remaining = (
+    F.coalesce(F.col("refractory_mm"), F.lit(REFRACTORY_NEW_MM)) - F.lit(REFRACTORY_MIN_MM)
+) / F.lit(REFRACTORY_NEW_MM - REFRACTORY_MIN_MM)
+wear = F.least(F.greatest(F.lit(1.0) - remaining, F.lit(0.0)), F.lit(1.0))
+
+
+def excess(actual, baseline):
+    """Fractional overshoot of a sector metric above its peer baseline, 0..1."""
+    ratio = actual / F.greatest(baseline, F.lit(1e-6)) - F.lit(1.0)
+    return F.least(F.greatest(F.coalesce(ratio, F.lit(0.0)), F.lit(0.0)), F.lit(1.0))
+
+
 risk_raw = (
-    F.lit(0.20)
-    + F.greatest(F.coalesce(F.col("shell_temp_avg"), F.lit(140.0)) - 140.0, F.lit(0.0))
-    / 100.0
-    * 0.35
-    + F.greatest(F.coalesce(F.col("heat_flux_avg"), F.lit(90.0)) - 90.0, F.lit(0.0))
-    / 160.0
-    * 0.30
-    + F.greatest(180.0 - F.coalesce(F.col("cooling_flow_avg"), F.lit(180.0)), F.lit(0.0))
-    / 180.0
-    * 0.15
+    F.lit(0.15)
+    + F.lit(0.55) * wear
+    + F.lit(0.20) * excess(F.col("heat_flux_avg"), F.col("peer_heat_flux"))
+    + F.lit(0.10) * excess(F.col("cooling_delta_t"), F.col("peer_delta_t"))
 )
 scored = (
-    features.withColumn("risk_score", F.least(F.greatest(risk_raw, F.lit(0.01)), F.lit(0.99)))
+    featured.withColumn("risk_score", F.least(F.greatest(risk_raw, F.lit(0.01)), F.lit(0.99)))
+    # 100 days is the modelled remaining-campaign horizon, so risk >= 0.50 always
+    # lands the p50 inside the 5..60 day warning band that DQ-DEMO-001 asserts and
+    # a strongly worn sector falls under the 21 day alerting threshold below; the
+    # 6 day floor is the minimum inspection-to-reline lead time.
     .withColumn(
         "rul_p50",
-        F.greatest(F.lit(3.0), F.lit(90.0) * (F.lit(1.0) - F.col("risk_score")))
+        F.greatest(F.lit(6.0), F.lit(100.0) * (F.lit(1.0) - F.col("risk_score")))
     )
     .withColumn("rul_p10", F.col("rul_p50") * 0.80)
     .withColumn("rul_p90", F.col("rul_p50") * 1.30)
-    .withColumn("component_id", F.lit("HEARTH-SECTOR-07"))
+    .withColumn("component_id", F.concat(F.lit("HEARTH-SECTOR-"), F.col("sector")))
     .withColumn(
         "inference_id",
         F.concat(
@@ -128,24 +189,39 @@ scored = (
     .withColumn("confidence", F.lit(0.84))
     .withColumn(
         "top_factors_json",
+        # Contributions are the actual weighted terms of risk_raw, so the
+        # explanation the UI shows always reconciles with the score.
         F.to_json(
             F.array(
                 F.struct(
-                    F.lit("heat_flux_6h_slope").alias("feature"),
-                    F.lit(0.29).alias("contribution"),
+                    F.lit("refractory_wear_fraction").alias("feature"),
+                    F.round(F.lit(0.55) * wear, 4).alias("contribution"),
                 ),
                 F.struct(
-                    F.lit("sector_to_ring_temp_delta").alias("feature"),
-                    F.lit(0.24).alias("contribution"),
+                    F.lit(DEMO_HEAT_FLUX_CUE).alias("feature"),
+                    F.round(
+                        F.lit(0.20) * excess(F.col("heat_flux_avg"), F.col("peer_heat_flux")),
+                        4,
+                    ).alias("contribution"),
                 ),
                 F.struct(
-                    F.lit("cooling_efficiency_residual").alias("feature"),
-                    F.lit(0.18).alias("contribution"),
+                    F.lit("cooling_delta_t_vs_peer_sectors").alias("feature"),
+                    F.round(
+                        F.lit(0.10) * excess(F.col("cooling_delta_t"), F.col("peer_delta_t")),
+                        4,
+                    ).alias("contribution"),
                 ),
             )
         ),
     )
 )
+if (
+    scored.where(F.col("component_id") == F.lit(DEMO_LINING_COMPONENT_ID))
+    .limit(1)
+    .count()
+    == 0
+):
+    raise RuntimeError(f"{DEMO_LINING_COMPONENT_ID} demo lining cue was not scored")
 
 rul_inference = scored.select(
     "inference_id",
@@ -173,7 +249,7 @@ rul_inference = scored.select(
     "scenario_id",
     "seed",
 )
-rul_silver_written = upsert(
+rul_silver_written = replace_model_rows(
     rul_inference, "fact_model_inference", ["inference_id"]
 )
 
@@ -200,7 +276,7 @@ rul_gold = scored.select(
     "scenario_id",
     "seed",
 )
-rul_gold_written = upsert(rul_gold, "fact_furnace_rul", ["inference_id"])
+rul_gold_written = replace_model_rows(rul_gold, "fact_furnace_rul", ["inference_id"])
 
 quality_written = 0
 if DeltaTable.isDeltaTable(spark, path("fact_quality_measurement")):

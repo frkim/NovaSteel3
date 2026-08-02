@@ -1,0 +1,12 @@
+{
+  "namespace": "usertypes",
+  "id": "2002",
+  "name": "hasSensor",
+  "namespaceType": "Custom",
+  "source": {
+    "entityTypeId": "1002"
+  },
+  "target": {
+    "entityTypeId": "1003"
+  }
+}

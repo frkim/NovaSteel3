@@ -2,7 +2,7 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
   "metadata": {
     "type": "DataPipeline",
-    "displayName": "pl-ns-medallion",
+    "displayName": "pl-novasteelv3-medallion",
     "description": "Initialize and run bronze-to-silver-to-gold with a quality gate."
   },
   "config": {
