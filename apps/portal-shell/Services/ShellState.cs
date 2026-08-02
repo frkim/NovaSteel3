@@ -52,8 +52,6 @@ public sealed class ShellState
         ["QualityEngineer"] = "Jens Bakker - Quality Engineer",
         ["SustainabilityOfficer"] = "Amina Haddad - Sustainability Officer",
         ["KnowledgeEngineer"] = "Pieter Claes - Knowledge Engineer",
-        ["Executive"] = "Isabelle Moreau - Executive",
-        ["PlatformOps"] = "Nils Andersen - Platform Ops",
     };
 
     public static string PersonaLabel(string persona) =>
@@ -81,16 +79,6 @@ public sealed class ShellState
             ["SustainabilityOfficer"] =
                 ["sustainability-compliance", "executive-overview", "dashboards", "proof-of-execution"],
             ["KnowledgeEngineer"] = ["operations", "quality", "knowledge-hub", "dashboards"],
-            ["Executive"] =
-            [
-                "executive-overview",
-                "sustainability-compliance",
-                "dashboards",
-                "proof-of-execution",
-                "technical-requirements",
-                "company-website",
-            ],
-            ["PlatformOps"] = ["command-center", "device-operations", "platform-ops", "dashboards"],
         };
 
     public IReadOnlyList<ShellNavItem> NavigationItems { get; } =
@@ -102,15 +90,15 @@ public sealed class ShellState
         new("Energy Optimization", "energy-optimization", "spot-price-schedule", "EnergyManager", "ϟ", "Daily operations"),
         new("Quality", "quality", "batches", "QualityEngineer", "✓", "Daily operations"),
         // Insight & governance
-        new("Executive Overview", "executive-overview", null, "Executive", "▤", "Insight & governance"),
+        new("Executive Overview", "executive-overview", null, "PlantManager", "▤", "Insight & governance"),
         new("Sustainability", "sustainability-compliance", "emissions-ledger", "SustainabilityOfficer", "♧", "Insight & governance"),
         new("Knowledge Hub", "knowledge-hub", "procedures", "KnowledgeEngineer", "⌕", "Insight & governance"),
         new("Dashboards", "dashboards", "collections", "PlantManager", "▦", "Insight & governance"),
         new("Proof of Execution", "proof-of-execution", "requirements", "PlantManager", "⎋", "Insight & governance"),
         new("Technical Requirements", "technical-requirements", "criteria", "PlantManager", "⌘", "Insight & governance"),
         // Platform & reference
-        new("Device Operations", "device-operations", "fleet", "PlatformOps", "◈", "Platform & reference"),
-        new("Platform Ops", "platform-ops", "capacity", "PlatformOps", "⚙", "Platform & reference"),
+        new("Device Operations", "device-operations", "fleet", "PlantManager", "◈", "Platform & reference"),
+        new("Platform Ops", "platform-ops", "capacity", "PlantManager", "⚙", "Platform & reference"),
         new("AxelorMetal", "company-website", "home", "PlantManager", "◇", "Platform & reference")
     ];
 
@@ -324,6 +312,7 @@ public sealed class ShellState
             ThemeMode.ToString().ToLowerInvariant(),
             Locale,
             ActivePersona,
+            PrimaryPersona,
             Site,
             _tokenReferenceBroker.Current.Value,
             "1.0",

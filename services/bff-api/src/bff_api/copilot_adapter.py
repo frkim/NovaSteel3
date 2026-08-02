@@ -182,8 +182,12 @@ class CopilotAdapter:
             else []
         )
         # With the screen-context toggle off the assistant is a general steel
-        # expert, so the steel knowledge base is what grounds it.
-        steel_hits = search_steel_corpus(question) if general else []
+        # expert, so the steel knowledge base is what grounds it. With the
+        # toggle on the screen is the primary grounding, but the steel corpus is
+        # still attached (narrower) so the assistant can explain the mechanism
+        # behind a screen's number instead of dead-ending when the dashboard
+        # summary does not literally contain the value that was asked for.
+        steel_hits = search_steel_corpus(question, limit=3 if general else 2)
 
         grounding = [
             self._grounding_item(

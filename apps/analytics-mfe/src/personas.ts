@@ -8,6 +8,7 @@
 
 export interface Persona {
   id: string
+  shellKey: string
   name: string
   role: string
   initials: string
@@ -18,6 +19,7 @@ export interface Persona {
 export const personas: Persona[] = [
   {
     id: 'plant-manager',
+    shellKey: 'PlantManager',
     name: 'Marc Weber',
     role: 'Plant Manager',
     initials: 'MW',
@@ -26,6 +28,7 @@ export const personas: Persona[] = [
   },
   {
     id: 'furnace-operator',
+    shellKey: 'FurnaceOperator',
     name: 'Elena Duarte',
     role: 'Furnace Operator',
     initials: 'ED',
@@ -34,6 +37,7 @@ export const personas: Persona[] = [
   },
   {
     id: 'maintenance-engineer',
+    shellKey: 'MaintenanceEngineer',
     name: 'Tomás Rossi',
     role: 'Maintenance & Reliability Engineer',
     initials: 'TR',
@@ -42,6 +46,7 @@ export const personas: Persona[] = [
   },
   {
     id: 'energy-manager',
+    shellKey: 'EnergyManager',
     name: 'Sofia Lindqvist',
     role: 'Energy Manager',
     initials: 'SL',
@@ -50,6 +55,7 @@ export const personas: Persona[] = [
   },
   {
     id: 'quality-engineer',
+    shellKey: 'QualityEngineer',
     name: 'Jens Bakker',
     role: 'Quality Engineer',
     initials: 'JB',
@@ -58,6 +64,7 @@ export const personas: Persona[] = [
   },
   {
     id: 'sustainability-officer',
+    shellKey: 'SustainabilityOfficer',
     name: 'Amina Haddad',
     role: 'Sustainability Officer',
     initials: 'AH',
@@ -66,6 +73,7 @@ export const personas: Persona[] = [
   },
   {
     id: 'knowledge-engineer',
+    shellKey: 'KnowledgeEngineer',
     name: 'Pieter Claes',
     role: 'Knowledge Engineer',
     initials: 'PC',
@@ -73,28 +81,13 @@ export const personas: Persona[] = [
     primaryQuestion: 'Are all retrievable procedures approved and up to date?',
   },
   {
-    id: 'executive',
-    name: 'Isabelle Moreau',
-    role: 'Executive',
-    initials: 'IM',
-    description: 'Reviews cross-site KPIs against strategic targets and signs off quarterly board reports.',
-    primaryQuestion: 'Are we on track against the annual targets across all sites?',
-  },
-  {
     id: 'ot-systems-engineer',
+    shellKey: 'OtSystemsEngineer',
     name: 'Rui Almeida',
     role: 'OT Systems Engineer',
     initials: 'RA',
     description: 'Maintains device fleet health, sensor calibration, and the incident simulation harness.',
     primaryQuestion: 'Which devices need attention and are the signals trustworthy?',
-  },
-  {
-    id: 'platform-ops',
-    name: 'Nils Andersen',
-    role: 'Platform Ops',
-    initials: 'NA',
-    description: 'Manages Fabric capacity lifecycle, pipeline orchestration, and platform cost telemetry.',
-    primaryQuestion: 'Is the platform healthy, and what is it costing us?',
   },
 ]
 
@@ -104,4 +97,12 @@ export function personaById(id: string): Persona | undefined {
 
 export function personasByIds(ids: string[]): Persona[] {
   return ids.map((id) => personaById(id)).filter((p): p is Persona => p !== undefined)
+}
+
+export function personaByShellKey(key: string | undefined | null): Persona | undefined {
+  if (!key) {
+    return undefined
+  }
+  const normalizedKey = key.toLocaleLowerCase()
+  return personas.find((p) => p.shellKey.toLocaleLowerCase() === normalizedKey)
 }

@@ -16,9 +16,7 @@ const EN: Catalog = {
   'persona.qualityEngineer': 'Jens Bakker - Quality Engineer',
   'persona.sustainabilityOfficer': 'Amina Haddad - Sustainability Officer',
   'persona.knowledgeEngineer': 'Pieter Claes - Knowledge Engineer',
-  'persona.executive': 'Isabelle Moreau - Executive',
   'persona.otSystemsEngineer': 'Rui Almeida - OT Systems Engineer',
-  'persona.platformOps': 'Nils Andersen - Platform Ops',
 }
 
 const FR: Catalog = {
@@ -29,9 +27,7 @@ const FR: Catalog = {
   'persona.qualityEngineer': 'Jens Bakker - Ingénieur qualité',
   'persona.sustainabilityOfficer': 'Amina Haddad - Responsable développement durable',
   'persona.knowledgeEngineer': 'Pieter Claes - Ingénieur connaissances',
-  'persona.executive': 'Isabelle Moreau - Direction',
   'persona.otSystemsEngineer': 'Rui Almeida - Ingénieur systèmes OT',
-  'persona.platformOps': 'Nils Andersen - Ops plateforme',
 }
 
 const DE: Catalog = {
@@ -42,9 +38,7 @@ const DE: Catalog = {
   'persona.qualityEngineer': 'Jens Bakker - Qualitätsingenieur',
   'persona.sustainabilityOfficer': 'Amina Haddad - Nachhaltigkeitsbeauftragte',
   'persona.knowledgeEngineer': 'Pieter Claes - Wissensingenieur',
-  'persona.executive': 'Isabelle Moreau - Geschäftsführung',
   'persona.otSystemsEngineer': 'Rui Almeida - OT-Systemingenieur',
-  'persona.platformOps': 'Nils Andersen - Plattform-Ops',
 }
 
 const NL: Catalog = {
@@ -55,9 +49,7 @@ const NL: Catalog = {
   'persona.qualityEngineer': 'Jens Bakker - Kwaliteitsingenieur',
   'persona.sustainabilityOfficer': 'Amina Haddad - Duurzaamheidsmanager',
   'persona.knowledgeEngineer': 'Pieter Claes - Kennisingenieur',
-  'persona.executive': 'Isabelle Moreau - Directie',
   'persona.otSystemsEngineer': 'Rui Almeida - OT-systeemingenieur',
-  'persona.platformOps': 'Nils Andersen - Platform-ops',
 }
 
 const ES: Catalog = {
@@ -68,9 +60,7 @@ const ES: Catalog = {
   'persona.qualityEngineer': 'Jens Bakker - Ingeniero de calidad',
   'persona.sustainabilityOfficer': 'Amina Haddad - Responsable de sostenibilidad',
   'persona.knowledgeEngineer': 'Pieter Claes - Ingeniero del conocimiento',
-  'persona.executive': 'Isabelle Moreau - Dirección',
   'persona.otSystemsEngineer': 'Rui Almeida - Ingeniero de sistemas OT',
-  'persona.platformOps': 'Nils Andersen - Ops de plataforma',
 }
 
 export const PERSONA_CATALOGS: Record<string, Catalog> = { en: EN, fr: FR, de: DE, nl: NL, es: ES }

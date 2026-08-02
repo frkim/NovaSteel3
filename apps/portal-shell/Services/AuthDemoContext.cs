@@ -50,9 +50,7 @@ public sealed class AuthDemoContext
             "EnergyManager",
             "QualityEngineer",
             "SustainabilityOfficer",
-            "KnowledgeEngineer",
-            "Executive",
-            "PlatformOps"
+            "KnowledgeEngineer"
         ]);
 
     public bool IsSignedIn { get; private set; } = true;

@@ -12,6 +12,7 @@ export function testShellContext(overrides: Partial<ShellContext> = {}): ShellCo
     themeMode: 'light',
     locale: 'en-LU',
     activePersona: 'PlantManager',
+    primaryPersona: 'PlantManager',
     site: 'de',
     tokenRef: 'test-reference',
     bridgeVersion: '1.0',

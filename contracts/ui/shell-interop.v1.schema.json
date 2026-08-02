@@ -30,6 +30,15 @@
       "type": "string",
       "minLength": 1
     },
+    "primaryPersona": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional persona currently selected in the shell top menu. Unlike activePersona (derived from the open route) this follows the operator's own role selection, so the microfrontend can surface role-specific affordances such as the Copilot question suggestions."
+    },
+    "helpBilingual": {
+      "type": "boolean",
+      "description": "Optional. When true the Help Assistant renders every explanation in English and French together."
+    },
     "site": {
       "type": "string",
       "minLength": 1

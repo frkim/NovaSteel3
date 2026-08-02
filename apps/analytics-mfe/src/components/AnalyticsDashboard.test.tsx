@@ -5,10 +5,10 @@ import { AnalyticsDashboard } from './AnalyticsDashboard'
 import { testShellContext } from '../test/renderWithProviders'
 
 describe('AnalyticsDashboard (UI smoke)', () => {
-  it('renders the Command Center with the demo banner and KPI band', async () => {
+  it('renders the Command Center without the demo banner and with the KPI band', async () => {
     render(<AnalyticsDashboard context={testShellContext()} emit={() => undefined} />)
 
-    expect(screen.getByText(/Synthetic demo data/i)).toBeInTheDocument()
+    expect(screen.queryByTestId('demo-banner')).toBeNull()
     expect(await screen.findByRole('heading', { name: 'Command Center', level: 1 })).toBeInTheDocument()
     expect(await screen.findByText('Furnace lining RUL')).toBeInTheDocument()
     expect(await screen.findByText('Active alerts')).toBeInTheDocument()

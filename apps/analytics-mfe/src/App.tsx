@@ -31,6 +31,7 @@ function App() {
     themeMode: 'light',
     locale: 'en-LU',
     activePersona: 'PlantManager',
+    primaryPersona: 'PlantManager',
     site: 'lu',
     tokenRef: 'standalone-demo-reference',
     bridgeVersion: '1.0',

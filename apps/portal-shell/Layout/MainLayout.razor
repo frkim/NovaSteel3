@@ -47,10 +47,6 @@
                 aria-haspopup="dialog" aria-expanded="@Capacity.PanelOpen"
                 title="Open Fabric capacity control">
             <span aria-hidden="true">●</span> Fabric: @Capacity.Status.State
-            @if (Capacity.Status.DemoModeSimulated)
-            {
-                <span class="capacity-pill-sim">Simulated</span>
-            }
         </button>
 
         <button class="icon-button" type="button" @onclick="OpenAlerts" aria-label="Alerts">
@@ -116,10 +112,6 @@
             }
         </div>
     </header>
-
-    <div class="demo-banner" role="status">
-        Synthetic demo data — not for operational control
-    </div>
 
     <div class="shell-content">
         <aside class="shell-nav" aria-label="Persona navigation">

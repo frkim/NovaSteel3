@@ -97,8 +97,8 @@ export const personaSections: PersonaSection[] = [
   {
     section: 'executive-overview',
     title: 'Executive Overview',
-    persona: 'Isabelle Moreau - Executive',
-    personaIds: ['executive'],
+    persona: 'Marc Weber - Plant Manager',
+    personaIds: ['plant-manager'],
     description: 'Cross-site KPIs, targets versus actuals, and an optional board report.',
     defaultSubView: 'overview',
     tabs: [
@@ -126,8 +126,7 @@ export const personaSections: PersonaSection[] = [
     persona: 'All personas',
     personaIds: [
       'plant-manager', 'furnace-operator', 'maintenance-engineer', 'energy-manager',
-      'quality-engineer', 'sustainability-officer', 'knowledge-engineer', 'executive',
-      'ot-systems-engineer', 'platform-ops',
+      'quality-engineer', 'sustainability-officer', 'knowledge-engineer', 'ot-systems-engineer',
     ],
     description: 'Curated, ready-to-open dashboard sets grouped by the question each one answers.',
     defaultSubView: 'collections',
@@ -139,8 +138,7 @@ export const personaSections: PersonaSection[] = [
     persona: 'All personas',
     personaIds: [
       'plant-manager', 'furnace-operator', 'maintenance-engineer', 'energy-manager',
-      'quality-engineer', 'sustainability-officer', 'knowledge-engineer', 'executive',
-      'ot-systems-engineer', 'platform-ops',
+      'quality-engineer', 'sustainability-officer', 'knowledge-engineer', 'ot-systems-engineer',
     ],
     description:
       'Every requirement of the use-case brief, the evidence in the running solution that satisfies it, and the caveats we state openly.',
@@ -156,8 +154,7 @@ export const personaSections: PersonaSection[] = [
     persona: 'All personas',
     personaIds: [
       'plant-manager', 'furnace-operator', 'maintenance-engineer', 'energy-manager',
-      'quality-engineer', 'sustainability-officer', 'knowledge-engineer', 'executive',
-      'ot-systems-engineer', 'platform-ops',
+      'quality-engineer', 'sustainability-officer', 'knowledge-engineer', 'ot-systems-engineer',
     ],
     description:
       'The technical grading rubric answered criterion by criterion, with the evidence behind each score and the gaps we state openly.',
@@ -167,8 +164,8 @@ export const personaSections: PersonaSection[] = [
   {
     section: 'platform-ops',
     title: 'Platform Ops',
-    persona: 'Nils Andersen - Platform Ops',
-    personaIds: ['platform-ops'],
+    persona: 'Rui Almeida - OT Systems Engineer',
+    personaIds: ['ot-systems-engineer'],
     description: 'Restricted non-production capacity lifecycle, jobs, and cost telemetry.',
     defaultSubView: 'capacity',
     tabs: [

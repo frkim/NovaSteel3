@@ -10,6 +10,8 @@ export interface ShellContext {
   themeMode: ThemeMode
   locale: string
   activePersona: string
+  /** Optional because standalone/dev mounts may not receive the shell menu persona. */
+  primaryPersona?: string
   site: string
   tokenRef: string
   bridgeVersion: '1.0'
