@@ -85,18 +85,10 @@ const PERSONA_QUESTIONS: PersonaQuestion[] = [
   { persona: 'Pieter Claes', question: 'How does the Copilot decide which sources to cite?' },
   { persona: 'Pieter Claes', question: 'What is the knowledge grounding architecture of this platform?' },
   { persona: 'Pieter Claes', question: 'What are the guardrails against prompt injection?' },
-  { persona: 'Isabelle Moreau', question: 'Give me a one-paragraph executive summary of plant performance today.' },
-  { persona: 'Isabelle Moreau', question: 'What are the top three risks across all sites this week?' },
-  { persona: 'Isabelle Moreau', question: 'How does this month\u2019s energy cost compare to budget?' },
-  { persona: 'Isabelle Moreau', question: 'What is the business case for the hydrogen-DRI pilot?' },
   { persona: 'Rui Almeida', question: 'Which OT data feeds are currently delayed or missing?' },
   { persona: 'Rui Almeida', question: 'What is the polling latency for the furnace sensor network?' },
   { persona: 'Rui Almeida', question: 'How do I configure a new PLC tag for ingestion?' },
   { persona: 'Rui Almeida', question: 'What communication protocol does the thermal sensor array use?' },
-  { persona: 'Nils Andersen', question: 'What is the current API response time for the BFF layer?' },
-  { persona: 'Nils Andersen', question: 'Are there any unhealthy pods in the analytics cluster?' },
-  { persona: 'Nils Andersen', question: 'What infrastructure changes were deployed in the last 24 hours?' },
-  { persona: 'Nils Andersen', question: 'How do I scale up the ingestion pipeline for a new site?' },
 ]
 
 export interface CopilotPanelProps {
@@ -108,6 +100,7 @@ export interface CopilotPanelProps {
   /** Human-readable screen title, shown in the context chip. */
   screenTitle: string
   persona: string
+  selectedPersona?: string
   locale: string
   onClose?: () => void
 }
@@ -225,6 +218,7 @@ export function CopilotPanel({
   site,
   screenTitle,
   persona,
+  selectedPersona,
   locale,
   onClose,
 }: CopilotPanelProps) {
@@ -257,12 +251,21 @@ export function CopilotPanel({
     })
   }, [])
 
-  // Grouped suggestions: current persona first
+  // The Plant Manager is the default cross-domain role, so highlighting it would only flag the default state.
+  const highlightPersona =
+    selectedPersona &&
+    selectedPersona !== 'Marc Weber' &&
+    PERSONA_QUESTIONS.some((q) => q.persona === selectedPersona)
+      ? selectedPersona
+      : null
+
+  // Grouped suggestions: highlighted shell persona first, otherwise current screen persona first.
   const groupedSuggestions = useMemo(() => {
-    const forPersona = PERSONA_QUESTIONS.filter((q) => q.persona === persona)
-    const rest = PERSONA_QUESTIONS.filter((q) => q.persona !== persona)
+    const leadingPersona = highlightPersona ?? persona
+    const forPersona = PERSONA_QUESTIONS.filter((q) => q.persona === leadingPersona)
+    const rest = PERSONA_QUESTIONS.filter((q) => q.persona !== leadingPersona)
     return [...forPersona, ...rest]
-  }, [persona])
+  }, [highlightPersona, persona])
 
   const refreshConversations = useCallback(() => {
     client
@@ -580,11 +583,40 @@ export function CopilotPanel({
                 data-testid="copilot-suggestion"
               />
             )}
-            renderOption={(props, option) => (
-              <li {...props} key={`${option.persona}-${option.question}`}>
-                <Typography variant="body2" noWrap>{option.question}</Typography>
-              </li>
-            )}
+            renderGroup={(params) => {
+              const highlighted = params.group === highlightPersona
+              return (
+                <li key={params.key}>
+                  <Box
+                    component="div"
+                    className="MuiAutocomplete-groupLabel"
+                    sx={highlighted ? { color: 'primary.main', fontWeight: 700 } : undefined}
+                  >
+                    {params.group}
+                    {highlighted ? ' · your role' : ''}
+                  </Box>
+                  <ul className="MuiAutocomplete-groupUl">{params.children}</ul>
+                </li>
+              )
+            }}
+            renderOption={(props, option) => {
+              const highlighted = option.persona === highlightPersona
+              return (
+                <li
+                  {...props}
+                  key={`${option.persona}-${option.question}`}
+                  data-testid={highlighted ? 'copilot-suggestion-highlighted' : undefined}
+                >
+                  <Typography
+                    variant="body2"
+                    noWrap
+                    sx={highlighted ? { color: 'primary.main', fontWeight: 600 } : undefined}
+                  >
+                    {option.question}
+                  </Typography>
+                </li>
+              )
+            }}
             blurOnSelect
             clearOnBlur={false}
             sx={{ mt: 0.5 }}

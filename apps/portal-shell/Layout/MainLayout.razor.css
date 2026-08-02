@@ -149,14 +149,6 @@
     color: var(--ns-color-brand-primary);
 }
 
-.capacity-pill-sim {
-    background: var(--ns-color-surface-alt);
-    border-radius: var(--ns-radius-s);
-    color: var(--ns-color-text-secondary);
-    font-size: 0.625rem;
-    padding: 0 4px;
-}
-
 .bff-pill {
     align-items: center;
     background: transparent;
@@ -191,15 +183,6 @@
 .user-context {
     color: var(--ns-color-text-secondary);
     font-size: 0.8125rem;
-}
-
-.demo-banner {
-    background: var(--ns-color-demo);
-    color: var(--ns-color-demo-text);
-    font-size: 0.8125rem;
-    font-weight: 600;
-    padding: 4px var(--ns-space-m);
-    text-align: center;
 }
 
 .shell-content {

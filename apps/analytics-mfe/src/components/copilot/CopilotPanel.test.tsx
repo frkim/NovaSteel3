@@ -123,6 +123,23 @@ function renderPanel(stub: Stub, locale = 'en-LU') {
   )
 }
 
+function renderPanelForSelectedPersona(stub: Stub, selectedPersona: string) {
+  return render(
+    <ThemeProvider theme={createNovaSteelTheme('light')}>
+      <CopilotPanel
+        client={stub.client}
+        section="furnace-health"
+        subView="lining-forecast"
+        site="de"
+        screenTitle="Furnace Health"
+        persona="Furnace Operator"
+        selectedPersona={selectedPersona}
+        locale="en-LU"
+      />
+    </ThemeProvider>,
+  )
+}
+
 describe('CopilotPanel', () => {
   beforeEach(() => {
     localStorage.clear()
@@ -144,6 +161,20 @@ describe('CopilotPanel', () => {
     const suggestionsBox = screen.getByTestId('copilot-suggestions')
     expect(suggestionsBox).toBeInTheDocument()
     expect(within(suggestionsBox).getByRole('combobox')).toBeInTheDocument()
+  })
+
+  it('highlights the selected persona suggestion group', async () => {
+    const user = userEvent.setup({ delay: null })
+    renderPanelForSelectedPersona(stubClient(), 'Elena Duarte')
+
+    await user.click(within(screen.getByTestId('copilot-suggestions')).getByRole('combobox'))
+
+    expect(await screen.findByText('Elena Duarte · your role')).toBeInTheDocument()
+    expect(await screen.findAllByTestId('copilot-suggestion-highlighted')).toHaveLength(4)
+    expect(screen.getByText('Which line is furthest behind target today?').closest('li')).not.toHaveAttribute(
+      'data-testid',
+      'copilot-suggestion-highlighted',
+    )
   })
 
   it('sends context when context toggle is ON', async () => {

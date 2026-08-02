@@ -169,6 +169,27 @@ def test_foundry_agent_falls_back_to_the_grounded_answer_on_failure(monkeypatch)
     assert result.agent == "copilot-chat-local"
 
 
+def test_foundry_dead_end_answer_is_replaced_by_the_grounded_answer(monkeypatch):
+    stub = _StubAgent("I can't determine that from the provided grounding.")
+    agent = _foundry(monkeypatch, stub)
+    result = agent.answer(turn("What is the risk?"))
+    assert "determine" not in result.answer
+    assert "Lining risk" in result.answer
+    assert result.sources
+    assert any("dead-end" in entry for entry in result.trace)
+
+
+def test_foundry_long_answer_mentioning_grounding_is_kept(monkeypatch):
+    long_answer = (
+        "Lining risk on BF-01 is driven by hearth wall thermal gradient and "
+        "coke rate. " * 12
+    ) + " The provided grounding does not restate the hourly value."
+    stub = _StubAgent(long_answer)
+    agent = _foundry(monkeypatch, stub)
+    result = agent.answer(turn("What is the risk?"))
+    assert result.answer == long_answer
+
+
 def test_foundry_agent_refuses_injection_without_calling_the_model(monkeypatch):
     stub = _StubAgent()
     agent = _foundry(monkeypatch, stub)

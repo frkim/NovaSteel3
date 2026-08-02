@@ -18,13 +18,14 @@ import StopCircleIcon from '@mui/icons-material/Stop'
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import GridViewIcon from '@mui/icons-material/GridView'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutlined'
-import { createNovaSteelTheme, demoPalette, resolveThemeMode } from '../designTokens'
+import { createNovaSteelTheme, resolveThemeMode } from '../designTokens'
 import { DataClient } from '../api/dataClient'
 import { CopilotClient } from '../api/copilotClient'
 import { DeviceClient } from '../api/deviceClient'
 import { AnalyticsContext, type AnalyticsContextValue } from '../context/analytics'
 import { createTranslator } from '../i18n/messages'
 import { resolveSection } from '../personaRoutes'
+import { personaByShellKey } from '../personas'
 import type { MicrofrontendEmitter, ShellContext } from '../types'
 import { resolveScreen } from './screens/screenRegistry'
 import { ErrorBoundary } from './ErrorBoundary'
@@ -42,7 +43,6 @@ interface AnalyticsDashboardProps {
 
 export function AnalyticsDashboard({ context, emit }: AnalyticsDashboardProps) {
   const theme = useMemo(() => createNovaSteelTheme(context.themeMode), [context.themeMode])
-  const demoColors = useMemo(() => demoPalette(resolveThemeMode(context.themeMode)), [context.themeMode])
   const [tourOpen, setTourOpen] = useState(false)
   const [copilotOpen, setCopilotOpen] = useState(false)
   const [helpMode, setHelpMode] = useState(false)
@@ -85,6 +85,10 @@ export function AnalyticsDashboard({ context, emit }: AnalyticsDashboardProps) {
 
   const { section, tab } = resolveSection(context.navigation.section, context.navigation.subView)
   const Screen = resolveScreen(section.section, tab.slug) ?? resolveScreen(section.section, section.defaultSubView)
+  const selectedPersona = useMemo(
+    () => (personaByShellKey(context.primaryPersona) ?? personaByShellKey(context.activePersona))?.name,
+    [context.activePersona, context.primaryPersona],
+  )
 
   useEffect(() => {
     // Keep the standalone/dev token CSS variables aligned with the resolved theme.
@@ -99,23 +103,6 @@ export function AnalyticsDashboard({ context, emit }: AnalyticsDashboardProps) {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box className="analytics-dashboard" component="div">
-        <Alert
-          severity="info"
-          role="status"
-          icon={false}
-          sx={{
-            mb: 2,
-            fontWeight: 600,
-            color: demoColors.accent,
-            bgcolor: demoColors.surface,
-            border: '1px solid',
-            borderColor: demoColors.accent,
-          }}
-          data-testid="demo-banner"
-        >
-          {translator('app.synthetic')}
-        </Alert>
-
         <Stack
           direction={{ xs: 'column', md: 'row' }}
           spacing={2}
@@ -233,6 +220,7 @@ export function AnalyticsDashboard({ context, emit }: AnalyticsDashboardProps) {
                 site={context.site}
                 screenTitle={section.title}
                 persona={section.persona}
+                selectedPersona={selectedPersona}
                 locale={context.locale}
                 onClose={() => setCopilotOpen(false)}
               />
