@@ -203,8 +203,8 @@ class TestCopilotAdapterIntegration:
         ids = [s.get("sourceId") for s in sources]
         assert "steelmaking-routes" in ids
 
-    def test_context_on_no_steel_corpus(self, adapter: CopilotAdapter):
-        """With screen context ON, no extra steel corpus is injected."""
+    def test_context_on_includes_narrow_steel_corpus(self, adapter: CopilotAdapter):
+        """With screen context ON, screen and steel-corpus grounding are both present."""
         result = adapter.chat(
             owner="test-user-ctx",
             question="What are the different processes to create steel?",
@@ -218,7 +218,11 @@ class TestCopilotAdapterIntegration:
         )
         sources = result["answer"]["sources"]
         ids = [s.get("sourceId") for s in sources]
-        assert "steelmaking-routes" not in ids
+        assert "furnace-health" in ids
+        assert "steelmaking-routes" in ids
+        steelmaking = next(s for s in sources if s.get("sourceId") == "steelmaking-routes")
+        assert steelmaking["kind"] == "knowledge"
+        assert steelmaking["offlineCorpus"] is True
 
     def test_glossary_online_fallback(self, adapter: CopilotAdapter):
         """Glossary online fallback returns corpus results."""
