@@ -5,7 +5,7 @@
  *
  * Palette is derived from the NovaSteel / AxelorMetal brand assets committed in
  * apps/portal-shell/wwwroot/brand: molten-orange accent on a cool graphite base.
- * Class contract consumed by slides.md: lead, tight, backup, cards[.four],
+ * Class contract consumed by slides.md: lead, tight, backup, cards[.four|.five],
  * card[.teal|.orange|.purple|.green|.blue], card-num, subtitle, split[.right-wide],
  * stat/big/label, pill[.green|.orange|.purple|.gray|.blue], tag, grad, hero-line,
  * herostats, brandbar, corners[.bottom-right],
@@ -372,6 +372,24 @@ section.lead img {
 .cards.four {
   grid-template-columns: repeat(4, 1fr);
   gap: 14px;
+}
+
+.cards.five {
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+
+.cards.five .card {
+  padding: 12px 13px;
+}
+
+.cards.five .card h3 {
+  font-size: 17px;
+}
+
+.cards.five .card p {
+  font-size: 14px;
+  line-height: 1.35;
 }
 
 .card {
