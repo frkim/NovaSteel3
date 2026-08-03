@@ -7,7 +7,8 @@
  * apps/portal-shell/wwwroot/brand: molten-orange accent on a cool graphite base.
  * Class contract consumed by slides.md: lead, tight, diagram, backup, cards[.four|.five],
  * card[.teal|.orange|.purple|.green|.blue], card-num, subtitle, split[.right-wide],
- * small-body, stat/big/label, pill[.green|.orange|.purple|.gray|.blue], tag, grad, hero-line,
+ * small-body, scope-boundary/scope-grid/scope-panel/scope-footer, deep-dive,
+ * stat/big/label, pill[.green|.orange|.purple|.gray|.blue], tag, grad, hero-line,
  * herostats, brandbar, corners[.bottom-right],
  * flow/lane[.teal|.orange|.purple|.green|.blue]/lane-tag/nodes/node/arrow/legend.
  */
@@ -216,6 +217,67 @@ section.diagram {
 section.diagram h1 {
   font-size: 38px;
   margin-bottom: 10px;
+}
+
+/* --- explicit solution boundary --------------------------------------- */
+
+section.scope-boundary .subtitle {
+  margin-bottom: 14px;
+}
+
+.scope-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
+
+.scope-panel {
+  min-height: 330px;
+  padding: 22px 26px 18px;
+  border: 1px solid var(--ns-line);
+  border-top: 7px solid;
+  border-radius: 12px;
+}
+
+.scope-panel.in {
+  background: var(--ns-green-soft);
+  border-top-color: var(--ns-green);
+}
+
+.scope-panel.out {
+  background: var(--ns-molten-soft);
+  border-top-color: var(--ns-molten);
+}
+
+.scope-panel h2 {
+  color: var(--ns-ink);
+  font-size: 27px;
+  margin-bottom: 10px;
+}
+
+.scope-panel p,
+.scope-panel li {
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+.scope-panel li {
+  margin-bottom: 7px;
+}
+
+.scope-footer {
+  margin-top: 16px;
+  padding: 10px 18px;
+  background: var(--ns-ink);
+  color: #ffffff;
+  font-size: 19px;
+  text-align: center;
+  border-radius: 8px;
+}
+
+.scope-footer strong,
+.scope-footer b {
+  color: #ffffff;
 }
 
 section.diagram h1::after {
@@ -564,6 +626,91 @@ section.vnext .split > div:last-child p {
 
 .split > div > *:first-child {
   margin-top: 0;
+}
+
+/* --- evidence-rich deep dives ----------------------------------------- */
+
+section.deep-dive {
+  padding: 32px 54px 46px;
+}
+
+section.deep-dive h1 {
+  font-size: 36px;
+  margin-bottom: 8px;
+}
+
+section.deep-dive h1::after {
+  margin-top: 10px;
+  height: 4px;
+}
+
+section.deep-dive .split {
+  gap: 34px;
+  margin-top: 12px;
+}
+
+section.deep-dive .split.right-wide {
+  grid-template-columns: 6fr 5fr;
+}
+
+section.deep-dive h3 {
+  color: var(--ns-molten);
+  font-size: 21px;
+  margin-bottom: 7px;
+}
+
+section.deep-dive .split p,
+section.deep-dive .split li {
+  font-size: 16px;
+  line-height: 1.3;
+}
+
+section.deep-dive .split p {
+  margin: 0 0 8px;
+}
+
+section.deep-dive .deep-dive-shot {
+  height: 270px;
+  margin: 0 auto 12px;
+  overflow: hidden;
+  border: 1px solid var(--ns-line);
+  border-radius: 10px;
+  box-shadow: 0 8px 18px rgb(15 23 42 / 10%);
+}
+
+section.deep-dive .deep-dive-shot img {
+  width: 100% !important;
+  height: 100%;
+  max-width: none !important;
+  object-fit: cover;
+  transform: scale(1.55);
+  transform-origin: center center;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+section.deep-dive table {
+  width: 100% !important;
+  font-size: 15px;
+  margin-top: 0;
+}
+
+section.deep-dive th,
+section.deep-dive td {
+  padding: 5px 9px;
+}
+
+section.deep-dive .stat {
+  margin-bottom: 12px;
+}
+
+section.deep-dive .stat .big {
+  font-size: 36px;
+}
+
+section.deep-dive .stat .label {
+  font-size: 16px;
 }
 
 /* --- statistics -------------------------------------------------------- */

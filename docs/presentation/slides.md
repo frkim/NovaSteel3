@@ -142,6 +142,44 @@ The demonstration opens with Marc Weber, the plant manager, because his Site Com
 
 ---
 
+<!-- _class: tight scope-boundary -->
+
+# What's In — and What's Out
+
+<p class="subtitle">A governed decision-support solution with a deliberate OT safety boundary</p>
+
+<div class="scope-grid">
+<div class="scope-panel in">
+<h2>✓ In the solution</h2>
+
+- Microsoft Fabric data spine: plant, energy, emissions, quality, maintenance & knowledge
+- Four advisory capabilities: **energy dispatch, lining RUL, quality risk, knowledge capture**
+- Persona dashboards, bounded what-if simulations, confidence & explainability
+- Human accept / modify / reject gates with model version, correlation ID & audit trail
+- EU-hosted processing, consent, content safety, approved-only knowledge retrieval
+
+</div>
+<div class="scope-panel out">
+<h2>× What's out of scope</h2>
+
+- **No PLC, interlock, furnace, recipe or production-setpoint control**
+- No autonomous schedule, work-order or CMMS commit
+- No LLM-only calculation or relaxation of deterministic hard constraints
+- No production credentials or shared demo / production storage
+- No unapproved transcript or draft procedure as operational instruction
+
+</div>
+</div>
+
+<div class="scope-footer"><b>Hard boundary:</b> no recommendation becomes authorization; no application path crosses into OT control</div>
+
+<!-- ⏱ 0:55 · Before the architecture, let me make the boundary explicit.
+In scope is a governed Fabric data spine, four advisory capabilities, role-specific experiences, bounded simulation, confidence, and a complete human decision trail.
+Out of scope is equally important: no path writes to a PLC, interlock, furnace, recipe, production setpoint, schedule, work order, or CMMS. Language models cannot replace the Python calculation or relax a hard constraint, and an unapproved transcript never becomes an instruction.
+That boundary is not a future intention; it is an architectural rule: AI advises, humans decide, and the operational systems remain authoritative. -->
+
+---
+
 <!-- _class: tight -->
 
 # One Governed Platform
@@ -367,30 +405,33 @@ And nothing leaves that stack without a human accepting, modifying, or rejecting
 
 ---
 
-<!-- _class: tight -->
+<!-- _class: tight deep-dive -->
 <!-- _header: '' -->
 <!-- _footer: '' -->
 
 # Deep Dive: Energy Dispatch Optimization
 
-![w:960](images/energy-optimization-spot-price-schedule.png)
-
 <div class="split right-wide">
 <div>
 
-- **Implemented in solution:** Gold data provides prices, carbon, production targets, and hard constraints
-- Python `optimizer-worker` solves a MILP (PuLP + CBC) and returns a feasible schedule option
-- Result is reviewed in the portal and stored with accept/modify/reject reason code
-- **AI in simple terms:** it is a smart planner that shifts only flexible work away from expensive hours
-- Hard rules are never broken (required tonnage, locked tasks, and equipment limits)
+### Shift production — do not reduce it
 
-**MILP, not AI** — a mixed-integer linear program (PuLP/CBC). One yes/no variable per
-batch × 15-min slot; hard rules as equations (urgent heats pinned, furnace concurrency
-capped); objective = weighted cost + CO₂. Returns the **proven** cheapest legal
-schedule, single-threaded and deterministic. The agent explains it — it never computes it.
+A deterministic **MILP** (PuLP/CBC) assigns every flexible batch to one
+15-minute slot, minimizing weighted energy cost + CO₂. Required tonnage is
+identical; urgent heats stay pinned.
+
+**Hard constraints:** maximum shift / hold window, minimum soak time,
+furnace concurrency and equipment eligibility. Invalid inputs or an infeasible
+plan are surfaced — constraints are never silently relaxed.
+
+The single-threaded solve returns baseline vs. optimized schedules, constraint
+evidence and whole-dispatch savings. A human reviews the proposal and records
+accept / modify / reject; the Foundry agent may explain it, **never compute it**.
 
 </div>
 <div>
+
+<div class="deep-dive-shot"><img src="images/energy-optimization-spot-price-schedule.png" alt="Energy dispatch portal showing spot price and scheduled load"></div>
 
 | Metric | Value |
 |---|---|
@@ -412,25 +453,34 @@ Those are single-scenario evidence, not banked savings — realized savings are 
 
 ---
 
-<!-- _class: tight -->
+<!-- _class: tight deep-dive -->
 <!-- _header: '' -->
 <!-- _footer: '' -->
 
 # Deep Dive: Furnace Lining Remaining Useful Life
 
-![w:960](images/furnace-health-lining-forecast.png)
-
 <div class="split right-wide">
 <div>
 
-- **Implemented in solution:** Silver thermal/cooling features are scored daily by the Python `scoring-worker`
-- Output written as P10/P50/P90, confidence, and top drivers to governed data + audit
-- Portal flow is advisory only: acknowledge alert → open CMMS work order
-- **AI in simple terms:** it estimates "days left" from wear patterns, like a health forecast for lining
-- It gives a range (best/likely/worst), not one magic number, so planners can act safely
+### Physics-based RUL — not a black box
+
+Daily scoring fits an explainable linear wear trend to **hearth refractory
+thickness**, corroborated by heat-flux and cooling-water behavior. The core
+estimate is `TTF = (thickness − 300 mm safe threshold) / |wear slope|`.
+
+Slope standard error is propagated with the **delta method** to produce
+P10 / P50 / P90, while fit quality, observation window and thermal agreement
+contribute to confidence. Fewer than three valid thickness observations yields
+no forecast — not false precision.
+
+A `HIGH` risk gate is raised at score ≥ 0.80. Engineers see named drivers,
+acknowledge the advisory alert and may open a CMMS work order; the platform
+never controls the furnace or creates maintenance action autonomously.
 
 </div>
 <div>
+
+<div class="deep-dive-shot"><img src="images/furnace-health-lining-forecast.png" alt="Furnace health portal showing the lining forecast"></div>
 
 | Metric | Value |
 |---|---|
@@ -451,25 +501,33 @@ The engineer stays accountable: they acknowledge the alert and it links to a CMM
 
 ---
 
-<!-- _class: tight -->
+<!-- _class: tight deep-dive -->
 <!-- _header: '' -->
 <!-- _footer: '' -->
 
 # Deep Dive: In-line Quality Prediction
 
-![w:960](images/quality-spc.png)
-
 <div class="split">
 <div>
 
-- **Implemented in solution:** Genealogy + process features are prepared in silver/gold and scored by Python services
-- The model outputs spec risk plus bounded what-if correction suggestions per heat/coil
-- UI shows predicted first-pass yield impact before the first lab confirmation arrives
-- **AI in simple terms:** it recognizes combinations that looked like past defect patterns
-- **No automatic recipe/setpoint write** — recommendations stay what-if until a human decides
+### Detect drift before scrap occurs
+
+The governed feature path joins full **heat → slab → coil genealogy** with
+coiling-temperature bias, carbon-equivalent context and quality status. The
+synthetic scenario activates the warning before the first off-spec laboratory
+result, creating an intervention window rather than a scrap report.
+
+The score returns calibrated spec risk, predicted first-pass yield and named
+drivers. A bounded what-if tests only approved ranges for coiling temperature,
+force balance and carbon-equivalent adjustment, with P10 / P50 / P90 impact.
+
+Every proposal carries `operationalWrite: false`: it can guide a process
+engineer, but cannot change a grade recipe or production setpoint.
 
 </div>
 <div>
+
+<div class="deep-dive-shot"><img src="images/quality-spc.png" alt="Quality portal showing SPC drift and defect Pareto"></div>
 
 <div class="stat"><div class="big">~88% → ~95%</div><div class="label">predicted first-pass yield after bounded correction</div></div>
 
@@ -485,25 +543,33 @@ That distinction matters: this is a what-if recommendation, not an automatic wri
 
 ---
 
-<!-- _class: tight -->
+<!-- _class: tight deep-dive -->
 <!-- _header: '' -->
 <!-- _footer: '' -->
 
 # Deep Dive: GenAI Knowledge Capture
 
-![w:960](images/knowledge-hub-capture-status.png)
-
 <div class="split">
 <div>
 
-- **Implemented in solution:** Consent state machine gates recording, then Speech Fast Transcription creates text
-- Foundry Agent Service drafts a structured procedure (trigger → action → rationale → risk)
-- Every statement links back to transcript citations; draft remains versioned and traceable
-- **AI in simple terms:** it is a first-draft assistant that turns expert talk into a usable checklist
-- Publication still requires human approval; unapproved drafts never become live instructions
+### Capture expertise before it retires
+
+Explicit consent gates recording; **Azure Speech Fast Transcription** creates
+speaker-separated segments. A Foundry 5-series deployment drafts grounded
+observation, recommended check, rationale and safety-boundary fields.
+
+Every claim must cite a real `[S<n>]` transcript segment. A second critic pass
+checks citations, completeness and unsafe steps, with at most two revision
+iterations. Missing evidence triggers revision or refusal — never invention.
+
+Only a `Knowledge.Publisher` can approve the versioned draft. Prompt-injection
+screening, content safety, PII redaction and a hash-chained audit trail protect
+the flow; only **APPROVED** procedures become retrievable.
 
 </div>
 <div>
+
+<div class="deep-dive-shot"><img src="images/knowledge-hub-capture-status.png" alt="Knowledge capture portal showing grounded procedure status"></div>
 
 - **Human expert approval** required before publication
 - Draft never becomes operational instruction unsupervised

@@ -17,7 +17,7 @@ PRESENTATION = ROOT / "docs" / "presentation"
 SLIDES = PRESENTATION / "slides.md"
 THEME = PRESENTATION / "theme.css"
 
-MAIN_SLIDE_COUNT = 29
+MAIN_SLIDE_COUNT = 30
 BACKUP_SLIDE_COUNT = 16
 MIN_TALK_SECONDS = 37 * 60
 MAX_TALK_SECONDS = 39 * 60
@@ -215,6 +215,9 @@ def test_requested_slides_are_named_and_ordered() -> None:
     ]
 
     assert titles.index("Transformation Objectives") + 1 == titles.index("Personas & Journey")
+    assert titles.index("What's In — and What's Out") + 1 == titles.index(
+        "One Governed Platform"
+    )
     assert titles.index("What You'll See Next") < titles.index(
         "How We Built the Demo with an Agent Swarm"
     )
@@ -223,6 +226,42 @@ def test_requested_slides_are_named_and_ordered() -> None:
     ) + 1 == titles.index("Conclusion")
     assert titles.index("Next Steps") + 1 == titles.index("Thank You")
     assert titles[-1] == "Appendix — Fabric RTI"
+
+
+def test_scope_boundary_and_deep_dives_are_explicit() -> None:
+    _, slides = _front_matter_and_slides()
+
+    scope = next(slide for slide in slides if "# What's In — and What's Out" in slide)
+    for boundary in (
+        "No PLC, interlock, furnace, recipe or production-setpoint control",
+        "No autonomous schedule, work-order or CMMS commit",
+        "no recommendation becomes authorization",
+    ):
+        assert boundary in scope
+
+    expected = {
+        "Deep Dive: Energy Dispatch Optimization": (
+            "Shift production — do not reduce it",
+            "constraints are never silently relaxed",
+        ),
+        "Deep Dive: Furnace Lining Remaining Useful Life": (
+            "Physics-based RUL — not a black box",
+            "delta method",
+        ),
+        "Deep Dive: In-line Quality Prediction": (
+            "Detect drift before scrap occurs",
+            "operationalWrite: false",
+        ),
+        "Deep Dive: GenAI Knowledge Capture": (
+            "Capture expertise before it retires",
+            "only **APPROVED** procedures become retrievable",
+        ),
+    }
+    for title, phrases in expected.items():
+        slide = next(slide for slide in slides if f"# {title}" in slide)
+        assert "deep-dive" in _classes(slide)
+        for phrase in phrases:
+            assert phrase in slide
 
 
 def test_fabric_diagrams_and_architecture_labels_are_present() -> None:
