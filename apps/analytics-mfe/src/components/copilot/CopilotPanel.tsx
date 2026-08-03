@@ -602,10 +602,23 @@ export function CopilotPanel({
             renderOption={(props, option) => {
               const highlighted = option.persona === highlightPersona
               return (
-                <li
+                <Box
+                  component="li"
                   {...props}
                   key={`${option.persona}-${option.question}`}
                   data-testid={highlighted ? 'copilot-suggestion-highlighted' : undefined}
+                  sx={
+                    highlighted
+                      ? {
+                          backgroundColor: 'action.selected',
+                          border: '1px solid',
+                          borderColor: 'primary.main',
+                          borderRadius: 1,
+                          mx: 0.5,
+                          my: 0.25,
+                        }
+                      : undefined
+                  }
                 >
                   <Typography
                     variant="body2"
@@ -614,7 +627,7 @@ export function CopilotPanel({
                   >
                     {option.question}
                   </Typography>
-                </li>
+                </Box>
               )
             }}
             blurOnSelect
