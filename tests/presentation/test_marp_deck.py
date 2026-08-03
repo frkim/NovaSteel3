@@ -17,7 +17,7 @@ PRESENTATION = ROOT / "docs" / "presentation"
 SLIDES = PRESENTATION / "slides.md"
 THEME = PRESENTATION / "theme.css"
 
-MAIN_SLIDE_COUNT = 30
+MAIN_SLIDE_COUNT = 32
 BACKUP_SLIDE_COUNT = 16
 MIN_TALK_SECONDS = 37 * 60
 MAX_TALK_SECONDS = 39 * 60
@@ -214,9 +214,13 @@ def test_requested_slides_are_named_and_ordered() -> None:
         if re.search(r"(?m)^#\s+(.*)$", slide)
     ]
 
+    assert titles[1] == "Agenda"
     assert titles.index("Transformation Objectives") + 1 == titles.index("Personas & Journey")
-    assert titles.index("What's In — and What's Out") + 1 == titles.index(
-        "One Governed Platform"
+    assert titles.index("Personas & Journey") + 1 == titles.index(
+        "An Agent for Every Role — Human Judgment at the Center"
+    )
+    assert titles.index("One Governed Platform") + 1 == titles.index(
+        "What's In — and What's Out"
     )
     assert titles.index("What You'll See Next") < titles.index(
         "How We Built the Demo with an Agent Swarm"
@@ -226,6 +230,24 @@ def test_requested_slides_are_named_and_ordered() -> None:
     ) + 1 == titles.index("Conclusion")
     assert titles.index("Next Steps") + 1 == titles.index("Thank You")
     assert titles[-1] == "Appendix — Fabric RTI"
+
+
+def test_persona_and_employee_agent_story_are_present() -> None:
+    _, slides = _front_matter_and_slides()
+    personas = next(slide for slide in slides if "# Personas & Journey" in slide)
+    assert "distinct knowledge and skills" in personas
+    assert "historians, spreadsheets, MES exports and specialist software" in personas
+    assert "Marc Weber" not in personas
+    assert "Site Command Center" not in personas
+
+    employee_agents = next(
+        slide
+        for slide in slides
+        if "# An Agent for Every Role — Human Judgment at the Center" in slide
+    )
+    assert "images/employees-with-agents.png" in employee_agents
+    assert "Accept · modify · reject" in employee_agents
+    assert "No agent crosses into operational control" in employee_agents
 
 
 def test_scope_boundary_and_deep_dives_are_explicit() -> None:

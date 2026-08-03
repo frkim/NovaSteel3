@@ -79,7 +79,7 @@ artifacts, and the `github-pages-deploy` job is skipped.
 - Every content slide carries exactly one speaker note comment that starts with a
   timing marker, e.g. `<!-- ⏱ 1:30 · … -->`. The markers are the timing budget:
   [`tests/presentation/test_marp_deck.py`](../../tests/presentation/test_marp_deck.py)
-  fails the build if the 30 main slides do not add up to a 38-minute talk. Backup and
+  fails the build if the 32 main slides do not add up to a 38-minute talk. Backup and
   appendix slides carry `⏱ 0:00` so they stay outside the speaking budget. The defense
   clock is 38 min slides + 10 min live demo + Q&A.
 - Keep the honesty contract of the project: 🎯 TARGET (projected outcome) versus

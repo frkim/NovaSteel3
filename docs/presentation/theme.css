@@ -7,7 +7,9 @@
  * apps/portal-shell/wwwroot/brand: molten-orange accent on a cool graphite base.
  * Class contract consumed by slides.md: lead, tight, diagram, backup, cards[.four|.five],
  * card[.teal|.orange|.purple|.green|.blue], card-num, subtitle, split[.right-wide],
- * small-body, scope-boundary/scope-grid/scope-panel/scope-footer, deep-dive,
+ * small-body, agenda/agenda-grid/agenda-item/agenda-path, persona-friction,
+ * employee-agents/employee-agent-visual/employee-agent-outcomes,
+ * scope-boundary/scope-grid/scope-panel/scope-footer, deep-dive,
  * stat/big/label, pill[.green|.orange|.purple|.gray|.blue], tag, grad, hero-line,
  * herostats, brandbar, corners[.bottom-right],
  * flow/lane[.teal|.orange|.purple|.green|.blue]/lane-tag/nodes/node/arrow/legend.
@@ -217,6 +219,194 @@ section.diagram {
 section.diagram h1 {
   font-size: 38px;
   margin-bottom: 10px;
+}
+
+/* --- agenda ------------------------------------------------------------ */
+
+section.agenda .subtitle {
+  margin-bottom: 18px;
+}
+
+.agenda-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 20px;
+}
+
+.agenda-item {
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  gap: 14px;
+  align-items: center;
+  min-height: 78px;
+  padding: 10px 18px;
+  border: 1px solid var(--ns-line);
+  border-left: 7px solid var(--ns-molten);
+  border-radius: 9px;
+  background: var(--ns-surface-alt);
+}
+
+.agenda-item span {
+  font-size: 27px;
+  font-weight: 700;
+  color: var(--ns-molten);
+}
+
+.agenda-item b {
+  display: block;
+  font-size: 20px;
+  line-height: 1.15;
+}
+
+.agenda-item small {
+  display: block;
+  margin-top: 4px;
+  color: var(--ns-ink-soft);
+  font-size: 15px;
+}
+
+.agenda-item.teal {
+  border-left-color: var(--ns-teal);
+}
+
+.agenda-item.teal span {
+  color: var(--ns-teal);
+}
+
+.agenda-item.purple {
+  border-left-color: var(--ns-purple);
+}
+
+.agenda-item.purple span {
+  color: var(--ns-purple);
+}
+
+.agenda-item.green {
+  border-left-color: var(--ns-green);
+}
+
+.agenda-item.green span {
+  color: var(--ns-green);
+}
+
+.agenda-item.blue {
+  border-left-color: var(--ns-blue);
+}
+
+.agenda-item.blue span {
+  color: var(--ns-blue);
+}
+
+.agenda-path {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 18px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: var(--ns-ink);
+  color: #ffffff;
+  font-size: 17px;
+}
+
+.agenda-path b {
+  color: #ffffff;
+}
+
+.agenda-path i {
+  color: #f29a62;
+  font-size: 21px;
+  line-height: 1;
+}
+
+/* --- personas and role-specific agents -------------------------------- */
+
+.persona-friction {
+  margin-top: 16px;
+  padding: 11px 18px;
+  border-left: 6px solid var(--ns-molten);
+  border-radius: 0 8px 8px 0;
+  background: var(--ns-molten-soft);
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+section.employee-agents {
+  padding: 34px 52px 48px;
+}
+
+section.employee-agents h1 {
+  font-size: 38px;
+  margin-bottom: 10px;
+}
+
+section.employee-agents .subtitle {
+  margin-bottom: 12px;
+  font-size: 21px;
+}
+
+.employee-agent-visual {
+  height: 330px;
+  overflow: hidden;
+  border: 1px solid var(--ns-line);
+  border-radius: 12px;
+  background: var(--ns-surface-alt);
+  box-shadow: 0 8px 18px rgb(15 23 42 / 10%);
+}
+
+.employee-agent-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: scale(1.42);
+  transform-origin: center center;
+  border-radius: 0;
+}
+
+.employee-agent-outcomes {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.employee-agent-outcomes span {
+  padding: 9px 12px;
+  border-top: 4px solid var(--ns-teal);
+  border-radius: 7px;
+  background: var(--ns-teal-soft);
+  text-align: center;
+}
+
+.employee-agent-outcomes span:nth-child(2) {
+  border-top-color: var(--ns-purple);
+  background: var(--ns-purple-soft);
+}
+
+.employee-agent-outcomes span:nth-child(3) {
+  border-top-color: var(--ns-green);
+  background: var(--ns-green-soft);
+}
+
+.employee-agent-outcomes span:nth-child(4) {
+  border-top-color: var(--ns-molten);
+  background: var(--ns-molten-soft);
+}
+
+.employee-agent-outcomes b,
+.employee-agent-outcomes small {
+  display: block;
+}
+
+.employee-agent-outcomes b {
+  font-size: 17px;
+}
+
+.employee-agent-outcomes small {
+  margin-top: 2px;
+  color: var(--ns-ink-soft);
+  font-size: 13px;
+  line-height: 1.2;
 }
 
 /* --- explicit solution boundary --------------------------------------- */

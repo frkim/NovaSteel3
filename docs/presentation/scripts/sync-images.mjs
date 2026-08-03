@@ -38,6 +38,7 @@ const assets = [
   [join(diagramDir, "steel-process-routes.webp"), "steel-process-routes.webp"],
   [join(diagramDir, "fabric-architecture-diagram.webp"), "fabric-architecture-diagram.webp"],
   [join(diagramDir, "fabric-rti-diagram.webp"), "fabric-rti-diagram.webp"],
+  [join(diagramDir, "Employees_with_agents.png"), "employees-with-agents.png"],
   [join(generatedDir, "steelworks-hero.png"), "steelworks-hero.png"],
   [join(generatedDir, "thermal-map.png"), "thermal-map.png"],
   ...[

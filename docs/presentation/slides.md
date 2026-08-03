@@ -4,6 +4,7 @@ theme: novasteel
 paginate: true
 header: 'NovaSteel · AI-Powered Steel Production Optimization'
 footer: 'AI advises, humans decide'
+title: 'NovaSteel · AI-Powered Steel Production Optimization'
 ---
 
 <!-- _class: lead -->
@@ -19,12 +20,12 @@ footer: 'AI advises, humans decide'
 
 <div class="hero-line"></div>
 
-AxelorMetal · 4 EU countries
-
 <div class="brandbar">
 <img src="images/novasteel-logo.png" alt="NovaSteel" onerror="this.remove()">
 <img src="images/axelormetal-wordmark.png" alt="AxelorMetal" onerror="this.remove()">
 </div>
+
+4 EU countries
 
 <div class="herostats">
 <div class="s"><b>−14%</b><span>energy per ton · target</span></div>
@@ -33,10 +34,34 @@ AxelorMetal · 4 EU countries
 <div class="s"><b>+8%</b><span>high-grade yield · target</span></div>
 </div>
 
-<!-- ⏱ 0:45 · Good morning.
+<!-- ⏱ 0:35 · Good morning.
 In the next hour I'll defend the NovaSteel platform: thirty-five minutes of architecture and value, a ten-minute live demonstration on fully synthetic data, and fifteen minutes for your questions.
 One ground rule I'll repeat throughout: I will always tell you whether a number is a target we're aiming for or evidence you're watching us reproduce.
 Today's demo proves the mechanics on synthetic data — it does not claim realized savings. -->
+
+---
+
+<!-- _class: tight agenda -->
+
+# Agenda
+
+<p class="subtitle">From business pressure to governed decisions — then proof in the live experience</p>
+
+<div class="agenda-grid">
+<div class="agenda-item orange"><span>01</span><div><b>Business context</b><small>Challenge · objectives · personas</small></div></div>
+<div class="agenda-item teal"><span>02</span><div><b>Platform & architecture</b><small>Scope · Fabric · AI flow</small></div></div>
+<div class="agenda-item purple"><span>03</span><div><b>Decision intelligence</b><small>Energy · RUL · quality · knowledge</small></div></div>
+<div class="agenda-item green"><span>04</span><div><b>Trust & governance</b><small>Security · Responsible AI · compliance</small></div></div>
+<div class="agenda-item blue"><span>05</span><div><b>Live demonstration</b><small>Persona journeys · evidence reproduced</small></div></div>
+<div class="agenda-item orange"><span>06</span><div><b>Value & next steps</b><small>Targets vs. evidence · roadmap · close</small></div></div>
+</div>
+
+<div class="agenda-path"><b>Business need</b><i>›</i><b>governed platform</b><i>›</i><b>human decision</b><i>›</i><b>measurable outcome</b></div>
+
+<!-- ⏱ 0:40 · Here is the route through the defense.
+I will start with the business pressure, objectives and the people making the decisions. Then I will show the governed platform and architecture that connect their fragmented information.
+We will go deeper into the four decision-intelligence capabilities, the trust and compliance controls around them, and then reproduce the evidence in the live persona journeys.
+I will close by separating demonstrated evidence from transformation targets and setting out the roadmap and next steps. -->
 
 ---
 
@@ -50,7 +75,7 @@ Today's demo proves the mechanics on synthetic data — it does not claim realiz
 <span class="pill orange">Blast furnace route</span> ore, coke and limestone → pig iron → basic oxygen furnace. <span class="pill blue">Electric arc furnace route</span> scrap and DRI melted with electricity. Both converge on ladle refining, casting, rolling and coating.
 </div>
 
-<!-- ⏱ 1:05 · Before the architecture, thirty seconds on the process itself, because every design choice hangs off this picture.
+<!-- ⏱ 0:55 · Before the architecture, thirty seconds on the process itself, because every design choice hangs off this picture.
 AxelorMetal runs both primary routes. The integrated route reduces iron ore, coking coal and limestone in the blast furnace into molten pig iron, which the basic oxygen furnace then decarburises into steel. The electric arc furnace route melts scrap and direct-reduced iron with electricity instead — far less embedded carbon, far more exposure to the hourly power price, which is exactly why energy dispatch matters more on that route.
 From ladle refining onward the two routes share one line: continuous casting into slabs, blooms and billets, then hot and cold rolling, galvanizing and coating.
 Everything NovaSteel does hangs off four points on this picture — the electricity the furnace pulls, refractory wear inside the furnace, the defect risk introduced at the caster and the mill, and the tacit knowledge that walks out of the gate at shift handover. -->
@@ -70,9 +95,11 @@ Everything NovaSteel does hangs off four points on this picture — the electric
 <div class="card blue"><div class="card-num">Yield</div><h3>Grade yield variability</h3><p>Genealogy must be heat-by-heat</p></div>
 </div>
 
+</BR>
+
 Regulatory frame: GDPR · EU AI Act · EU ETS
 
-<!-- ⏱ 1:30 · AxelorMetal runs blast furnaces and rolling mills across four EU countries.
+<!-- ⏱ 1:15 · AxelorMetal runs blast furnaces and rolling mills across four EU countries.
 Five structural problems: energy is thirty-five percent of production cost with no real-time lever; carbon is now a hard financial cost under the EU Emissions Trading System; a furnace-lining failure costs around eight million euros per event and today is effectively unpredictable; automotive-grade yield swings heat to heat, and the customers who buy that steel expect genealogy traced heat by heat rather than shift by shift; and the experts who know the furnace are retiring faster than we can capture what they know.
 This is a heavy-industry, safety-sensitive, EU-regulated context — which shapes every architectural choice that follows. -->
 
@@ -91,14 +118,14 @@ This is a heavy-industry, safety-sensitive, EU-regulated context — which shape
 </div>
 <div>
 
-<div class="stat"><div class="big">€8M</div><div class="label">single lining failure event</div></div>
+<div class="stat"><div class="big">€8M (~15 days)</div><div class="label">single lining failure event</div></div>
 
 > Doing nothing isn't neutral — it's the most expensive option.
 
 </div>
 </div>
 
-<!-- ⏱ 1:10 · Doing nothing isn't neutral — it's the most expensive option.
+<!-- ⏱ 0:55 · Doing nothing isn't neutral — it's the most expensive option.
 Every axis compounds: energy bought at peak, carbon paid at penalty, failures paid at eight million a time, and knowledge lost permanently.
 I'm deliberately not putting a single made-up total savings number here — you'll see me refuse round numbers all morning.
 The point is direction and materiality, which the board already feels. -->
@@ -116,7 +143,7 @@ The point is direction and materiality, which the board already feels. -->
 
 <span class="pill orange">🎯 TARGET</span> All four numbers are targets tied to stated baselines — not proven today
 
-<!-- ⏱ 1:25 · These four numbers are our contract with the business — and they are targets, each tied to a stated baseline so they're falsifiable, not marketing.
+<!-- ⏱ 1:10 · These four numbers are our contract with the business — and they are targets, each tied to a stated baseline so they're falsifiable, not marketing.
 Fourteen percent less energy per ton, twenty-two percent less CO₂ per ton, at least twenty-one days of warning before a lining failure, and eight percent more high-grade yield.
 Notice I'm showing the baseline under each; a percentage without a baseline is a slogan.
 Today's demo will show the platform producing these kinds of outputs on synthetic data — not that we've banked them. -->
@@ -124,6 +151,8 @@ Today's demo will show the platform producing these kinds of outputs on syntheti
 ---
 
 # Personas & Journey
+
+<p class="subtitle">Expert people are slowed by fragmented tools, software and data</p>
 
 | Persona | Role | Dashboard | Key job-to-be-done |
 |---|---|---|---|
@@ -133,50 +162,36 @@ Today's demo will show the platform producing these kinds of outputs on syntheti
 | **Amina Haddad** | Sustainability Officer | ETS Cockpit | Own the −22% carbon target |
 | **Pieter Claes** | Knowledge Engineer | GenAI Capture Studio | Preserve retiring expertise |
 
-<span class="pill blue">DEMO</span> Marc Weber, Plant Manager, opens the demonstration on the Site Command Center
+<div class="persona-friction"><b>Today:</b> each employee brings distinct knowledge and skills, but must reconcile historians, spreadsheets, MES exports and specialist software before acting.</div>
 
-<!-- ⏱ 1:15 · The platform serves people, not job titles — so every persona has a name, and those names are binding across the deck, the portal and the demo.
+<!-- ⏱ 1:00 · The platform serves people, not job titles — so every persona has a name, and those names are binding across the deck, the portal and the demo.
 Elena Duarte runs the furnace on shift and wants the decision context for the next four hours, not a monthly report. Sofia Lindqvist manages energy and wants to move flexible load off price peaks. Jens Bakker owns quality and wants to catch drift before it ships, with genealogy provable heat-by-heat.
 Amina Haddad owns the twenty-two-percent carbon target and the ETS exposure. Pieter Claes wants a retiring expert's judgment captured before it walks out of the gate.
-The demonstration opens with Marc Weber, the plant manager, because his Site Command Center is where a real operating day starts — and then I'll walk these five in the order that day would touch them. -->
+Each brings different expertise, but today they lose time moving between historians, spreadsheets, MES exports and specialist applications, manually rebuilding the same context before they can decide. -->
 
 ---
 
-<!-- _class: tight scope-boundary -->
+<!-- _class: tight employee-agents -->
 
-# What's In — and What's Out
+# An Agent for Every Role — Human Judgment at the Center
 
-<p class="subtitle">A governed decision-support solution with a deliberate OT safety boundary</p>
+<p class="subtitle">Role-specific agents bring governed context into each employee's flow of work — while people retain control</p>
 
-<div class="scope-grid">
-<div class="scope-panel in">
-<h2>✓ In the solution</h2>
-
-- Microsoft Fabric data spine: plant, energy, emissions, quality, maintenance & knowledge
-- Four advisory capabilities: **energy dispatch, lining RUL, quality risk, knowledge capture**
-- Persona dashboards, bounded what-if simulations, confidence & explainability
-- Human accept / modify / reject gates with model version, correlation ID & audit trail
-- EU-hosted processing, consent, content safety, approved-only knowledge retrieval
-
-</div>
-<div class="scope-panel out">
-<h2>× What's out of scope</h2>
-
-- **No PLC, interlock, furnace, recipe or production-setpoint control**
-- No autonomous schedule, work-order or CMMS commit
-- No LLM-only calculation or relaxation of deterministic hard constraints
-- No production credentials or shared demo / production storage
-- No unapproved transcript or draft procedure as operational instruction
-
-</div>
+<div class="employee-agent-visual">
+<img src="images/employees-with-agents.png" alt="Employees working with role-specific agents">
 </div>
 
-<div class="scope-footer"><b>Hard boundary:</b> no recommendation becomes authorization; no application path crosses into OT control</div>
+<div class="employee-agent-outcomes">
+<span><b>Find faster</b><small>Governed data and approved knowledge</small></span>
+<span><b>Decide better</b><small>Role-specific risks and recommendations</small></span>
+<span><b>Share expertise</b><small>Consistent handoffs across teams</small></span>
+<span><b>Stay accountable</b><small>Accept · modify · reject</small></span>
+</div>
 
-<!-- ⏱ 0:55 · Before the architecture, let me make the boundary explicit.
-In scope is a governed Fabric data spine, four advisory capabilities, role-specific experiences, bounded simulation, confidence, and a complete human decision trail.
-Out of scope is equally important: no path writes to a PLC, interlock, furnace, recipe, production setpoint, schedule, work order, or CMMS. Language models cannot replace the Python calculation or relax a hard constraint, and an unapproved transcript never becomes an instruction.
-That boundary is not a future intention; it is an architectural rule: AI advises, humans decide, and the operational systems remain authoritative. -->
+<!-- ⏱ 0:50 · NovaSteel changes the relationship between employees and their tools.
+Instead of asking every person to search across systems and manually assemble context, a role-specific agent brings governed data, approved knowledge, risks and recommendations into the employee's flow of work.
+The agent does not replace expertise; it makes that expertise more productive — faster discovery, better-informed decisions and more consistent handoffs between shifts and functions.
+The employee remains accountable: they accept, modify or reject. No agent crosses into operational control. -->
 
 ---
 
@@ -213,10 +228,48 @@ That boundary is not a future intention; it is an architectural rule: AI advises
 <div class="node orange"><b>Human decision</b><span>approval + audit</span></div>
 </div>
 
-<!-- ⏱ 1:25 · Here is the entire platform in one picture.
+<!-- ⏱ 1:15 · Here is the entire platform in one picture.
 Live plant signals flow into a single, unified platform core. Today AxelorMetal's data and tooling are scattered across historians, spreadsheets, MES exports and separate BI stacks; the whole point of this slide is that they stop being scattered — one governed place where the data, the AI and the decision live together.
 On top of that governed core sit four AI capabilities. Those feed persona-specific experiences. A human always makes the consequential decision, and every decision is audited.
 The center of gravity is that unified core — I'll spend real time defending why Microsoft Fabric is the right implementation of it, because it's the question this room should press hardest on. -->
+
+---
+
+<!-- _class: tight scope-boundary -->
+
+# What's In — and What's Out
+
+<p class="subtitle">A governed decision-support solution with a deliberate OT safety boundary</p>
+
+<div class="scope-grid">
+<div class="scope-panel in">
+<h2>✓ In the solution</h2>
+
+- Microsoft Fabric data spine: plant, energy, emissions, quality, maintenance & knowledge
+- Four advisory capabilities: **energy dispatch, lining RUL, quality risk, knowledge capture**
+- Persona dashboards, bounded what-if simulations, confidence & explainability
+- Human accept / modify / reject gates with model version, correlation ID & audit trail
+- EU-hosted processing, consent, content safety, retrieval limited to approved knowledge
+
+</div>
+<div class="scope-panel out">
+<h2>× What's out of scope</h2>
+
+- **No PLC, interlock, furnace, recipe or production-setpoint control**
+- No autonomous schedule, work-order or CMMS commit
+- No LLM-only calculation or relaxation of deterministic hard constraints
+- No production credentials or shared demo / production storage
+- No unapproved transcript or draft procedure as operational instruction
+
+</div>
+</div>
+
+<div class="scope-footer"><b>Hard boundary:</b> no recommendation becomes authorization; no application path crosses into OT control</div>
+
+<!-- ⏱ 0:55 · Now that the unified platform is clear, let me make its boundary explicit.
+In scope is a governed Fabric data spine, four advisory capabilities, role-specific experiences, bounded simulation, confidence, and a complete human decision trail.
+Out of scope is equally important: no path writes to a PLC, interlock, furnace, recipe, production setpoint, schedule, work order, or CMMS. Language models cannot replace the Python calculation or relax a hard constraint, and an unapproved transcript never becomes an instruction.
+That boundary is not a future intention; it is an architectural rule: AI advises, humans decide, and the operational systems remain authoritative. -->
 
 ---
 

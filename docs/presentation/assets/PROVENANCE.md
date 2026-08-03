@@ -115,6 +115,7 @@ under `docs/images/`, and only the optimised WebP rendition is committed.
 | `diagrams/steel-process-routes.webp` | Illustrated diagram | Generated for this project | No licence risk |
 | `diagrams/fabric-architecture-diagram.webp` | Architecture diagram | Supplied by the repository owner for this project | Confirmed project asset |
 | `diagrams/fabric-rti-diagram.webp` | Architecture diagram | Supplied by the repository owner for this project | Confirmed project asset |
+| `diagrams/Employees_with_agents.png` | Employee and agent operating-model diagram | Supplied by the repository owner for this project | Confirmed project asset |
 
 `../scripts/sync-images.mjs` copies it into the deck's generated `images/`
 folder, so `slides.md` references it as `images/steel-process-routes.webp`.
