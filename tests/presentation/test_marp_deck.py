@@ -17,8 +17,8 @@ PRESENTATION = ROOT / "docs" / "presentation"
 SLIDES = PRESENTATION / "slides.md"
 THEME = PRESENTATION / "theme.css"
 
-MAIN_SLIDE_COUNT = 25
-BACKUP_SLIDE_COUNT = 17
+MAIN_SLIDE_COUNT = 29
+BACKUP_SLIDE_COUNT = 16
 MIN_TALK_SECONDS = 37 * 60
 MAX_TALK_SECONDS = 39 * 60
 
@@ -70,7 +70,7 @@ def test_deck_never_mentions_a_phase_zero() -> None:
     assert "Phase 0" not in _read(SLIDES)
 
 
-def test_deck_has_twenty_five_main_slides_and_seventeen_backup_slides() -> None:
+def test_deck_has_expected_main_and_backup_slides() -> None:
     _, slides = _front_matter_and_slides()
     assert len(slides) == MAIN_SLIDE_COUNT + BACKUP_SLIDE_COUNT
     assert all("backup" not in _classes(slide) for slide in slides[:MAIN_SLIDE_COUNT])
@@ -113,12 +113,19 @@ def test_deck_carries_a_compliance_slide_instead_of_the_deployment_slide() -> No
     assert not any("Appendix — Deployment, Capacity & Scale" in slide for slide in backup)
 
 
-def test_demo_handoff_announces_a_ten_minute_demonstration() -> None:
+def test_demo_handoff_contains_only_the_demo_sequence() -> None:
     _, slides = _front_matter_and_slides()
     handoff = [slide for slide in slides if "What You'll See Next" in slide]
     assert len(handoff) == 1
-    assert "10-minute demonstration" in handoff[0]
-    assert "15-minute" not in handoff[0]
+    for removed in (
+        "Live, deterministic, synthetic",
+        "Accelerated 60× clock",
+        "Every screen labeled synthetic",
+        "10-minute demonstration",
+    ):
+        assert removed not in handoff[0]
+    assert "Fleet overview" in handoff[0]
+    assert "Recap — targets vs. evidence" in handoff[0]
 
 
 def test_backup_slides_are_outside_the_speaking_budget() -> None:
@@ -193,10 +200,39 @@ def test_deck_carries_the_architecture_and_ai_flow_diagrams() -> None:
         heading = re.search(r"(?m)^#\s+(.*)$", slide)
         assert heading is not None, "a diagram slide is missing its title"
         titles.append(heading.group(1))
-    assert {"Architecture at a Glance", "AI Architecture in Detail"} <= set(titles), (
+    assert {"High Level Architecture", "AI Architecture in Detail"} <= set(titles), (
         "the deck needs an architecture diagram and an AI detail diagram"
     )
-    assert titles.index("Architecture at a Glance") < titles.index("AI Architecture in Detail")
+    assert titles.index("High Level Architecture") < titles.index("AI Architecture in Detail")
+
+
+def test_requested_slides_are_named_and_ordered() -> None:
+    _, slides = _front_matter_and_slides()
+    titles = [
+        re.search(r"(?m)^#\s+(.*)$", slide).group(1)
+        for slide in slides
+        if re.search(r"(?m)^#\s+(.*)$", slide)
+    ]
+
+    assert titles.index("Transformation Objectives") + 1 == titles.index("Personas & Journey")
+    assert titles.index("What You'll See Next") < titles.index(
+        "How We Built the Demo with an Agent Swarm"
+    )
+    assert titles.index(
+        "Appendix — vNext: Two-way Control with Microsoft Adaptive Cloud"
+    ) + 1 == titles.index("Conclusion")
+    assert titles.index("Next Steps") + 1 == titles.index("Thank You")
+    assert titles[-1] == "Appendix — Fabric RTI"
+
+
+def test_fabric_diagrams_and_architecture_labels_are_present() -> None:
+    text = _read(SLIDES)
+    assert "# High Level Architecture" in text
+    assert "Decision Center App" in text
+    assert "Python FastAPI BFF" not in text
+    assert "images/fabric-architecture-diagram.png" in text
+    assert "images/fabric-rti-diagram.png" in text
+    assert "# Appendix — Why Fabric — and Why Not a Parallel Lake" not in text
 
 
 def test_deck_sizes_the_run_cost_for_one_site() -> None:

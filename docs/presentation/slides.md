@@ -19,7 +19,7 @@ footer: 'AI advises, humans decide'
 
 <div class="hero-line"></div>
 
-Microsoft Fabric–centered architecture · AxelorMetal · 4 EU countries
+AxelorMetal · 4 EU countries
 
 <div class="brandbar">
 <img src="images/novasteel-logo.png" alt="NovaSteel" onerror="this.remove()">
@@ -34,7 +34,7 @@ Microsoft Fabric–centered architecture · AxelorMetal · 4 EU countries
 </div>
 
 <!-- ⏱ 0:45 · Good morning.
-In the next hour I'll defend the NovaSteel platform: thirty-five minutes of architecture and value, a ten-minute live demonstration on fully synthetic data, and fifteen minutes for your hardest questions.
+In the next hour I'll defend the NovaSteel platform: thirty-five minutes of architecture and value, a ten-minute live demonstration on fully synthetic data, and fifteen minutes for your questions.
 One ground rule I'll repeat throughout: I will always tell you whether a number is a target we're aiming for or evidence you're watching us reproduce.
 Today's demo proves the mechanics on synthetic data — it does not claim realized savings. -->
 
@@ -61,8 +61,6 @@ Everything NovaSteel does hangs off four points on this picture — the electric
 
 <div class="subtitle">A steel estate under pressure on five fronts</div>
 
-- Luxembourg-based integrated producer · blast furnaces + rolling mills across **4 countries**
-- Regulatory frame: GDPR · EU AI Act · EU ETS
 
 <div class="cards five">
 <div class="card orange"><div class="card-num">35%</div><h3>Energy cost share</h3><p>No real-time optimization lever</p></div>
@@ -71,6 +69,8 @@ Everything NovaSteel does hangs off four points on this picture — the electric
 <div class="card green"><div class="card-num">Knowledge</div><h3>Operator attrition</h3><p>Retiring experts, irreversible loss</p></div>
 <div class="card blue"><div class="card-num">Yield</div><h3>Grade yield variability</h3><p>Genealogy must be heat-by-heat</p></div>
 </div>
+
+Regulatory frame: GDPR · EU AI Act · EU ETS
 
 <!-- ⏱ 1:30 · AxelorMetal runs blast furnaces and rolling mills across four EU countries.
 Five structural problems: energy is thirty-five percent of production cost with no real-time lever; carbon is now a hard financial cost under the EU Emissions Trading System; a furnace-lining failure costs around eight million euros per event and today is effectively unpredictable; automotive-grade yield swings heat to heat, and the customers who buy that steel expect genealogy traced heat by heat rather than shift by shift; and the experts who know the furnace are retiring faster than we can capture what they know.
@@ -116,10 +116,29 @@ The point is direction and materiality, which the board already feels. -->
 
 <span class="pill orange">🎯 TARGET</span> All four numbers are targets tied to stated baselines — not proven today
 
-<!-- ⏱ 1:30 · These four numbers are our contract with the business — and they are targets, each tied to a stated baseline so they're falsifiable, not marketing.
+<!-- ⏱ 1:25 · These four numbers are our contract with the business — and they are targets, each tied to a stated baseline so they're falsifiable, not marketing.
 Fourteen percent less energy per ton, twenty-two percent less CO₂ per ton, at least twenty-one days of warning before a lining failure, and eight percent more high-grade yield.
 Notice I'm showing the baseline under each; a percentage without a baseline is a slogan.
 Today's demo will show the platform producing these kinds of outputs on synthetic data — not that we've banked them. -->
+
+---
+
+# Personas & Journey
+
+| Persona | Role | Dashboard | Key job-to-be-done |
+|---|---|---|---|
+| **Elena Duarte** | Furnace Operator | Health Monitor + Knowledge | Daily decision context at the furnace |
+| **Sofia Lindqvist** | Energy Manager | Dispatch Optimization | Move flexible load off price peaks |
+| **Jens Bakker** | Quality Engineer | In-line Quality | Catch drift before it ships |
+| **Amina Haddad** | Sustainability Officer | ETS Cockpit | Own the −22% carbon target |
+| **Pieter Claes** | Knowledge Engineer | GenAI Capture Studio | Preserve retiring expertise |
+
+<span class="pill blue">DEMO</span> Marc Weber, Plant Manager, opens the demonstration on the Site Command Center
+
+<!-- ⏱ 1:15 · The platform serves people, not job titles — so every persona has a name, and those names are binding across the deck, the portal and the demo.
+Elena Duarte runs the furnace on shift and wants the decision context for the next four hours, not a monthly report. Sofia Lindqvist manages energy and wants to move flexible load off price peaks. Jens Bakker owns quality and wants to catch drift before it ships, with genealogy provable heat-by-heat.
+Amina Haddad owns the twenty-two-percent carbon target and the ETS exposure. Pieter Claes wants a retiring expert's judgment captured before it walks out of the gate.
+The demonstration opens with Marc Weber, the plant manager, because his Site Command Center is where a real operating day starts — and then I'll walk these five in the order that day would touch them. -->
 
 ---
 
@@ -183,34 +202,15 @@ If any of these is a problem for you, stop me now, because I won't trade them aw
 
 ---
 
-# Who Benefits: Personas & Journeys
-
-| Persona | Role | Dashboard | Key job-to-be-done |
-|---|---|---|---|
-| **Elena Duarte** | Furnace Operator | Health Monitor + Knowledge | Daily decision context at the furnace |
-| **Sofia Lindqvist** | Energy Manager | Dispatch Optimization | Move flexible load off price peaks |
-| **Jens Bakker** | Quality Engineer | In-line Quality | Catch drift before it ships |
-| **Amina Haddad** | Sustainability Officer | ETS Cockpit | Own the −22% carbon target |
-| **Pieter Claes** | Knowledge Engineer | GenAI Capture Studio | Preserve retiring expertise |
-
-<span class="pill blue">DEMO</span> Marc Weber, Plant Manager, opens the demonstration on the Site Command Center
-
-<!-- ⏱ 1:25 · The platform serves people, not job titles — so every persona has a name, and those names are binding across the deck, the portal and the demo.
-Elena Duarte runs the furnace on shift and wants the decision context for the next four hours, not a monthly report. Sofia Lindqvist manages energy and wants to move flexible load off price peaks. Jens Bakker owns quality and wants to catch drift before it ships, with genealogy provable heat-by-heat.
-Amina Haddad owns the twenty-two-percent carbon target and the ETS exposure. Pieter Claes wants a retiring expert's judgment captured before it walks out of the gate.
-The demonstration opens with Marc Weber, the plant manager, because his Site Command Center is where a real operating day starts — and then I'll walk these five in the order that day would touch them. -->
-
----
-
 <!-- _class: tight -->
 <!-- _header: '' -->
 <!-- _footer: '' -->
 
-# Architecture at a Glance
+# High Level Architecture
 
 <div class="flow">
 <div class="lane purple"><div class="lane-tag">AI &amp; app<br>services</div><div class="nodes">
-<div class="node purple"><b>Python FastAPI BFF</b><span>domain APIs · read-only adapters to KQL + gold</span></div>
+<div class="node purple"><b>Decision Center App</b><span>domain APIs · read-only adapters to KQL + gold</span></div>
 <div class="node purple"><b>Scoring / optimizer workers</b><span>MILP dispatch · RUL · quality risk</span></div>
 <div class="node purple"><b>Foundry (EU) + Speech</b><span>explain &amp; transcribe · restricted OpenAPI tools</span></div>
 </div></div>
@@ -234,11 +234,21 @@ The demonstration opens with Marc Weber, the plant manager, because his Site Com
 </div></div>
 </div>
 
-<!-- ⏱ 2:20 · This is the whole system on one slide; I'll return to it three times.
+<!-- ⏱ 1:50 · This is the whole system on one slide; I'll return to it three times.
 Read it bottom to top, the way the data actually travels. At each site, controllers and historians sit at Purdue levels zero to two with no inbound path from the cloud, and a gateway in an industrial DMZ terminates OT protocols and only ever emits outbound, schema-validated telemetry — no cloud system ever reaches down into the plant.
 One level up, Azure Event Hubs buffers, and a managed-identity relay publishes to Fabric's Eventstream over Entra ID with no shared key; batch systems — MES, ERP, LIMS, CMMS — land on the same contract through Fabric pipelines.
 Above that Fabric is the core: hot data in KQL, governed bronze-silver-gold history in OneLake, one Direct Lake semantic model, Power BI, and Activator strictly for notifications.
 At the top, Python services do the math and read Fabric read-only, and Foundry and Speech handle language. Features and labels flow down into them; predictions, recommendations and audit facts flow back up. -->
+
+---
+
+<!-- _class: diagram diagram-title-in-image -->
+
+# Fabric Architecture
+
+![Fabric architecture](images/fabric-architecture-diagram.png)
+
+<!-- ⏱ 0:25 · This diagram expands the Fabric core: Real-Time Intelligence handles the operational clock, OneLake and the Lakehouse preserve governed history, and a shared semantic layer serves analytics and decision experiences without creating a parallel data estate. -->
 
 ---
 
@@ -263,7 +273,7 @@ At the top, Python services do the math and read Fabric read-only, and Foundry a
 </div>
 </div>
 
-<!-- ⏱ 2:00 · Why bet the platform on Fabric? Because heavy-industry analytics has two clocks: a one-second operational clock and a governed-history clock. Fabric handles both in one governed estate.
+<!-- ⏱ 1:45 · Why bet the platform on Fabric? Because heavy-industry analytics has two clocks: a one-second operational clock and a governed-history clock. Fabric handles both in one governed estate.
 Real-Time Intelligence — Eventstream into an Eventhouse KQL database — gives us hot telemetry, alarms, and freshness. OneLake with bronze-silver-gold Delta gives us immutable lineage, the training substrate, and stable KPI definitions.
 Direct Lake means one semantic model reads gold data with no extra copy — so high-grade yield means exactly one thing everywhere.
 We consciously chose not to build a parallel lake or a second BI stack — that's ADR-001 — and we keep hot KQL separate from governed Delta, ADR-002, so we always answer from the right store.
@@ -316,7 +326,7 @@ That's ADR-006, and it's why a language model being confidently wrong can't hurt
 
 ---
 
-<!-- _class: tight -->
+<!-- _class: tight vnext -->
 <!-- _header: '' -->
 <!-- _footer: '' -->
 
@@ -686,19 +696,18 @@ Be clear about what we are not claiming. We produce audit-grade management infor
 <div class="split">
 <div>
 
-- Live, deterministic, synthetic — seed `240725`
-- Accelerated 60× clock
-- Every screen labeled synthetic
-- 10-minute demonstration
+**From operations to optimization**
 
-</div>
-<div>
-
-**Demo sequence:**
 1. Fleet overview — Marc Weber, Plant Manager
 2. Energy dispatch optimization
 3. Furnace lining RUL alert
 4. Quality prediction & genealogy
+
+</div>
+<div>
+
+**From prediction to proof**
+
 5. Operator knowledge capture
 6. Sustainability / ETS / audit
 7. Recap — targets vs. evidence
@@ -708,9 +717,68 @@ Be clear about what we are not claiming. We produce audit-grade management infor
 
 > Targets are 14 / 22 / 21 / 8 — the demo proves the mechanics, not the savings.
 
-<!-- ⏱ 0:40 · Now I'll show it live. Everything is synthetic and deterministic — seed two-four-oh-seven-two-five, an accelerated clock so forty-five days compress into seconds.
-I'll move through seven tabs in the order an operating day touches them, starting with Marc Weber's site command centre, and I'll call out target versus evidence as we go.
-Ten minutes, starting now. -->
+<!-- ⏱ 0:20 · I'll move through seven experiences in the order an operating day touches them, starting with Marc Weber's site command centre, and I'll call out target versus evidence as we go. -->
+
+---
+
+# How We Built the Demo with an Agent Swarm
+
+<div class="cards four">
+<div class="card purple"><div class="card-num">01</div><h3>Orchestrate</h3><p>Break the outcome into small tasks with explicit dependencies</p></div>
+<div class="card blue"><div class="card-num">02</div><h3>Specialize</h3><p>Domain, UX, data, AI and security agents own independent scopes</p></div>
+<div class="card teal"><div class="card-num">03</div><h3>Integrate</h3><p>Shared contracts, repository artifacts and tests keep parallel work coherent</p></div>
+<div class="card green"><div class="card-num">04</div><h3>Validate</h3><p>Fresh-agent review, automated checks and human approval close every task</p></div>
+</div>
+
+<div class="chain">
+<div class="node purple"><b>Plan</b><span>task DAG</span></div>
+<div class="step">›</div>
+<div class="node blue"><b>Build in parallel</b><span>bounded ownership</span></div>
+<div class="step">›</div>
+<div class="node teal"><b>Integrate continuously</b><span>shared contracts</span></div>
+<div class="step">›</div>
+<div class="node green"><b>Prove</b><span>tests + review</span></div>
+</div>
+
+<!-- ⏱ 0:35 · We built the demonstration as an agent swarm rather than one long sequential task. An orchestrator decomposed the outcome into a dependency graph; specialist agents owned bounded domain, UX, data, AI and security scopes; shared contracts and repository tests integrated their work continuously; and fresh-agent review plus human approval closed each task. -->
+
+---
+
+<!-- _class: tight -->
+
+# Appendix — vNext: Two-way Control with Microsoft Adaptive Cloud
+
+<div class="split right-wide">
+<div class="small-body">
+
+**Goal**
+
+- Enable selected closed-loop actions for low-risk workloads
+
+**Adaptive Cloud implementation**
+
+- **Azure Arc** manages edge Kubernetes lifecycle and policy
+- **Azure IoT Operations** provides MQTT, OPC UA, and local dataflows
+- **Azure IoT Hub** provides command, device identity, twins, and jobs
+- **Fabric + AI services** provide prediction and policy context
+
+**Safe control loop**
+
+1. AI marks a low-risk workload as control-eligible
+2. Policy checks the safety envelope, interlocks, and approval
+3. IoT executes the bounded command; acknowledgement and telemetry close the audit loop
+
+</div>
+<div>
+
+![w:610](images/adaptive-cloud-iot-operations.png)
+
+<span class="pill orange">vNext</span> OT safety systems remain authoritative; AI can act only inside predefined control envelopes.
+
+</div>
+</div>
+
+<!-- ⏱ 0:30 · This is the forward-looking control architecture: Arc-managed edge, IoT Operations for local protocol and runtime, IoT Hub for identity and cloud command, and policy-gated AI decisions. We start with human-confirmed actions and expand only to bounded autonomous loops where safety and governance approvals are explicit. -->
 
 ---
 
@@ -738,7 +806,7 @@ Ten minutes, starting now. -->
 
 > The honesty discipline *is* the trustworthiness.
 
-<!-- ⏱ 1:10 · Let me close on four things, and one distinction.
+<!-- ⏱ 1:00 · Let me close on four things, and one distinction.
 First, one governed platform: the scattered historians, spreadsheets and disconnected tools become a single EU-hosted estate with one definition of every KPI.
 Second, AI that is accountable: deterministic Python computes the answer, the language model only explains it, a human approves it, and every consequential output is replayable input by input.
 Third, safe by construction: advisory only, an outbound-only boundary to the plant, Zero Trust and least privilege — safety systems stay authoritative and untouched.
@@ -782,11 +850,26 @@ And the distinction I have kept all morning: what you just watched is evidence t
 </div>
 </div>
 
-<!-- ⏱ 1:05 · So what do I actually want from you?
+<!-- ⏱ 0:55 · So what do I actually want from you?
 Not a rollout decision. In the next thirty days: a workshop where we replace our seven assumptions with your real numbers, a choice of pilot site, and the opening of three governance gates — the DPIA, Legal's AI Act classification, and an accredited ETS verifier.
 Then Phase 1 is a single site, read-only, with shadow scoring that changes nothing on the floor, and an auditable savings ledger — because that ledger is the only honest mechanism for turning a fourteen-percent target into a banked fourteen percent.
 The right-hand table is the gate list, each with a named owner, and none of them is ours to waive.
 The decision I'm asking for today is narrow: approve the pilot scope and open the gates. Thank you — I'll take your hardest questions now. -->
+
+---
+
+<!-- _class: lead -->
+<!-- _paginate: false -->
+<!-- _header: '' -->
+<!-- _footer: '' -->
+
+# Thank You
+
+## Questions & discussion
+
+> AI advises, humans decide.
+
+<!-- ⏱ 0:10 · Thank you. I welcome your questions. -->
 
 
 ---
@@ -1214,49 +1297,6 @@ Burned error budget triggers a change freeze until root cause is addressed.
 
 <!-- _class: tight backup -->
 
-# Appendix — vNext: Two-way Control with Microsoft Adaptive Cloud
-
-<div class="split right-wide">
-<div>
-
-**Goal**
-
-- Enable selected closed-loop actions for low-risk, repetitive workloads
-
-**Adaptive Cloud implementation**
-
-- **Azure Arc** manages edge Kubernetes lifecycle and policy at plant sites
-- **Azure IoT Operations** provides edge MQTT, OPC UA integration, and local dataflows
-- **Azure IoT Hub** provides cloud command channel, device identity, twins, and jobs
-- **Fabric + AI services** provide prediction/optimization and policy decision context
-
-**Safe control loop**
-
-1. AI marks a recommendation as control-eligible for a specific workload
-2. Policy gate checks safety envelope, interlocks, and approval mode
-3. Command is sent through IoT Hub / IoT Operations to the target edge connector/device
-4. Device acknowledgement + telemetry close the loop into an append-only audit trail
-
-**Guardrail**
-
-- Start in human-confirmed mode; move to bounded autonomy only where formally approved.
-
-</div>
-<div>
-
-![w:610](images/adaptive-cloud-iot-operations.png)
-
-<span class="pill orange">vNext</span> OT safety systems remain authoritative; AI can act only inside predefined control envelopes.
-
-</div>
-</div>
-
-<!-- ⏱ 0:00 · Appendix slide. This is a forward-looking control architecture: Arc-managed edge, IoT Operations for local protocol/runtime, IoT Hub for identity and cloud command, and policy-gated AI decisions. Start with human-confirmed actions, then expand only to bounded autonomous loops where safety, interlocks, and governance approvals are explicit. -->
-
----
-
-<!-- _class: tight backup -->
-
 # Appendix — Why We Do Not Write to the Furnace
 
 <div class="split">
@@ -1318,31 +1358,10 @@ Today they are roadmap capabilities, not required for the validated MVP boundary
 
 ---
 
-<!-- _class: tight backup -->
+<!-- _class: diagram rti-diagram backup -->
 
-# Appendix — Why Fabric — and Why Not a Parallel Lake, Databricks, or Snowflake?
+# Appendix — Fabric RTI
 
-<div class="split">
-<div>
+![Fabric Real-Time Intelligence architecture](images/fabric-rti-diagram.png)
 
-**Fabric fits the operating model**
-
-- One governed estate for hot + historical analytics
-- OneLake lineage and Direct Lake semantic consistency
-- Native Power BI and audit-friendly data contracts
-
-</div>
-<div>
-
-**Why not the alternatives in this architecture**
-
-- A parallel lake duplicates data and trust boundaries (explicitly rejected by ADR-001)
-- Extra cross-platform stitching increases latency and governance complexity
-- More copies means harder reconciliation and weaker audit posture
-
-<span class="pill blue">DECISION</span> Keep one governed estate, two clocks (operational + historical), no parallel lake.
-
-</div>
-</div>
-
-<!-- ⏱ 0:00 · Appendix slide. The architecture decision is about governance and operating simplicity, not vendor branding: one governed estate, minimal copies, and one semantic truth for KPI and audit evidence. -->
+<!-- ⏱ 0:00 · Appendix slide. This diagram isolates the Fabric Real-Time Intelligence path from streaming ingestion through Eventstream and Eventhouse to operational analytics, alerting, and downstream governed storage. -->

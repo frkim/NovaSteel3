@@ -5,9 +5,9 @@
  *
  * Palette is derived from the NovaSteel / AxelorMetal brand assets committed in
  * apps/portal-shell/wwwroot/brand: molten-orange accent on a cool graphite base.
- * Class contract consumed by slides.md: lead, tight, backup, cards[.four|.five],
+ * Class contract consumed by slides.md: lead, tight, diagram, backup, cards[.four|.five],
  * card[.teal|.orange|.purple|.green|.blue], card-num, subtitle, split[.right-wide],
- * stat/big/label, pill[.green|.orange|.purple|.gray|.blue], tag, grad, hero-line,
+ * small-body, stat/big/label, pill[.green|.orange|.purple|.gray|.blue], tag, grad, hero-line,
  * herostats, brandbar, corners[.bottom-right],
  * flow/lane[.teal|.orange|.purple|.green|.blue]/lane-tag/nodes/node/arrow/legend.
  */
@@ -209,6 +209,38 @@ section.tight li {
   font-size: 20px;
 }
 
+section.diagram {
+  padding: 36px 48px 48px;
+}
+
+section.diagram h1 {
+  font-size: 38px;
+  margin-bottom: 10px;
+}
+
+section.diagram h1::after {
+  content: none;
+}
+
+section.diagram img {
+  width: auto;
+  max-width: 100%;
+  max-height: 530px;
+  object-fit: contain;
+}
+
+section.diagram-title-in-image h1 {
+  display: none;
+}
+
+section.diagram-title-in-image img {
+  max-height: 610px;
+}
+
+section.rti-diagram img {
+  clip-path: inset(8px 0 0 8px);
+}
+
 section.backup {
   background: var(--ns-surface-alt);
 }
@@ -254,6 +286,14 @@ section.lead h3 {
 
 section.lead p {
   color: #e2e8f0;
+}
+
+section.lead blockquote {
+  width: 68%;
+}
+
+section.lead blockquote p {
+  color: var(--ns-ink);
 }
 
 section.lead img {
@@ -474,6 +514,52 @@ section.lead img {
 
 .split.right-wide {
   grid-template-columns: 5fr 7fr;
+}
+
+.small-body p,
+.small-body li {
+  font-size: 17px;
+  line-height: 1.3;
+}
+
+.small-body li {
+  margin-bottom: 3px;
+}
+
+section.vnext {
+  padding: 30px 50px 48px;
+}
+
+section.vnext h1 {
+  font-size: 34px;
+  margin-bottom: 8px;
+}
+
+section.vnext h1::after {
+  content: none;
+}
+
+section.vnext .split {
+  gap: 24px;
+}
+
+section.vnext .small-body p,
+section.vnext .small-body li {
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+section.vnext .small-body ul,
+section.vnext .small-body ol {
+  margin: 3px 0;
+}
+
+section.vnext .small-body li {
+  margin-bottom: 2px;
+}
+
+section.vnext .split > div:last-child p {
+  font-size: 17px;
 }
 
 .split > div > *:first-child {

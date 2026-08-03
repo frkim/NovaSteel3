@@ -19,6 +19,7 @@ const targetDir = join(presentationDir, "images");
 
 const brandDir = join(repoRoot, "apps", "portal-shell", "wwwroot", "brand");
 const logoDir = join(repoRoot, "docs", "images", "logo");
+const docsImageDir = join(repoRoot, "docs", "images");
 const generatedDir = join(repoRoot, "tools", "presentation", "assets");
 const diagramDir = join(repoRoot, "docs", "presentation", "assets", "diagrams");
 const screenshotDir = join(
@@ -38,6 +39,8 @@ const assets = [
   [join(diagramDir, "steel-process-routes.webp"), "steel-process-routes.webp"],
   [join(generatedDir, "steelworks-hero.png"), "steelworks-hero.png"],
   [join(generatedDir, "thermal-map.png"), "thermal-map.png"],
+  [join(docsImageDir, "Fabric Architecture Diagram.png"), "fabric-architecture-diagram.png"],
+  [join(docsImageDir, "Fabric RTI Diagram.png"), "fabric-rti-diagram.png"],
   ...[
     "adaptive-cloud-iot-operations.png",
     "command-center-overview.png",
