@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import logging
 import sys
+from math import isfinite
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -80,6 +81,12 @@ def build_registry(
     Per request, never cached: each implementation closes over this caller's
     validated scope, so reusing a registry across callers would let a tool answer
     with someone else's plants.
+
+    Every operations agent's tools come from this one registry, including the
+    orchestrator's four. That is deliberate: which tools an agent may *declare* is
+    decided by the manifest, but what any of them can *reach* is decided here, once,
+    under this caller's roles and plant scope. A second registry built for the
+    orchestrator would be a second place for that to drift.
     """
     registry = ToolRegistry()
     registry.register(
@@ -88,6 +95,14 @@ def build_registry(
     )
     registry.register(
         "lining_rul_forecast", _lining_rul_forecast(user, services, correlation_id)
+    )
+    registry.register(
+        "carbon_footprint_summary",
+        _carbon_footprint_summary(user, services, correlation_id),
+    )
+    registry.register(
+        "quality_yield_what_if",
+        _quality_yield_what_if(user, services, correlation_id),
     )
     return registry
 
@@ -198,7 +213,152 @@ def _lining_rul_forecast(user: UserContext, services: Any, correlation_id: str):
     return _run
 
 
+def _carbon_footprint_summary(user: UserContext, services: Any, correlation_id: str):
+    """Bind the plant carbon summary to this caller."""
+
+    def _run(arguments: Mapping[str, Any]) -> Mapping[str, Any]:
+        # Same gate as GET /v1/sustainability/summary: a reader may see the plant's
+        # carbon position, and no stronger role is invented for the agent path.
+        # Reaching this through the assistant must be neither easier nor harder
+        # than reaching it through the dashboard.
+        site = _authorized_site(user, arguments.get("site"))
+
+        try:
+            summary = services.repository.sustainability_summary(site)
+        except Exception as exc:
+            raise ToolRefused(str(exc)) from exc
+
+        scope1 = float(summary.get("scope1KgCo2e") or 0.0)
+        scope2 = float(summary.get("scope2KgCo2e") or 0.0)
+        return {
+            "site": site,
+            "energyConsumptionMwh": summary.get("energyConsumptionMwh"),
+            "scope1KgCo2e": scope1,
+            "scope2KgCo2e": scope2,
+            # Pre-summed here rather than left to the model: adding two numbers is
+            # the sort of arithmetic a model does correctly almost always, and
+            # "almost always" is not a property an emissions figure may have.
+            "totalKgCo2e": round(scope1 + scope2, 2),
+            "etsAllowancePriceEurTonne": summary.get("etsAllowancePriceEurTonne"),
+            "modeledEtsExposureEur": round(
+                (scope1 + scope2) / 1000.0
+                * float(summary.get("etsAllowancePriceEurTonne") or 0.0),
+                2,
+            ),
+            "modeledDispatchCo2ReductionPct": summary.get(
+                "modeledDispatchCo2ReductionPct"
+            ),
+            # Carried through rather than dropped: the agent is instructed to say a
+            # figure is modelled, and it can only do that if it is told.
+            "dataClassification": summary.get("dataClassification", "SYNTHETIC"),
+            "synthetic": bool(summary.get("synthetic", True)),
+            "status": "MODELLED_POSITION_NOT_AN_AUDITED_STATEMENT",
+        }
+
+    return _run
+
+
+def _quality_yield_what_if(user: UserContext, services: Any, correlation_id: str):
+    """Bind the bounded quality what-if to this caller."""
+
+    def _run(arguments: Mapping[str, Any]) -> Mapping[str, Any]:
+        # Same role gate as POST /v1/quality/what-if.
+        _require_role(user, "ProcessEngineer.Contribute")
+        batch_id = str(arguments.get("batchId") or "").strip()
+        if not batch_id:
+            raise ToolRefused("batchId is required.")
+
+        # The batch's plant is resolved from the repository, exactly as the route
+        # does, rather than parsed out of the identifier the model supplied.
+        batch = services.repository.quality_batch(batch_id)
+        if batch is None:
+            raise ToolRefused(f"Batch {batch_id} was not found.")
+        _authorized_site(user, batch.get("site"))
+
+        adjustments = _bounded_adjustments(arguments)
+
+        try:
+            result = services.scorer.quality_what_if(
+                batch=batch, adjustments=adjustments
+            )
+        except Exception as exc:
+            # A ScoringError here is the model saying "these inputs are not
+            # supported", which the agent should relay rather than raise.
+            raise ToolRefused(str(exc)) from exc
+
+        record = services.audit.append(
+            domain="quality",
+            entity_id=batch["batchId"],
+            correlation_id=correlation_id,
+            action="quality.what_if",
+            actor=f"agent:{user.user_id}",
+            input_snapshot_ref=batch.get("sourceRef", ""),
+            model_version=result["modelVersion"],
+            output={"value": result["value"], "unit": result["unit"]},
+        )
+
+        current = result.get("current") or {}
+        proposed = result.get("proposed") or {}
+        return {
+            "batchId": batch["batchId"],
+            "site": batch.get("site"),
+            "grade": batch.get("grade"),
+            "adjustments": adjustments,
+            "currentPredictedFirstPassYieldPct": current.get(
+                "predictedFirstPassYieldPct"
+            ),
+            "currentRiskScore": current.get("riskScore"),
+            "proposedPredictedFirstPassYieldPct": proposed.get(
+                "predictedFirstPassYieldPct"
+            ),
+            "unit": result.get("unit"),
+            "confidence": result.get("confidence"),
+            # Truncated for the same reason as the lining drivers: the full list is
+            # model detail, not something an engineer reads in a chat answer.
+            "drivers": list(result.get("drivers") or [])[:3],
+            "operationalWrite": False,
+            "scoredAt": result.get("scoredAt"),
+            "modelVersion": result.get("modelVersion"),
+            "auditRef": record.audit_id,
+            "status": "PROPOSAL_PENDING_HUMAN_APPROVAL",
+        }
+
+    return _run
+
+
 # --- Guards -----------------------------------------------------------------
+
+
+def _bounded_adjustments(arguments: Mapping[str, Any]) -> dict[str, float]:
+    """Collect the process levers the model moved, clamped to the model's range.
+
+    Zero deltas are dropped rather than passed through. The strict function-tool
+    schema has no optional properties, so the agent is told to send 0 for a lever it
+    is not touching; forwarding those zeros would record an adjustment that was never
+    made in the audit entry and in the ``proposed.adjustments`` echo.
+
+    The bounds mirror ``ScoringWorker.quality_what_if``. Duplicating them is
+    deliberate: out-of-range values are clamped here so a model that overshoots still
+    gets a usable answer with stated assumptions, while the scorer keeps its own
+    check as the authority for anything that reaches it by another path.
+    """
+    bounds = {
+        "coilingTempDeltaC": (-20.0, 20.0),
+        "forceBalanceDeltaPct": (-10.0, 10.0),
+        "carbonEquivalentDeltaPct": (-0.05, 0.05),
+    }
+    adjustments: dict[str, float] = {}
+    for name, (low, high) in bounds.items():
+        if name not in arguments:
+            continue
+        try:
+            value = float(arguments[name])
+        except (TypeError, ValueError):
+            continue
+        if not isfinite(value) or value == 0.0:
+            continue
+        adjustments[name] = max(low, min(high, value))
+    return adjustments
 
 
 def _bounded_int(value: Any, default: int, low: int, high: int) -> int:

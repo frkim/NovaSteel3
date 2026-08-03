@@ -258,8 +258,180 @@ def test_registries_are_not_shared_between_callers(services, demo_site):
 
 
 def test_the_registry_exposes_exactly_the_catalogued_tools(services):
+    """The registry is the whole reachable surface, so it is pinned rather than
+    counted: a tool that appears here without a review is a tool the orchestrator
+    can call."""
+    from knowledge_orchestrator.agent_tools import TOOL_CATALOGUE
+
     registry = _registry(services, _user())
     assert sorted(registry.implementations) == [
+        "carbon_footprint_summary",
         "lining_rul_forecast",
+        "quality_yield_what_if",
         "simulate_energy_dispatch",
     ]
+    # Every catalogued tool has a body. A declared tool with no implementation is
+    # dropped from the agent definition at reconcile time, which reads to an
+    # operator as an agent that has quietly stopped working.
+    assert sorted(registry.implementations) == sorted(TOOL_CATALOGUE)
+
+
+# --- the CO2 tool ------------------------------------------------------------
+
+
+def test_carbon_summary_is_refused_for_a_plant_outside_scope(services, demo_site):
+    registry = _registry(services, _user(plants=("NS-DEMO-OTHER-01",)))
+    with pytest.raises(ToolRefused) as excinfo:
+        registry.execute("carbon_footprint_summary", {"site": demo_site})
+    assert demo_site in str(excinfo.value)
+
+
+def test_carbon_summary_reports_both_scopes_and_their_total(services, demo_site):
+    """Scope 1 and Scope 2 separately, because a combined number hides where the
+    reduction has to come from — and the total pre-summed, because adding two
+    emissions figures is not something a model should be trusted to do."""
+    registry = _registry(services, _user(plants=(demo_site,)))
+    result = registry.execute("carbon_footprint_summary", {"site": demo_site})
+    assert result["scope1KgCo2e"] > 0
+    assert result["scope2KgCo2e"] > 0
+    assert result["totalKgCo2e"] == pytest.approx(
+        result["scope1KgCo2e"] + result["scope2KgCo2e"], rel=1e-6
+    )
+
+
+def test_carbon_summary_carries_its_synthetic_provenance(services, demo_site):
+    """The agent is instructed to say a figure is modelled; it can only do that if
+    the tool tells it."""
+    registry = _registry(services, _user(plants=(demo_site,)))
+    result = registry.execute("carbon_footprint_summary", {"site": demo_site})
+    assert result["dataClassification"] == "SYNTHETIC"
+    assert result["synthetic"] is True
+    assert "AUDITED" in result["status"]
+
+
+def test_carbon_summary_prices_the_ets_exposure_from_the_returned_price(
+    services, demo_site
+):
+    """The MWh-to-CO2e-to-euro chain is exactly the arithmetic a model gets subtly
+    wrong, so the tool does it."""
+    registry = _registry(services, _user(plants=(demo_site,)))
+    result = registry.execute("carbon_footprint_summary", {"site": demo_site})
+    expected = (
+        result["totalKgCo2e"] / 1000.0 * result["etsAllowancePriceEurTonne"]
+    )
+    assert result["modeledEtsExposureEur"] == pytest.approx(expected, rel=1e-6)
+
+
+# --- the quality tool --------------------------------------------------------
+
+
+@pytest.fixture(scope="module")
+def demo_batch(services) -> dict:
+    return services.repository.quality_rows()[0]
+
+
+def test_quality_what_if_requires_the_same_role_as_its_rest_route(
+    services, demo_batch
+):
+    registry = _registry(services, _user(roles={"Operator.Read"}))
+    with pytest.raises(ToolRefused) as excinfo:
+        registry.execute(
+            "quality_yield_what_if", {"batchId": demo_batch["batchId"]}
+        )
+    assert "ProcessEngineer.Contribute" in str(excinfo.value)
+
+
+def test_quality_what_if_resolves_the_plant_from_the_batch_not_the_model(
+    services, demo_batch
+):
+    """The batch's plant comes from the repository, so an operator scoped elsewhere
+    cannot read it by naming it."""
+    registry = _registry(services, _user(plants=("NS-DEMO-OTHER-01",)))
+    with pytest.raises(ToolRefused) as excinfo:
+        registry.execute(
+            "quality_yield_what_if", {"batchId": demo_batch["batchId"]}
+        )
+    assert demo_batch["site"] in str(excinfo.value)
+
+
+def test_quality_what_if_refuses_an_unknown_batch(services, demo_batch):
+    registry = _registry(services, _user(plants=(demo_batch["site"],)))
+    with pytest.raises(ToolRefused) as excinfo:
+        registry.execute("quality_yield_what_if", {"batchId": "BATCH-DOES-NOT-EXIST"})
+    assert "not found" in str(excinfo.value).lower()
+
+
+def test_quality_what_if_reports_current_alongside_proposed(services, demo_batch):
+    """A proposed yield quoted on its own reads as a promise rather than a
+    difference."""
+    registry = _registry(services, _user(plants=(demo_batch["site"],)))
+    result = registry.execute(
+        "quality_yield_what_if",
+        {
+            "batchId": demo_batch["batchId"],
+            "coilingTempDeltaC": 10,
+            "forceBalanceDeltaPct": 0,
+            "carbonEquivalentDeltaPct": 0,
+        },
+    )
+    assert result["currentPredictedFirstPassYieldPct"] is not None
+    assert (
+        result["proposedPredictedFirstPassYieldPct"]
+        >= result["currentPredictedFirstPassYieldPct"]
+    )
+    assert result["operationalWrite"] is False
+    assert result["status"] == "PROPOSAL_PENDING_HUMAN_APPROVAL"
+    assert result["auditRef"]
+
+
+def test_zero_deltas_are_not_recorded_as_adjustments(services, demo_batch):
+    """Strict schemas have no optional keys, so the agent sends 0 for levers it is
+    not moving. Forwarding those would record a change that was never proposed."""
+    registry = _registry(services, _user(plants=(demo_batch["site"],)))
+    result = registry.execute(
+        "quality_yield_what_if",
+        {
+            "batchId": demo_batch["batchId"],
+            "coilingTempDeltaC": 0,
+            "forceBalanceDeltaPct": 4,
+            "carbonEquivalentDeltaPct": 0,
+        },
+    )
+    assert result["adjustments"] == {"forceBalanceDeltaPct": 4.0}
+
+
+def test_an_out_of_range_adjustment_is_clamped_not_passed_through(
+    services, demo_batch
+):
+    """The bounds are the range the underlying model was fitted for. A model that
+    overshoots gets a usable answer inside them rather than a scoring error."""
+    registry = _registry(services, _user(plants=(demo_batch["site"],)))
+    result = registry.execute(
+        "quality_yield_what_if",
+        {
+            "batchId": demo_batch["batchId"],
+            "coilingTempDeltaC": 5000,
+            "forceBalanceDeltaPct": -900,
+            "carbonEquivalentDeltaPct": 0,
+        },
+    )
+    assert result["adjustments"] == {
+        "coilingTempDeltaC": 20.0,
+        "forceBalanceDeltaPct": -10.0,
+    }
+
+
+def test_the_quality_what_if_is_audited_under_the_agent_actor(services, demo_batch):
+    """The agent path must be as traceable as the REST route, and distinguishable
+    from an engineer clicking the button."""
+    registry = _registry(services, _user(plants=(demo_batch["site"],)))
+    result = registry.execute(
+        "quality_yield_what_if",
+        {"batchId": demo_batch["batchId"], "coilingTempDeltaC": 3},
+    )
+    entries = services.audit.query(domain="quality", entity_id=demo_batch["batchId"])
+    record = next(
+        entry for entry in entries if entry["auditId"] == result["auditRef"]
+    )
+    assert record["actor"] == "agent:u-1"
+    assert record["action"] == "quality.what_if"

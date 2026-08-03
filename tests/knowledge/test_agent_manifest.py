@@ -12,19 +12,24 @@ import pytest
 
 from knowledge_orchestrator import agent_manifest
 from knowledge_orchestrator.agent_manifest import (
+    CARBON_ADVISOR_AGENT_NAME,
     ENERGY_ADVISOR_AGENT_NAME,
     MAINTENANCE_ADVISOR_AGENT_NAME,
     MANIFEST,
+    ORCHESTRATOR_AGENT_NAME,
     PROCEDURE_AGENT_NAME,
     PROJECT_ENDPOINT_ENV,
     PROJECT_KNOWLEDGE,
     PROJECT_OPERATIONS,
+    QUALITY_ADVISOR_AGENT_NAME,
     TOOL_KNOWLEDGE_MCP,
     TOOL_WEB_SEARCH,
     WEB_SEARCH_AGENT_NAME,
     agent_spec,
     agents_for_project,
+    orchestrator_for_project,
     projects,
+    specialists_for_project,
 )
 from knowledge_orchestrator.agent_tools import TOOL_CATALOGUE
 
@@ -85,6 +90,103 @@ def test_agent_spec_looks_up_by_name():
     assert agent_spec(WEB_SEARCH_AGENT_NAME).project == PROJECT_KNOWLEDGE
     assert agent_spec(ENERGY_ADVISOR_AGENT_NAME).project == PROJECT_OPERATIONS
     assert agent_spec(MAINTENANCE_ADVISOR_AGENT_NAME).project == PROJECT_OPERATIONS
+    assert agent_spec(CARBON_ADVISOR_AGENT_NAME).project == PROJECT_OPERATIONS
+    assert agent_spec(QUALITY_ADVISOR_AGENT_NAME).project == PROJECT_OPERATIONS
+    assert agent_spec(ORCHESTRATOR_AGENT_NAME).project == PROJECT_OPERATIONS
+
+
+# --- the specialist / orchestrator split ------------------------------------
+
+
+def test_every_specialist_owns_exactly_one_calculation():
+    """One agent, one concern, one tool. What a specialist can do has to be legible
+    from its definition; an agent that accumulates tools stops being reviewable."""
+    for spec in specialists_for_project(PROJECT_OPERATIONS):
+        assert len(spec.tools) == 1, f"{spec.name} holds {len(spec.tools)} tools"
+
+
+def test_every_specialist_declares_a_distinct_domain():
+    """Two specialists sharing a domain would make routing between them arbitrary."""
+    domains = [spec.domain for spec in specialists_for_project(PROJECT_OPERATIONS)]
+    assert all(domains)
+    assert len(domains) == len(set(domains))
+
+
+def test_every_specialist_declares_routing_keywords():
+    """A specialist with no keywords can never be selected, so it would silently
+    become an agent nobody can reach."""
+    for spec in specialists_for_project(PROJECT_OPERATIONS):
+        assert spec.routing_keywords, f"{spec.name} is unroutable"
+
+
+def test_no_keyword_is_claimed_by_two_domains():
+    """A shared keyword makes every question containing it multi-domain, which
+    quietly routes a growing share of traffic to the orchestrator."""
+    seen: dict[str, str] = {}
+    for spec in specialists_for_project(PROJECT_OPERATIONS):
+        for keyword in spec.routing_keywords:
+            assert keyword not in seen, (
+                f"{keyword!r} is claimed by both {seen.get(keyword)} and {spec.name}"
+            )
+            seen[keyword] = spec.name
+
+
+def test_there_is_exactly_one_orchestrator():
+    orchestrators = [spec for spec in MANIFEST if spec.is_orchestrator]
+    assert len(orchestrators) == 1
+    assert orchestrators[0].name == ORCHESTRATOR_AGENT_NAME
+    assert orchestrator_for_project(PROJECT_OPERATIONS) is orchestrators[0]
+
+
+def test_the_orchestrator_holds_every_specialist_tool():
+    """It exists to answer questions that span the specialists, so a tool it lacks
+    is a cross-domain question it silently answers incompletely."""
+    orchestrator = orchestrator_for_project(PROJECT_OPERATIONS)
+    specialist_tools = {
+        tool
+        for spec in specialists_for_project(PROJECT_OPERATIONS)
+        for tool in spec.tools
+    }
+    assert set(orchestrator.tools) == specialist_tools
+
+
+def test_the_orchestrator_is_not_itself_a_routing_target():
+    """It is the fallback, not a fifth domain. Keywords would make it compete with
+    the specialists it is meant to back."""
+    orchestrator = orchestrator_for_project(PROJECT_OPERATIONS)
+    assert orchestrator.routing_keywords == ()
+    assert orchestrator.domain == ""
+    assert orchestrator not in specialists_for_project(PROJECT_OPERATIONS)
+
+
+def test_the_knowledge_project_has_no_orchestrator():
+    """An orchestrator holds every function tool. One in the knowledge project would
+    hand the full calculation surface to the agents that read untrusted content."""
+    assert orchestrator_for_project(PROJECT_KNOWLEDGE) is None
+
+
+def test_every_catalogued_tool_is_reachable_from_some_agent():
+    """A tool nobody declares is a schema with no agent behind it — dead review
+    surface that reads as capability."""
+    declared = {tool for spec in MANIFEST for tool in spec.tools}
+    assert set(TOOL_CATALOGUE) <= declared
+
+
+def test_the_orchestrator_is_told_not_to_resolve_a_trade_off():
+    """The whole point of surfacing a tension rather than settling it: weighting
+    cost against carbon against asset life is a planner's decision, not a model's."""
+    instructions = agent_spec(ORCHESTRATOR_AGENT_NAME).instructions.lower()
+    assert "trade-off" in instructions
+    assert "do not resolve it" in instructions
+
+
+def test_the_orchestrator_may_not_combine_two_results_arithmetically():
+    """ADR-006 survives the fan-out or it does not survive at all: an orchestrator
+    that adds two tool outputs together has become the calculation."""
+    instructions = " ".join(
+        agent_spec(ORCHESTRATOR_AGENT_NAME).instructions.lower().split()
+    )
+    assert "never combine two tool results arithmetically" in instructions
 
 
 def test_agent_spec_error_names_the_known_agents():

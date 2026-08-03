@@ -160,9 +160,96 @@ LINING_RUL_FORECAST = ToolSpec(
     },
 )
 
+CARBON_FOOTPRINT_SUMMARY = ToolSpec(
+    name="carbon_footprint_summary",
+    description=(
+        "Return the plant's current carbon position: Scope 1 and Scope 2 emissions "
+        "in kg CO2e, energy consumed in MWh, the prevailing ETS allowance price, and "
+        "the CO2 reduction the dispatch model has already been shown to deliver. "
+        "Read-only. Call it before discussing emissions, carbon intensity, ETS "
+        "exposure or decarbonisation; never estimate an emission figure yourself."
+    ),
+    parameters={
+        "type": "object",
+        "properties": {
+            "site": {
+                "type": "string",
+                "description": (
+                    "Plant identifier, e.g. NS-DEMO-GENT. Must be a plant the "
+                    "operator is authorized for; the request is refused otherwise."
+                ),
+            },
+        },
+        "required": ["site"],
+        "additionalProperties": False,
+    },
+)
+
+# The quality tool is a what-if, not a setpoint change. The adjustment names and
+# their bounds are the scoring worker's, restated in the schema so the model is
+# constrained to what the model behind them was fitted for rather than being free to
+# invent a process change nobody has evidence about.
+QUALITY_YIELD_WHAT_IF = ToolSpec(
+    name="quality_yield_what_if",
+    description=(
+        "Run the deterministic quality model for one production batch and return "
+        "the predicted first-pass yield today and under a bounded process "
+        "adjustment, with the drivers behind the difference. This SIMULATES only: "
+        "it produces a proposal for a process engineer and never writes a setpoint "
+        "to any plant system. Call it whenever the operator asks what a coiling "
+        "temperature, rolling force or carbon-equivalent change would do to yield, "
+        "or asks why a batch is failing."
+    ),
+    parameters={
+        "type": "object",
+        "properties": {
+            "batchId": {
+                "type": "string",
+                "description": "Production batch identifier, e.g. BATCH-000123.",
+            },
+            "coilingTempDeltaC": {
+                "type": "number",
+                "description": (
+                    "Coiling temperature change in degrees Celsius, between -20 and "
+                    "20. Use 0 to score the batch as it stands."
+                ),
+            },
+            "forceBalanceDeltaPct": {
+                "type": "number",
+                "description": (
+                    "Rolling force balance change in percent, between -10 and 10. "
+                    "Use 0 for no change."
+                ),
+            },
+            "carbonEquivalentDeltaPct": {
+                "type": "number",
+                "description": (
+                    "Carbon-equivalent change as a fraction, between -0.05 and 0.05. "
+                    "Use 0 for no change."
+                ),
+            },
+        },
+        # Strict mode has no optional keys, so the agent is told to send 0 for the
+        # levers it is not moving; the executor drops zero deltas before calling the
+        # scorer so an unchanged lever is not recorded as an adjustment.
+        "required": [
+            "batchId",
+            "coilingTempDeltaC",
+            "forceBalanceDeltaPct",
+            "carbonEquivalentDeltaPct",
+        ],
+        "additionalProperties": False,
+    },
+)
+
 TOOL_CATALOGUE: Mapping[str, ToolSpec] = {
     spec.name: spec
-    for spec in (SIMULATE_ENERGY_DISPATCH, LINING_RUL_FORECAST)
+    for spec in (
+        SIMULATE_ENERGY_DISPATCH,
+        LINING_RUL_FORECAST,
+        CARBON_FOOTPRINT_SUMMARY,
+        QUALITY_YIELD_WHAT_IF,
+    )
 }
 
 
@@ -244,7 +331,9 @@ def _parse_arguments(name: str, arguments: str | Mapping[str, Any]) -> Mapping[s
 
 
 __all__ = [
+    "CARBON_FOOTPRINT_SUMMARY",
     "LINING_RUL_FORECAST",
+    "QUALITY_YIELD_WHAT_IF",
     "SIMULATE_ENERGY_DISPATCH",
     "TOOL_CATALOGUE",
     "ToolCallable",

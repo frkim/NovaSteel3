@@ -36,8 +36,30 @@ def test_the_roster_lists_only_operations_agents(client, admin_headers, unconfig
     assert response.status_code == 200
     data = response.json()["data"]
     names = {agent["name"] for agent in data["agents"]}
-    assert names == {"novasteel-energy-advisor", "novasteel-maintenance-advisor"}
+    assert names == {
+        "novasteel-energy-advisor",
+        "novasteel-maintenance-advisor",
+        "novasteel-carbon-advisor",
+        "novasteel-quality-advisor",
+        "novasteel-operations-orchestrator",
+    }
     assert "novasteel-procedure-agent" not in names
+
+
+def test_the_roster_distinguishes_the_orchestrator_from_the_specialists(
+    client, admin_headers, unconfigured
+):
+    """Five equivalent-looking entries would push the operator into choosing an agent,
+    which is the choice the router exists to make for them."""
+    data = client.get("/v1/copilot/agents", headers=admin_headers).json()["data"]
+    by_role: dict[str, list[dict]] = {}
+    for agent in data["agents"]:
+        by_role.setdefault(agent["role"], []).append(agent)
+
+    assert len(by_role["orchestrator"]) == 1
+    assert by_role["orchestrator"][0]["name"] == "novasteel-operations-orchestrator"
+    assert len(by_role["specialist"]) == 4
+    assert all(agent["domain"] for agent in by_role["specialist"])
 
 
 def test_every_rostered_agent_declares_its_tools(client, admin_headers, unconfigured):
@@ -163,6 +185,104 @@ def test_caller_scope_context_ignores_request_body_text(
     assert "NS-DEMO-LUX-01" in context
     assert "NS-DEMO-OTHER-01" not in context
     assert "FAKE-ASSET-99" not in context
+
+
+@pytest.fixture
+def deployed(client, monkeypatch):
+    """An operations project that exists, with the upstream turn recorded."""
+    monkeypatch.setenv(
+        "FOUNDRY_OPERATIONS_PROJECT_ENDPOINT",
+        "https://x.services.ai.azure.com/api/projects/ops",
+    )
+    recording = _RecordingAgentService()
+    monkeypatch.setattr(
+        client.app.state.services.agents, "_build_service", lambda: recording
+    )
+    return recording
+
+
+def _ask(client, headers, question, **body):
+    response = client.post(
+        "/v1/copilot/agent",
+        headers=headers,
+        json={"question": question, **body},
+    )
+    assert response.status_code == 200, response.text
+    return response.json()["data"]
+
+
+def test_a_single_domain_question_reaches_its_specialist(
+    client, admin_headers, deployed
+):
+    """The caller names no agent — that is the point. An operator asking about
+    emissions should not have to know a carbon advisor exists."""
+    data = _ask(client, admin_headers, "What were our scope 2 emissions last month?")
+    assert data["agent"] == "novasteel-carbon-advisor"
+    assert data["role"] == "specialist"
+    assert deployed.calls[0]["agent_name"] == "novasteel-carbon-advisor"
+
+
+def test_a_cross_domain_question_reaches_the_orchestrator(
+    client, admin_headers, deployed
+):
+    data = _ask(
+        client,
+        admin_headers,
+        "Would the cheaper overnight dispatch schedule raise our CO2 emissions?",
+    )
+    assert data["agent"] == "novasteel-operations-orchestrator"
+    assert data["role"] == "orchestrator"
+    assert data["routing"]["reason"] == "multi-domain"
+    assert set(data["routing"]["domains"]) == {"energy", "carbon"}
+
+
+def test_the_routing_decision_is_returned_with_its_evidence(
+    client, admin_headers, deployed
+):
+    """An answer covering more ground than the question did is confusing unless the
+    reason is on the response rather than in a log the operator cannot read."""
+    data = _ask(client, admin_headers, "When is the lining due for relining?")
+    routing = data["routing"]
+    assert routing["agent"] == "novasteel-maintenance-advisor"
+    assert routing["reason"] == "single-domain"
+    assert routing["matchedKeywords"]["maintenance"]
+
+
+def test_naming_an_agent_bypasses_the_router(client, admin_headers, deployed):
+    """An engineer who asked the quality advisor deliberately should not be
+    re-routed because their question also mentioned cost."""
+    data = _ask(
+        client,
+        admin_headers,
+        "What does the tariff peak cost us?",
+        agent="novasteel-quality-advisor",
+    )
+    assert data["agent"] == "novasteel-quality-advisor"
+    assert data["routing"]["reason"] == "explicit"
+    assert deployed.calls[0]["agent_name"] == "novasteel-quality-advisor"
+
+
+def test_asking_a_knowledge_agent_here_is_refused(client, admin_headers, deployed):
+    """Naming an agent must not be a way across the trust boundary: the knowledge
+    agents read untrusted content and this endpoint carries tool access."""
+    response = client.post(
+        "/v1/copilot/agent",
+        headers=admin_headers,
+        json={"question": "hi", "agent": "novasteel-procedure-agent"},
+    )
+    assert response.status_code == 403
+    assert not deployed.calls
+
+
+def test_routing_grants_nothing_the_caller_did_not_already_have(
+    client, admin_headers, deployed
+):
+    """Whichever agent answers, it receives the same server-validated scope block —
+    a mis-route costs a worse answer, never a wider one."""
+    _ask(client, admin_headers, "What were our scope 2 emissions?")
+    _ask(client, admin_headers, "Would cheaper dispatch raise CO2 emissions?")
+    assert deployed.calls[0]["agent_name"] != deployed.calls[1]["agent_name"]
+    assert deployed.calls[0]["context"] == deployed.calls[1]["context"]
 
 
 def test_knowledge_chat_path_does_not_receive_caller_scope(
