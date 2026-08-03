@@ -22,6 +22,7 @@ from typing import Optional, Protocol
 
 from .. import prompt_defense
 from ..foundry_endpoints import normalize_endpoint, openai_v1_url, token_scope
+from . import fabric_answers
 from .context import ResolvedContext
 from .context import resolve as resolve_context
 from . import glossary as glossary_lookup
@@ -104,6 +105,8 @@ _TEMPLATES: dict[str, dict[str, str]] = {
         "general_no_match": "That is not in my steel knowledge base yet. I can go deep on steelmaking routes and process metallurgy, plant operations and reliability, energy and emissions, EU ETS and CBAM, or how the NovaSteel platform is built \u2014 and with **Screen context** switched on I answer directly about the view you are working in.",
         "general_reasoning": "How I got there: screen context is off, so I answered from NovaSteel's steel-industry knowledge base and the glossary rather than from any particular screen.",
         "knowledge": "From NovaSteel's steel knowledge base:",
+        "fabric": "Answered by the **Microsoft Fabric** data agent **da-novasteelv3**, over the NovaSteel gold lakehouse.",
+        "fabric_reasoning": "How I got there: this is one of the platform's predefined analytical questions, so I ran it against the Fabric datasets cited below instead of answering from the glossary.",
     },
     "fr": {
         "context": "Vous \u00eates sur **{screen}** ({persona}) : je comprends votre question comme portant sur **{concept}**.",
@@ -119,6 +122,8 @@ _TEMPLATES: dict[str, dict[str, str]] = {
         "general_no_match": "Cela ne figure pas encore dans ma base de connaissances. Je peux approfondir les fili\u00e8res sid\u00e9rurgiques et la m\u00e9tallurgie des proc\u00e9d\u00e9s, l'exploitation et la fiabilit\u00e9 d'une aci\u00e9rie, l'\u00e9nergie et les \u00e9missions, le SEQE-UE et le MACF, ou l'architecture de la plateforme NovaSteel \u2014 et en activant le **Contexte d'\u00e9cran**, je r\u00e9ponds directement sur la vue que vous consultez.",
         "general_reasoning": "Mon raisonnement : le contexte d'\u00e9cran est d\u00e9sactiv\u00e9, j'ai donc r\u00e9pondu \u00e0 partir de la base de connaissances sid\u00e9rurgiques de NovaSteel et du glossaire, sans me r\u00e9f\u00e9rer \u00e0 un \u00e9cran particulier.",
         "knowledge": "Depuis la base de connaissances sid\u00e9rurgiques de NovaSteel :",
+        "fabric": "R\u00e9ponse de l'agent de donn\u00e9es **Microsoft Fabric** **da-novasteelv3**, sur le lakehouse gold NovaSteel.",
+        "fabric_reasoning": "Mon raisonnement : il s'agit d'une des questions analytiques pr\u00e9d\u00e9finies de la plateforme ; je l'ai donc ex\u00e9cut\u00e9e sur les jeux de donn\u00e9es Fabric cit\u00e9s ci-dessous plut\u00f4t que de r\u00e9pondre depuis le glossaire.",
     },
     "de": {
         "context": "Sie befinden sich auf **{screen}** ({persona}); ich verstehe Ihre Frage daher als Frage zu **{concept}**.",
@@ -134,6 +139,8 @@ _TEMPLATES: dict[str, dict[str, str]] = {
         "general_no_match": "Das steht noch nicht in meiner Wissensbasis. Ich kann tief auf Stahlrouten und Prozessmetallurgie, Werksbetrieb und Instandhaltung, Energie und Emissionen, EU-EHS und CBAM oder den Aufbau der NovaSteel-Plattform eingehen \u2014 und mit aktiviertem **Bildschirmkontext** antworte ich direkt zur angezeigten Ansicht.",
         "general_reasoning": "So bin ich vorgegangen: Der Bildschirmkontext ist deaktiviert, daher habe ich aus der Stahl-Wissensbasis von NovaSteel und dem Glossar geantwortet, nicht aus einem bestimmten Bildschirm.",
         "knowledge": "Aus der Stahl-Wissensbasis von NovaSteel:",
+        "fabric": "Beantwortet vom **Microsoft Fabric**-Datenagenten **da-novasteelv3** \u00fcber das NovaSteel-Gold-Lakehouse.",
+        "fabric_reasoning": "So bin ich vorgegangen: Dies ist eine der vordefinierten analytischen Fragen der Plattform, daher habe ich sie gegen die unten zitierten Fabric-Datens\u00e4tze ausgef\u00fchrt statt aus dem Glossar zu antworten.",
     },
     "nl": {
         "context": "U bent op **{screen}** ({persona}); ik lees uw vraag daarom als een vraag over **{concept}**.",
@@ -149,6 +156,8 @@ _TEMPLATES: dict[str, dict[str, str]] = {
         "general_no_match": "Dat staat nog niet in mijn kennisbank. Ik kan diep ingaan op staalroutes en procesmetallurgie, fabrieksbedrijf en betrouwbaarheid, energie en emissies, EU-ETS en CBAM, of de opbouw van het NovaSteel-platform \u2014 en met **Schermcontext** aan antwoord ik direct over de weergave waarin u werkt.",
         "general_reasoning": "Zo kwam ik daartoe: schermcontext staat uit, dus ik antwoordde vanuit de staalkennisbank van NovaSteel en de woordenlijst, niet vanuit een specifiek scherm.",
         "knowledge": "Uit de staalkennisbank van NovaSteel:",
+        "fabric": "Beantwoord door de **Microsoft Fabric**-data-agent **da-novasteelv3**, op het NovaSteel gold-lakehouse.",
+        "fabric_reasoning": "Zo kwam ik daartoe: dit is een van de vooraf gedefinieerde analytische vragen van het platform, dus ik heb die uitgevoerd op de hieronder geciteerde Fabric-datasets in plaats van te antwoorden vanuit de woordenlijst.",
     },
     "es": {
         "context": "Est\u00e1 en **{screen}** ({persona}), as\u00ed que entiendo su pregunta como una pregunta sobre **{concept}**.",
@@ -164,6 +173,8 @@ _TEMPLATES: dict[str, dict[str, str]] = {
         "general_no_match": "Eso todav\u00eda no est\u00e1 en mi base de conocimiento. Puedo profundizar en las rutas sider\u00fargicas y la metalurgia de procesos, la operaci\u00f3n y fiabilidad de planta, la energ\u00eda y las emisiones, el RCDE UE y el MAFC, o en c\u00f3mo est\u00e1 construida la plataforma NovaSteel \u2014 y con el **Contexto de pantalla** activado respondo directamente sobre la vista en la que est\u00e1 trabajando.",
         "general_reasoning": "C\u00f3mo lo deduje: el contexto de pantalla est\u00e1 desactivado, as\u00ed que respond\u00ed desde la base de conocimiento sider\u00fargico de NovaSteel y el glosario, no desde una pantalla concreta.",
         "knowledge": "Desde la base de conocimiento sider\u00fargico de NovaSteel:",
+        "fabric": "Respondido por el agente de datos de **Microsoft Fabric** **da-novasteelv3**, sobre el lakehouse gold de NovaSteel.",
+        "fabric_reasoning": "C\u00f3mo lo deduje: esta es una de las preguntas anal\u00edticas predefinidas de la plataforma, as\u00ed que la ejecut\u00e9 sobre los conjuntos de datos de Fabric citados m\u00e1s abajo en lugar de responder desde el glosario.",
     },
 }
 
@@ -226,6 +237,15 @@ class LocalCopilotChatAgent:
 
         resolved = resolve_context(request.question, request.context)
         general = request.context.is_general
+
+        # A predefined chip is a question the platform already knows the answer
+        # to, so it is served from the curated Fabric result rather than from
+        # the glossary. Free-text questions fall through to the composition
+        # below unchanged.
+        fabric = fabric_answers.answer_for(request.question, language)
+        if fabric is not None:
+            return self._fabric_turn(fabric, request, resolved, strings, trace)
+
         trace.append(
             f"resolved {'general (no screen context)' if general else resolved.profile.section}"
             f"{'/' + request.context.sub_view if request.context.sub_view else ''}"
@@ -389,6 +409,66 @@ class LocalCopilotChatAgent:
             trace=tuple(trace),
         )
 
+    def _fabric_turn(
+        self,
+        fabric: "fabric_answers.FabricAnswer",
+        request: ChatTurnRequest,
+        resolved: ResolvedContext,
+        strings: dict[str, str],
+        trace: list[str],
+    ) -> ChatTurnResult:
+        """Serve a curated Fabric result for one of the predefined questions.
+
+        The body is used verbatim: its figures are the ones the dashboard behind
+        the panel is showing, and paraphrasing them would be the one way to make
+        the two disagree. Everything around it -- provenance line, citations,
+        optional public context, synthetic-data disclaimer -- follows the same
+        rules as every other answer.
+        """
+        general = request.context.is_general
+        trace.append(f"fabric card {fabric.card.card_id} ({fabric.language})")
+
+        paragraphs = [strings["fabric"], fabric.body]
+        sources = list(fabric.sources)
+        if not general:
+            sources.append(_screen_source(resolved, fabric.language))
+
+        online_used = False
+        if request.online_search and not general:
+            hits = self._online.search(
+                resolved, request.question, fabric.language, limit=MAX_HITS
+            )
+            if hits:
+                online_used = True
+                paragraphs.append(
+                    f"{strings['online_on']}\n"
+                    + "\n".join(f"- {hit.title} \u2014 {hit.snippet}" for hit in hits)
+                )
+                sources.extend(
+                    ChatSource(
+                        kind=SourceKind.ONLINE,
+                        source_id=hit.source_id,
+                        title=hit.title,
+                        snippet=hit.snippet,
+                        url=hit.url,
+                    )
+                    for hit in hits
+                )
+                trace.append(f"online backend: {self._online.mode}")
+
+        if request.reasoning is ReasoningTier.HIGH:
+            paragraphs.append(strings["fabric_reasoning"])
+        paragraphs.append(f"_{strings['synthetic']}_")
+
+        return ChatTurnResult(
+            answer="\n\n".join(paragraphs),
+            sources=tuple(sources),
+            agent=self.agent_name,
+            resolved_reasoning=request.reasoning,
+            online_search_used=online_used,
+            trace=tuple(trace),
+        )
+
 
 SYSTEM_PROMPT = (
     "You are NovaSteel Copilot, the in-product assistant of an industrial steel "
@@ -523,6 +603,20 @@ class AzureFoundryChatAgent:
         scan = prompt_defense.scan_for_injection(request.question)
         if scan.severity is prompt_defense.InjectionSeverity.HIGH:
             return grounded
+
+        if any(source.kind is SourceKind.FABRIC for source in grounded.sources):
+            # A predefined question already resolved to a curated Fabric result.
+            # Sending it through the model would only risk rewording figures the
+            # dashboard is displaying, so the deterministic answer is served.
+            return ChatTurnResult(
+                answer=grounded.answer,
+                sources=grounded.sources,
+                agent=self.agent_name,
+                resolved_reasoning=self.tier,
+                online_search_used=grounded.online_search_used,
+                resolved_terms=grounded.resolved_terms,
+                trace=grounded.trace + ("fabric result served verbatim",),
+            )
 
         general = request.context.is_general
         template = GENERAL_SYSTEM_PROMPT if general else SYSTEM_PROMPT

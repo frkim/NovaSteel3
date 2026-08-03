@@ -161,6 +161,8 @@ function SourceList({ sources, t }: { sources: CopilotSource[]; t: (key: string)
         return t('copilot.sources.glossary')
       case 'screen':
         return t('copilot.sources.screen')
+      case 'fabric':
+        return t('copilot.sources.fabric')
       case 'knowledge':
         return t('copilot.sources.internal')
       default:
