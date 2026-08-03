@@ -25,6 +25,8 @@ copies it into the deck's generated `images/` folder at build time.
 | Source file | Deck rendition | Subject |
 |---|---|---|
 | `steel process with Blast Furnace and Electric arc furnace.png` | `../presentation/assets/diagrams/steel-process-routes.webp` | Both primary routes on one canvas — the "How a Steel Mill Works" slide |
+| `Fabric Architecture Diagram.png` | `../presentation/assets/diagrams/fabric-architecture-diagram.webp` | End-to-end Microsoft Fabric architecture |
+| `Fabric RTI Diagram.png` | `../presentation/assets/diagrams/fabric-rti-diagram.webp` | Microsoft Fabric Real-Time Intelligence capabilities |
 
 ## Uniform figures
 
@@ -100,7 +102,9 @@ FIGURES = [
     ("rolling_mils_02.jpeg", "rolling-mill-line", 1200),
 ]
 DECK = [
-    ("steel process with Blast Furnace and Electric arc furnace.png", "steel-process-routes"),
+    ("steel process with Blast Furnace and Electric arc furnace.png", "steel-process-routes", False),
+    ("Fabric Architecture Diagram.png", "fabric-architecture-diagram", True),
+    ("Fabric RTI Diagram.png", "fabric-rti-diagram", True),
 ]
 
 def save(img, out, width):
@@ -118,9 +122,16 @@ for src_name, stem, max_width in FIGURES:
     save(img, DST / f"{stem}.webp", min(max_width, img.width))
 
 DECK_DST.mkdir(parents=True, exist_ok=True)
-for src_name, stem in DECK:
+for src_name, stem, lossless in DECK:
     img = Image.open(SRC / src_name).convert("RGB")
-    save(img, DECK_DST / f"{stem}.webp", 1800)
+    out = DECK_DST / f"{stem}.webp"
+    width = min(1800, img.width)
+    resized = img.resize((width, round(img.height * width / img.width)), Image.LANCZOS)
+    if lossless:
+        resized.save(out, "WEBP", lossless=True, method=6)
+    else:
+        resized.save(out, "WEBP", quality=86, method=6)
+    print(f"{out.name} {width}x{resized.height} {out.stat().st_size / 1024:.0f} KB")
 '@ | .\services\bff-api\.venv\Scripts\python.exe -
 ```
 
@@ -132,5 +143,5 @@ reinstalling, use the approved Microsoft package feed:
   --index-url https://packagefeedproxy.microsoft.io/pypi/simple pillow
 ```
 
-Quality 86 was chosen as the point where the small in-diagram labels stay
-legible at 400 % lightbox zoom while each file stays under 400 KB.
+Quality 86 is used for illustrated process artwork. Fabric diagrams use lossless
+WebP because their small labels and connector lines need sharper rendering.

@@ -246,7 +246,7 @@ At the top, Python services do the math and read Fabric read-only, and Foundry a
 
 # Fabric Architecture
 
-![Fabric architecture](images/fabric-architecture-diagram.png)
+![Fabric architecture](images/fabric-architecture-diagram.webp)
 
 <!-- ⏱ 0:25 · This diagram expands the Fabric core: Real-Time Intelligence handles the operational clock, OneLake and the Lakehouse preserve governed history, and a shared semantic layer serves analytics and decision experiences without creating a parallel data estate. -->
 
@@ -1362,6 +1362,6 @@ Today they are roadmap capabilities, not required for the validated MVP boundary
 
 # Appendix — Fabric RTI
 
-![Fabric Real-Time Intelligence architecture](images/fabric-rti-diagram.png)
+![Fabric Real-Time Intelligence architecture](images/fabric-rti-diagram.webp)
 
 <!-- ⏱ 0:00 · Appendix slide. This diagram isolates the Fabric Real-Time Intelligence path from streaming ingestion through Eventstream and Eventhouse to operational analytics, alerting, and downstream governed storage. -->
