@@ -15,6 +15,13 @@ model may *propose* a site; only the BFF decides whether the caller may have it.
 The agent is also not the calculator. Every tool call lands in the same audited,
 version-pinned service the REST routes call, and every result comes back marked
 ``PROPOSAL_PENDING_HUMAN_APPROVAL`` (ADR-006, ADR-007).
+
+**Choosing the agent.** Callers may name one, but the default is ``auto``: the
+question is routed by :mod:`knowledge_orchestrator.agent_router`, deterministically,
+to the specialist that owns its domain or to the orchestrator when it spans several
+or none. The decision comes back in the response so the operator can see why an
+answer covers more ground than they asked about. Routing selects an agent and grants
+nothing — the tools re-check roles and plant scope either way.
 """
 
 from __future__ import annotations
@@ -34,6 +41,10 @@ logger = logging.getLogger(__name__)
 _ROOT = Path(__file__).resolve().parents[4]
 _KNOWLEDGE_SRC = _ROOT / "services" / "knowledge-orchestrator" / "src"
 
+# The sentinel a caller sends to let the router choose. Also the default, so a UI
+# that knows nothing about the roster still reaches the right specialist.
+AUTO_AGENT = "auto"
+
 
 class OperationsAgentAdapter:
     """Runs a turn against an operations agent with caller-scoped tools."""
@@ -43,12 +54,12 @@ class OperationsAgentAdapter:
             sys.path.insert(0, str(_KNOWLEDGE_SRC))
         try:
             from knowledge_orchestrator.agent_manifest import (
-                ENERGY_ADVISOR_AGENT_NAME,
                 PROJECT_ENDPOINT_ENV,
                 PROJECT_OPERATIONS,
                 agent_spec,
                 agents_for_project,
             )
+            from knowledge_orchestrator.agent_router import REASON_EXPLICIT, route
             from knowledge_orchestrator.agent_service import FoundryAgentService
         except ImportError as exc:  # pragma: no cover - repository integration failure
             raise RuntimeError("knowledge-orchestrator is required by the BFF.") from exc
@@ -57,8 +68,9 @@ class OperationsAgentAdapter:
         self._agent_spec = agent_spec
         self._project = PROJECT_OPERATIONS
         self._endpoint_env = PROJECT_ENDPOINT_ENV[PROJECT_OPERATIONS]
-        self._default_agent = ENERGY_ADVISOR_AGENT_NAME
         self._agents_for_project = agents_for_project
+        self._route = route
+        self._reason_explicit = REASON_EXPLICIT
 
     def roster(self) -> list[dict[str, Any]]:
         """The operations agents this deployment knows about, and their tools.
@@ -66,12 +78,18 @@ class OperationsAgentAdapter:
         Read from the same manifest the reconciler applies, so what the UI offers
         and what exists in Foundry cannot drift apart in the code — only in the
         estate, and that is exactly what the reconciler exists to close.
+
+        ``role`` and ``domain`` are surfaced so a UI can present four specialists
+        and one orchestrator as what they are, rather than as five equivalent
+        entries the operator has to choose between.
         """
         return [
             {
                 "name": spec.name,
                 "description": spec.description,
                 "tools": list(spec.tools),
+                "role": "orchestrator" if spec.is_orchestrator else "specialist",
+                "domain": spec.domain,
             }
             for spec in self._agents_for_project(self._project)
         ]
@@ -127,19 +145,8 @@ class OperationsAgentAdapter:
                 "Operations agents are not configured in this environment.",
             )
 
-        name = (agent_name or self._default_agent).strip() or self._default_agent
-        try:
-            spec = self._agent_spec(name)
-        except KeyError as exc:
-            raise ApiError(
-                404, ErrorCode.NOT_FOUND, f"Unknown agent '{name}'."
-            ) from exc
-        if spec.project != self._project:
-            raise ApiError(
-                403,
-                ErrorCode.FORBIDDEN_ROLE,
-                f"Agent '{name}' is not an operations agent.",
-            )
+        decision = self._resolve(question, agent_name)
+        spec = self._validated_spec(decision.agent)
 
         registry = build_registry(
             user=user, services=services, correlation_id=correlation_id
@@ -148,7 +155,7 @@ class OperationsAgentAdapter:
         service = self._build_service()
         result = service.run(
             question,
-            agent_name=name,
+            agent_name=spec.name,
             conversation_id=conversation_id,
             registry=registry,
             context=context,
@@ -163,18 +170,55 @@ class OperationsAgentAdapter:
             for call in result.get("tool_calls", ())
         ]
         logger.info(
-            "operations agent answered correlation_id=%s agent=%s tools=%s",
+            "operations agent answered correlation_id=%s agent=%s routing=%s tools=%s",
             correlation_id,
-            name,
+            spec.name,
+            decision.reason,
             ",".join(call["tool"] for call in tool_calls) or "-",
         )
         return {
-            "agent": name,
+            "agent": spec.name,
             "project": self._project,
+            "role": "orchestrator" if spec.is_orchestrator else "specialist",
+            "routing": decision.as_dict(),
             "answer": result.get("answer", ""),
             "conversationId": result.get("conversation_id", ""),
             "toolCalls": tool_calls,
         }
+
+    def _resolve(self, question: str, agent_name: str | None):
+        """Decide which agent answers, honouring an explicit choice.
+
+        A named agent is used as given — an engineer who asked the quality advisor
+        deliberately should not be silently re-routed because their question also
+        mentioned cost. Only ``auto`` (and an omitted agent, which means the same)
+        reaches the router.
+        """
+        from knowledge_orchestrator.agent_router import RoutingDecision
+
+        requested = (agent_name or AUTO_AGENT).strip() or AUTO_AGENT
+        if requested.casefold() != AUTO_AGENT:
+            return RoutingDecision(requested, self._reason_explicit)
+        try:
+            return self._route(question, project=self._project)
+        except LookupError as exc:  # pragma: no cover - empty manifest
+            raise ApiError(503, ErrorCode.UPSTREAM_UNAVAILABLE, str(exc)) from exc
+
+    def _validated_spec(self, name: str):
+        """Resolve a manifest spec, refusing anything outside the operations project."""
+        try:
+            spec = self._agent_spec(name)
+        except KeyError as exc:
+            raise ApiError(
+                404, ErrorCode.NOT_FOUND, f"Unknown agent '{name}'."
+            ) from exc
+        if spec.project != self._project:
+            raise ApiError(
+                403,
+                ErrorCode.FORBIDDEN_ROLE,
+                f"Agent '{name}' is not an operations agent.",
+            )
+        return spec
 
 
 def _decode_arguments(raw: Any) -> dict[str, Any]:
@@ -224,4 +268,4 @@ def _caller_scope_context(user: Any, services: Any) -> str:
     return "\n".join(lines)
 
 
-__all__ = ["OperationsAgentAdapter"]
+__all__ = ["AUTO_AGENT", "OperationsAgentAdapter"]

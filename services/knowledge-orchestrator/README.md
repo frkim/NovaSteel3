@@ -137,23 +137,53 @@ The hosted agent's instructions embed the *canonical* decline sentence produced 
 same `enforce_answer_citations` check as local ones, and a paraphrased refusal
 would be rejected as an ungrounded answer.
 
-## The agent roster: two projects, four agents (ADR-019)
+## The agent roster: two projects, seven agents (ADR-019)
 
 Agents are declared once, in `agent_manifest.py`, and split across **two Foundry
 projects in the same Foundry account**:
 
-| Project | Endpoint variable | Agent | Tools |
-|---|---|---|---|
-| `knowledge` | `FOUNDRY_PROJECT_ENDPOINT` | `novasteel-procedure-agent` | Foundry IQ knowledge base (MCP) |
-| `knowledge` | `FOUNDRY_PROJECT_ENDPOINT` | `novasteel-web-search-agent` | `web_search` |
-| `operations` | `FOUNDRY_OPERATIONS_PROJECT_ENDPOINT` | `novasteel-energy-advisor` | `simulate_energy_dispatch` |
-| `operations` | `FOUNDRY_OPERATIONS_PROJECT_ENDPOINT` | `novasteel-maintenance-advisor` | `lining_rul_forecast` |
+| Project | Endpoint variable | Agent | Domain | Tools |
+|---|---|---|---|---|
+| `knowledge` | `FOUNDRY_PROJECT_ENDPOINT` | `novasteel-procedure-agent` | — | Foundry IQ knowledge base (MCP) |
+| `knowledge` | `FOUNDRY_PROJECT_ENDPOINT` | `novasteel-web-search-agent` | — | `web_search` |
+| `operations` | `FOUNDRY_OPERATIONS_PROJECT_ENDPOINT` | `novasteel-energy-advisor` | `energy` | `simulate_energy_dispatch` |
+| `operations` | `FOUNDRY_OPERATIONS_PROJECT_ENDPOINT` | `novasteel-carbon-advisor` | `carbon` | `carbon_footprint_summary` |
+| `operations` | `FOUNDRY_OPERATIONS_PROJECT_ENDPOINT` | `novasteel-quality-advisor` | `quality` | `quality_yield_what_if` |
+| `operations` | `FOUNDRY_OPERATIONS_PROJECT_ENDPOINT` | `novasteel-maintenance-advisor` | `maintenance` | `lining_rul_forecast` |
+| `operations` | `FOUNDRY_OPERATIONS_PROJECT_ENDPOINT` | `novasteel-operations-orchestrator` | — (fallback) | all four function tools |
 
 The split is a **trust boundary, not a namespace**. An agent can only call the
 tools declared on its own definition in its own project, so a prompt injected into
 a retrieved procedure has no path to the dispatch optimizer: the agent that read it
 has no such tool and cannot acquire one at runtime. Knowledge agents retrieve and
 never calculate; operations agents calculate and never retrieve.
+
+Each specialist owns exactly one calculation, which is what keeps its definition
+legible — an agent that accumulates tools stops being reviewable. The orchestrator
+holds all four because it exists for the questions that span them, and answering
+"does the cheaper schedule raise our CO2" across two agents would leave the operator
+to combine the results themselves.
+
+### Routing is deterministic, not a supervisor model (`agent_router.py`)
+
+An operator asks a question without knowing which agent holds the relevant tool, so
+something has to choose. `route()` scores the question against each specialist's
+declared `routing_keywords` and selects that specialist on exactly one domain match,
+or the orchestrator on zero or several. `POST /v1/copilot/agent` uses it whenever
+`agent` is omitted or `"auto"`; naming an agent bypasses it.
+
+The obvious alternative — hand a supervisor model the roster and let it decide — is
+deliberately not taken. It would make the *choice of calculation* an inference, which
+is the one thing ADR-006 keeps out of the model everywhere else; it is unreviewable,
+since nothing diffs and a routing regression looks like a good day; and it is a
+prompt-injection surface, because text carried into the turn could steer which tools
+become reachable. Keyword scoring is less clever and strictly better on all three:
+it is a pure function of the question and unit-testable without a network.
+
+Routing selects an agent and **grants nothing**. Every tool body re-applies the
+caller's role and plant scope, so a mis-route costs a worse answer, never a wider
+one. The decision — agent, reason and matched keywords — is returned on the response
+so an operator can see why an answer covered more ground than they asked about.
 
 ### Function tools are the ADR-006 boundary in code
 
@@ -182,7 +212,8 @@ With `azure-ai-projects` 2.x, agent *definitions* go through
 OpenAI-compatible surface: `client.get_openai_client()` →
 `conversations.create()` + `responses.create(..., extra_body={"agent_reference":
 …})`. There is no `threads`/`messages`/`runs` surface on this client. `run()`
-drives a bounded function-call loop (`MAX_TOOL_ITERATIONS`), executing each
+drives a bounded function-call loop (`MAX_TOOL_ITERATIONS`, six — enough for the
+orchestrator to call all four tools and still take a closing turn), executing each
 `function_call` locally and resubmitting a `function_call_output`.
 
 Conversations are held **server-side by Foundry**, which is a deliberate exception

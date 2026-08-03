@@ -383,16 +383,35 @@ calculations as function tools (ADR-019).
 
 | Route | Query/body | Response `data` | Status codes |
 |---|---|---|---|
-| `GET /v1/copilot/agents` | none | `{ "configured": bool, "agents": [{ "name", "description", "tools": [...] }] }` — read from the same manifest the reconciler applies, so it answers even when the project is not deployed | `200`; `401`; `403` |
-| `POST /v1/copilot/agent` | `{ "question", "conversationId"?, "agent"? }`; unknown top-level keys return `400` | `{ "agent", "project", "answer", "conversationId", "toolCalls": [{ "tool", "status", "arguments" }] }` | `200`; `400 VALIDATION_ERROR`; `401`; `403`; `404 NOT_FOUND` for an unknown agent; `503 UPSTREAM_UNAVAILABLE` when `FOUNDRY_OPERATIONS_PROJECT_ENDPOINT` is unset |
+| `GET /v1/copilot/agents` | none | `{ "configured": bool, "agents": [{ "name", "description", "tools": [...], "role": "specialist"\|"orchestrator", "domain" }] }` — read from the same manifest the reconciler applies, so it answers even when the project is not deployed | `200`; `401`; `403` |
+| `POST /v1/copilot/agent` | `{ "question", "conversationId"?, "agent"? }`; `agent` defaults to `"auto"`; unknown top-level keys return `400` | `{ "agent", "project", "role", "routing": { "agent", "reason", "domains": [...], "matchedKeywords": {...} }, "answer", "conversationId", "toolCalls": [{ "tool", "status", "arguments" }] }` | `200`; `400 VALIDATION_ERROR`; `401`; `403 FORBIDDEN_ROLE` for an agent outside the operations project; `404 NOT_FOUND` for an unknown agent; `503 UPSTREAM_UNAVAILABLE` when `FOUNDRY_OPERATIONS_PROJECT_ENDPOINT` is unset |
+
+The operations project holds four specialists — energy, carbon, quality and
+maintenance, one calculation each — and one orchestrator that holds all four tools
+for questions spanning them.
+
+**Which agent answers.** Omitting `agent` (or sending `"auto"`) routes the question
+*deterministically*: it is scored against each specialist's declared keywords, and
+goes to that specialist on exactly one domain match or to the orchestrator on zero or
+several. Naming an agent bypasses routing entirely. The decision is returned in
+`routing` — `reason` is one of `single-domain`, `multi-domain`, `no-domain-match` or
+`explicit` — so a caller can see why an answer covered more ground than the question
+did. Routing is not a supervisor model: making the choice of calculation an inference
+would put it back inside the model that ADR-006 keeps it out of, and would make which
+tools are reachable steerable by text carried into the turn.
+
+Routing grants nothing. Whichever agent answers, the tools re-apply the caller's
+roles and plant scope, so a mis-route costs a worse answer, never a wider one.
 
 Authorization is **inside the tool**, not at the route. A hosted agent runs as the
 project managed identity, so the function call it emits carries no caller identity;
 each tool body therefore closes over the request's validated user context and
 re-applies the same role and plant-scope checks as the equivalent REST route. A
 reader can reach `POST /v1/copilot/agent`, but `simulate_energy_dispatch` still
-requires `EnergyPlanner.Approve` and `lining_rul_forecast` still requires
-`MaintenanceEngineer.Read`, and either refuses a site outside the caller's scope.
+requires `EnergyPlanner.Approve`, `quality_yield_what_if` still requires
+`ProcessEngineer.Contribute`, and `lining_rul_forecast` still requires
+`MaintenanceEngineer.Read`; every tool, `carbon_footprint_summary` included, refuses
+a site outside the caller's scope.
 The model may *propose* a site; only the BFF decides whether the caller may have it.
 
 Tool results are the same audited, version-pinned payloads the REST routes return,

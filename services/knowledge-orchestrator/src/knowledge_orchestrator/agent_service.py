@@ -93,7 +93,11 @@ DEFAULT_MODEL = "gpt-5.4-mini"
 # another. It is bounded so that a model which keeps re-calling the same tool — a
 # known failure mode when a tool returns an error it cannot act on — costs a fixed
 # number of requests instead of running until the request times out.
-MAX_TOOL_ITERATIONS = 4
+#
+# Six, not four, because the orchestrator holds four tools and a genuinely
+# cross-domain question can need all of them plus a round to answer; a specialist
+# still only ever needs one or two, so the higher bound costs it nothing.
+MAX_TOOL_ITERATIONS = 6
 
 
 
