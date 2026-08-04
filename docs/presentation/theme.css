@@ -33,6 +33,8 @@
   --ns-green-soft: #e4f3ea;
   --ns-blue: #1f5fa9;
   --ns-blue-soft: #e6eff9;
+  --ns-pink: #a83277;
+  --ns-pink-soft: #fae9f3;
 }
 
 section {
@@ -1071,6 +1073,11 @@ section.deep-dive .stat .label {
   background: var(--ns-blue-soft);
 }
 
+.node.pink {
+  border-color: #eec3dc;
+  background: var(--ns-pink-soft);
+}
+
 .arrow {
   text-align: center;
   font-size: 13px;
@@ -1115,37 +1122,67 @@ section.deep-dive .stat .label {
 
 /* --- Fabric item taxonomy: "one shared foundation" -------------------- */
 
-/* The Fabric centre-of-gravity slide carries a dense right-hand map of item
-   types, so it runs at a tighter type scale than the default body slide. */
+/* The Fabric centre-of-gravity slide pairs four platform pillars with a
+   six-stage item chain, so it runs at a tighter type scale than a default
+   body slide. */
 section.fabric-gravity h1 {
-  font-size: 36px;
+  font-size: 34px;
+  margin-bottom: 6px;
 }
 
-section.fabric-gravity .split > div:first-child li {
-  font-size: 19px;
-  line-height: 1.35;
+section.fabric-gravity .split {
+  gap: 24px;
+  margin-top: 6px;
 }
 
-section.fabric-gravity h3 {
-  font-size: 20px;
+section.fabric-gravity .split li {
+  font-size: 18px;
+  line-height: 1.3;
   margin-bottom: 4px;
 }
 
 section.fabric-gravity .subtitle {
-  font-size: 16px;
-  margin: 0 0 8px;
+  font-size: 17px;
+  margin: 10px 0 0;
 }
 
-section.fabric-gravity .small-body li {
-  font-size: 16px;
-  line-height: 1.28;
-  margin-bottom: 5px;
+/* Six stages of the Fabric lifecycle read left to right as one sequence: each
+   step names the stage, the workload behind it, then its item types. */
+.fabric-chain {
+  gap: 5px;
+  margin-top: 10px;
 }
 
-section.fabric-gravity .small-body em {
-  color: var(--ns-ink-soft);
-  font-style: normal;
-  font-weight: 600;
+.fabric-chain .node {
+  padding: 8px 9px;
+  text-align: left;
+}
+
+.fabric-chain .node b {
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.fabric-chain .node .wl {
+  margin-top: 3px;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ns-ink);
+  opacity: 0.72;
+}
+
+.fabric-chain .node .wl + span {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(0, 0, 0, 0.09);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.fabric-chain .step {
+  font-size: 18px;
 }
 
 /* Full-width closing banner: every item above shares one platform. */
@@ -1154,8 +1191,8 @@ section.fabric-gravity .small-body em {
   align-items: baseline;
   justify-content: space-between;
   gap: 16px;
-  margin-top: 16px;
-  padding: 10px 20px;
+  margin-top: 14px;
+  padding: 9px 20px;
   border-radius: 8px;
   background: var(--ns-ink);
   color: #ffffff;
@@ -1163,13 +1200,13 @@ section.fabric-gravity .small-body em {
 
 .foundation-bar b {
   color: #ffffff;
-  font-size: 17px;
+  font-size: 16px;
   letter-spacing: 0.09em;
   text-transform: uppercase;
 }
 
 .foundation-bar span {
-  font-size: 16px;
+  font-size: 15px;
   color: #f29a62;
 }
 
