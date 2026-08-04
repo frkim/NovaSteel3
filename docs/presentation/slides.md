@@ -347,21 +347,6 @@ At the top, Python services do the math and read Fabric read-only, and Foundry a
 
 # Why Microsoft Fabric Is the Center of Gravity
 
-<div class="split">
-<div>
-
-- **Real-Time Intelligence** — Eventstream + Eventhouse/KQL for hot telemetry
-- **OneLake / Lakehouse** — bronze→silver→gold governed history & ML
-
-</div>
-<div>
-
-- **Direct Lake** — one semantic model, no data copy
-- **Power BI + Activator** — reporting & notification (not control)
-
-</div>
-</div>
-
 <p class="subtitle">Fabric items span every workload — representative workspace item types, grouped by what they do.</p>
 
 <div class="chain fabric-chain">
@@ -378,13 +363,28 @@ At the top, Python services do the math and read Fabric read-only, and Foundry a
 <div class="node pink"><b>06 · Share &amp; context</b><span class="wl">Power BI / Fabric IQ</span><span>report / dashboard · paginated report · ontology* · graph</span></div>
 </div>
 
+<div class="split">
+<div>
+
+- **Real-Time Intelligence** — Eventstream + Eventhouse/KQL for hot telemetry
+- **OneLake / Lakehouse** — bronze→silver→gold governed history & ML
+
+</div>
+<div>
+
+- **Direct Lake** — one semantic model, no data copy
+- **Power BI + Activator** — reporting & notification (not control)
+
+</div>
+</div>
+
 <div class="foundation-bar"><b>One shared foundation</b><span>OneLake · workspace governance · unified security</span></div>
 
 <!-- ⏱ 1:45 · Why bet the platform on Fabric? Because heavy-industry analytics has two clocks: a one-second operational clock and a governed-history clock. Fabric handles both in one governed estate.
 Real-Time Intelligence — Eventstream into an Eventhouse KQL database — gives us hot telemetry, alarms, and freshness. OneLake with bronze-silver-gold Delta gives us immutable lineage, the training substrate, and stable KPI definitions.
 Direct Lake means one semantic model reads gold data with no extra copy — so high-grade yield means exactly one thing everywhere.
 We consciously chose not to build a parallel lake or a second BI stack, and we keep hot KQL separate from governed Delta, so we always answer from the right store.
-The chain along the bottom walks that estate end to end: move and orchestrate with Data Factory, store and serve in the lakehouse and warehouse, transform and build in notebooks and Spark, analyze and learn with ML and semantic models, stream and respond through Real-Time Intelligence, then share and context in Power BI and Fabric IQ. Six stages, one shared foundation — OneLake, workspace governance, unified security.
+The chain across the top walks that estate end to end: move and orchestrate with Data Factory, store and serve in the lakehouse and warehouse, transform and build in notebooks and Spark, analyze and learn with ML and semantic models, stream and respond through Real-Time Intelligence, then share and context in Power BI and Fabric IQ. Six stages, one shared foundation — OneLake, workspace governance, unified security.
 Azure services exist only for integration, APIs, and domain compute Fabric doesn't provide. -->
 
 ---
