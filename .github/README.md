@@ -106,12 +106,25 @@ editing the caller alone.
 | `BFF_CONTAINER_APP` | `novasteelv3-bff` |
 | `PORTAL_CONTAINER_APP` | `novasteelv3-portal` |
 
-A job that declares `environment:` gets the OIDC subject
-`repo:frkim/NovaSteel3:environment:demo`, not the branch subject, so
-`novasteelv3-github-oidc` carries a second federated credential
-(`github-env-demo`) for it. The identity holds `AcrPush` on the registry for the
-build and `Container Apps Contributor` on `rg-novasteelv3-demo-sc` for the
-deployment.
+A job that declares `environment:` gets an OIDC subject scoped to the
+environment rather than to the branch, so `novasteelv3-github-oidc` needs its own
+federated credential for it. This repository has GitHub's **immutable-ID** OIDC
+subjects enabled, which means the token presents numeric owner and repository IDs
+instead of names:
+
+```
+repo:frkim@74252080/NovaSteel3@1312557916:environment:demo
+```
+
+Both spellings are registered (`github-env-demo` and `github-env-demo-immutable`)
+so the login keeps working whichever format GitHub issues, matching the existing
+`github-main` / `github-main-immutable` pair used by the branch-scoped jobs. If
+`azure/login` fails with `AADSTS700213: No matching federated identity record`,
+compare the `subject claim` line in the job log against the credential subjects on
+the identity - the name-based form alone is not enough here.
+
+The identity holds `AcrPush` on the registry for the build and `Container Apps
+Contributor` on `rg-novasteelv3-demo-sc` for the deployment.
 
 `tests/workflows/` validates these workflows themselves (trigger filters,
 `needs` graph, SHA pins, `persist-credentials: false`, and the ban on splicing
