@@ -225,12 +225,14 @@ def test_every_workflow_is_documented() -> None:
         )
 
 
-def test_only_dev_is_promoted_automatically() -> None:
-    """Merging to `main` may reach dev; every other environment stays a decision.
+def test_only_demo_is_promoted_automatically() -> None:
+    """Merging to `main` may reach demo; every other environment stays a decision.
 
-    The release gates in `docs/tech/security-governance-and-threat-model.md`
-    require a human sign-off before test, demo or prod, so the automatic path
-    must be pinned to dev on both sides of the reusable-workflow call.
+    demo is the only environment with deployed Container Apps, and its GitHub
+    Environment carries a required reviewer, so the automatic run queues for a
+    human. prod must stay a manual dispatch either way (the release gates in
+    `docs/tech/security-governance-and-threat-model.md`), so the target is
+    pinned on both sides of the reusable-workflow call.
     """
 
     caller = _load(WORKFLOW_DIR / "ci-build-services.yml")
@@ -243,7 +245,7 @@ def test_only_dev_is_promoted_automatically() -> None:
     assert deploy_jobs, "ci-build-services.yml no longer deploys anything"
 
     for job_id, job in deploy_jobs.items():
-        assert job["with"]["environment"] == "dev", (
+        assert job["with"]["environment"] == "demo", (
             f"job '{job_id}' promotes to '{job['with']['environment']}' without a human gate"
         )
         assert job["if"] == "github.event_name == 'push' && github.ref == 'refs/heads/main'", (
@@ -256,11 +258,11 @@ def test_only_dev_is_promoted_automatically() -> None:
     guard = [
         step
         for step in _steps(_jobs(callee)["validate"])
-        if "inputs.environment != 'dev'" in (step.get("if") or "")
+        if "inputs.environment != 'demo'" in (step.get("if") or "")
     ]
     assert guard, (
         "cd-services.yml lost the guard that stops a non-dispatch call from "
-        "promoting to test, demo or prod"
+        "promoting to dev, test or prod"
     )
 
 

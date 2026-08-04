@@ -62,9 +62,9 @@ explicit `::error::` naming any variable that is missing.
 |---|---|---|
 | `ci.yml` | PR / push | Lint, pytest, C# build, protected-feed verification, security gates |
 | `codeql.yml` | PR / schedule | CodeQL for Python, TypeScript and C# |
-| `ci-build-services.yml` | PR / push touching `services/**` | Builds every `services/*/Dockerfile` and, on `main`, pushes to ACR via OIDC and deploys to `dev` |
+| `ci-build-services.yml` | PR / push touching `services/**` | Builds every `services/*/Dockerfile` and, on `main`, pushes to ACR via OIDC and deploys to `demo` |
 | `cd-infra.yml` | Manual dispatch per environment | `bicep build` → what-if → `az deployment sub create` |
-| `cd-services.yml` | Merge to `main` for `dev`; manual dispatch for `test`/`demo`/`prod` | Rolls the built images onto the Container Apps |
+| `cd-services.yml` | Merge to `main` for `demo`; manual dispatch for `dev`/`test`/`prod` | Rolls the built images onto the Container Apps |
 | `cd-fabric-items.yml` | Manual dispatch per environment | Synchronises Fabric SaaS items through the Fabric REST API |
 | `presentation.yml` | PR / push touching `docs/presentation/**` | Builds the Marp oral-defense deck and best-effort publishes it to GitHub Pages |
 
@@ -75,21 +75,43 @@ index as its only source, so no public registry is contacted during the build.
 ### How far a merge deploys
 
 A merge to `main` builds the services whose sources changed, pushes them to ACR,
-and then calls `cd-services.yml` once per changed service with
-`environment: dev`. The image is passed as the `@sha256:` digest that the build
-just produced, never as a tag, so what runs in `dev` is exactly what was built
+and then calls `cd-services.yml` for `bff-api` and `portal-shell` with
+`environment: demo`. The image is passed as the `@sha256:` digest that the build
+just produced, never as a tag, so what runs in `demo` is exactly what was built
 from that commit.
 
-Promotion stops there. `test`, `demo` and `prod` still require a manual
-dispatch of `cd-services.yml`, because the release gates in
-[`security-governance-and-threat-model.md`](../docs/tech/security-governance-and-threat-model.md)
-§21 need a human sign-off (data classification, agent controls, DPIA). The
-reusable workflow refuses a non-`workflow_dispatch` call for any environment
-other than `dev`, so the policy cannot be bypassed by editing the caller alone.
+Only those two services are deployed because only they have a Container App
+(`novasteelv3-bff` and `novasteelv3-portal`). The `bff-api` image already
+carries `optimizer-worker`, `scoring-worker`, `knowledge-orchestrator` and the
+device simulator as build contexts, which is why the change filter routes all of
+those paths to it — they ship inside that one image.
 
-`dev` deployments inherit whatever protection rules the `dev` GitHub
-Environment carries. Adding a required reviewer there turns the automatic
-deployment into a queued one-click approval rather than disabling it.
+The run is not unattended. The `demo` GitHub Environment carries a **required
+reviewer**, so a merge queues a deployment that waits for one click. That is the
+human sign-off the release gates in
+[`security-governance-and-threat-model.md`](../docs/tech/security-governance-and-threat-model.md)
+§21 ask for. `dev`, `test` and `prod` still need a manual dispatch of
+`cd-services.yml`; the reusable workflow refuses a non-`workflow_dispatch` call
+for any environment other than `demo`, so the policy cannot be bypassed by
+editing the caller alone.
+
+### Environment configuration behind CD
+
+`cd-services.yml` reads these from the **`demo` GitHub Environment** (the
+`AZURE_*` values fall back to the repository variables above):
+
+| Variable | Value |
+|---|---|
+| `CONTAINER_RESOURCE_GROUP` | `rg-novasteelv3-demo-sc` |
+| `BFF_CONTAINER_APP` | `novasteelv3-bff` |
+| `PORTAL_CONTAINER_APP` | `novasteelv3-portal` |
+
+A job that declares `environment:` gets the OIDC subject
+`repo:frkim/NovaSteel3:environment:demo`, not the branch subject, so
+`novasteelv3-github-oidc` carries a second federated credential
+(`github-env-demo`) for it. The identity holds `AcrPush` on the registry for the
+build and `Container Apps Contributor` on `rg-novasteelv3-demo-sc` for the
+deployment.
 
 `tests/workflows/` validates these workflows themselves (trigger filters,
 `needs` graph, SHA pins, `persist-credentials: false`, and the ban on splicing

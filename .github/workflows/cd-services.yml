@@ -83,12 +83,12 @@ jobs:
             bff-api|optimizer-worker|scoring-worker|ingest-relay|knowledge-orchestrator|portal-shell) ;;
             *) echo "Unknown service: $SERVICE" >&2; exit 1 ;;
           esac
-      - name: Keep automatic promotion on dev
-        if: github.event_name != 'workflow_dispatch' && inputs.environment != 'dev'
+      - name: Keep automatic promotion on demo
+        if: github.event_name != 'workflow_dispatch' && inputs.environment != 'demo'
         env:
           TARGET_ENVIRONMENT: ${{ inputs.environment }}
         run: |
-          echo "Only dev promotes automatically; $TARGET_ENVIRONMENT needs a manual dispatch." >&2
+          echo "Only demo promotes automatically; $TARGET_ENVIRONMENT needs a manual dispatch." >&2
           exit 1
       - name: Publish pre-deployment evidence
         if: always()
