@@ -62,15 +62,34 @@ explicit `::error::` naming any variable that is missing.
 |---|---|---|
 | `ci.yml` | PR / push | Lint, pytest, C# build, protected-feed verification, security gates |
 | `codeql.yml` | PR / schedule | CodeQL for Python, TypeScript and C# |
-| `ci-build-services.yml` | PR / push touching `services/**` | Builds every `services/*/Dockerfile` and, on `main`, pushes to ACR via OIDC |
+| `ci-build-services.yml` | PR / push touching `services/**` | Builds every `services/*/Dockerfile` and, on `main`, pushes to ACR via OIDC and deploys to `dev` |
 | `cd-infra.yml` | Manual dispatch per environment | `bicep build` → what-if → `az deployment sub create` |
-| `cd-services.yml` | Manual dispatch per environment | Rolls the built images onto the Container Apps |
+| `cd-services.yml` | Merge to `main` for `dev`; manual dispatch for `test`/`demo`/`prod` | Rolls the built images onto the Container Apps |
 | `cd-fabric-items.yml` | Manual dispatch per environment | Synchronises Fabric SaaS items through the Fabric REST API |
 | `presentation.yml` | PR / push touching `docs/presentation/**` | Builds the Marp oral-defense deck and best-effort publishes it to GitHub Pages |
 
 `ci-build-services.yml` needs `ACR_LOGIN_SERVER` in addition to the variables
 above. Every `services/*/Dockerfile` writes `/etc/pip.conf` with the protected
 index as its only source, so no public registry is contacted during the build.
+
+### How far a merge deploys
+
+A merge to `main` builds the services whose sources changed, pushes them to ACR,
+and then calls `cd-services.yml` once per changed service with
+`environment: dev`. The image is passed as the `@sha256:` digest that the build
+just produced, never as a tag, so what runs in `dev` is exactly what was built
+from that commit.
+
+Promotion stops there. `test`, `demo` and `prod` still require a manual
+dispatch of `cd-services.yml`, because the release gates in
+[`security-governance-and-threat-model.md`](../docs/tech/security-governance-and-threat-model.md)
+§21 need a human sign-off (data classification, agent controls, DPIA). The
+reusable workflow refuses a non-`workflow_dispatch` call for any environment
+other than `dev`, so the policy cannot be bypassed by editing the caller alone.
+
+`dev` deployments inherit whatever protection rules the `dev` GitHub
+Environment carries. Adding a required reviewer there turns the automatic
+deployment into a queued one-click approval rather than disabling it.
 
 `tests/workflows/` validates these workflows themselves (trigger filters,
 `needs` graph, SHA pins, `persist-credentials: false`, and the ban on splicing
