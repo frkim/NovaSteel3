@@ -285,6 +285,31 @@ served correctly today by the glossary, screen context and the device simulator.
 Costs to budget: **10 new questions × 5 languages = 50 translated strings**, plus the two
 existing tests, plus the offline `OFFLINE_SUGGESTIONS` list in `copilotClient.ts`.
 
+### 8.1 What shipped instead — option D for all 44 non-search chips
+
+The chips were not rewritten. Every existing chip that asks about the plant rather than about the
+public world now carries a **curated Fabric answer**, served deterministically:
+
+- 11 screens × 5 chips = 55 questions. The 11 "Search for recent …" chips keep the online-search
+  corpus; the other **44** resolve to a card in
+  `services/knowledge-orchestrator/src/knowledge_orchestrator/copilot/fabric_answer_data.py`.
+- Bodies live in `fabric_answers_{en,fr,de,nl,es}.py` — **44 cards × 5 languages = 220 answers** —
+  and every figure in them is the synthetic value the screen behind the panel is already showing,
+  the simulator is emitting, or the July-2026 gold scorecard in
+  `docs/demo/data-agent-question-script.md` records.
+- `fabric_answers.py` matches on question text alone, normalised (case- and punctuation-free), in
+  any of the five languages. It cannot key off the screen: the panel's **Screen context** toggle is
+  off by default, so a chip usually arrives with no section.
+- `LocalCopilotChatAgent` short-circuits on a match, serves the body verbatim and cites the Fabric
+  datasets as `SourceKind.FABRIC` (rendered as "Microsoft Fabric" in the panel).
+  `AzureFoundryChatAgent` passes a Fabric-served result through unchanged, so the model can never
+  reword a figure the dashboard is displaying.
+
+This is option D applied at demo scope: no capacity has to be resumed, the answers are reproducible
+and work offline, and the wiring — a `SourceKind`, a citation list, a short-circuit in the local
+agent — is the same seam a live data agent would plug into under option A. When phase 2 lands, the
+card body becomes the fallback and the live Fabric result takes precedence.
+
 ---
 
 ## 9. Configuration

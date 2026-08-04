@@ -18,6 +18,8 @@ from .agents import (
     create_chat_agents,
 )
 from .context import ResolvedContext, ScreenProfile, profile_for, resolve
+from .fabric_answer_data import FabricCard, FabricDataset
+from .fabric_answers import FabricAnswer, answer_for, card_for_question
 from .glossary import GlossaryEntry, all_entries, lookup, search
 from .models import (
     SUPPORTED_LANGUAGES,
@@ -60,6 +62,9 @@ __all__ = [
     "CopilotService",
     "CopilotValidationError",
     "CuratedOnlineSearchProvider",
+    "FabricAnswer",
+    "FabricCard",
+    "FabricDataset",
     "GlossaryEntry",
     "GroundingItem",
     "LocalCopilotChatAgent",
@@ -75,6 +80,8 @@ __all__ = [
     "WebIQOnlineSearchProvider",
     "WebSearchToolProvider",
     "all_entries",
+    "answer_for",
+    "card_for_question",
     "create_chat_agents",
     "create_online_search_provider",
     "lookup",

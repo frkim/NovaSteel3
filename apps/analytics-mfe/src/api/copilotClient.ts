@@ -6,7 +6,13 @@ import type { SingleEnvelope } from './envelope'
 /** Reasoning tiers exposed in the composer; `auto` is resolved server-side. */
 export type ReasoningTier = 'auto' | 'default' | 'high'
 
-export type CopilotSourceKind = 'internal' | 'online' | 'glossary' | 'screen' | 'knowledge'
+export type CopilotSourceKind =
+  | 'internal'
+  | 'online'
+  | 'glossary'
+  | 'screen'
+  | 'knowledge'
+  | 'fabric'
 
 export interface CopilotSource {
   kind: CopilotSourceKind

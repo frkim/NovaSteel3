@@ -69,8 +69,9 @@ class SourceKind(str, enum.Enum):
     """Where a cited fragment came from.
 
     The distinction is surfaced in the UI: operators must be able to see at a
-    glance whether an answer leaned on internal grounded material or on a
-    public web result.
+    glance whether an answer leaned on internal grounded material, on a public
+    web result, or on an analytical query answered by the Fabric data agent
+    over the gold lakehouse.
     """
 
     INTERNAL = "internal"
@@ -78,6 +79,7 @@ class SourceKind(str, enum.Enum):
     GLOSSARY = "glossary"
     SCREEN = "screen"
     KNOWLEDGE = "knowledge"
+    FABRIC = "fabric"
 
 
 @dataclass(frozen=True)
