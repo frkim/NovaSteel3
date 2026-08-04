@@ -27,6 +27,20 @@ on:
         description: Immutable approved container image digest
         required: true
         type: string
+  workflow_call:
+    inputs:
+      environment:
+        description: GitHub Environment and NovaSteel target environment
+        required: true
+        type: string
+      service:
+        description: Service to promote
+        required: true
+        type: string
+      image:
+        description: Immutable approved container image digest
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -54,6 +68,28 @@ jobs:
         run: |
           set -euo pipefail
           [[ "$IMAGE" =~ @sha256:[0-9a-fA-F]{64}$ ]]
+      - name: Require a known environment and service
+        shell: bash
+        env:
+          TARGET_ENVIRONMENT: ${{ inputs.environment }}
+          SERVICE: ${{ inputs.service }}
+        run: |
+          set -euo pipefail
+          case "$TARGET_ENVIRONMENT" in
+            dev|test|demo|prod) ;;
+            *) echo "Unknown environment: $TARGET_ENVIRONMENT" >&2; exit 1 ;;
+          esac
+          case "$SERVICE" in
+            bff-api|optimizer-worker|scoring-worker|ingest-relay|knowledge-orchestrator|portal-shell) ;;
+            *) echo "Unknown service: $SERVICE" >&2; exit 1 ;;
+          esac
+      - name: Keep automatic promotion on demo
+        if: github.event_name != 'workflow_dispatch' && inputs.environment != 'demo'
+        env:
+          TARGET_ENVIRONMENT: ${{ inputs.environment }}
+        run: |
+          echo "Only demo promotes automatically; $TARGET_ENVIRONMENT needs a manual dispatch." >&2
+          exit 1
       - name: Publish pre-deployment evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

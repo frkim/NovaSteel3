@@ -223,3 +223,68 @@ def test_every_workflow_is_documented() -> None:
         assert path.name in documentation, (
             f"{path.name} is not described in .github/README.md"
         )
+
+
+def test_only_demo_is_promoted_automatically() -> None:
+    """Merging to `main` may reach demo; every other environment stays a decision.
+
+    demo is the only environment with deployed Container Apps, and its GitHub
+    Environment carries a required reviewer, so the automatic run queues for a
+    human. prod must stay a manual dispatch either way (the release gates in
+    `docs/tech/security-governance-and-threat-model.md`), so the target is
+    pinned on both sides of the reusable-workflow call.
+    """
+
+    caller = _load(WORKFLOW_DIR / "ci-build-services.yml")
+    callee = _load(WORKFLOW_DIR / "cd-services.yml")
+    deploy_jobs = {
+        job_id: job
+        for job_id, job in _jobs(caller).items()
+        if job.get("uses", "").endswith("cd-services.yml")
+    }
+    assert deploy_jobs, "ci-build-services.yml no longer deploys anything"
+
+    for job_id, job in deploy_jobs.items():
+        assert job["with"]["environment"] == "demo", (
+            f"job '{job_id}' promotes to '{job['with']['environment']}' without a human gate"
+        )
+        assert job["if"] == "github.event_name == 'push' && github.ref == 'refs/heads/main'", (
+            f"job '{job_id}' would deploy from something other than a merge to main"
+        )
+        assert job.get("permissions", {}).get("id-token") == "write", (
+            f"job '{job_id}' does not pass the OIDC token down to the reusable workflow"
+        )
+
+    guard = [
+        step
+        for step in _steps(_jobs(callee)["validate"])
+        if "inputs.environment != 'demo'" in (step.get("if") or "")
+    ]
+    assert guard, (
+        "cd-services.yml lost the guard that stops a non-dispatch call from "
+        "promoting to dev, test or prod"
+    )
+
+
+def test_automatic_deployments_are_pinned_to_an_image_digest() -> None:
+    """A tag can be re-pointed after review; only a digest is the thing that was built."""
+
+    caller = _load(WORKFLOW_DIR / "ci-build-services.yml")
+    jobs = _jobs(caller)
+    for job_id, job in jobs.items():
+        if not job.get("uses", "").endswith("cd-services.yml"):
+            continue
+        producer = job["needs"]
+        assert isinstance(producer, str), f"job '{job_id}' should depend on a single build job"
+        assert job["with"]["image"] == "${{ needs.%s.outputs.image }}" % producer, (
+            f"job '{job_id}' does not deploy the image its build job produced"
+        )
+
+        reference = jobs[producer]["outputs"]["image"]
+        step_id = reference.removeprefix("${{ steps.").split(".", 1)[0]
+        script = next(
+            step["run"] for step in _steps(jobs[producer]) if step.get("id") == step_id
+        )
+        assert "@${DIGEST}" in script, (
+            f"job '{producer}' publishes a mutable tag instead of an image digest"
+        )

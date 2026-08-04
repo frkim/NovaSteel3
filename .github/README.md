@@ -62,15 +62,69 @@ explicit `::error::` naming any variable that is missing.
 |---|---|---|
 | `ci.yml` | PR / push | Lint, pytest, C# build, protected-feed verification, security gates |
 | `codeql.yml` | PR / schedule | CodeQL for Python, TypeScript and C# |
-| `ci-build-services.yml` | PR / push touching `services/**` | Builds every `services/*/Dockerfile` and, on `main`, pushes to ACR via OIDC |
+| `ci-build-services.yml` | PR / push touching `services/**` | Builds every `services/*/Dockerfile` and, on `main`, pushes to ACR via OIDC and deploys to `demo` |
 | `cd-infra.yml` | Manual dispatch per environment | `bicep build` → what-if → `az deployment sub create` |
-| `cd-services.yml` | Manual dispatch per environment | Rolls the built images onto the Container Apps |
+| `cd-services.yml` | Merge to `main` for `demo`; manual dispatch for `dev`/`test`/`prod` | Rolls the built images onto the Container Apps |
 | `cd-fabric-items.yml` | Manual dispatch per environment | Synchronises Fabric SaaS items through the Fabric REST API |
 | `presentation.yml` | PR / push touching `docs/presentation/**` | Builds the Marp oral-defense deck and best-effort publishes it to GitHub Pages |
 
 `ci-build-services.yml` needs `ACR_LOGIN_SERVER` in addition to the variables
 above. Every `services/*/Dockerfile` writes `/etc/pip.conf` with the protected
 index as its only source, so no public registry is contacted during the build.
+
+### How far a merge deploys
+
+A merge to `main` builds the services whose sources changed, pushes them to ACR,
+and then calls `cd-services.yml` for `bff-api` and `portal-shell` with
+`environment: demo`. The image is passed as the `@sha256:` digest that the build
+just produced, never as a tag, so what runs in `demo` is exactly what was built
+from that commit.
+
+Only those two services are deployed because only they have a Container App
+(`novasteelv3-bff` and `novasteelv3-portal`). The `bff-api` image already
+carries `optimizer-worker`, `scoring-worker`, `knowledge-orchestrator` and the
+device simulator as build contexts, which is why the change filter routes all of
+those paths to it — they ship inside that one image.
+
+The run is not unattended. The `demo` GitHub Environment carries a **required
+reviewer**, so a merge queues a deployment that waits for one click. That is the
+human sign-off the release gates in
+[`security-governance-and-threat-model.md`](../docs/tech/security-governance-and-threat-model.md)
+§21 ask for. `dev`, `test` and `prod` still need a manual dispatch of
+`cd-services.yml`; the reusable workflow refuses a non-`workflow_dispatch` call
+for any environment other than `demo`, so the policy cannot be bypassed by
+editing the caller alone.
+
+### Environment configuration behind CD
+
+`cd-services.yml` reads these from the **`demo` GitHub Environment** (the
+`AZURE_*` values fall back to the repository variables above):
+
+| Variable | Value |
+|---|---|
+| `CONTAINER_RESOURCE_GROUP` | `rg-novasteelv3-demo-sc` |
+| `BFF_CONTAINER_APP` | `novasteelv3-bff` |
+| `PORTAL_CONTAINER_APP` | `novasteelv3-portal` |
+
+A job that declares `environment:` gets an OIDC subject scoped to the
+environment rather than to the branch, so `novasteelv3-github-oidc` needs its own
+federated credential for it. This repository has GitHub's **immutable-ID** OIDC
+subjects enabled, which means the token presents numeric owner and repository IDs
+instead of names:
+
+```
+repo:frkim@74252080/NovaSteel3@1312557916:environment:demo
+```
+
+Both spellings are registered (`github-env-demo` and `github-env-demo-immutable`)
+so the login keeps working whichever format GitHub issues, matching the existing
+`github-main` / `github-main-immutable` pair used by the branch-scoped jobs. If
+`azure/login` fails with `AADSTS700213: No matching federated identity record`,
+compare the `subject claim` line in the job log against the credential subjects on
+the identity - the name-based form alone is not enough here.
+
+The identity holds `AcrPush` on the registry for the build and `Container Apps
+Contributor` on `rg-novasteelv3-demo-sc` for the deployment.
 
 `tests/workflows/` validates these workflows themselves (trigger filters,
 `needs` graph, SHA pins, `persist-credentials: false`, and the ban on splicing
