@@ -343,9 +343,11 @@ At the top, Python services do the math and read Fabric read-only, and Foundry a
 
 ---
 
+<!-- _class: fabric-gravity -->
+
 # Why Microsoft Fabric Is the Center of Gravity
 
-<div class="split">
+<div class="split right-wide">
 <div>
 
 - **Real-Time Intelligence** — Eventstream + Eventhouse/KQL for hot telemetry
@@ -354,20 +356,29 @@ At the top, Python services do the math and read Fabric read-only, and Foundry a
 - **Power BI + Activator** — reporting & notification (not control)
 
 </div>
-<div>
+<div class="small-body">
 
-- ADR-001: Fabric is the analytics core; **no parallel data lake**
-- ADR-002: hot KQL separated from governed Delta
+### Fabric items span every workload
 
-> One governed estate, two clocks: operational and historical.
+<p class="subtitle">Representative workspace item types, grouped by what they do — not an exhaustive catalog.</p>
+
+- **01 · Move & orchestrate** — *Data Factory*: data pipeline, copy job, Dataflow Gen2, Apache Airflow job
+- **02 · Store & serve** — *Eng. / DW / DB*: lakehouse, warehouse, mirrored database, SQL / Cosmos DB
+- **03 · Transform & build** — *Data Engineering*: notebook, Spark job definition, environment, API for GraphQL
+- **04 · Analyze & learn** — *Data Science / BI*: ML experiment, ML model, semantic model, data agent
+- **05 · Stream & respond** — *Real-Time Intelligence*: Eventstream, Eventhouse, KQL queryset, RT dashboard / Activator, digital twin builder\*
+- **06 · Share & context** — *Power BI / Fabric IQ*: report / dashboard, paginated report, ontology\*, graph
 
 </div>
 </div>
+
+<div class="foundation-bar"><b>One shared foundation</b><span>OneLake · workspace governance · unified security</span></div>
 
 <!-- ⏱ 1:45 · Why bet the platform on Fabric? Because heavy-industry analytics has two clocks: a one-second operational clock and a governed-history clock. Fabric handles both in one governed estate.
 Real-Time Intelligence — Eventstream into an Eventhouse KQL database — gives us hot telemetry, alarms, and freshness. OneLake with bronze-silver-gold Delta gives us immutable lineage, the training substrate, and stable KPI definitions.
 Direct Lake means one semantic model reads gold data with no extra copy — so high-grade yield means exactly one thing everywhere.
-We consciously chose not to build a parallel lake or a second BI stack — that's ADR-001 — and we keep hot KQL separate from governed Delta, ADR-002, so we always answer from the right store.
+We consciously chose not to build a parallel lake or a second BI stack, and we keep hot KQL separate from governed Delta, so we always answer from the right store.
+The right-hand map shows how that plays out in practice: every Fabric item type we use — from pipelines and lakehouses through notebooks, semantic models and Eventhouses to reports and graphs — sits on one shared foundation of OneLake, workspace governance, and unified security.
 Azure services exist only for integration, APIs, and domain compute Fabric doesn't provide. -->
 
 ---

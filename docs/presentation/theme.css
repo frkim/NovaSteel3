@@ -1112,3 +1112,64 @@ section.deep-dive .stat .label {
   font-size: 15px;
   color: var(--ns-ink-soft);
 }
+
+/* --- Fabric item taxonomy: "one shared foundation" -------------------- */
+
+/* The Fabric centre-of-gravity slide carries a dense right-hand map of item
+   types, so it runs at a tighter type scale than the default body slide. */
+section.fabric-gravity h1 {
+  font-size: 36px;
+}
+
+section.fabric-gravity .split > div:first-child li {
+  font-size: 19px;
+  line-height: 1.35;
+}
+
+section.fabric-gravity h3 {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+section.fabric-gravity .subtitle {
+  font-size: 16px;
+  margin: 0 0 8px;
+}
+
+section.fabric-gravity .small-body li {
+  font-size: 16px;
+  line-height: 1.28;
+  margin-bottom: 5px;
+}
+
+section.fabric-gravity .small-body em {
+  color: var(--ns-ink-soft);
+  font-style: normal;
+  font-weight: 600;
+}
+
+/* Full-width closing banner: every item above shares one platform. */
+.foundation-bar {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 16px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  background: var(--ns-ink);
+  color: #ffffff;
+}
+
+.foundation-bar b {
+  color: #ffffff;
+  font-size: 17px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.foundation-bar span {
+  font-size: 16px;
+  color: #f29a62;
+}
+
