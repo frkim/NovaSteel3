@@ -51,6 +51,11 @@ product can call it.
 - Two tests pin the shape: `test_every_screen_has_five_suggestions_in_every_language` and an
   API test asserting five per set. `MAX_SUGGESTIONS = 5`.
 
+A second, separate set lives in the front end: `PERSONA_QUESTIONS` in
+`apps/analytics-mfe/src/components/copilot/CopilotPanel.tsx` — **8 personas × 4 questions = 32**,
+English-only, shown when a persona is selected. They are sent as free text with no screen context,
+so nothing can match them by section; see §8.2.
+
 The existing chips are **screen-scoped, persona-scoped and action-oriented** — "Draft the
 inspection work-order rationale", "Search for recent refractory guidance", "Explain how the
 thermal signature works". The data-agent script's questions are **analytical and tabular** —
@@ -309,6 +314,58 @@ This is option D applied at demo scope: no capacity has to be resumed, the answe
 and work offline, and the wiring — a `SourceKind`, a citation list, a short-circuit in the local
 agent — is the same seam a live data agent would plug into under option A. When phase 2 lands, the
 card body becomes the fallback and the live Fabric result takes precedence.
+
+### 8.2 The retrieval trace, and the 32 persona chips
+
+Option D answered correctly but silently: the panel printed a figure and cited "Microsoft Fabric"
+without ever showing that a query had run. Two gaps followed from that — the answer did not *look*
+retrieved, and the 32 persona chips (`PERSONA_QUESTIONS` in `CopilotPanel.tsx`, 8 personas × 4
+questions) were not curated at all and fell through to the generic local answer.
+
+Both are now closed. **76 cards carry 151 query steps.**
+
+**Query steps.** `fabric_sources.py` is the shared vocabulary: the workspace/lakehouse/KQL-database/
+ontology/data-agent constants, a `FabricDataset` that now carries `engine`, `statement`, `rows` and
+`elapsed_ms` alongside the citation fields, and the `gold()` / `kql()` / `graph()` helpers that build
+one. Every dataset on every card is therefore a *step the agent ran*, not just a table it mentions:
+
+- `gold()` → **SQL analytics endpoint** over `lh_novasteelv3_core`
+- `kql()` → **KQL** over `kql-ns-operations`
+- `graph()` → **GQL** over `onto_novasteelv3`
+
+The statements are written against the real schema — the Eventhouse tables, materialised views and
+`fn_*` functions in `DatabaseSchema.kql`, the gold DDL in `fabric/lakehouse/sql/20_gold.sql`, and the
+`Asset -[:supplies]-> Asset` genealogy in the ontology. They bind to July 2026 (gold history stops
+2026-07-29) rather than to `GETDATE()`, and they use the real plant keys (`NS-DEMO-LUX-01`, not
+`LUX`). A card that has no direct column for what was asked derives it — OEE and throughput from
+`runtime_minutes` / `planned_minutes` / `total_tons`, CO₂ intensity from `total_co2e_t` over
+`crude_steel_tons` — or says plainly that the demo does not carry it.
+
+**Rendering.** `_fabric_retrieval()` in `agents.py` turns the card's steps into a localized block that
+`_fabric_turn()` injects as the second paragraph, between the intro and the body:
+
+> **Retrieved from Fabric** — workspace **NovaSteelV3-Demo** · query steps: 2 · rows returned: 8 ·
+> elapsed: 0.56 s.
+> - **SQL analytics endpoint** on lh_novasteelv3_core.fact_furnace_rul — SELECT … → 5 rows in 310 ms
+> - **KQL** on kql-ns-operations.telemetry_hot — telemetry_hot | where … → 3 rows in 250 ms
+
+The same lines are appended to `result.trace`, so the reasoning trace and the visible answer agree.
+The five `_TEMPLATES` entries (`fabric_retrieval`, `fabric_step`) say "query steps: N" rather than
+inflecting a noun, which keeps one phrasing correct in all five languages.
+
+**Persona cards.** `fabric_persona_data.py` holds the 32 cards and their 71 query steps; the bodies
+live in `fabric_persona_{en,fr,de,nl,es}.py` — **32 cards × 5 languages = 160 answers**. These chips
+arrive as free text with no section, so `fabric_answers.py::_build_index` was extended to match a
+card by its verbatim `prompts` as well as by section+index; normalisation makes the typographic
+apostrophe in two of the prompts harmless. `CARDS = _SCREEN_CARDS + PERSONA_CARDS`, and the import-time
+validation covers both packs equally.
+
+Guardrails, because a plausible-looking invented column is the failure mode here:
+`tests/knowledge/test_copilot_persona_questions.py` parses `PERSONA_QUESTIONS` straight out of the
+TSX and asserts that every one of the 32 questions resolves to a Fabric answer with a trace in all
+five languages, and that the translations preserve every figure. Do not add a `setdefault` fallback
+that copies English into an empty translation pack — it makes those tests pass on data that is not
+there.
 
 ---
 
