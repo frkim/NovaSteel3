@@ -12,6 +12,7 @@
  * scope-boundary/scope-grid/scope-panel/scope-footer, deep-dive,
  * stat/big/label, pill[.green|.orange|.purple|.gray|.blue], tag, grad, hero-line,
  * herostats, brandbar, corners[.bottom-right],
+ * chapter[.teal|.purple|.green|.blue|.orange|.gray]/chapter-num/chapter-sub/chapter-path/chapter-icon,
  * flow/lane[.teal|.orange|.purple|.green|.blue]/lane-tag/nodes/node/arrow/legend.
  */
 
@@ -652,6 +653,110 @@ section.lead img {
   margin-top: 4px;
   font-size: 15px;
   color: #cbd5e1;
+}
+
+/* --- chapter divider ----------------------------------------------------
+   Section-opener slide. Reuses section.lead's exact dark navy/molten
+   background (same class, applied alongside .chapter: `lead chapter teal`)
+   so every chapter break matches the title slide, then swaps the big number
+   and breadcrumb chip to that chapter's agenda color. */
+
+section.chapter {
+  justify-content: center;
+}
+
+section.chapter h1 {
+  font-size: 58px;
+  color: #f8fafc;
+}
+
+.chapter-num {
+  margin: 0 0 4px;
+  font-size: 108px;
+  font-weight: 800;
+  line-height: 1;
+  color: #eb8532;
+}
+
+.chapter-sub {
+  margin: 0 0 30px;
+  font-size: 25px;
+  color: #cbd5e1;
+}
+
+.chapter-path {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.chapter-path span {
+  padding: 8px 16px;
+  border: 1px solid rgba(248, 250, 252, 0.22);
+  border-radius: 999px;
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+.chapter-path span.now {
+  color: #f8fafc;
+  border-color: #eb8532;
+  background: rgba(248, 250, 252, 0.08);
+  font-weight: 600;
+}
+
+.chapter-icon {
+  position: absolute;
+  top: 64px;
+  right: 88px;
+  width: 176px;
+  height: auto;
+}
+
+section.chapter.teal .chapter-num {
+  color: #2dd4bf;
+}
+
+section.chapter.teal .chapter-path span.now {
+  color: #2dd4bf;
+  border-color: #2dd4bf;
+}
+
+section.chapter.purple .chapter-num {
+  color: #a78bfa;
+}
+
+section.chapter.purple .chapter-path span.now {
+  color: #a78bfa;
+  border-color: #a78bfa;
+}
+
+section.chapter.green .chapter-num {
+  color: #34d399;
+}
+
+section.chapter.green .chapter-path span.now {
+  color: #34d399;
+  border-color: #34d399;
+}
+
+section.chapter.blue .chapter-num {
+  color: #60a5fa;
+}
+
+section.chapter.blue .chapter-path span.now {
+  color: #60a5fa;
+  border-color: #60a5fa;
+}
+
+section.chapter.gray .chapter-num {
+  color: #cbd5e1;
+}
+
+section.chapter.gray .chapter-path span.now {
+  color: #cbd5e1;
+  border-color: #cbd5e1;
 }
 
 /* --- card grid --------------------------------------------------------- */

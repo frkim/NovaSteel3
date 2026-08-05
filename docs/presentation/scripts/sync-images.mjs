@@ -78,6 +78,23 @@ const logos = [
   ["microsoft-logo.png", [join(logoDir, "microsoft_logo.png")]],
 ];
 
+/**
+ * Chapter-divider icons. Optional like the logos above: a missing icon just drops
+ * that slide's visual (see the onerror handler in slides.md) instead of failing
+ * the build, since these are illustrative and not load-bearing.
+ *
+ * @type {Array<[string, string[]]>} file name inside images/ -> candidate sources
+ */
+const chapterIcons = [
+  "icon_business_context.png",
+  "icon_platform_architecture.png",
+  "icon_decision_intelligence.png",
+  "icon_trust_governance.png",
+  "icon_demo.png",
+  "icon_value_next_steps.png",
+  "icon_appendix.png",
+].map((name) => [name, [join(generatedDir, name)]]);
+
 if (existsSync(targetDir)) {
   for (const entry of readdirSync(targetDir)) {
     rmSync(join(targetDir, entry), { recursive: true, force: true });
@@ -91,10 +108,10 @@ for (const [source, name] of assets) {
 }
 
 let copiedLogos = 0;
-for (const [name, candidates] of logos) {
+for (const [name, candidates] of [...logos, ...chapterIcons]) {
   const source = candidates.find((candidate) => existsSync(candidate));
   if (source === undefined) {
-    console.warn(`sync-images: no source for ${name}; the title slide will omit that logo`);
+    console.warn(`sync-images: no source for ${name}; the deck will omit that image`);
     continue;
   }
   copyFileSync(source, join(targetDir, name));

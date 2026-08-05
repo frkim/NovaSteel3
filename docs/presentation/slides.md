@@ -65,6 +65,31 @@ I will close by separating demonstrated evidence from transformation targets and
 
 ---
 
+<!-- _class: lead chapter -->
+<!-- _paginate: false -->
+
+<img class="chapter-icon" src="images/icon_business_context.png" alt="" onerror="this.remove()">
+
+<div class="chapter-num">01</div>
+
+# Business context
+
+<p class="chapter-sub">Challenge · objectives · personas</p>
+
+<div class="chapter-path">
+<span class="now">01 Business</span>
+<span>02 Platform</span>
+<span>03 Decision</span>
+<span>04 Trust</span>
+<span>05 Demo</span>
+<span>06 Value</span>
+<span>07 Appendix</span>
+</div>
+
+<!-- ⏱ 0:10 · Chapter one: the business pressure, the four targets, and the five people making the call. -->
+
+---
+
 <!-- _class: tight -->
 
 # How a Steel Mill Works
@@ -192,6 +217,31 @@ Each brings different expertise, but today they lose time moving between histori
 Instead of asking every person to search across systems and manually assemble context, a role-specific agent brings governed data, approved knowledge, risks and recommendations into the employee's flow of work.
 The agent does not replace expertise; it makes that expertise more productive — faster discovery, better-informed decisions and more consistent handoffs between shifts and functions.
 The employee remains accountable: they accept, modify or reject. No agent crosses into operational control. -->
+
+---
+
+<!-- _class: lead chapter teal -->
+<!-- _paginate: false -->
+
+<img class="chapter-icon" src="images/icon_platform_architecture.png" alt="" onerror="this.remove()">
+
+<div class="chapter-num">02</div>
+
+# Platform & architecture
+
+<p class="chapter-sub">Scope · Fabric · AI flow</p>
+
+<div class="chapter-path">
+<span>01 Business</span>
+<span class="now">02 Platform</span>
+<span>03 Decision</span>
+<span>04 Trust</span>
+<span>05 Demo</span>
+<span>06 Value</span>
+<span>07 Appendix</span>
+</div>
+
+<!-- ⏱ 0:10 · Chapter two: one governed platform, its scope boundary, and why Fabric is the core. -->
 
 ---
 
@@ -414,6 +464,31 @@ Azure services exist only for integration, APIs, and domain compute Fabric doesn
 <!-- ⏱ 1:45 · Trust starts at ingestion. Every event arrives in an immutable bronze envelope with a UUIDv7 id, its original event time, a per-source sequence, and a schema version.
 Silver is the single place we deduplicate and normalize units, so streaming and batch land on the same contract. Crucially, bad data is visible: late, duplicate, wrong-unit, or unknown-asset records are quarantined with a reason, never quietly fixed.
 On identity: Fabric's Event Hubs connector uses a shared key, which our security policy forbids — so we buffer in Event Hubs and use a managed-identity relay to a Custom Endpoint over Entra ID. The wider permission — workspace Contributor — is isolated in an ingress-only workspace with no access to curated, ML, or reporting data. That's ADR-005. -->
+
+---
+
+<!-- _class: lead chapter purple -->
+<!-- _paginate: false -->
+
+<img class="chapter-icon" src="images/icon_decision_intelligence.png" alt="" onerror="this.remove()">
+
+<div class="chapter-num">03</div>
+
+# Decision intelligence
+
+<p class="chapter-sub">Energy · RUL · quality · knowledge</p>
+
+<div class="chapter-path">
+<span>01 Business</span>
+<span>02 Platform</span>
+<span class="now">03 Decision</span>
+<span>04 Trust</span>
+<span>05 Demo</span>
+<span>06 Value</span>
+<span>07 Appendix</span>
+</div>
+
+<!-- ⏱ 0:10 · Chapter three: the four AI capabilities that turn governed data into decisions. -->
 
 ---
 
@@ -659,6 +734,31 @@ This is where generative AI adds real value and where it's most tightly governed
 
 ---
 
+<!-- _class: lead chapter green -->
+<!-- _paginate: false -->
+
+<img class="chapter-icon" src="images/icon_trust_governance.png" alt="" onerror="this.remove()">
+
+<div class="chapter-num">04</div>
+
+# Trust & governance
+
+<p class="chapter-sub">Security · Responsible AI · compliance</p>
+
+<div class="chapter-path">
+<span>01 Business</span>
+<span>02 Platform</span>
+<span>03 Decision</span>
+<span class="now">04 Trust</span>
+<span>05 Demo</span>
+<span>06 Value</span>
+<span>07 Appendix</span>
+</div>
+
+<!-- ⏱ 0:10 · Chapter four: the guardrails, security posture and compliance obligations behind every recommendation. -->
+
+---
+
 # Responsible AI & EU AI Act Governance
 
 <div class="split">
@@ -837,6 +937,31 @@ Be clear about what we are not claiming. We produce audit-grade management infor
 
 ---
 
+<!-- _class: lead chapter blue -->
+<!-- _paginate: false -->
+
+<img class="chapter-icon" src="images/icon_demo.png" alt="" onerror="this.remove()">
+
+<div class="chapter-num">05</div>
+
+# Live demonstration
+
+<p class="chapter-sub">Persona journeys · evidence reproduced</p>
+
+<div class="chapter-path">
+<span>01 Business</span>
+<span>02 Platform</span>
+<span>03 Decision</span>
+<span>04 Trust</span>
+<span class="now">05 Demo</span>
+<span>06 Value</span>
+<span>07 Appendix</span>
+</div>
+
+<!-- ⏱ 0:10 · Chapter five: seven persona journeys, reproducing the evidence live. -->
+
+---
+
 # What You'll See Next
 
 <div class="split">
@@ -891,6 +1016,31 @@ Be clear about what we are not claiming. We produce audit-grade management infor
 </div>
 
 <!-- ⏱ 0:35 · We treated agentic development as an organized engineering system, not ad-hoc prompting. GitHub Spec Kit turns intent into a constitution, specification, plan, tasks, and acceptance criteria. Superpowers adds reusable skills for brainstorming, test-driven development, debugging, and review. GitHub Copilot then executes the same governed workflow across VS Code, Copilot CLI, and the GitHub Copilot app. Specialized coding, QA, security, research, and documentation agents own bounded branches and pull requests; automated gates prove the work, and a human approves the plan and the merge. -->
+
+---
+
+<!-- _class: lead chapter -->
+<!-- _paginate: false -->
+
+<img class="chapter-icon" src="images/icon_value_next_steps.png" alt="" onerror="this.remove()">
+
+<div class="chapter-num">06</div>
+
+# Value & next steps
+
+<p class="chapter-sub">Targets vs. evidence · roadmap · close</p>
+
+<div class="chapter-path">
+<span>01 Business</span>
+<span>02 Platform</span>
+<span>03 Decision</span>
+<span>04 Trust</span>
+<span>05 Demo</span>
+<span class="now">06 Value</span>
+<span>07 Appendix</span>
+</div>
+
+<!-- ⏱ 0:10 · Chapter six: separating target from evidence, the roadmap, and the decision asked today. -->
 
 ---
 
@@ -1021,6 +1171,31 @@ The decision I'm asking for today is narrow: approve the pilot scope and open th
 
 <!-- ⏱ 0:10 · Thank you. I welcome your questions. -->
 
+
+---
+
+<!-- _class: lead chapter gray -->
+<!-- _paginate: false -->
+
+<img class="chapter-icon" src="images/icon_appendix.png" alt="" onerror="this.remove()">
+
+<div class="chapter-num">07</div>
+
+# Appendix
+
+<p class="chapter-sub">ADRs · cost model · roadmap · backup Q&A</p>
+
+<div class="chapter-path">
+<span>01 Business</span>
+<span>02 Platform</span>
+<span>03 Decision</span>
+<span>04 Trust</span>
+<span>05 Demo</span>
+<span>06 Value</span>
+<span class="now">07 Appendix</span>
+</div>
+
+<!-- ⏱ 0:00 · Appendix: architecture decision records, cost sensitivity, phased roadmap, and backup answers for the harder questions. -->
 
 ---
 
