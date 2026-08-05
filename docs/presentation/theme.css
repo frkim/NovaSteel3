@@ -1222,3 +1222,153 @@ section.fabric-gravity .foundation-bar {
   color: #f29a62;
 }
 
+section.security-slide .split {
+  grid-template-columns: 7fr 5fr;
+  gap: 24px;
+}
+
+.security-principles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.security-principles div {
+  padding: 10px 12px;
+  border: 1px solid var(--ns-line);
+  border-left: 5px solid var(--ns-teal);
+  border-radius: 8px;
+  background: var(--ns-teal-soft);
+}
+
+.security-principles div:last-child {
+  grid-column: 1 / -1;
+}
+
+.security-principles b,
+.security-principles span {
+  display: block;
+}
+
+.security-principles b {
+  margin-bottom: 3px;
+  color: var(--ns-teal);
+  font-size: 17px;
+}
+
+.security-principles span {
+  color: #334155;
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+section.security-slide table {
+  margin-top: 0;
+  font-size: 15px;
+}
+
+section.security-slide th,
+section.security-slide td {
+  border-color: #b8c4d3;
+  padding: 6px 8px;
+}
+
+section.compliance-slide table {
+  margin-top: 4px;
+  font-size: 14px;
+}
+
+section.compliance-slide th,
+section.compliance-slide td {
+  padding: 5px 8px;
+}
+
+section.compliance-slide .split {
+  gap: 28px;
+  margin-top: 8px;
+}
+
+section.compliance-slide .split li {
+  margin-bottom: 4px;
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+section.compliance-slide .compliance-gates {
+  margin: 8px 0 0;
+  font-size: 17px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+section.compliance-slide .compliance-gates .pill {
+  font-size: 14px;
+}
+
+section.compliance-slide blockquote {
+  margin-top: 10px;
+  padding: 9px 18px;
+}
+
+section.compliance-slide blockquote p {
+  font-size: 17px;
+  line-height: 1.2;
+}
+
+section.cost-slide .split > div:first-child th:last-child,
+section.cost-slide .split > div:first-child td:last-child {
+  min-width: 118px;
+  white-space: nowrap;
+}
+
+section.cost-slide .split {
+  grid-template-columns: 7fr 5fr;
+  gap: 24px;
+}
+
+section.cost-slide table {
+  font-size: 17px;
+}
+
+section.cost-slide th,
+section.cost-slide td {
+  padding: 7px 9px;
+}
+
+section.cost-slide .legend {
+  font-size: 16px;
+  line-height: 1.3;
+  color: #334155;
+}
+
+section.agent-swarm .cards {
+  margin-top: 22px;
+}
+
+section.agent-swarm .card {
+  min-height: 178px;
+  padding: 18px;
+}
+
+section.agent-swarm .chain {
+  margin-top: 24px;
+  gap: 12px;
+}
+
+section.agent-swarm .chain .node {
+  padding: 12px 14px;
+}
+
+section.agent-swarm .chain .node b {
+  font-size: 18px;
+}
+
+section.agent-swarm .chain .node span {
+  font-size: 15px;
+  color: #334155;
+  font-weight: 500;
+}
+
+section.agent-swarm .chain .step {
+  font-size: 28px;
+}

@@ -326,18 +326,25 @@ Proceed only when: all displayed data is labeled synthetic; deterministic manife
 
 | Category | Representative services | Indicative €/yr |
 |---|---|---|
-| Data platform | Microsoft Fabric capacity, OneLake | €120k–€220k |
+| Data platform | F64 Fabric capacity, OneLake | €57k–€98k |
 | Ingestion | Event Hubs (ingress buffer) | €40k–€80k |
-| AI/ML | Fabric Data Science compute (train/score) | €90k–€180k |
-| GenAI | Microsoft Foundry (Azure OpenAI tokens) | €30k–€90k |
-| Apps & experience | Container Apps, Power BI Pro/PPU | €20k–€50k |
+| GenAI | Microsoft Foundry (Azure OpenAI tokens), Speech | €30k–€90k |
+| Apps & experience | Container Apps, Power BI creator Pro/PPU seats | €20k–€50k |
 | Security & governance | Defender, Purview, Key Vault, Monitor | €30k–€60k |
 | Networking | VNet, private endpoints, egress | €10k–€30k |
-| **Indicative annual run total** | | **≈ €340k–€710k** |
+| **Indicative annual run total** | | **≈ €187k–€408k** |
 
-> Optimization levers: Fabric capacity right-sizing, reservations/savings plans, autoscale,
-> dev/test shutdown, batch scheduling of training. The §8.1 cost-driver table and FinOps
-> cadence (§10) govern ongoing optimization.
+> **Pricing basis (checked 2026-08-04):** Sweden Central retail pricing in EUR is
+> €0.1667/CU-hour PAYG and €868.8021/CU-year for a one-year reservation. The F64
+> data-platform range therefore spans €55.6k reserved to €93.5k PAYG for compute,
+> plus an illustrative 5–20 TB of hot OneLake at €0.0202/GB-month. Fabric Data
+> Science, notebooks, RTI, and Power BI consume the same shared capacity pool, so
+> training and scoring are not added again as a separate compute line. Opt-in Spark
+> autoscale is outside this envelope until enabled and measured.
+>
+> Optimization levers: Fabric capacity right-sizing, reservations, autoscale,
+> dev/test shutdown, and batch scheduling of training. The §8.1 cost-driver table
+> and FinOps cadence (§10) govern ongoing optimization.
 
 #### 8.5.3 🎯 TARGET — Implementation cost (one-off) — illustrative
 
@@ -374,7 +381,7 @@ Proceed only when: all displayed data is labeled synthetic; deterministic manife
 | 3-yr ROI | High multiple | Higher | Highest |
 
 Because annual benefits (energy alone ~€24.5M illustrative at 14%) vastly exceed build
-(~€0.6–1.1M) plus run (~€0.3–0.7M/yr), **payback is well under a year** even after
+(~€0.6–1.1M) plus run (~€0.19–0.41M/yr), **payback is well under a year** even after
 large conservative discounts. NPV/IRR should be computed with AxelorMetal's discount
 rate during a formal workshop.
 
@@ -460,7 +467,7 @@ This demo cost is 🔬 **EVIDENCE** — it reflects what the platform actually c
 | | 🎯 TARGET (illustrative) |
 |---|---|
 | **Build** | €0.6–1.1M one-off |
-| **Run** | €0.3–0.7M/yr |
+| **Run** | €0.19–0.41M/yr |
 | **Energy benefit (O1)** | ~€24.5M/yr at scale *(dominant lever — 14% × 35% of cost × 1 Mt)* |
 | **Avoided failures (O3)** | ~€3.2M/yr expected *(€8M × 1 event / 2.5 yr)* |
 | **Payback** | **< 12 months** (conservative); < 9 months (base) |

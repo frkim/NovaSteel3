@@ -113,6 +113,20 @@ def test_deck_carries_a_compliance_slide_instead_of_the_deployment_slide() -> No
     assert not any("Appendix — Deployment, Capacity & Scale" in slide for slide in backup)
 
 
+def test_security_slide_names_the_agent_security_principles() -> None:
+    _, slides = _front_matter_and_slides()
+    security = [slide for slide in slides if "# Security, Identity & EU Data Residency" in slide]
+    assert len(security) == 1
+    for principle in (
+        "Zero Trust",
+        "Least Privilege",
+        "Defense in Depth",
+        "Security Left Shift",
+        "Data Minimization",
+    ):
+        assert principle in security[0], f"the security slide must name {principle}"
+
+
 def test_demo_handoff_contains_only_the_demo_sequence() -> None:
     _, slides = _front_matter_and_slides()
     handoff = [slide for slide in slides if "What You'll See Next" in slide]
@@ -226,7 +240,7 @@ def test_requested_slides_are_named_and_ordered() -> None:
         "How We Built the Demo with an Agent Swarm"
     )
     assert titles.index(
-        "Appendix — vNext: Two-way Control with Microsoft Adaptive Cloud"
+        "NovaSteel vNext: Two-way Control with Microsoft Adaptive Cloud"
     ) + 1 == titles.index("Conclusion")
     assert titles.index("Next Steps") + 1 == titles.index("Thank You")
     assert titles[-1] == "Appendix — Fabric RTI"
@@ -308,6 +322,26 @@ def test_deck_sizes_the_run_cost_for_one_site() -> None:
     assert len(cost) == 1
     for tier in ("**Mini**", "**Medium**", "**Large**"):
         assert tier in cost[0], f"the cost slide must size the {tier} tier"
+    for sku in ("F8", "F64", "F128"):
+        assert sku in cost[0], f"the cost slide must name the {sku} deployment profile"
+    assert "≈ €187k–€408k" in cost[0]
+    assert "AI/ML train & score" not in cost[0]
+    assert "same shared F-capacity pool" in cost[0]
+
+
+def test_agent_swarm_slide_explains_the_agentic_development_stack() -> None:
+    _, slides = _front_matter_and_slides()
+    swarm = next(
+        slide for slide in slides if "# How We Built the Demo with an Agent Swarm" in slide
+    )
+    for concept in (
+        "GitHub Spec Kit",
+        "Superpowers",
+        "VS Code + Copilot CLI + GitHub Copilot app",
+        "Specialized GitHub agents",
+        "bounded branches and PRs",
+    ):
+        assert concept in swarm
 
 
 def test_build_scripts_produce_html_pdf_and_pptx() -> None:

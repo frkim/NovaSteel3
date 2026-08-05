@@ -687,23 +687,29 @@ A model response is never authorization. -->
 
 ---
 
+<!-- _class: tight security-slide -->
+
 # Security, Identity & EU Data Residency
 
 <div class="split">
 <div>
 
-- **No standing secrets** — Entra managed identities
-- Four separate auth planes: Azure RBAC ≠ Fabric ≠ Foundry ≠ app roles
-- **Zero Trust** — verify explicitly, assume breach, no implicit network trust
-- **Least privilege by default** — every identity scoped to one job, blast radius contained
+<div class="security-principles">
+<div><b>Zero Trust</b><span>Never trust, always verify — every agent request is authenticated and authorized</span></div>
+<div><b>Least Privilege</b><span>Each agent has minimal permissions for its specific function</span></div>
+<div><b>Defense in Depth</b><span>Multiple security layers: network, identity, data and application</span></div>
+<div><b>Security Left Shift</b><span>Security checks run in the CI/CD pipeline, not just production</span></div>
+<div><b>Data Minimization</b><span>Agents access only the data required for their specific task</span></div>
+</div>
 
 </div>
 <div>
 
 | Aspect | Posture |
 |---|---|
+| Identity | Entra managed identities; no standing secrets |
+| Authorization | Azure RBAC ≠ Fabric ≠ Foundry ≠ app roles |
 | Residency | Sweden Central + Data Zone (EU) |
-| Breach notification | 72 hours |
 | Audit retention | 1 yr hot + 6 yr archive |
 | Interview audio | Highly Confidential, 30 d |
 | Deploy secrets | None — GitHub OIDC |
@@ -719,41 +725,43 @@ Everything processes in the EU — Sweden Central primary, Foundry in the EU Dat
 
 ---
 
+<!-- _class: cost-slide -->
+
 # What It Costs to Run One Site
 
-<span class="pill orange">🎯 TARGET</span> Illustrative Azure run cost, EU consumption pricing — not a quote
+<span class="pill orange">🎯 TARGET</span> Sweden Central list-price check · EUR · 04 Aug 2026 — not a quote
 
 <div class="split">
 <div>
 
-| Tier · one site | Shape | Fabric | Azure run €/yr |
+| Tier · one site | Shape | Fabric | Fabric + OneLake €/yr |
 |---|---|:-:|--:|
-| **Mini** — demo / shadow | 1 line, replay + shadow scoring | F2, paused 18 h/day | **≈ €40k–€90k** |
-| **Medium** — pilot ~0.3 Mt | 1 site read-only, live ingest | F2 → F4 on contention | **≈ €340k–€710k** |
-| **Large** — full site ~1.0 Mt | full plant, 4 AI capabilities | F4 → F8 measured | **≈ €1.0M–€2.1M** |
+| **Mini** — demo / shadow | 1 line, replay + shadow scoring | F8 · PAYG 6 h/day | **≈ €3k–€4k** |
+| **Medium** — pilot ~0.3 Mt | 1 site read-only, live ingest | F64 · 24×7 | **≈ €57k–€98k** |
+| **Large** — full site ~1.0 Mt | full plant, 4 AI capabilities | F128 · 24×7 | **≈ €116k–€205k** |
 
-<p class="legend">Today's isolated demo estate measures <b>&lt; €100/month</b> — 🔬 EVIDENCE, and deliberately not the production cost model.</p>
+<p class="legend">Baseline = Fabric compute + assumed hot OneLake: 0.5–5 TB / 5–20 TB / 20–75 TB. Medium and large span 1-year reservation to PAYG; mini uses PAYG because it is paused.</p>
 
 </div>
 <div>
 
-| Cost line (medium tier) | Indicative €/yr |
+| Medium full-stack planning envelope | Indicative €/yr |
 |---|--:|
-| Fabric capacity + OneLake | €120k–€220k |
-| Event Hubs ingestion | €40k–€80k |
-| AI/ML train & score | €90k–€180k |
-| Foundry + Speech (GenAI) | €30k–€90k |
-| Apps, Power BI Pro/PPU | €20k–€50k |
+| Fabric F64 + OneLake | €57k–€98k |
+| Event Hubs buffer | €40k–€80k |
+| Foundry + Speech · usage based | €30k–€90k |
+| Apps + Power BI creator seats | €20k–€50k |
 | Security & governance | €30k–€60k |
-| Networking | €10k–€30k |
+| Platform networking | €10k–€30k |
+| **Total planning envelope** | **≈ €187k–€408k** |
 
 </div>
 </div>
 
 <!-- ⏱ 1:50 · Now the question every CFO asks: what does one site cost to run?
-We size it in three tiers, same code and same guardrails, only the capacity changes. Mini is a demo or shadow footprint on the smallest Fabric SKU, paused eighteen hours a day — roughly forty to ninety thousand euros a year. Medium is a real one-site pilot at about three hundred thousand tonnes, live ingestion, three hundred forty to seven hundred ten thousand. Large is a full one-million-tonne site with all four capabilities running, one to two-point-one million.
-The shape matters more than the number: capacity, ingestion, and model compute dominate, and every one of them is right-sizable — reservations, autoscale, batch-scheduled training, and a nightly pause on anything non-production.
-The honest caveat: these are modelled ranges on EU consumption pricing, not a quote. The number I can actually measure today is the isolated demo estate, which runs under one hundred euros a month. -->
+We use three explicit deployment profiles: F8 for a mini demo or shadow footprint, F64 for a medium one-site pilot, and F128 for a large full-site deployment. At the official Sweden Central list rate of 0.1667 euros per capacity unit-hour, F8 running six hours a day is about 2.9 thousand euros a year in Fabric compute. F64 running continuously is 93.5 thousand PAYG or 55.6 thousand with a one-year reservation. F128 is 186.9 thousand PAYG or 111.2 thousand reserved. The displayed baseline adds explicit hot-OneLake volume assumptions.
+The corrected medium full-stack envelope is roughly 187 to 408 thousand euros a year. The earlier model double-counted AI and machine-learning compute as a separate line: Fabric Data Science, notebooks, real-time intelligence, and Power BI draw from the same shared F-capacity pool. Separate Spark autoscale would be added only if we deliberately enable it and measure its job hours.
+Event Hubs, Foundry, Speech, creator licenses, security, and broader platform networking remain usage-sensitive planning allowances. At F64 and above, viewer-role users can view Power BI with a free Fabric license, while creators still need Pro or PPU. These are retail planning figures before negotiated discounts, taxes, and measured workload tuning — not a quote. -->
 
 ---
 
@@ -765,7 +773,7 @@ The honest caveat: these are modelled ranges on EU consumption pricing, not a qu
 <div class="stat"><div class="big">&lt; 12 mo</div><div class="label">payback, conservative case · &lt; 9 base · &lt; 6 optimistic</div></div>
 
 - Build (one-off): **€0.6M–€1.1M** — foundation, three AI workloads, experience, DPIA & AI Act file
-- Run: **€0.34M–€0.71M/yr** at pilot scale
+- Run: **€0.19M–€0.41M/yr** at pilot scale
 
 </div>
 <div>
@@ -783,11 +791,13 @@ The honest caveat: these are modelled ranges on EU consumption pricing, not a qu
 </div>
 
 <!-- ⏱ 1:25 · Put the run cost next to the value and the case is not close.
-Build is between six hundred thousand and one-point-one million one-off. Run is under seven hundred and ten thousand a year at pilot scale.
+Build is between six hundred thousand and one-point-one million one-off. The corrected run-cost planning envelope is under four hundred and ten thousand a year at pilot scale.
 Against that, the energy lever alone is roughly twenty-four and a half million a year at a one-million-tonne site — because fourteen percent of thirty-five percent of a five-hundred-euro-per-tonne cost base is a structural number, not a rounding error. Avoided relines add about three point two million expected. Carbon and yield add several million more.
 So payback is well under a year even after large conservative haircuts. But I will not leave you with one number: the sensitivity table in the appendix shows what happens if the percentages come in lower, and the answer is that the case shrinks and stays comfortably positive. The pilot proves the real percentage before anyone commits at scale. -->
 
 ---
+
+<!-- _class: tight compliance-slide -->
 
 # Compliance
 
@@ -811,10 +821,10 @@ So payback is well under a year even after large conservative haircuts. But I wi
 - **CSRD / ESRS E1** still moving — we produce the data, not the assurance
 - **ISO/IEC 27001 · 42001** as the management-system frame
 
-<span class="pill orange">🎯 OPEN GATES</span> Accredited ETS verifier · DPIA · Legal's AI Act classification
+</div>
+</div>
 
-</div>
-</div>
+<p class="compliance-gates"><span class="pill orange">🎯 OPEN GATES</span> Accredited ETS verifier · DPIA · Legal's AI Act classification</p>
 
 > We produce audit-grade **management information**, not a regulated filing. Full analysis: `docs/business/compliance/`
 
@@ -857,32 +867,36 @@ Be clear about what we are not claiming. We produce audit-grade management infor
 
 ---
 
+<!-- _class: tight agent-swarm -->
+
 # How We Built the Demo with an Agent Swarm
 
+<p class="subtitle">Agentic development = organized specifications + reusable skills + Copilot execution + bounded GitHub specialists</p>
+
 <div class="cards four">
-<div class="card purple"><div class="card-num">01</div><h3>Orchestrate</h3><p>Break the outcome into small tasks with explicit dependencies</p></div>
-<div class="card blue"><div class="card-num">02</div><h3>Specialize</h3><p>Domain, UX, data, AI and security agents own independent scopes</p></div>
-<div class="card teal"><div class="card-num">03</div><h3>Integrate</h3><p>Shared contracts, repository artifacts and tests keep parallel work coherent</p></div>
-<div class="card green"><div class="card-num">04</div><h3>Validate</h3><p>Fresh-agent review, automated checks and human approval close every task</p></div>
+<div class="card purple"><div class="card-num">01 · Organize</div><h3>GitHub Spec Kit</h3><p>Constitution → spec → plan → tasks; acceptance criteria exist before code</p></div>
+<div class="card blue"><div class="card-num">02 · Equip</div><h3>Superpowers</h3><p>Reusable skills enforce brainstorming, TDD, debugging and review discipline</p></div>
+<div class="card teal"><div class="card-num">03 · Execute</div><h3>GitHub Copilot</h3><p>VS Code + Copilot CLI + GitHub Copilot app carry one governed workflow</p></div>
+<div class="card green"><div class="card-num">04 · Delegate</div><h3>Specialized GitHub agents</h3><p>Coding, QA, security, research and docs agents own bounded branches and PRs</p></div>
 </div>
 
 <div class="chain">
-<div class="node purple"><b>Plan</b><span>task DAG</span></div>
+<div class="node purple"><b>Specify</b><span>intent + constraints</span></div>
 <div class="step">›</div>
-<div class="node blue"><b>Build in parallel</b><span>bounded ownership</span></div>
+<div class="node blue"><b>Approve plan</b><span>human gate</span></div>
 <div class="step">›</div>
-<div class="node teal"><b>Integrate continuously</b><span>shared contracts</span></div>
+<div class="node teal"><b>Build in parallel</b><span>bounded ownership</span></div>
 <div class="step">›</div>
-<div class="node green"><b>Prove</b><span>tests + review</span></div>
+<div class="node green"><b>Prove in GitHub</b><span>CI + reviews + PR</span></div>
 </div>
 
-<!-- ⏱ 0:35 · We built the demonstration as an agent swarm rather than one long sequential task. An orchestrator decomposed the outcome into a dependency graph; specialist agents owned bounded domain, UX, data, AI and security scopes; shared contracts and repository tests integrated their work continuously; and fresh-agent review plus human approval closed each task. -->
+<!-- ⏱ 0:35 · We treated agentic development as an organized engineering system, not ad-hoc prompting. GitHub Spec Kit turns intent into a constitution, specification, plan, tasks, and acceptance criteria. Superpowers adds reusable skills for brainstorming, test-driven development, debugging, and review. GitHub Copilot then executes the same governed workflow across VS Code, Copilot CLI, and the GitHub Copilot app. Specialized coding, QA, security, research, and documentation agents own bounded branches and pull requests; automated gates prove the work, and a human approves the plan and the merge. -->
 
 ---
 
 <!-- _class: tight -->
 
-# Appendix — vNext: Two-way Control with Microsoft Adaptive Cloud
+# NovaSteel vNext: Two-way Control with Microsoft Adaptive Cloud
 
 <div class="split right-wide">
 <div class="small-body">
