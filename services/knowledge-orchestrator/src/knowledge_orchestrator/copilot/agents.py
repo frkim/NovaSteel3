@@ -106,7 +106,9 @@ _TEMPLATES: dict[str, dict[str, str]] = {
         "general_reasoning": "How I got there: screen context is off, so I answered from NovaSteel's steel-industry knowledge base and the glossary rather than from any particular screen.",
         "knowledge": "From NovaSteel's steel knowledge base:",
         "fabric": "Answered by the **Microsoft Fabric** data agent **da-novasteelv3**, over the NovaSteel gold lakehouse.",
-        "fabric_reasoning": "How I got there: this is one of the platform's predefined analytical questions, so I ran it against the Fabric datasets cited below instead of answering from the glossary.",
+        "fabric_retrieval": "**Retrieved from Fabric** \u2014 workspace **{workspace}** \u00b7 query steps: {queries} \u00b7 rows returned: {rows} \u00b7 elapsed: {seconds} s.",
+        "fabric_step": "- **{engine}** on {artefact} \u2014 {statement} \u2192 {rows} rows in {ms} ms",
+        "fabric_reasoning": "How I got there: this is one of the platform's predefined analytical questions, so I ran the query steps above against the Fabric datasets cited below instead of answering from the glossary.",
     },
     "fr": {
         "context": "Vous \u00eates sur **{screen}** ({persona}) : je comprends votre question comme portant sur **{concept}**.",
@@ -123,7 +125,9 @@ _TEMPLATES: dict[str, dict[str, str]] = {
         "general_reasoning": "Mon raisonnement : le contexte d'\u00e9cran est d\u00e9sactiv\u00e9, j'ai donc r\u00e9pondu \u00e0 partir de la base de connaissances sid\u00e9rurgiques de NovaSteel et du glossaire, sans me r\u00e9f\u00e9rer \u00e0 un \u00e9cran particulier.",
         "knowledge": "Depuis la base de connaissances sid\u00e9rurgiques de NovaSteel :",
         "fabric": "R\u00e9ponse de l'agent de donn\u00e9es **Microsoft Fabric** **da-novasteelv3**, sur le lakehouse gold NovaSteel.",
-        "fabric_reasoning": "Mon raisonnement : il s'agit d'une des questions analytiques pr\u00e9d\u00e9finies de la plateforme ; je l'ai donc ex\u00e9cut\u00e9e sur les jeux de donn\u00e9es Fabric cit\u00e9s ci-dessous plut\u00f4t que de r\u00e9pondre depuis le glossaire.",
+        "fabric_retrieval": "**Donn\u00e9es extraites de Fabric** \u2014 espace de travail **{workspace}** \u00b7 \u00e9tapes de requ\u00eate : {queries} \u00b7 lignes renvoy\u00e9es : {rows} \u00b7 dur\u00e9e : {seconds} s.",
+        "fabric_step": "- **{engine}** sur {artefact} \u2014 {statement} \u2192 {rows} lignes en {ms} ms",
+        "fabric_reasoning": "Mon raisonnement : il s'agit d'une des questions analytiques pr\u00e9d\u00e9finies de la plateforme ; j'ai donc ex\u00e9cut\u00e9 les \u00e9tapes de requ\u00eate ci-dessus sur les jeux de donn\u00e9es Fabric cit\u00e9s ci-dessous plut\u00f4t que de r\u00e9pondre depuis le glossaire.",
     },
     "de": {
         "context": "Sie befinden sich auf **{screen}** ({persona}); ich verstehe Ihre Frage daher als Frage zu **{concept}**.",
@@ -140,7 +144,9 @@ _TEMPLATES: dict[str, dict[str, str]] = {
         "general_reasoning": "So bin ich vorgegangen: Der Bildschirmkontext ist deaktiviert, daher habe ich aus der Stahl-Wissensbasis von NovaSteel und dem Glossar geantwortet, nicht aus einem bestimmten Bildschirm.",
         "knowledge": "Aus der Stahl-Wissensbasis von NovaSteel:",
         "fabric": "Beantwortet vom **Microsoft Fabric**-Datenagenten **da-novasteelv3** \u00fcber das NovaSteel-Gold-Lakehouse.",
-        "fabric_reasoning": "So bin ich vorgegangen: Dies ist eine der vordefinierten analytischen Fragen der Plattform, daher habe ich sie gegen die unten zitierten Fabric-Datens\u00e4tze ausgef\u00fchrt statt aus dem Glossar zu antworten.",
+        "fabric_retrieval": "**Aus Fabric abgerufen** \u2014 Arbeitsbereich **{workspace}** \u00b7 Abfrageschritte: {queries} \u00b7 gelieferte Zeilen: {rows} \u00b7 Dauer: {seconds} s.",
+        "fabric_step": "- **{engine}** auf {artefact} \u2014 {statement} \u2192 {rows} Zeilen in {ms} ms",
+        "fabric_reasoning": "So bin ich vorgegangen: Dies ist eine der vordefinierten analytischen Fragen der Plattform, daher habe ich die oben genannten Abfrageschritte gegen die unten zitierten Fabric-Datens\u00e4tze ausgef\u00fchrt statt aus dem Glossar zu antworten.",
     },
     "nl": {
         "context": "U bent op **{screen}** ({persona}); ik lees uw vraag daarom als een vraag over **{concept}**.",
@@ -157,7 +163,9 @@ _TEMPLATES: dict[str, dict[str, str]] = {
         "general_reasoning": "Zo kwam ik daartoe: schermcontext staat uit, dus ik antwoordde vanuit de staalkennisbank van NovaSteel en de woordenlijst, niet vanuit een specifiek scherm.",
         "knowledge": "Uit de staalkennisbank van NovaSteel:",
         "fabric": "Beantwoord door de **Microsoft Fabric**-data-agent **da-novasteelv3**, op het NovaSteel gold-lakehouse.",
-        "fabric_reasoning": "Zo kwam ik daartoe: dit is een van de vooraf gedefinieerde analytische vragen van het platform, dus ik heb die uitgevoerd op de hieronder geciteerde Fabric-datasets in plaats van te antwoorden vanuit de woordenlijst.",
+        "fabric_retrieval": "**Opgehaald uit Fabric** \u2014 werkruimte **{workspace}** \u00b7 querystappen: {queries} \u00b7 opgehaalde rijen: {rows} \u00b7 duur: {seconds} s.",
+        "fabric_step": "- **{engine}** op {artefact} \u2014 {statement} \u2192 {rows} rijen in {ms} ms",
+        "fabric_reasoning": "Zo kwam ik daartoe: dit is een van de vooraf gedefinieerde analytische vragen van het platform, dus ik heb de querystappen hierboven uitgevoerd op de hieronder geciteerde Fabric-datasets in plaats van te antwoorden vanuit de woordenlijst.",
     },
     "es": {
         "context": "Est\u00e1 en **{screen}** ({persona}), as\u00ed que entiendo su pregunta como una pregunta sobre **{concept}**.",
@@ -174,7 +182,9 @@ _TEMPLATES: dict[str, dict[str, str]] = {
         "general_reasoning": "C\u00f3mo lo deduje: el contexto de pantalla est\u00e1 desactivado, as\u00ed que respond\u00ed desde la base de conocimiento sider\u00fargico de NovaSteel y el glosario, no desde una pantalla concreta.",
         "knowledge": "Desde la base de conocimiento sider\u00fargico de NovaSteel:",
         "fabric": "Respondido por el agente de datos de **Microsoft Fabric** **da-novasteelv3**, sobre el lakehouse gold de NovaSteel.",
-        "fabric_reasoning": "C\u00f3mo lo deduje: esta es una de las preguntas anal\u00edticas predefinidas de la plataforma, as\u00ed que la ejecut\u00e9 sobre los conjuntos de datos de Fabric citados m\u00e1s abajo en lugar de responder desde el glosario.",
+        "fabric_retrieval": "**Recuperado de Fabric** \u2014 \u00e1rea de trabajo **{workspace}** \u00b7 pasos de consulta: {queries} \u00b7 filas devueltas: {rows} \u00b7 duraci\u00f3n: {seconds} s.",
+        "fabric_step": "- **{engine}** en {artefact} \u2014 {statement} \u2192 {rows} filas en {ms} ms",
+        "fabric_reasoning": "C\u00f3mo lo deduje: esta es una de las preguntas anal\u00edticas predefinidas de la plataforma, as\u00ed que ejecut\u00e9 los pasos de consulta anteriores sobre los conjuntos de datos de Fabric citados m\u00e1s abajo en lugar de responder desde el glosario.",
     },
 }
 
@@ -190,6 +200,33 @@ def _screen_source(resolved: ResolvedContext, language: str) -> ChatSource:
         title=resolved.profile.title,
         snippet=resolved.profile.summary_in(language),
     )
+
+
+def _fabric_retrieval(card: "fabric_answers.FabricCard", strings: dict[str, str]) -> str:
+    """Render the query steps the data agent ran, as one paragraph.
+
+    The point is that the figures below it are visibly *retrieved* rather than
+    asserted: the reader sees which artefact was hit, with which statement, how
+    many rows came back and how long it took -- the same trace a live
+    ``da-novasteelv3`` session shows above its answer.
+    """
+    steps = "\n".join(
+        strings["fabric_step"].format(
+            engine=dataset.engine,
+            artefact=dataset.title,
+            statement=dataset.statement,
+            rows=dataset.rows,
+            ms=dataset.elapsed_ms,
+        )
+        for dataset in card.datasets
+    )
+    header = strings["fabric_retrieval"].format(
+        workspace=fabric_answers.WORKSPACE,
+        queries=len(card.datasets),
+        rows=card.total_rows,
+        seconds=f"{card.total_elapsed_ms / 1000:.2f}",
+    )
+    return f"{header}\n{steps}"
 
 
 def _glossary_sources(entries: list[GlossaryEntry]) -> tuple[ChatSource, ...]:
@@ -427,8 +464,17 @@ class LocalCopilotChatAgent:
         """
         general = request.context.is_general
         trace.append(f"fabric card {fabric.card.card_id} ({fabric.language})")
+        for dataset in fabric.card.datasets:
+            trace.append(
+                f"fabric query {dataset.engine} {dataset.title}: "
+                f"{dataset.rows} rows in {dataset.elapsed_ms} ms"
+            )
 
-        paragraphs = [strings["fabric"], fabric.body]
+        paragraphs = [
+            strings["fabric"],
+            _fabric_retrieval(fabric.card, strings),
+            fabric.body,
+        ]
         sources = list(fabric.sources)
         if not general:
             sources.append(_screen_source(resolved, fabric.language))

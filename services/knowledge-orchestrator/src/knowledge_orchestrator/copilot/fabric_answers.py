@@ -27,7 +27,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Final, Optional
 
-from .fabric_answer_data import CARDS, FabricCard
+from .fabric_answer_data import CARDS, WORKSPACE, FabricCard
 from .models import ChatSource, SourceKind, normalize_language
 from .suggestion_data import SUGGESTIONS_BY_SECTION
 
@@ -64,22 +64,33 @@ class FabricAnswer:
 
 
 def _build_index() -> dict[str, FabricCard]:
-    """Map every localized wording of a covered chip onto its card.
+    """Map every wording that reaches a card onto it.
 
-    A card that names a screen/index pair with no matching suggestion is a
-    typo, and is reported at import time rather than silently never matching.
+    Two kinds of card are indexed. A screen chip names a screen/index pair, and
+    is registered under its wording in each of the five languages -- a pair with
+    no matching suggestion is a typo, and is reported at import time rather than
+    silently never matching. A persona question carries its verbatim prompts
+    instead, because the chat panel sends those as free text.
     """
     index: dict[str, FabricCard] = {}
     for card in CARDS:
-        by_language = SUGGESTIONS_BY_SECTION.get(card.section)
-        if by_language is None:
-            raise ValueError(f"Fabric card {card.card_id}: unknown section")
-        for language, questions in by_language.items():
-            if card.index >= len(questions):
-                raise ValueError(
-                    f"Fabric card {card.card_id}: no {language} question at index {card.index}"
-                )
-            index[normalize_question(questions[card.index])] = card
+        if card.section:
+            by_language = SUGGESTIONS_BY_SECTION.get(card.section)
+            if by_language is None:
+                raise ValueError(f"Fabric card {card.card_id}: unknown section")
+            for language, questions in by_language.items():
+                if card.index >= len(questions):
+                    raise ValueError(
+                        f"Fabric card {card.card_id}: no {language} question at index {card.index}"
+                    )
+                index[normalize_question(questions[card.index])] = card
+        for prompt in card.prompts:
+            key = normalize_question(prompt)
+            if not key:
+                raise ValueError(f"Fabric card {card.card_id}: empty prompt")
+            index[key] = card
+        if not card.section and not card.prompts:
+            raise ValueError(f"Fabric card {card.card_id}: no section and no prompt")
     return index
 
 

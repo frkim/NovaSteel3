@@ -71,6 +71,14 @@ def test_search_chips_stay_on_the_online_corpus():
 
 @pytest.mark.parametrize("card", CARDS, ids=lambda card: card.card_id)
 def test_card_resolves_from_every_language(card):
+    if not card.section:
+        # A persona card is addressed by its verbatim prompt instead.
+        for prompt in card.prompts:
+            for language in SUPPORTED_LANGUAGES:
+                answer = fabric_answers.answer_for(prompt, language)
+                assert answer is not None
+                assert answer.card is card
+        return
     for language in SUPPORTED_LANGUAGES:
         question = SUGGESTIONS_BY_SECTION[card.section][language][card.index]
         answer = fabric_answers.answer_for(question, language)
@@ -89,6 +97,45 @@ def test_card_cites_at_least_one_fabric_dataset(card):
     for dataset in card.datasets:
         assert dataset.source_id.startswith("fabric:")
         assert dataset.snippet
+
+
+@pytest.mark.parametrize("card", CARDS, ids=lambda card: card.card_id)
+def test_every_dataset_carries_a_query_step(card):
+    """An answer must show the retrieval that produced it, not just cite a table."""
+    for dataset in card.datasets:
+        assert dataset.engine in {"T-SQL", "KQL", "GQL"}, dataset.title
+        assert dataset.statement.strip(), (card.card_id, dataset.title)
+        assert "\n" not in dataset.statement, (card.card_id, dataset.title)
+        assert dataset.rows > 0, (card.card_id, dataset.title)
+        assert dataset.elapsed_ms > 0, (card.card_id, dataset.title)
+
+
+def test_retrieval_trace_is_rendered_above_the_answer():
+    card = fabric_answers.CARDS_BY_ID["energy-optimization-q1"]
+    question = SUGGESTIONS_BY_SECTION["energy-optimization"]["en"][card.index]
+
+    result = LocalCopilotChatAgent().answer(turn(question))
+
+    assert "Retrieved from Fabric" in result.answer
+    assert fabric_answers.WORKSPACE in result.answer
+    for dataset in card.datasets:
+        assert dataset.statement in result.answer
+        assert f"{dataset.rows} rows in {dataset.elapsed_ms} ms" in result.answer
+    # The trace comes before the figures it produced.
+    assert result.answer.index("Retrieved from Fabric") < result.answer.index(
+        card.body["en"]
+    )
+    assert any(entry.startswith("fabric query") for entry in result.trace)
+
+
+def test_retrieval_trace_is_localized():
+    card = fabric_answers.CARDS_BY_ID["quality-q1"]
+    question = SUGGESTIONS_BY_SECTION["quality"]["fr"][card.index]
+
+    result = LocalCopilotChatAgent().answer(turn(question, language="fr"))
+
+    assert "Donn\u00e9es extraites de Fabric" in result.answer
+    assert card.datasets[0].statement in result.answer
 
 
 def test_bodies_avoid_markup_the_panel_cannot_render():
