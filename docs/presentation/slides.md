@@ -1106,12 +1106,14 @@ Be clear about what we are not claiming. We produce audit-grade management infor
 
 > The honesty discipline *is* the trustworthiness.
 
-<!-- ⏱ 1:00 · Let me close on four things, and one distinction.
+> **Turns Signal into business outcomes with Intelligence & Trust.**
+
+<!-- ⏱ 1:05 · Let me close on four things, and one distinction.
 First, one governed platform: the scattered historians, spreadsheets and disconnected tools become a single EU-hosted estate with one definition of every KPI.
 Second, AI that is accountable: deterministic Python computes the answer, the language model only explains it, a human approves it, and every consequential output is replayable input by input.
 Third, safe by construction: advisory only, an outbound-only boundary to the plant, Zero Trust and least privilege — safety systems stay authoritative and untouched.
 Fourth, a business case that survives large haircuts: payback under twelve months even on the conservative assumptions in the appendix.
-And the distinction I have kept all morning: what you just watched is evidence that the mechanics work, reproducibly, on synthetic data. Fourteen, twenty-two, twenty-one and eight remain targets until a pilot proves them. That discipline is the trustworthiness. -->
+And the distinction I have kept all morning: what you just watched is evidence that the mechanics work, reproducibly, on synthetic data. Fourteen, twenty-two, twenty-one and eight remain targets until a pilot proves them. That discipline is the trustworthiness. In one line: NovaSteel turns signal into business outcomes with intelligence and trust. -->
 
 ---
 
