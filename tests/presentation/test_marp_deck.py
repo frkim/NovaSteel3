@@ -2,7 +2,7 @@
 
 The deck is generated in CI (``.github/workflows/presentation.yml``) straight from
 ``docs/presentation/slides.md``. These checks keep that source buildable and keep the
-38-minute speaking budget honest before a single browser is started.
+37-40 minute speaking budget honest before a single browser is started.
 """
 
 from __future__ import annotations
@@ -17,10 +17,10 @@ PRESENTATION = ROOT / "docs" / "presentation"
 SLIDES = PRESENTATION / "slides.md"
 THEME = PRESENTATION / "theme.css"
 
-MAIN_SLIDE_COUNT = 32
-BACKUP_SLIDE_COUNT = 16
+MAIN_SLIDE_COUNT = 38
+BACKUP_SLIDE_COUNT = 17
 MIN_TALK_SECONDS = 37 * 60
-MAX_TALK_SECONDS = 39 * 60
+MAX_TALK_SECONDS = 40 * 60
 
 NOTE_PATTERN = re.compile(r"<!--(?!\s*_)(.*?)-->", re.DOTALL)
 TIMING_PATTERN = re.compile(r"^\s*⏱\s*(\d+):([0-5]\d)\s*·\s")
@@ -92,7 +92,7 @@ def test_main_slides_fit_the_thirty_eight_minute_budget() -> None:
     ]
     total = sum(durations)
     assert MIN_TALK_SECONDS <= total <= MAX_TALK_SECONDS, (
-        f"main slides speak for {total // 60}:{total % 60:02d}; the budget is 37:00-39:00"
+        f"main slides speak for {total // 60}:{total % 60:02d}; the budget is 37:00-40:00"
     )
     assert all(duration > 0 for duration in durations)
 

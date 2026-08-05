@@ -86,7 +86,7 @@ I will close by separating demonstrated evidence from transformation targets and
 <span>07 Appendix</span>
 </div>
 
-<!-- ⏱ 0:10 · Chapter one: the business pressure, the four targets, and the five people making the call. -->
+<!-- ⏱ 0:08 · Chapter one: the business pressure, the four targets, and the five people making the call. -->
 
 ---
 
@@ -241,7 +241,7 @@ The employee remains accountable: they accept, modify or reject. No agent crosse
 <span>07 Appendix</span>
 </div>
 
-<!-- ⏱ 0:10 · Chapter two: one governed platform, its scope boundary, and why Fabric is the core. -->
+<!-- ⏱ 0:08 · Chapter two: one governed platform, its scope boundary, and why Fabric is the core. -->
 
 ---
 
@@ -488,7 +488,7 @@ On identity: Fabric's Event Hubs connector uses a shared key, which our security
 <span>07 Appendix</span>
 </div>
 
-<!-- ⏱ 0:10 · Chapter three: the four AI capabilities that turn governed data into decisions. -->
+<!-- ⏱ 0:08 · Chapter three: the four AI capabilities that turn governed data into decisions. -->
 
 ---
 
@@ -755,7 +755,7 @@ This is where generative AI adds real value and where it's most tightly governed
 <span>07 Appendix</span>
 </div>
 
-<!-- ⏱ 0:10 · Chapter four: the guardrails, security posture and compliance obligations behind every recommendation. -->
+<!-- ⏱ 0:08 · Chapter four: the guardrails, security posture and compliance obligations behind every recommendation. -->
 
 ---
 
@@ -958,7 +958,7 @@ Be clear about what we are not claiming. We produce audit-grade management infor
 <span>07 Appendix</span>
 </div>
 
-<!-- ⏱ 0:10 · Chapter five: seven persona journeys, reproducing the evidence live. -->
+<!-- ⏱ 0:08 · Chapter five: seven persona journeys, reproducing the evidence live. -->
 
 ---
 
@@ -1040,7 +1040,7 @@ Be clear about what we are not claiming. We produce audit-grade management infor
 <span>07 Appendix</span>
 </div>
 
-<!-- ⏱ 0:10 · Chapter six: separating target from evidence, the roadmap, and the decision asked today. -->
+<!-- ⏱ 0:08 · Chapter six: separating target from evidence, the roadmap, and the decision asked today. -->
 
 ---
 
@@ -1174,7 +1174,7 @@ The decision I'm asking for today is narrow: approve the pilot scope and open th
 
 ---
 
-<!-- _class: lead chapter gray -->
+<!-- _class: lead chapter gray backup -->
 <!-- _paginate: false -->
 
 <img class="chapter-icon" src="images/icon_appendix.png" alt="" onerror="this.remove()">
