@@ -16,9 +16,6 @@ param foundryEndpoint string = ''
 @description('Foundry project endpoint for Agent Service. Empty means agents are not hosted.')
 param foundryProjectEndpoint string = ''
 
-@description('Endpoint of the operations Foundry project, which hosts the tool-calling agents. Kept separate from the knowledge project so an agent that reads untrusted content can never reach a NovaSteel calculation tool.')
-param foundryOperationsProjectEndpoint string = ''
-
 param foundryChatDeployment string = ''
 param foundryReasoningDeployment string = ''
 param foundryEmbedDeployment string = ''
@@ -257,10 +254,6 @@ resource bffApp 'Microsoft.App/containerApps@2024-03-01' = {
             {
               name: 'FOUNDRY_PROJECT_ENDPOINT'
               value: foundryProjectEndpoint
-            }
-            {
-              name: 'FOUNDRY_OPERATIONS_PROJECT_ENDPOINT'
-              value: foundryOperationsProjectEndpoint
             }
             {
               name: 'FOUNDRY_CHAT_DEPLOYMENT'

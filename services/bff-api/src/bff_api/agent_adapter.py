@@ -55,9 +55,9 @@ class OperationsAgentAdapter:
         try:
             from knowledge_orchestrator.agent_manifest import (
                 PROJECT_ENDPOINT_ENV,
-                PROJECT_OPERATIONS,
+                PROJECT_NOVASTEEL,
                 agent_spec,
-                agents_for_project,
+                operations_agents,
             )
             from knowledge_orchestrator.agent_router import REASON_EXPLICIT, route
             from knowledge_orchestrator.agent_service import FoundryAgentService
@@ -66,9 +66,9 @@ class OperationsAgentAdapter:
 
         self._service_cls = FoundryAgentService
         self._agent_spec = agent_spec
-        self._project = PROJECT_OPERATIONS
-        self._endpoint_env = PROJECT_ENDPOINT_ENV[PROJECT_OPERATIONS]
-        self._agents_for_project = agents_for_project
+        self._project = PROJECT_NOVASTEEL
+        self._endpoint_env = PROJECT_ENDPOINT_ENV[PROJECT_NOVASTEEL]
+        self._operations_agents = operations_agents
         self._route = route
         self._reason_explicit = REASON_EXPLICIT
 
@@ -91,27 +91,25 @@ class OperationsAgentAdapter:
                 "role": "orchestrator" if spec.is_orchestrator else "specialist",
                 "domain": spec.domain,
             }
-            for spec in self._agents_for_project(self._project)
+            for spec in self._operations_agents()
         ]
 
     @property
     def configured(self) -> bool:
-        """True when the operations project endpoint is present in the environment.
+        """True when the Foundry project endpoint is present in the environment.
 
-        Deliberately not a fallback to the knowledge project. The two projects are
-        a trust boundary: an agent can only call the tools declared on its own
-        definition, so quietly running an operations agent in the knowledge
-        project would hand tool access to the project that reads untrusted
-        content.
+        One project now hosts the whole roster (ADR-020), so there is no second
+        endpoint to fall back to. What keeps this surface to the tool-calling
+        agents is :func:`operations_agents`: an agent is reachable here because its
+        own definition declares a calculation tool, not because of where it lives.
         """
         return bool(os.environ.get(self._endpoint_env, "").strip())
 
     def _build_service(self) -> Any:
-        """Construct the runtime for the operations project.
+        """Construct the runtime for the Foundry project.
 
-        ``FoundryAgentService`` takes a project *endpoint*, not a project name: one
-        class serves both projects and the endpoint is what selects between them.
-        The model and knowledge-base configuration are read from the environment
+        ``FoundryAgentService`` takes a project *endpoint*, not a project name. The
+        model and knowledge-base configuration are read from the environment
         the same way the orchestrator's own hosting path reads them, so a turn
         served through the BFF and a turn served by the reconciler resolve to the
         same agent definition.
@@ -205,14 +203,19 @@ class OperationsAgentAdapter:
             raise ApiError(503, ErrorCode.UPSTREAM_UNAVAILABLE, str(exc)) from exc
 
     def _validated_spec(self, name: str):
-        """Resolve a manifest spec, refusing anything outside the operations project."""
+        """Resolve a manifest spec, refusing anything that is not a tool-calling agent.
+
+        The check is on the definition, not on where the agent is hosted: an agent
+        that declares no function tool has no calculation to reach, and naming it
+        here must not be a way to run it against caller-scoped tools.
+        """
         try:
             spec = self._agent_spec(name)
         except KeyError as exc:
             raise ApiError(
                 404, ErrorCode.NOT_FOUND, f"Unknown agent '{name}'."
             ) from exc
-        if spec.project != self._project:
+        if spec not in self._operations_agents():
             raise ApiError(
                 403,
                 ErrorCode.FORBIDDEN_ROLE,

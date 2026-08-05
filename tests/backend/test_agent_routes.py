@@ -5,7 +5,12 @@
 (ADR-011); this one reaches agents that can call the deterministic NovaSteel
 calculations. These tests pin the two things a caller can observe without a
 Foundry project: the roster the UI renders from, and what happens when the
-operations project is not deployed.
+project is not deployed.
+
+Since ADR-020 the whole roster shares one Foundry project, so the separation this
+endpoint enforces is no longer structural. What keeps the knowledge agents out of it
+is ``operations_agents()`` — an agent is reachable here because its own definition
+declares a calculation tool. The refusal tests below are what hold that.
 """
 
 from __future__ import annotations
@@ -26,12 +31,13 @@ class _RecordingAgentService:
 
 @pytest.fixture
 def unconfigured(monkeypatch):
-    """Guarantee the operations project looks absent regardless of the shell."""
-    monkeypatch.delenv("FOUNDRY_OPERATIONS_PROJECT_ENDPOINT", raising=False)
+    """Guarantee the Foundry project looks absent regardless of the shell."""
+    monkeypatch.delenv("FOUNDRY_PROJECT_ENDPOINT", raising=False)
 
 
 def test_the_roster_lists_only_operations_agents(client, admin_headers, unconfigured):
-    """The knowledge agents live in the other project and cannot be asked here."""
+    """The knowledge agents declare no calculation tool, so they are not on this
+    surface even though they now share the same Foundry project."""
     response = client.get("/v1/copilot/agents", headers=admin_headers)
     assert response.status_code == 200
     data = response.json()["data"]
@@ -63,8 +69,8 @@ def test_the_roster_distinguishes_the_orchestrator_from_the_specialists(
 
 
 def test_every_rostered_agent_declares_its_tools(client, admin_headers, unconfigured):
-    """An operations agent with no tools would just be a chat agent in the project
-    that is allowed to call things, which is the shape we are avoiding."""
+    """Membership of this roster *is* "declares a calculation tool" since ADR-020, so
+    an entry with no tools would mean the filter had stopped filtering."""
     data = client.get("/v1/copilot/agents", headers=admin_headers).json()["data"]
     for agent in data["agents"]:
         assert agent["tools"], f"{agent['name']} declares no tools"
@@ -84,8 +90,8 @@ def test_the_roster_reports_whether_the_project_is_deployed(
 def test_asking_without_the_operations_project_fails_loudly(
     client, admin_headers, unconfigured
 ):
-    """No silent fallback to the knowledge project: that project reads untrusted
-    content, so borrowing it would hand tool access across the trust boundary."""
+    """No endpoint, no answer. A fallback that borrowed some other configured project
+    would run tool-calling agents against an estate nobody reviewed."""
     response = client.post(
         "/v1/copilot/agent",
         headers=admin_headers,
@@ -126,8 +132,8 @@ def test_unexpected_body_keys_are_refused(client, admin_headers, unconfigured):
 
 def test_ask_passes_validated_caller_scope_context(client, admin_headers, monkeypatch):
     monkeypatch.setenv(
-        "FOUNDRY_OPERATIONS_PROJECT_ENDPOINT",
-        "https://x.services.ai.azure.com/api/projects/ops",
+        "FOUNDRY_PROJECT_ENDPOINT",
+        "https://x.services.ai.azure.com/api/projects/novasteelv3",
     )
     recording = _RecordingAgentService()
     monkeypatch.setattr(
@@ -164,8 +170,8 @@ def test_caller_scope_context_ignores_request_body_text(
     client, admin_headers, monkeypatch
 ):
     monkeypatch.setenv(
-        "FOUNDRY_OPERATIONS_PROJECT_ENDPOINT",
-        "https://x.services.ai.azure.com/api/projects/ops",
+        "FOUNDRY_PROJECT_ENDPOINT",
+        "https://x.services.ai.azure.com/api/projects/novasteelv3",
     )
     recording = _RecordingAgentService()
     monkeypatch.setattr(
@@ -189,10 +195,10 @@ def test_caller_scope_context_ignores_request_body_text(
 
 @pytest.fixture
 def deployed(client, monkeypatch):
-    """An operations project that exists, with the upstream turn recorded."""
+    """A Foundry project that exists, with the upstream turn recorded."""
     monkeypatch.setenv(
-        "FOUNDRY_OPERATIONS_PROJECT_ENDPOINT",
-        "https://x.services.ai.azure.com/api/projects/ops",
+        "FOUNDRY_PROJECT_ENDPOINT",
+        "https://x.services.ai.azure.com/api/projects/novasteelv3",
     )
     recording = _RecordingAgentService()
     monkeypatch.setattr(
@@ -263,12 +269,31 @@ def test_naming_an_agent_bypasses_the_router(client, admin_headers, deployed):
 
 
 def test_asking_a_knowledge_agent_here_is_refused(client, admin_headers, deployed):
-    """Naming an agent must not be a way across the trust boundary: the knowledge
-    agents read untrusted content and this endpoint carries tool access."""
+    """This is the control ADR-020 traded the project split for.
+
+    The procedure agent now lives in the same Foundry project as the advisors and is
+    reachable with the same credential, so nothing structural stops this call — only
+    ``operations_agents()`` does. Naming an agent must not be a way to put a
+    retrieval agent behind an endpoint that carries tool access, because a prompt
+    injected into a retrieved procedure would then be one hop from a calculation.
+    """
     response = client.post(
         "/v1/copilot/agent",
         headers=admin_headers,
         json={"question": "hi", "agent": "novasteel-procedure-agent"},
+    )
+    assert response.status_code == 403
+    assert response.json()["code"] == "FORBIDDEN_ROLE"
+    assert not deployed.calls
+
+
+def test_asking_a_web_search_agent_here_is_refused(client, admin_headers, deployed):
+    """The same refusal for the other reader. Web results are the least trusted input
+    in the estate, so it gets its own test rather than sharing a loop."""
+    response = client.post(
+        "/v1/copilot/agent",
+        headers=admin_headers,
+        json={"question": "hi", "agent": "novasteel-web-search-agent"},
     )
     assert response.status_code == 403
     assert not deployed.calls

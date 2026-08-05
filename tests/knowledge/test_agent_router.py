@@ -24,10 +24,10 @@ from knowledge_orchestrator.agent_manifest import (
     ENERGY_ADVISOR_AGENT_NAME,
     MAINTENANCE_ADVISOR_AGENT_NAME,
     ORCHESTRATOR_AGENT_NAME,
-    PROJECT_KNOWLEDGE,
-    PROJECT_OPERATIONS,
+    PROJECT_NOVASTEEL,
     QUALITY_ADVISOR_AGENT_NAME,
     AgentSpec,
+    knowledge_agents,
     specialists_for_project,
 )
 from knowledge_orchestrator.agent_router import (
@@ -131,12 +131,16 @@ def test_domains_are_ordered_by_strength():
 # --- what routing is not -----------------------------------------------------
 
 
-def test_routing_never_leaves_the_operations_project():
+def test_routing_never_selects_an_agent_that_reads_untrusted_content():
     """The knowledge agents read untrusted content. Reaching one from the tool-calling
-    endpoint would be the trust boundary collapsing, so they are not candidates."""
-    knowledge_names = {
-        spec.name for spec in specialists_for_project(PROJECT_KNOWLEDGE)
-    }
+    endpoint would be the containment collapsing, so they are not candidates.
+
+    Since ADR-020 they share a Foundry project with the advisors, which makes this the
+    assertion that keeps them unreachable: routing selects on `domain`, and a knowledge
+    agent declares none.
+    """
+    knowledge_names = {spec.name for spec in knowledge_agents()}
+    assert knowledge_names
     for question in (
         "How do I tap the furnace safely?",
         "What does the procedure say about slag?",
@@ -148,7 +152,7 @@ def test_routing_never_leaves_the_operations_project():
 def test_every_specialist_is_reachable_by_at_least_one_of_its_own_keywords():
     """A keyword that cannot select its own agent is either dead or claimed
     elsewhere; either way the specialist is quietly less reachable than it reads."""
-    for spec in specialists_for_project(PROJECT_OPERATIONS):
+    for spec in specialists_for_project(PROJECT_NOVASTEEL):
         reachable = [
             keyword
             for keyword in spec.routing_keywords
@@ -179,7 +183,7 @@ def test_routing_is_stable_for_the_same_question():
 def _spec(name: str, domain: str, keywords: tuple[str, ...]) -> AgentSpec:
     return AgentSpec(
         name=name,
-        project=PROJECT_OPERATIONS,
+        project=PROJECT_NOVASTEEL,
         description="test",
         instructions="test",
         tools=(),

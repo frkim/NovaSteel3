@@ -65,11 +65,8 @@ param foundryEmbedDeployment string = ''
 @description('Advanced-reasoning model deployment name (GPT-5.5) used by the Copilot chat "high reasoning" tier. Empty string keeps the Copilot on the default tier only.')
 param foundryReasoningDeployment string = ''
 
-@description('Foundry project data-plane endpoint. This is how the knowledge-orchestrator creates and runs agents in Agent Service — there is no ARM resource for an agent.')
+@description('Foundry project data-plane endpoint. This is how the knowledge-orchestrator creates and runs agents in Agent Service — there is no ARM resource for an agent. One project hosts the whole roster.')
 param foundryProjectEndpoint string = ''
-
-@description('Data-plane endpoint of the operations Foundry project, which hosts the tool-calling agents. Kept separate from the knowledge project so an agent that reads untrusted content can never reach a NovaSteel calculation tool.')
-param foundryOperationsProjectEndpoint string = ''
 
 @description('Azure AI Search endpoint holding the approved procedures.')
 param searchEndpoint string = ''
@@ -245,11 +242,6 @@ resource placeholderApps 'Microsoft.App/containerApps@2024-03-01' = [
               {
                 name: 'FOUNDRY_PROJECT_ENDPOINT'
                 value: foundryProjectEndpoint
-              }
-            ] : [], (svc == 'bff-api' || svc == 'knowledge-orchestrator') && !empty(foundryOperationsProjectEndpoint) ? [
-              {
-                name: 'FOUNDRY_OPERATIONS_PROJECT_ENDPOINT'
-                value: foundryOperationsProjectEndpoint
               }
             ] : [])
           }
