@@ -97,7 +97,7 @@ regarder :
 |---|---|
 | Ce guide (français) | `docs/presentation/assets/app-guide/fr/` |
 | Ce guide (anglais) | `docs/presentation/assets/app-guide/en/` |
-| Captures d'écran (37 PNG) | `docs/presentation/assets/app-guide/screenshots/` |
+| Captures d'écran (43 PNG) | `docs/presentation/assets/app-guide/screenshots/` |
 | Catalogue des exigences (source de vérité) | `apps/analytics-mfe/src/proof/proofCatalog.ts` |
 | Cahier des charges du cas d'usage | `docs/usecase/usecase.md` |
 | Document de preuve d'exécution | `docs/presentation/proof_of_execution.md` |

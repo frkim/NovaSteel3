@@ -55,28 +55,30 @@ stock photography.
 
 ## Application screenshots (committed, no licence risk)
 
-`app-guide/screenshots/` holds **37 PNG captures of this repository's own running
+`app-guide/screenshots/` holds **43 PNG captures of this repository's own running
 application** — 31 route screenshots (one per screen of the analytics microfrontend,
-rendered inside the Blazor portal shell) and 6 feature captures (Copilot panel, help
-assistant, capacity panel, settings dialog, dark theme, account menu).
+rendered inside the Blazor portal shell), 6 feature captures (Copilot panel, help
+assistant, capacity panel, settings dialog, dark theme, account menu), and 6 portrait
+phone captures of the operator voice-capture PWA (`operator-capture-*.png`).
 
 | Property | Value |
 |---|---|
-| Source | `apps/portal-shell` + `apps/analytics-mfe` running locally against the local BFF (`DEMO_MODE=local`) |
-| Captured on | 2026-07-28, all 37 re-captured in one pass against the current `main` |
-| Viewport | 1680 px wide, full-page capture |
-| Data shown | Deterministic **synthetic** fixture data only — every capture carries the "Synthetic demo data — not for operational control" banner |
+| Source | `apps/portal-shell` + `apps/analytics-mfe` running locally against the local BFF (`DEMO_MODE=local`); the `operator-capture-*` captures come from `apps/operator-capture-mfe` deployed as the `novasteelv3-capture` Container App against the demo BFF |
+| Captured on | 2026-07-28, all 37 portal captures re-captured in one pass against the current `main`; the 6 `operator-capture-*` captures added afterwards from the deployed PWA |
+| Viewport | 1680 px wide, full-page capture (portal); 430x932 CSS portrait, full-page capture downscaled to 860 px wide (capture PWA) |
+| Data shown | Deterministic **synthetic** fixture data only — every portal capture carries the "Synthetic demo data — not for operational control" banner, and the capture PWA screens show the synthetic `OP-DEMO-014` interview |
 | Licence risk | **None.** Self-authored capture of first-party software; no third-party imagery, no personal data, no tenant identifiers. |
-| Consumed by | [`app-guide/en/README.md`](app-guide/en/README.md) and [`app-guide/fr/LISEZMOI.md`](app-guide/fr/LISEZMOI.md) |
+| Consumed by | [`app-guide/en/README.md`](app-guide/en/README.md) and [`app-guide/fr/LISEZMOI.md`](app-guide/fr/LISEZMOI.md); the `operator-capture-*` captures are consumed only by the demo cue cards below |
 
 Regeneration instructions are in the guide index (§"Regenerating the screenshots").
 
 ### Annotated demo cue cards (committed derivatives)
 
-`../../demo/screenshots/` holds **19 annotated derivatives** of the captures above, consumed by
+`../../demo/screenshots/` holds **25 annotated derivatives** of the captures above, consumed by
 [`../../demo/demo-runbook.md`](../../demo/demo-runbook.md) (§4.3 and §11). Each one is cropped,
-downscaled to 1400 px and overlaid with red highlight frames and caption tabs so the presenter can
-see exactly which region of a screen supports which claim.
+downscaled (1400 px for portal screens, 860 px for the portrait capture-PWA screens) and overlaid
+with red highlight frames and caption tabs so the presenter can see exactly which region of a screen
+supports which claim.
 
 | Property | Value |
 |---|---|
