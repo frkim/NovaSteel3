@@ -41,6 +41,44 @@ nothing an operator records becomes an operational instruction without a domain 
 weak shop-floor network, and **explicitly bypasses every `/v1/knowledge/` request** — audio and transcript
 traffic is `Highly Confidential` and is never written to the cache.
 
+## Deployment
+
+The app ships as its own container (nginx serving the static Vite bundle on port `8080`) and its own
+Azure Container App, `novasteelv3-capture`, alongside the portal and BFF.
+
+**Demo URL:** <https://novasteelv3-capture.calmbeach-dbad72b1.swedencentral.azurecontainerapps.io>
+
+| Piece | Where |
+| --- | --- |
+| Image build | `Dockerfile` (BuildKit named contexts `reporoot` + `contracts`) |
+| Runtime server | `runtime/nginx.conf` |
+| Runtime config | `runtime/inject-config.sh` |
+| Local build | `.azure/scripts/build-images.ps1 -Target capture`, or the `capture` bake target |
+| Infrastructure | `.azure/infra/modules/apps.bicep` (`captureImage` / `captureOrigin` / `captureBffBaseUrl`) |
+| CI build + CD | `.github/workflows/ci-build-services.yml` -> `cd-services.yml` (`operator-capture-mfe`) |
+
+Pushing a change under `apps/operator-capture-mfe/**` to `main` builds the image, pushes it to ACR by
+immutable digest and promotes it to the demo Container App automatically.
+
+### Runtime configuration
+
+The BFF origin is **not** baked into the bundle. `runtime/inject-config.sh` writes `/config.js` on
+container start from the `CAPTURE_BFF_BASE_URL` (or `BFF_BASE_URL`) environment variable, and
+`index.html` loads it before the app bundle. One image is therefore promotable across environments.
+With no BFF URL set the app falls back to synthetic demo mode instead of calling its own static origin.
+
+`nginx.conf` marks `config.js` and `service-worker.js` `no-store`/`no-cache`, and the service worker
+skips `config.js`, so a redeploy can never be pinned to a previous environment's backend.
+
+### CORS and identity
+
+The PWA is served from its own origin, so the BFF must allowlist it. `apps.bicep` appends
+`captureOrigin` to `BFF_CORS_ORIGINS`; without that every capture call fails in the browser.
+
+In demo auth mode the BFF also requires a **plant scope**: a demo identity with no `X-Demo-Plants`
+header (or a value outside `NS-DEMO-*`) is rejected with `401`. `src/config.ts` always sends it, and
+`src/config.test.ts` guards the regression.
+
 ## Commands
 
 Run from the repo root (npm workspace) or from this folder:

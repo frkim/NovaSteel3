@@ -1,0 +1,11 @@
+# Keep the build context small: everything the image needs is either source or
+# comes from the `reporoot` / `contracts` named contexts.
+node_modules
+dist
+coverage
+.vite
+*.log
+*.tsbuildinfo
+package-lock.json
+.env
+.env.*

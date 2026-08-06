@@ -45,6 +45,15 @@ param portalOrigin string = 'https://placeholder.invalid'
 @description('HTTPS BFF base URL exposed to the portal container runtime. The app phase replaces the bootstrap placeholder with the deployed BFF URL.')
 param portalBffBaseUrl string = 'https://placeholder.invalid'
 
+@description('Full immutable operator-capture PWA image reference. Empty skips the capture Container App, keeping the estate deployable before that image exists.')
+param captureImage string = ''
+
+@description('HTTPS origin of the deployed capture PWA, added to the BFF CORS allowlist. The app phase replaces this with the deployed capture URL.')
+param captureOrigin string = ''
+
+@description('HTTPS BFF base URL injected into the capture PWA at container start.')
+param captureBffBaseUrl string = ''
+
 @description('Create the base Azure AI Services and Speech S0 accounts only after their Sweden Central availability has been reconfirmed.')
 param deployAiServices bool = false
 
@@ -83,6 +92,7 @@ param budgetContactEmails array = [
 var nameSuffix = substring(uniqueString(subscription().id, resourceGroupName), 0, 8)
 var portalAppName = '${resourcePrefix}-portal'
 var bffAppName = '${resourcePrefix}-bff'
+var captureAppName = '${resourcePrefix}-capture'
 var commonTags = {
   application: 'NovaSteel v3'
   environment: 'demo'
@@ -169,6 +179,9 @@ module apps './modules/apps.bicep' = if (deployApps) {
     bffImage: bffImage
     portalOrigin: portalOrigin
     portalBffBaseUrl: portalBffBaseUrl
+    captureImage: captureImage
+    captureOrigin: captureOrigin
+    captureBffBaseUrl: captureBffBaseUrl
     foundryEndpoint: platform.outputs.aiServicesEndpoint
     foundryChatDeployment: platform.outputs.chatDeploymentName
     foundryReasoningDeployment: platform.outputs.reasoningDeploymentName
@@ -201,6 +214,7 @@ output resourceIds object = {
   bffManagedIdentity: platform.outputs.bffIdentityId
   portalContainerApp: deployApps ? (apps.?outputs.?portalAppId ?? '') : ''
   bffContainerApp: deployApps ? (apps.?outputs.?bffAppId ?? '') : ''
+  captureContainerApp: deployApps ? (apps.?outputs.?captureAppId ?? '') : ''
   fabricCapacity: platform.outputs.fabricCapacityId
   fabricCapacityLifecycleRole: fabricCapacityLifecycleRole.id
   capacityPauseLogicApp: platform.outputs.capacityPauseLogicAppId
@@ -224,6 +238,7 @@ output resourceNames object = {
   bffManagedIdentity: platform.outputs.bffIdentityName
   portalContainerApp: portalAppName
   bffContainerApp: bffAppName
+  captureContainerApp: captureAppName
   fabricCapacity: platform.outputs.fabricCapacityName
   capacityPauseLogicApp: platform.outputs.capacityPauseLogicAppName
   eventHubsNamespace: platform.outputs.eventHubsNamespaceName
@@ -242,6 +257,7 @@ output hostnames object = {
   containerRegistry: platform.outputs.acrLoginServer
   portal: deployApps ? (apps.?outputs.?portalFqdn ?? '') : ''
   bff: deployApps ? (apps.?outputs.?bffFqdn ?? '') : ''
+  capture: deployApps ? (apps.?outputs.?captureFqdn ?? '') : ''
   storageBlob: platform.outputs.storageBlobEndpoint
   keyVault: platform.outputs.keyVaultUri
   eventHubs: platform.outputs.eventHubsHostName

@@ -15,6 +15,13 @@ param bffImage = 'placeholder.invalid/novasteelv3/bff@sha256:1111111111111111111
 param portalOrigin = 'https://placeholder.invalid'
 param portalBffBaseUrl = 'https://placeholder.invalid'
 
+// Operator capture PWA. An empty image skips the Container App entirely, so the
+// estate stays deployable before that image exists; the app phase supplies the
+// immutable digest and the deployed capture/BFF URLs.
+param captureImage = ''
+param captureOrigin = ''
+param captureBffBaseUrl = ''
+
 // AI/Speech and budget require an explicit operator opt-in.
 param deployAiServices = false
 

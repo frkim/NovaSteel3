@@ -8,7 +8,8 @@
 const DEMO_ROLES = [
   'Operator.Read',
   'ProcessEngineer.Contribute',
-  'Knowledge.Publisher',
+  // Operators capture and submit for review; approval stays with publishers.
+  'Knowledge.Contributor',
 ] as const
 
 declare global {
@@ -17,9 +18,17 @@ declare global {
       bffBaseUrl?: string
       /** Force synthetic offline behaviour with no network calls. */
       demoMode?: boolean
+      /** Demo plant scope. The BFF rejects demo tokens without an NS-DEMO-* plant. */
+      plant?: string
     }
   }
 }
+
+/**
+ * Demo tokens are plant-scoped: the BFF rejects any demo identity whose plant
+ * claim is missing or not an NS-DEMO-* value, so this must always be sent.
+ */
+const DEFAULT_DEMO_PLANT = 'NS-DEMO-LUX-01'
 
 function stripTrailingSlash(value: string): string {
   return value.replace(/\/+$/, '')
@@ -59,10 +68,17 @@ export function demoMode(): boolean {
   return !hasBackend
 }
 
+export function demoPlant(): string {
+  const fromWindow =
+    typeof window !== 'undefined' ? window.NOVASTEEL_CAPTURE_CONFIG?.plant?.trim() : undefined
+  return fromWindow || readEnv('VITE_DEMO_PLANT') || DEFAULT_DEMO_PLANT
+}
+
 export function demoHeaders(locale: string): Record<string, string> {
   return {
     'X-Demo-User': 'demo-operator-capture',
     'X-Demo-Roles': DEMO_ROLES.join(','),
+    'X-Demo-Plants': demoPlant(),
     'X-Demo-Display-Name': 'NovaSteel Operator',
     'X-Demo-Locale': locale || 'en-LU',
   }

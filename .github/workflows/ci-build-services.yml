@@ -11,6 +11,7 @@ on:
       - "services/device-simulator/**"
       - "apps/portal-shell/**"
       - "apps/analytics-mfe/**"
+      - "apps/operator-capture-mfe/**"
       - "contracts/**"
   push:
     branches:
@@ -24,6 +25,7 @@ on:
       - "services/device-simulator/**"
       - "apps/portal-shell/**"
       - "apps/analytics-mfe/**"
+      - "apps/operator-capture-mfe/**"
       - "contracts/**"
   workflow_dispatch:
 
@@ -50,6 +52,7 @@ jobs:
       ingest-relay: ${{ steps.filter.outputs.ingest-relay }}
       knowledge-orchestrator: ${{ steps.filter.outputs.knowledge-orchestrator }}
       portal-shell: ${{ steps.filter.outputs.portal-shell }}
+      operator-capture-mfe: ${{ steps.filter.outputs.operator-capture-mfe }}
     steps:
       - name: Verify Azure federation variables
         if: github.event_name != 'pull_request'
@@ -114,6 +117,7 @@ jobs:
           emit ingest-relay '^services/ingest-relay/'
           emit knowledge-orchestrator '^services/knowledge-orchestrator/'
           emit portal-shell '^(apps/portal-shell/|apps/analytics-mfe/|contracts/)'
+          emit operator-capture-mfe '^(apps/operator-capture-mfe/|contracts/)'
 
   build-bff-api:
     name: Build bff-api
@@ -376,12 +380,58 @@ jobs:
           DIGEST: ${{ steps.build.outputs.digest }}
         run: echo "ref=${REGISTRY}/novasteel/portal-shell@${DIGEST}" >> "$GITHUB_OUTPUT"
 
-  # Only bff-api and portal-shell have a Container App to land on: the bff image
-  # already carries optimizer-worker, scoring-worker, knowledge-orchestrator and
-  # the device simulator as build contexts, which is why the change filter above
-  # routes all of them to it. Promotion also stops at demo, the only deployed
-  # environment; prod stays a manual dispatch so the release gates in
-  # docs/tech/security-governance-and-threat-model.md (21) keep a human decision.
+  build-operator-capture-mfe:
+    name: Build operator-capture-mfe
+    needs: changes
+    if: needs.changes.outputs.operator-capture-mfe == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.image.outputs.ref }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
+      - name: Azure login via workload identity federation
+        if: github.event_name != 'pull_request'
+        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: ACR login
+        if: github.event_name != 'pull_request'
+        run: az acr login --name "${REGISTRY%%.*}"
+      - name: Build and push operator-capture-mfe
+        id: build
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        with:
+          context: apps/operator-capture-mfe
+          build-contexts: |
+            contracts=contracts
+            reporoot=.
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            ${{ env.REGISTRY }}/novasteel/operator-capture-mfe:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Resolve the immutable image reference
+        id: image
+        if: github.event_name != 'pull_request'
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: echo "ref=${REGISTRY}/novasteel/operator-capture-mfe@${DIGEST}" >> "$GITHUB_OUTPUT"
+
+  # Only bff-api, portal-shell and operator-capture-mfe have a Container App to
+  # land on: the bff image already carries optimizer-worker, scoring-worker,
+  # knowledge-orchestrator and the device simulator as build contexts, which is
+  # why the change filter above routes all of them to it. Promotion also stops at
+  # demo, the only deployed environment; prod stays a manual dispatch so the
+  # release gates in docs/tech/security-governance-and-threat-model.md (21) keep a
+  # human decision.
 
   deploy-demo-bff-api:
     name: Deploy bff-api to demo
@@ -408,3 +458,16 @@ jobs:
       environment: demo
       service: portal-shell
       image: ${{ needs.build-portal-shell.outputs.image }}
+
+  deploy-demo-operator-capture-mfe:
+    name: Deploy operator-capture-mfe to demo
+    needs: build-operator-capture-mfe
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/cd-services.yml
+    with:
+      environment: demo
+      service: operator-capture-mfe
+      image: ${{ needs.build-operator-capture-mfe.outputs.image }}
