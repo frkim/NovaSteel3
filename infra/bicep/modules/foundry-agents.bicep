@@ -72,17 +72,9 @@ param agentStorageBlobEndpoint string
 param appInsightsId string
 
 var projectName = 'proj-novasteel-${environment}'
-var operationsProjectName = 'proj-novasteel-ops-${environment}'
 var searchConnectionName = 'conn-${searchServiceName}'
 var cosmosConnectionName = 'conn-${cosmosAccountName}'
 var storageConnectionName = 'conn-${agentStorageAccountName}'
-// Connection names are unique per Foundry ACCOUNT, not per project: the service
-// rejects a second project reusing a name with "already exist, and can only be
-// updated by the workspace that created it". The operations project therefore
-// needs its own names even though it points at the same three backing stores.
-var operationsSearchConnectionName = 'conn-ops-${searchServiceName}'
-var operationsCosmosConnectionName = 'conn-ops-${cosmosAccountName}'
-var operationsStorageConnectionName = 'conn-ops-${agentStorageAccountName}'
 
 resource foundryAccount 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' existing = {
   name: foundryAccountName
@@ -104,7 +96,7 @@ resource project 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-previ
   }
   properties: {
     displayName: 'NovaSteel ${environment}'
-    description: 'Hosts the NovaSteel knowledge-capture, procedure and Copilot chat agents in Foundry Agent Service.'
+    description: 'Hosts the whole NovaSteel agent roster: the knowledge-capture, procedure and Copilot chat agents, and the tool-calling operations agents whose function tools call the audited deterministic services (ADR-006, ADR-007).'
   }
 }
 
@@ -144,86 +136,6 @@ resource cosmosConnection 'Microsoft.CognitiveServices/accounts/projects/connect
 resource storageConnection 'Microsoft.CognitiveServices/accounts/projects/connections@2025-04-01-preview' = {
   parent: project
   name: storageConnectionName
-  properties: {
-    category: 'AzureStorageAccount'
-    target: agentStorageBlobEndpoint
-    authType: 'AAD'
-    metadata: {
-      ApiType: 'Azure'
-      ResourceId: agentStorageAccountId
-      location: location
-    }
-  }
-}
-
-// --- Operations project ------------------------------------------------------
-// A second project, and the reason it exists is a trust boundary rather than a
-// naming convenience.
-//
-// An agent can only call the tools declared on its own definition, and a definition
-// lives in exactly one project. The `knowledge` project above hosts agents that read
-// untrusted content — approved procedures, interview transcripts, web results — and
-// they hold no tools that can reach a NovaSteel calculation. The `operations` project
-// hosts the agents that *do* call function tools (energy dispatch simulation, lining
-// RUL forecasts). Splitting them means a prompt injected into a retrieved procedure
-// has no path to `simulate_energy_dispatch`, because no agent that reads procedures
-// has ever been given that tool.
-//
-// Both projects share the same Foundry account, the same BYO Cosmos/Storage/Search
-// and the same App Insights connection. That is deliberate: the isolation being
-// bought here is over *tool reachability*, not over data at rest, and a second set of
-// backing stores would double cost and the GDPR erasure surface for no gain.
-//
-// Note the operations project still gets a Search connection even though none of its
-// agents use retrieval — the capability-host contract requires a vector store
-// connection, so it is a provisioning prerequisite, not a capability grant.
-resource operationsProject 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-preview' = {
-  parent: foundryAccount
-  name: operationsProjectName
-  location: location
-  tags: tags
-  identity: {
-    type: 'SystemAssigned'
-  }
-  properties: {
-    displayName: 'NovaSteel Operations ${environment}'
-    description: 'Hosts the NovaSteel tool-calling operations agents. Their function tools call the audited deterministic services; every result is a proposal requiring human approval (ADR-006, ADR-007).'
-  }
-}
-
-resource operationsSearchConnection 'Microsoft.CognitiveServices/accounts/projects/connections@2025-04-01-preview' = {
-  parent: operationsProject
-  name: operationsSearchConnectionName
-  properties: {
-    category: 'CognitiveSearch'
-    target: 'https://${searchServiceName}.search.windows.net'
-    authType: 'AAD'
-    metadata: {
-      ApiType: 'Azure'
-      ResourceId: searchServiceId
-      location: location
-    }
-  }
-}
-
-resource operationsCosmosConnection 'Microsoft.CognitiveServices/accounts/projects/connections@2025-04-01-preview' = {
-  parent: operationsProject
-  name: operationsCosmosConnectionName
-  properties: {
-    category: 'CosmosDB'
-    target: cosmosDocumentEndpoint
-    authType: 'AAD'
-    metadata: {
-      ApiType: 'Azure'
-      ResourceId: cosmosAccountId
-      location: location
-    }
-  }
-}
-
-resource operationsStorageConnection 'Microsoft.CognitiveServices/accounts/projects/connections@2025-04-01-preview' = {
-  parent: operationsProject
-  name: operationsStorageConnectionName
   properties: {
     category: 'AzureStorageAccount'
     target: agentStorageBlobEndpoint
@@ -287,26 +199,6 @@ resource searchServiceContributor 'Microsoft.Authorization/roleAssignments@2022-
   }
 }
 
-resource operationsSearchIndexDataContributor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  scope: searchService
-  name: guid(searchServiceId, operationsProject.id, '8ebe5a00-799e-43f5-93ac-243d3dce84a7')
-  properties: {
-    principalId: operationsProject.identity.principalId
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '8ebe5a00-799e-43f5-93ac-243d3dce84a7')
-    principalType: 'ServicePrincipal'
-  }
-}
-
-resource operationsSearchServiceContributor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  scope: searchService
-  name: guid(searchServiceId, operationsProject.id, '7ca78c08-252a-4471-8644-bb5ff32d4ba0')
-  properties: {
-    principalId: operationsProject.identity.principalId
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7ca78c08-252a-4471-8644-bb5ff32d4ba0')
-    principalType: 'ServicePrincipal'
-  }
-}
-
 // Application Insights reader roles for the project identity are granted by
 // modules/appinsights-agent-access.bicep — Application Insights lives in
 // rg-ns-<env>-monitoring, and a resource-group-scoped module cannot assign roles
@@ -324,17 +216,3 @@ output projectEndpoint string = 'https://${foundryAccountName}.services.ai.azure
 output searchConnectionName string = searchConnectionName
 output cosmosConnectionName string = cosmosConnectionName
 output storageConnectionName string = storageConnectionName
-
-output operationsProjectName string = operationsProject.name
-output operationsProjectId string = operationsProject.id
-@description('Object ID of the operations project managed identity. Needs the same Cosmos/Storage roles as the knowledge project.')
-output operationsProjectPrincipalId string = operationsProject.identity.principalId
-@description('Internal workspace ID of the operations project.')
-#disable-next-line BCP053
-output operationsProjectWorkspaceId string = operationsProject.properties.internalId
-@description('Data-plane endpoint for the tool-calling operations agents. Surfaced to the apps as FOUNDRY_OPERATIONS_PROJECT_ENDPOINT.')
-output operationsProjectEndpoint string = 'https://${foundryAccountName}.services.ai.azure.com/api/projects/${operationsProjectName}'
-@description('The operations project\'s own BYO connection names. Distinct from the knowledge project\'s because connection names are unique per Foundry account.')
-output operationsSearchConnectionName string = operationsSearchConnectionName
-output operationsCosmosConnectionName string = operationsCosmosConnectionName
-output operationsStorageConnectionName string = operationsStorageConnectionName

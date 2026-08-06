@@ -11,18 +11,21 @@ This module is the answer: the roster is a list of typed specs, so it diffs in a
 pull request like any other artifact, and :mod:`knowledge_orchestrator.agent_reconciler`
 applies it at release time instead of hoping a request arrives to trigger it.
 
-**Projects are a trust boundary, not a namespace.** The roster spans two Foundry
-projects and that split is the point. The *knowledge* project holds agents that read
-untrusted-ish content — retrieved procedure text, public web results — and hold no
-tools that reach a calculation. The *operations* project holds the tool-calling
-agents. Because an agent can only call tools declared on its own definition, in its
-own project, a prompt injected into a procedure document cannot reach
-``simulate_energy_dispatch``: it is not merely instructed not to, it has no such
-tool and no path to a project that does.
+**One project holds the whole roster.** The roster previously spanned two Foundry
+projects — a *knowledge* project for agents that read untrusted-ish content and an
+*operations* project for the tool-calling agents — so that an agent which read a
+procedure had no project-level path to ``simulate_energy_dispatch``. That split is
+gone (ADR-020 supersedes ADR-019): every agent now lives in the single ``novasteelv3``
+project. The separation that remains is per *agent definition* rather than per
+project — a knowledge agent still declares no function tools, so it still cannot call
+one — but it is no longer reinforced by a project boundary, and the controls that
+carry the weight are now the per-tool authorization in the BFF tool bodies, the
+deny-by-default registry in :mod:`knowledge_orchestrator.agent_tools`, and Prompt
+Shields.
 
-**One orchestrator, four specialists.** Inside the operations project each
-specialist owns exactly one concern and exactly one calculation, so what it can do
-is legible from its definition. The orchestrator holds all four tools, because
+**One orchestrator, four specialists.** Each operations specialist owns exactly one
+concern and exactly one calculation, so what it can do is legible from its
+definition. The orchestrator holds all four tools, because
 "what does the cheap overnight schedule do to our CO2 and to the reline date" is one
 question, and the alternative — making the operator ask three agents and add the
 answers up — is precisely the unsourced arithmetic ADR-006 exists to prevent. Which
@@ -40,16 +43,18 @@ from typing import Mapping
 from .agent_tools import ToolSpec, tool_spec
 from .retrieval import build_decline_answer
 
-# --- Projects ---------------------------------------------------------------
+# --- Project ----------------------------------------------------------------
+#
+# One project hosts every agent. The constant is kept (rather than dropped along with
+# the split) so the reconciler still has a name to group by and to log, and so adding
+# a second project later is a data change here rather than a control-flow change
+# everywhere.
 
-PROJECT_KNOWLEDGE = "knowledge"
-PROJECT_OPERATIONS = "operations"
+PROJECT_NOVASTEEL = "novasteelv3"
 
-# Environment variable carrying each project's endpoint. The knowledge project keeps
-# the original name so existing deployments and documentation stay valid.
+# Environment variable carrying the project's data-plane endpoint.
 PROJECT_ENDPOINT_ENV: Mapping[str, str] = {
-    PROJECT_KNOWLEDGE: "FOUNDRY_PROJECT_ENDPOINT",
-    PROJECT_OPERATIONS: "FOUNDRY_OPERATIONS_PROJECT_ENDPOINT",
+    PROJECT_NOVASTEEL: "FOUNDRY_PROJECT_ENDPOINT",
 }
 
 # --- Domains ----------------------------------------------------------------
@@ -85,10 +90,12 @@ class AgentSpec:
     """One agent definition, versioned in source rather than clicked into a portal."""
 
     name: str
-    project: str
     description: str
     instructions: str
     tools: tuple[str, ...] = ()
+    # The project hosting this agent. One project holds the whole roster; the field
+    # stays so the reconciler can group and log by it.
+    project: str = PROJECT_NOVASTEEL
     # Deployment override. Left unset, the agent uses FOUNDRY_CHAT_DEPLOYMENT.
     model_env: str = "FOUNDRY_CHAT_DEPLOYMENT"
     # The single concern this agent owns. Empty for agents that are not a routing
@@ -297,10 +304,11 @@ Rules, in priority order:
 """
 
 # The orchestrator holds every operations tool, which looks at first like it undoes
-# the one-agent-one-tool narrowness of the four specialists. It does not, because the
-# boundary being bought is between the *projects*: nothing in the knowledge project
-# can reach any of these tools, and that is what stops a prompt injected into a
-# retrieved procedure from reaching a calculation. Within operations, a question like
+# the one-agent-one-tool narrowness of the four specialists. It does not undo what
+# each specialist buys: a specialist's definition still says exactly what it can do.
+# Since ADR-020 collapsed the roster into one project, the containment is per agent
+# definition — the procedure and web-search agents declare no function tools, so they
+# still cannot reach a calculation — rather than per project. A question like
 # "what does the cheap overnight schedule do to our CO2 and to the reline date" is
 # genuinely one question, and answering it by forcing the operator to ask three
 # agents and add up the answers themselves is the worse outcome — that addition is
@@ -360,7 +368,6 @@ ORCHESTRATOR_AGENT_NAME = "novasteel-operations-orchestrator"
 MANIFEST: tuple[AgentSpec, ...] = (
     AgentSpec(
         name=PROCEDURE_AGENT_NAME,
-        project=PROJECT_KNOWLEDGE,
         description=(
             "Answers operator procedure questions, grounded in the approved corpus "
             "through the Foundry IQ knowledge base. Cites or declines."
@@ -370,7 +377,6 @@ MANIFEST: tuple[AgentSpec, ...] = (
     ),
     AgentSpec(
         name=WEB_SEARCH_AGENT_NAME,
-        project=PROJECT_KNOWLEDGE,
         description=(
             "Online-search fallback used when Foundry IQ's web knowledge source is "
             "unavailable. Public context only."
@@ -380,7 +386,6 @@ MANIFEST: tuple[AgentSpec, ...] = (
     ),
     AgentSpec(
         name=ENERGY_ADVISOR_AGENT_NAME,
-        project=PROJECT_OPERATIONS,
         description=(
             "Explains energy dispatch trade-offs by calling the deterministic MILP "
             "optimizer. Produces proposals for human approval, never commitments."
@@ -409,7 +414,6 @@ MANIFEST: tuple[AgentSpec, ...] = (
     ),
     AgentSpec(
         name=MAINTENANCE_ADVISOR_AGENT_NAME,
-        project=PROJECT_OPERATIONS,
         description=(
             "Explains lining condition by calling the physics-informed RUL model. "
             "Reports forecasts with their confidence and risk level, for human "
@@ -438,7 +442,6 @@ MANIFEST: tuple[AgentSpec, ...] = (
     ),
     AgentSpec(
         name=CARBON_ADVISOR_AGENT_NAME,
-        project=PROJECT_OPERATIONS,
         description=(
             "Explains the plant's CO2 position and ETS exposure by calling the "
             "deterministic emissions summary. Reports Scope 1 and Scope 2 "
@@ -470,7 +473,6 @@ MANIFEST: tuple[AgentSpec, ...] = (
     ),
     AgentSpec(
         name=QUALITY_ADVISOR_AGENT_NAME,
-        project=PROJECT_OPERATIONS,
         description=(
             "Explains batch quality risk by calling the deterministic first-pass "
             "yield model over a bounded process adjustment. Simulates only; never "
@@ -505,7 +507,6 @@ MANIFEST: tuple[AgentSpec, ...] = (
     # router returns when no single specialist owns the question.
     AgentSpec(
         name=ORCHESTRATOR_AGENT_NAME,
-        project=PROJECT_OPERATIONS,
         description=(
             "Answers cross-domain questions by calling several specialist "
             "calculations and laying their results side by side. Names trade-offs "
@@ -525,6 +526,24 @@ MANIFEST: tuple[AgentSpec, ...] = (
 def agents_for_project(project: str) -> tuple[AgentSpec, ...]:
     """Every spec hosted by one project."""
     return tuple(spec for spec in MANIFEST if spec.project == project)
+
+
+def operations_agents() -> tuple[AgentSpec, ...]:
+    """Every agent that declares at least one function tool.
+
+    This is the containment that used to be a project boundary. Before ADR-020 an
+    agent was an operations agent because it lived in the operations project; now it
+    is one because its own definition declares a calculation tool. Both the BFF's
+    ``POST /v1/copilot/agent`` roster and its authorization guard read this, so an
+    agent that holds no function tool — the procedure agent, the web-search agent —
+    is not reachable through the tool-calling surface at all.
+    """
+    return tuple(spec for spec in MANIFEST if spec.function_tools)
+
+
+def knowledge_agents() -> tuple[AgentSpec, ...]:
+    """Every agent that declares no function tool, and so can reach no calculation."""
+    return tuple(spec for spec in MANIFEST if not spec.function_tools)
 
 
 def specialists_for_project(project: str) -> tuple[AgentSpec, ...]:
@@ -584,8 +603,7 @@ __all__ = [
     "PROCEDURE_AGENT_INSTRUCTIONS",
     "PROCEDURE_AGENT_NAME",
     "PROJECT_ENDPOINT_ENV",
-    "PROJECT_KNOWLEDGE",
-    "PROJECT_OPERATIONS",
+    "PROJECT_NOVASTEEL",
     "QUALITY_ADVISOR_AGENT_NAME",
     "QUALITY_ADVISOR_INSTRUCTIONS",
     "TOOL_KNOWLEDGE_MCP",
@@ -595,6 +613,8 @@ __all__ = [
     "AgentSpec",
     "agent_spec",
     "agents_for_project",
+    "knowledge_agents",
+    "operations_agents",
     "orchestrator_for_project",
     "projects",
     "specialists_for_project",

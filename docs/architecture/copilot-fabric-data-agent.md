@@ -4,7 +4,7 @@
 **Decides:** whether, and how, the front-end Copilot's predefined questions and free-text
 answers may be backed by `da-novasteelv3`, the Fabric data agent.
 **Amends:** ADR-011 (the chat explains, it does not retrieve operational values).
-**Related:** ADR-012 (conversations never leave the process), ADR-019 (operations agents hold
+**Related:** ADR-012 (conversations never leave the process), ADR-019/ADR-020 (operations agents hold
 tools; the chat surface does not), ADR-007 (no direct OT action), ADR-018 (two data streams).
 
 ---

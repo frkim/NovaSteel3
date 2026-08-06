@@ -134,7 +134,7 @@ refuses any tool not declared on that agent's own definition, so there is no `co
 
 ```mermaid
 flowchart TD
-  U["Plant operator<br/>'Can we cut cost tonight without delaying order 4471?'"] --> A["novasteel-energy-advisor<br/>Foundry Agent Service · operations project"]
+  U["Plant operator<br/>'Can we cut cost tonight without delaying order 4471?'"] --> A["novasteel-energy-advisor<br/>Foundry Agent Service · novasteelv3 project"]
   A -->|"tool call: simulate_energy_dispatch"| T["Tool body in bff-api<br/>re-applies caller roles + plant scope"]
   T --> O["Optimizer worker<br/>PuLP / CBC MILP"]
   O -->|"proven-optimal schedule<br/>+ cost/CO2 deltas + solver name"| A
@@ -188,7 +188,7 @@ flowchart TD
 flowchart LR
   MFE["analytics-mfe"] --> BFF["bff-api<br/>POST /v1/agents/ask"]
   BFF --> AD["OperationsAgentAdapter<br/>binds tools to the caller's UserContext"]
-  AD --> EA["novasteel-energy-advisor<br/>Foundry Agent Service<br/>(operations project)"]
+  AD --> EA["novasteel-energy-advisor<br/>Foundry Agent Service<br/>(novasteelv3 project)"]
   EA -->|"function_call"| TB["Tool body in bff_api/agent_tools.py<br/>require_any_role + require_site"]
   TB --> BS["BffServices.simulate_energy<br/>audit + repository"]
   BS --> OPT["EnergyDispatchOptimizer<br/>MILP_CBC → heuristic"]
@@ -203,14 +203,13 @@ flowchart LR
 | Release-time reconciliation of the roster | `knowledge_orchestrator/agent_reconciler.py` |
 | Tool *bodies*, scoped to the caller | `bff_api/agent_tools.py` |
 | Run loop + caller-scope context | `bff_api/agent_adapter.py` |
-| Foundry projects, BYO stores, App Insights | `infra/bicep/modules/foundry-agents.bicep` |
+| Foundry project, BYO stores, App Insights | `infra/bicep/modules/foundry-agents.bicep` |
 
 ### Environment
 
 | Variable | Effect |
 |---|---|
-| `FOUNDRY_PROJECT_ENDPOINT` | Knowledge project — agents that read untrusted content. |
-| `FOUNDRY_OPERATIONS_PROJECT_ENDPOINT` | Operations project — the tool-calling advisors, including this one. |
+| `FOUNDRY_PROJECT_ENDPOINT` | The `novasteelv3` project — hosts the whole roster, including this advisor (ADR-020). |
 | `FOUNDRY_AGENT_SERVICE_MODE=local` | Explicit override, forces local agents. |
 | `FOUNDRY_CHAT_DEPLOYMENT` | Model behind the hosted agents. |
 

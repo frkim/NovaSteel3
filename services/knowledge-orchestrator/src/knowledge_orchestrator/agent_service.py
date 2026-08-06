@@ -59,8 +59,7 @@ from .agent_manifest import (
     PROCEDURE_AGENT_INSTRUCTIONS,
     PROCEDURE_AGENT_NAME,
     PROJECT_ENDPOINT_ENV,
-    PROJECT_KNOWLEDGE,
-    PROJECT_OPERATIONS,
+    PROJECT_NOVASTEEL,
     TOOL_KNOWLEDGE_MCP,
     TOOL_WEB_SEARCH,
     WEB_SEARCH_AGENT_NAME,
@@ -77,8 +76,7 @@ from .foundry_iq import (
 
 logger = logging.getLogger(__name__)
 
-ENV_PROJECT_ENDPOINT = PROJECT_ENDPOINT_ENV[PROJECT_KNOWLEDGE]
-ENV_OPERATIONS_PROJECT_ENDPOINT = PROJECT_ENDPOINT_ENV[PROJECT_OPERATIONS]
+ENV_PROJECT_ENDPOINT = PROJECT_ENDPOINT_ENV[PROJECT_NOVASTEEL]
 ENV_CHAT_DEPLOYMENT = "FOUNDRY_CHAT_DEPLOYMENT"
 ENV_AGENT_MODE = "FOUNDRY_AGENT_SERVICE_MODE"  # "azure" | "local" (explicit override)
 
@@ -120,7 +118,7 @@ class AgentServiceStatus:
     project_endpoint: str = ""
     agents: tuple[HostedAgent, ...] = ()
     reason: str = ""
-    project: str = PROJECT_KNOWLEDGE
+    project: str = PROJECT_NOVASTEEL
 
 
 class FoundryAgentService:
@@ -441,7 +439,7 @@ def run_web_search(question: str, limit: int = 3) -> list:
 
 
 
-def agent_service_status(project: str = PROJECT_KNOWLEDGE) -> AgentServiceStatus:
+def agent_service_status(project: str = PROJECT_NOVASTEEL) -> AgentServiceStatus:
     """Report whether Agent Service hosting is configured for one project."""
     if os.environ.get(ENV_AGENT_MODE, "").lower() == "local":
         return AgentServiceStatus(
@@ -491,7 +489,7 @@ def agent_service_status(project: str = PROJECT_KNOWLEDGE) -> AgentServiceStatus
     return AgentServiceStatus(enabled=True, project_endpoint=endpoint, project=project)
 
 
-def host_agents(project: str = PROJECT_KNOWLEDGE) -> AgentServiceStatus:
+def host_agents(project: str = PROJECT_NOVASTEEL) -> AgentServiceStatus:
     """Create one project's manifest agents at startup, degrading gracefully.
 
     Call this once during service startup. If Agent Service is not deployed, the SDK

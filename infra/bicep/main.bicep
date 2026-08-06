@@ -581,15 +581,6 @@ module appInsightsAgentAccess 'modules/appinsights-agent-access.bicep' = {
   }
 }
 
-module appInsightsOpsAgentAccess 'modules/appinsights-agent-access.bicep' = {
-  name: 'ns-${environment}-appi-ops-agent-access'
-  scope: rgMonitoring
-  params: {
-    appInsightsName: monitoring.outputs.appInsightsName
-    projectPrincipalId: foundryAgents.outputs.operationsProjectPrincipalId
-  }
-}
-
 module foundryAgentRbac 'modules/foundry-agent-rbac.bicep' = {
   name: 'ns-${environment}-foundry-agent-rbac'
   scope: rgAi
@@ -597,16 +588,6 @@ module foundryAgentRbac 'modules/foundry-agent-rbac.bicep' = {
     cosmosAccountName: cosmosAgentThreads.outputs.cosmosAccountName
     agentStorageAccountName: storageAgents.outputs.storageAccountName
     projectPrincipalId: foundryAgents.outputs.projectPrincipalId
-  }
-}
-
-module foundryOpsAgentRbac 'modules/foundry-agent-rbac.bicep' = {
-  name: 'ns-${environment}-foundry-ops-agent-rbac'
-  scope: rgAi
-  params: {
-    cosmosAccountName: cosmosAgentThreads.outputs.cosmosAccountName
-    agentStorageAccountName: storageAgents.outputs.storageAccountName
-    projectPrincipalId: foundryAgents.outputs.operationsProjectPrincipalId
   }
 }
 
@@ -622,26 +603,6 @@ module foundryAgentCapabilityHost 'modules/foundry-agent-capability-host.bicep' 
   }
   dependsOn: [
     foundryAgentRbac
-  ]
-}
-
-// Second project host. The account-level capability host is shared, so this
-// invocation must not try to create it again and must not run concurrently with the
-// one above.
-module foundryOpsAgentCapabilityHost 'modules/foundry-agent-capability-host.bicep' = if (foundryAgentServiceManuallyValidated) {
-  name: 'ns-${environment}-foundry-ops-caphost'
-  scope: rgAi
-  params: {
-    foundryAccountName: foundrySpeech.outputs.foundryAccountName
-    projectName: foundryAgents.outputs.operationsProjectName
-    searchConnectionName: foundryAgents.outputs.operationsSearchConnectionName
-    cosmosConnectionName: foundryAgents.outputs.operationsCosmosConnectionName
-    storageConnectionName: foundryAgents.outputs.operationsStorageConnectionName
-    deployAccountCapabilityHost: false
-  }
-  dependsOn: [
-    foundryOpsAgentRbac
-    foundryAgentCapabilityHost
   ]
 }
 
@@ -667,7 +628,6 @@ module containerApps 'modules/containerapps.bicep' = if (deployContainerAppsPlac
     foundryEmbedDeployment: foundrySpeech.outputs.embeddingDeploymentModelName
     foundryReasoningDeployment: foundrySpeech.outputs.reasoningDeploymentModelName
     foundryProjectEndpoint: foundryAgents.outputs.projectEndpoint
-    foundryOperationsProjectEndpoint: foundryAgents.outputs.operationsProjectEndpoint
     searchEndpoint: aiSearch.outputs.searchEndpoint
     searchIndexName: aiSearch.outputs.procedureIndexName
     knowledgeBaseName: aiSearch.outputs.knowledgeBaseName
@@ -777,8 +737,6 @@ output cosmosAgentThreadsAccountName string = cosmosAgentThreads.outputs.cosmosA
 @description('Foundry project data-plane endpoint. Agent definitions are created here by the knowledge-orchestrator at startup; ARM has no agent resource type.')
 output foundryProjectEndpoint string = foundryAgents.outputs.projectEndpoint
 output foundryProjectName string = foundryAgents.outputs.projectName
-output foundryOperationsProjectEndpoint string = foundryAgents.outputs.operationsProjectEndpoint
-output foundryOperationsProjectName string = foundryAgents.outputs.operationsProjectName
 @description('True once the Agent Service capability host has been provisioned. Until then the project exists but cannot run agents, and the orchestrator stays on its local fallback.')
 output agentServiceReady bool = foundryAgentServiceManuallyValidated
 output foundryChatDeployment string = foundrySpeech.outputs.gptDeploymentModelName

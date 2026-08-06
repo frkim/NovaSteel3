@@ -384,11 +384,11 @@ calculations as function tools (ADR-019).
 | Route | Query/body | Response `data` | Status codes |
 |---|---|---|---|
 | `GET /v1/copilot/agents` | none | `{ "configured": bool, "agents": [{ "name", "description", "tools": [...], "role": "specialist"\|"orchestrator", "domain" }] }` — read from the same manifest the reconciler applies, so it answers even when the project is not deployed | `200`; `401`; `403` |
-| `POST /v1/copilot/agent` | `{ "question", "conversationId"?, "agent"? }`; `agent` defaults to `"auto"`; unknown top-level keys return `400` | `{ "agent", "project", "role", "routing": { "agent", "reason", "domains": [...], "matchedKeywords": {...} }, "answer", "conversationId", "toolCalls": [{ "tool", "status", "arguments" }] }` | `200`; `400 VALIDATION_ERROR`; `401`; `403 FORBIDDEN_ROLE` for an agent outside the operations project; `404 NOT_FOUND` for an unknown agent; `503 UPSTREAM_UNAVAILABLE` when `FOUNDRY_OPERATIONS_PROJECT_ENDPOINT` is unset |
+| `POST /v1/copilot/agent` | `{ "question", "conversationId"?, "agent"? }`; `agent` defaults to `"auto"`; unknown top-level keys return `400` | `{ "agent", "project", "role", "routing": { "agent", "reason", "domains": [...], "matchedKeywords": {...} }, "answer", "conversationId", "toolCalls": [{ "tool", "status", "arguments" }] }` | `200`; `400 VALIDATION_ERROR`; `401`; `403 FORBIDDEN_ROLE` for an agent that declares no calculation tool; `404 NOT_FOUND` for an unknown agent; `503 UPSTREAM_UNAVAILABLE` when `FOUNDRY_PROJECT_ENDPOINT` is unset |
 
-The operations project holds four specialists — energy, carbon, quality and
-maintenance, one calculation each — and one orchestrator that holds all four tools
-for questions spanning them.
+This surface holds four specialists — energy, carbon, quality and maintenance, one
+calculation each — and one orchestrator that holds all four tools for questions
+spanning them.
 
 **Which agent answers.** Omitting `agent` (or sending `"auto"`) routes the question
 *deterministically*: it is scored against each specialist's declared keywords, and
@@ -423,9 +423,13 @@ Unlike `/v1/copilot/chat`, the conversation is held **server-side by Foundry**, 
 `conversationId` here is a Foundry conversation, not a BFF one, and it does not
 appear under `GET /v1/copilot/conversations`.
 
-There is **no fallback** to the knowledge project when the operations project is
-absent: that project reads untrusted content, and borrowing it would hand tool
-access across the trust boundary the two projects exist to create.
+Since ADR-020 the whole roster shares one Foundry project, so which agents this
+endpoint will reach is decided by their definitions, not by their address: only an
+agent that declares a calculation tool is admitted. Naming `novasteel-procedure-agent`
+here returns `403 FORBIDDEN_ROLE`, because that agent reads untrusted content and
+this endpoint carries tool access. There is likewise **no fallback** to some other
+configured project when `FOUNDRY_PROJECT_ENDPOINT` is unset — the call fails with
+`503`.
 
 ### 4.9 Audit
 

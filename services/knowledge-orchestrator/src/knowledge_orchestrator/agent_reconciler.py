@@ -19,9 +19,11 @@ It is idempotent. ``create_version`` is create-or-new-version by agent name, so
 re-running produces a new version of an unchanged agent rather than a duplicate, and
 the manifest stays the single source of truth for what an agent *is*.
 
-Reconciliation is per project and each project is independent: the operations project
-being undeployed must not stop the knowledge agents from being applied, so a project
-that is not configured is reported as skipped rather than failing the run.
+Reconciliation is per project and each project is independent, so a project that is
+not configured in this environment is reported as skipped rather than failing the
+run. Since ADR-020 one project holds the whole roster, so in practice there is a
+single group; the per-project loop is kept because it costs nothing and makes adding
+a project a manifest change rather than a control-flow change.
 """
 
 from __future__ import annotations
@@ -121,9 +123,8 @@ def reconcile(
         project_specs = [spec for spec in specs if spec.project == project]
         status = agent_service_status(project)
         if not status.enabled:
-            # Not an error. A project that is not deployed in this environment — the
-            # cost-capped demo estate does not run both — should leave the others
-            # reconcilable rather than failing the release step.
+            # Not an error. A project that is not deployed in this environment should
+            # leave any other reconcilable rather than failing the release step.
             for spec in project_specs:
                 report.outcomes.append(
                     AgentOutcome(spec.name, project, OUTCOME_SKIPPED, status.reason)

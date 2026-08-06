@@ -137,26 +137,33 @@ The hosted agent's instructions embed the *canonical* decline sentence produced 
 same `enforce_answer_citations` check as local ones, and a paraphrased refusal
 would be rejected as an ungrounded answer.
 
-## The agent roster: two projects, seven agents (ADR-019)
+## The agent roster: one project, seven agents (ADR-020)
 
-Agents are declared once, in `agent_manifest.py`, and split across **two Foundry
-projects in the same Foundry account**:
+Agents are declared once, in `agent_manifest.py`, and all seven are deployed to a
+**single Foundry project** (`novasteelv3` in the demo estate) behind one endpoint:
 
-| Project | Endpoint variable | Agent | Domain | Tools |
+| Group | Endpoint variable | Agent | Domain | Tools |
 |---|---|---|---|---|
-| `knowledge` | `FOUNDRY_PROJECT_ENDPOINT` | `novasteel-procedure-agent` | — | Foundry IQ knowledge base (MCP) |
-| `knowledge` | `FOUNDRY_PROJECT_ENDPOINT` | `novasteel-web-search-agent` | — | `web_search` |
-| `operations` | `FOUNDRY_OPERATIONS_PROJECT_ENDPOINT` | `novasteel-energy-advisor` | `energy` | `simulate_energy_dispatch` |
-| `operations` | `FOUNDRY_OPERATIONS_PROJECT_ENDPOINT` | `novasteel-carbon-advisor` | `carbon` | `carbon_footprint_summary` |
-| `operations` | `FOUNDRY_OPERATIONS_PROJECT_ENDPOINT` | `novasteel-quality-advisor` | `quality` | `quality_yield_what_if` |
-| `operations` | `FOUNDRY_OPERATIONS_PROJECT_ENDPOINT` | `novasteel-maintenance-advisor` | `maintenance` | `lining_rul_forecast` |
-| `operations` | `FOUNDRY_OPERATIONS_PROJECT_ENDPOINT` | `novasteel-operations-orchestrator` | — (fallback) | all four function tools |
+| reads | `FOUNDRY_PROJECT_ENDPOINT` | `novasteel-procedure-agent` | — | Foundry IQ knowledge base (MCP) |
+| reads | `FOUNDRY_PROJECT_ENDPOINT` | `novasteel-web-search-agent` | — | `web_search` |
+| calls | `FOUNDRY_PROJECT_ENDPOINT` | `novasteel-energy-advisor` | `energy` | `simulate_energy_dispatch` |
+| calls | `FOUNDRY_PROJECT_ENDPOINT` | `novasteel-carbon-advisor` | `carbon` | `carbon_footprint_summary` |
+| calls | `FOUNDRY_PROJECT_ENDPOINT` | `novasteel-quality-advisor` | `quality` | `quality_yield_what_if` |
+| calls | `FOUNDRY_PROJECT_ENDPOINT` | `novasteel-maintenance-advisor` | `maintenance` | `lining_rul_forecast` |
+| calls | `FOUNDRY_PROJECT_ENDPOINT` | `novasteel-operations-orchestrator` | — (fallback) | all four function tools |
 
-The split is a **trust boundary, not a namespace**. An agent can only call the
-tools declared on its own definition in its own project, so a prompt injected into
-a retrieved procedure has no path to the dispatch optimizer: the agent that read it
-has no such tool and cannot acquire one at runtime. Knowledge agents retrieve and
-never calculate; operations agents calculate and never retrieve.
+The read/call split is still a **containment boundary, not a namespace** — but since
+ADR-020 it is enforced by the agent's own definition rather than by which project
+hosts it. `operations_agents()` is exactly the specs that declare a function tool;
+`knowledge_agents()` is the rest. `POST /v1/copilot/agent` admits only the former, so
+naming the procedure agent there is a 403. Knowledge agents retrieve and never
+calculate; operations agents calculate and never retrieve.
+
+That invariant is no longer held by the platform, so it is held by tests instead:
+`tests/knowledge/test_agent_manifest.py` fails the build if the procedure or
+web-search agent ever gains a function tool, and
+`tests/backend/test_agent_routes.py` fails if either becomes reachable from the
+tool-calling endpoint. ADR-020 records why that trade was made and what it costs.
 
 Each specialist owns exactly one calculation, which is what keeps its definition
 legible — an agent that accumulates tools stops being reviewable. The orchestrator
@@ -306,8 +313,7 @@ portal's Tracing and Monitoring blades.
 | Variable | Default | Effect |
 |---|---|---|
 | `FOUNDRY_ENDPOINT` | *(unset)* | Foundry account endpoint for inference, e.g. `https://<account>.services.ai.azure.com`. A classic `*.cognitiveservices.azure.com` / `*.openai.azure.com` host is accepted and rewritten. Unset ⇒ local fixture agent. |
-| `FOUNDRY_PROJECT_ENDPOINT` | *(unset)* | Foundry **project** endpoint for Agent Service, `https://<account>.services.ai.azure.com/api/projects/<project>`. Unset (or an account endpoint) ⇒ agents are not hosted. |
-| `FOUNDRY_OPERATIONS_PROJECT_ENDPOINT` | *(unset)* | Foundry project endpoint for the **operations** project, which hosts the tool-calling agents. Unset ⇒ `POST /v1/copilot/agent` returns 503. Never falls back to the knowledge project (ADR-019). |
+| `FOUNDRY_PROJECT_ENDPOINT` | *(unset)* | Foundry **project** endpoint for Agent Service, `https://<account>.services.ai.azure.com/api/projects/<project>`. Hosts the whole roster since ADR-020. Unset (or an account endpoint) ⇒ agents are not hosted, and `POST /v1/copilot/agent` returns 503. |
 | `FOUNDRY_CHAT_DEPLOYMENT` | `gpt-5.4-mini` | Standard-tier chat/extraction deployment. |
 | `FOUNDRY_REASONING_DEPLOYMENT` | `gpt-5.5` | High-reasoning-tier deployment. |
 | `FOUNDRY_EMBED_DEPLOYMENT` | `text-embedding-3-large` | Deployment used for integrated vectorization. |

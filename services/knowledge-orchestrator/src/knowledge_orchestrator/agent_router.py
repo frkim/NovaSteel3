@@ -33,7 +33,7 @@ from dataclasses import dataclass
 from typing import Optional, Sequence
 
 from .agent_manifest import (
-    PROJECT_OPERATIONS,
+    PROJECT_NOVASTEEL,
     AgentSpec,
     orchestrator_for_project,
     specialists_for_project,
@@ -90,7 +90,7 @@ class RoutingDecision:
 def route(
     question: str,
     *,
-    project: str = PROJECT_OPERATIONS,
+    project: str = PROJECT_NOVASTEEL,
     specialists: Optional[Sequence[AgentSpec]] = None,
     orchestrator: Optional[AgentSpec] = None,
 ) -> RoutingDecision:
