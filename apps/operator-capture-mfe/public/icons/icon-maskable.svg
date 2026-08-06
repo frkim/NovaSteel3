@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="NovaSteel Capture">
+  <rect width="512" height="512" fill="#141719"/>
+  <g fill="none" stroke="#4C8DFF" stroke-width="22" stroke-linecap="round">
+    <path d="M256 150a50 50 0 0 1 50 50v86a50 50 0 0 1-100 0v-86a50 50 0 0 1 50-50Z" fill="#4C8DFF" stroke="none"/>
+    <path d="M172 268v18a84 84 0 0 0 168 0v-18"/>
+    <line x1="256" y1="370" x2="256" y2="410"/>
+    <line x1="212" y1="410" x2="300" y2="410"/>
+  </g>
+</svg>

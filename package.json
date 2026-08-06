@@ -4,13 +4,15 @@
   "private": true,
   "packageManager": "npm@10.9.3",
   "workspaces": [
-    "apps/analytics-mfe"
+    "apps/analytics-mfe",
+    "apps/operator-capture-mfe"
   ],
   "scripts": {
-    "build": "npm run build:analytics && npm run build:portal",
+    "build": "npm run build:analytics && npm run build:capture && npm run build:portal",
     "build:analytics": "npm --workspace @novasteel/analytics-mfe run build",
-    "test:frontend": "npm --workspace @novasteel/analytics-mfe run test",
-    "lint:frontend": "npm --workspace @novasteel/analytics-mfe run lint",
+    "build:capture": "npm --workspace @novasteel/operator-capture-mfe run build",
+    "test:frontend": "npm --workspace @novasteel/analytics-mfe run test && npm --workspace @novasteel/operator-capture-mfe run test",
+    "lint:frontend": "npm --workspace @novasteel/analytics-mfe run lint && npm --workspace @novasteel/operator-capture-mfe run lint",
     "restore:portal": "dotnet restore apps/portal-shell/PortalShell.csproj --configfile NuGet.Config",
     "build:portal": "dotnet build apps/portal-shell/PortalShell.csproj --no-restore",
     "test:bff": "set \"PIP_CONFIG_FILE=%CD%\\pip.conf\"&& set \"PIP_INDEX_URL=https://packagefeedproxy.microsoft.io/pypi/simple\"&& services\\bff-api\\.venv\\Scripts\\python.exe -m pytest services\\bff-api\\tests",

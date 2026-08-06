@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import sys
+from hashlib import sha256
 from pathlib import Path
 from typing import Any
 
@@ -14,6 +15,16 @@ logger = logging.getLogger(__name__)
 
 _ROOT = Path(__file__).resolve().parents[4]
 _KNOWLEDGE_SRC = _ROOT / "services" / "knowledge-orchestrator" / "src"
+
+# Recorded browser blobs carry no reliable PCM envelope, so the BFF submits a
+# conservative, Fast-Transcription-compatible default for fields it cannot parse
+# from the container without decoding it.
+_DEFAULT_SAMPLE_RATE_HZ = 16_000
+_DEFAULT_CHANNELS = 1
+
+
+def _checksum(data: bytes) -> str:
+    return f"sha256:{sha256(data).hexdigest()}"
 
 
 class KnowledgeAdapter:
@@ -29,7 +40,13 @@ class KnowledgeAdapter:
             sys.path.insert(0, str(_KNOWLEDGE_SRC))
         try:
             from knowledge_orchestrator import KnowledgeOrchestrator
-            from knowledge_orchestrator.adapter_factory import create_agent
+            from knowledge_orchestrator.adapter_factory import (
+                create_agent,
+                create_audio_storage,
+                create_speech,
+            )
+            from knowledge_orchestrator.audio import AudioValidationError
+            from knowledge_orchestrator.consent import ConsentError
             from knowledge_orchestrator.models import AudioMetadata
             from knowledge_orchestrator.orchestrator import (
                 ConflictError,
@@ -43,12 +60,18 @@ class KnowledgeAdapter:
         except ImportError as exc:  # pragma: no cover - repository integration failure
             raise RuntimeError("knowledge-orchestrator is required by the BFF.") from exc
 
-        # Select agent via the adapter factory (Azure when FOUNDRY_ENDPOINT set,
-        # local fixture otherwise). Fail-safe: factory handles import failures.
+        # Select agents/adapters via the adapter factory (Azure when the relevant
+        # endpoint env vars are set, local fixtures otherwise). The factory handles
+        # import/connection failures by degrading to the offline local adapters, so
+        # demo mode stays free of cloud dependencies and network calls.
         agent = create_agent()
-        self._orchestrator = KnowledgeOrchestrator(agent=agent)
+        speech = create_speech()
+        self._audio_storage = create_audio_storage()
+        self._orchestrator = KnowledgeOrchestrator(agent=agent, speech=speech)
         self._audio_metadata = AudioMetadata
         self._errors = (NotFoundError, ForbiddenError, ConflictError)
+        self._consent_error = ConsentError
+        self._audio_error = AudioValidationError
         self._workflow_errors = (WorkflowError, StaleApprovalError)
         self._demo_mode = demo_mode
         if demo_mode:
@@ -87,6 +110,78 @@ class KnowledgeAdapter:
             return self._orchestrator.get_transcript(session_id)
         except self._errors as exc:
             raise _map_error(exc) from exc
+
+    def upload_audio(
+        self,
+        *,
+        session_id: str,
+        data: bytes,
+        content_type: str,
+        duration_seconds: float,
+        language: str,
+        correlation_id: str,
+    ) -> dict[str, Any]:
+        """Store a recorded audio blob and transcribe it via the orchestrator.
+
+        Returns an opaque ``audioRef`` (never a raw storage URL). Raw bytes and
+        transcript text never leave the orchestrator, so they never reach the
+        response, logs, or the audit trail.
+        """
+        audio_ref = self._audio_storage.store(
+            session_id=session_id, data=data, content_type=content_type
+        )
+        meta = self._audio_metadata(
+            session_id=session_id,
+            content_type=content_type,
+            duration_seconds=duration_seconds,
+            sample_rate_hz=_DEFAULT_SAMPLE_RATE_HZ,
+            channels=_DEFAULT_CHANNELS,
+            size_bytes=len(data),
+            language=language,
+            speaker_role="operator",
+            checksum=_checksum(data),
+        )
+        try:
+            result = self._orchestrator.submit_audio(
+                session_id=session_id,
+                meta=meta,
+                audio_ref=audio_ref,
+                correlation_id=correlation_id,
+            )
+        except self._consent_error as exc:
+            raise ApiError(403, ErrorCode.FORBIDDEN_ROLE, str(exc)) from exc
+        except self._audio_error as exc:
+            raise ApiError(400, ErrorCode.VALIDATION_ERROR, str(exc)) from exc
+        except self._errors as exc:
+            raise _map_error(exc) from exc
+        return {
+            "sessionId": session_id,
+            "status": result["status"],
+            "audioRef": audio_ref,
+        }
+
+    def extract_draft_procedure(
+        self,
+        *,
+        session_id: str,
+        title: str,
+        domain: str,
+        correlation_id: str,
+    ) -> dict[str, Any]:
+        """Extract a DRAFT procedure from a session's transcript via the agent."""
+        try:
+            procedure = self._orchestrator.extract_draft(
+                session_id=session_id,
+                title=title,
+                task=(
+                    f"Extract a grounded operational procedure for the {domain} "
+                    "domain from the operator interview transcript."
+                ),
+                correlation_id=correlation_id,
+            )
+        except self._errors as exc:
+            raise _map_error(exc) from exc
+        return {"procedureId": procedure.procedure_id, "status": procedure.status.value}
 
     def list_procedures(
         self, *, status: str | None, q: str | None, page: int, size: int

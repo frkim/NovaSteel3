@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
-from fastapi import Body, Depends, FastAPI, Header, Query, Request
+from fastapi import Body, Depends, FastAPI, File, Form, Header, Query, Request, UploadFile
 from fastapi.responses import JSONResponse, StreamingResponse
 
 from .auth import (
@@ -24,6 +24,18 @@ from .services import OptimizationError, ScoringError
 from .table import apply_table_query
 
 from scoring_worker.metrics import record_quality_metrics  # noqa: E402
+
+
+# Knowledge capture: shop-floor operators (Knowledge.Contributor) and knowledge
+# engineers (Knowledge.Publisher) may both record interviews and extract drafts.
+_KNOWLEDGE_CAPTURE_ROLES = ("Knowledge.Publisher", "Knowledge.Contributor")
+
+# Audio upload guards for POST /v1/knowledge/interviews/{id}/audio.
+_AUDIO_MAX_BYTES = 25 * 1024 * 1024  # 25 MB ceiling on a single recording.
+_AUDIO_ALLOWED_CONTENT_TYPES = frozenset(
+    {"audio/webm", "audio/ogg", "audio/wav", "audio/mpeg", "audio/mp4"}
+)
+_AUDIO_LANGUAGES = frozenset({"en", "fr", "de", "nl", "es"})
 
 
 def register_routes(app: FastAPI) -> None:
@@ -535,7 +547,7 @@ def register_routes(app: FastAPI) -> None:
         idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
         user: UserContext = Depends(current_user),
     ) -> JSONResponse:
-        require_any_role(user, "Knowledge.Publisher")
+        require_any_role(user, *_KNOWLEDGE_CAPTURE_ROLES)
         _require_exact_keys(body, {"operatorRef", "language", "consent"})
         consent = body["consent"]
         if not isinstance(consent, Mapping):
@@ -582,10 +594,114 @@ def register_routes(app: FastAPI) -> None:
         request: Request,
         user: UserContext = Depends(current_user),
     ) -> JSONResponse:
-        require_any_role(user, "Knowledge.Publisher")
+        require_any_role(user, *_KNOWLEDGE_CAPTURE_ROLES)
         result = request.app.state.services.knowledge.transcript(session_id)
         status = 202 if result.get("status") == "PROCESSING" else 200
         return JSONResponse(_envelope(request, result), status_code=status)
+
+    @app.post(
+        "/v1/knowledge/interviews/{session_id}/audio",
+        tags=["Knowledge"],
+        status_code=202,
+    )
+    async def upload_knowledge_audio(
+        session_id: str,
+        request: Request,
+        file: UploadFile = File(...),
+        duration_seconds: str = Form(..., alias="durationSeconds"),
+        language: str = Form(...),
+        user: UserContext = Depends(current_user),
+    ) -> JSONResponse:
+        require_any_role(user, *_KNOWLEDGE_CAPTURE_ROLES)
+        if language not in _AUDIO_LANGUAGES:
+            raise ApiError(
+                400,
+                ErrorCode.VALIDATION_ERROR,
+                f"language must be one of {sorted(_AUDIO_LANGUAGES)}.",
+            )
+        content_type = (file.content_type or "").split(";")[0].strip().lower()
+        if content_type not in _AUDIO_ALLOWED_CONTENT_TYPES:
+            raise ApiError(
+                400,
+                ErrorCode.VALIDATION_ERROR,
+                f"Unsupported audio content type '{file.content_type}'.",
+            )
+        duration = _parse_duration_seconds(duration_seconds)
+        # Read one byte past the ceiling so an oversized upload is rejected without
+        # materializing an unbounded blob in memory.
+        data = await file.read(_AUDIO_MAX_BYTES + 1)
+        if len(data) > _AUDIO_MAX_BYTES:
+            raise ApiError(
+                413,
+                ErrorCode.PAYLOAD_TOO_LARGE,
+                f"Audio upload exceeds the {_AUDIO_MAX_BYTES} byte limit.",
+            )
+        if not data:
+            raise ApiError(400, ErrorCode.VALIDATION_ERROR, "The audio file is empty.")
+        result = request.app.state.services.knowledge.upload_audio(
+            session_id=session_id,
+            data=data,
+            content_type=content_type,
+            duration_seconds=duration,
+            language=language,
+            correlation_id=_correlation_id(request),
+        )
+        record = request.app.state.services.audit.append(
+            domain="knowledge",
+            entity_id=session_id,
+            correlation_id=_correlation_id(request),
+            action="knowledge.interview.audio",
+            actor=user.user_id,
+            input_snapshot_ref=f"audioRef:{result['audioRef']}",
+            output={"status": result["status"], "audioRef": result["audioRef"]},
+        )
+        result["auditRef"] = record.audit_id
+        return JSONResponse(_envelope(request, result), status_code=202)
+
+    @app.post(
+        "/v1/knowledge/interviews/{session_id}/draft",
+        tags=["Knowledge"],
+        status_code=201,
+    )
+    async def extract_knowledge_draft(
+        session_id: str,
+        request: Request,
+        body: dict[str, Any] = Body(...),
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+        user: UserContext = Depends(current_user),
+    ) -> JSONResponse:
+        require_any_role(user, *_KNOWLEDGE_CAPTURE_ROLES)
+        _require_exact_keys(body, {"title", "domain"})
+        title = _required_string(body, "title")
+        domain = _required_string(body, "domain")
+        key = IdempotencyStore.require_key(idempotency_key)
+        route = "/v1/knowledge/interviews/{id}/draft"
+        replay = request.app.state.services.idempotency.replay_or_none(
+            route=route, key=key, body=body
+        )
+        if replay:
+            return _replay_response(replay)
+        result = request.app.state.services.knowledge.extract_draft_procedure(
+            session_id=session_id,
+            title=title,
+            domain=domain,
+            correlation_id=_correlation_id(request),
+        )
+        record = request.app.state.services.audit.append(
+            domain="knowledge",
+            entity_id=result["procedureId"],
+            correlation_id=_correlation_id(request),
+            action="knowledge.interview.draft",
+            actor=user.user_id,
+            input_snapshot_ref=f"session:{session_id}",
+            output={"status": result["status"], "domain": domain},
+        )
+        result["auditRef"] = record.audit_id
+        response = _envelope(request, result)
+        request.app.state.services.idempotency.store(
+            route=route, key=key, body=body, status_code=201, response=response
+        )
+        return JSONResponse(response, status_code=201)
 
     @app.get("/v1/knowledge/procedures", tags=["Knowledge"])
     async def list_knowledge_procedures(
@@ -662,7 +778,7 @@ def register_routes(app: FastAPI) -> None:
         request: Request,
         user: UserContext = Depends(current_user),
     ) -> JSONResponse:
-        require_any_role(user, "Knowledge.Publisher")
+        require_any_role(user, *_KNOWLEDGE_CAPTURE_ROLES)
         result = request.app.state.services.knowledge.submit_for_review(
             procedure_id=procedure_id,
             actor=user.user_id,
@@ -1660,6 +1776,21 @@ def _required_int(body: Mapping[str, Any], name: str) -> int:
     value = body.get(name)
     if not isinstance(value, int) or value < 1:
         raise ApiError(400, ErrorCode.VALIDATION_ERROR, f"{name} must be a positive integer.")
+    return value
+
+
+def _parse_duration_seconds(raw: str) -> float:
+    """Parse the multipart ``durationSeconds`` string into a positive float."""
+    try:
+        value = float(raw)
+    except (TypeError, ValueError) as exc:
+        raise ApiError(
+            400, ErrorCode.VALIDATION_ERROR, "durationSeconds must be a number."
+        ) from exc
+    if value <= 0:
+        raise ApiError(
+            400, ErrorCode.VALIDATION_ERROR, "durationSeconds must be greater than zero."
+        )
     return value
 
 

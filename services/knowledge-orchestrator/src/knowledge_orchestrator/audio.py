@@ -17,13 +17,17 @@ from . import consent as consent_mod
 from .models import AudioMetadata, ConsentRecord
 
 # Fast Transcription-compatible container formats accepted by the orchestrator.
+# Includes the browser MediaRecorder outputs (WebM/Opus, MP4/AAC) an operator PWA
+# produces, alongside the classic WAV/MP3/OGG/FLAC uploads.
 ALLOWED_CONTENT_TYPES = frozenset(
     {
         "audio/wav",
         "audio/x-wav",
         "audio/mpeg",
         "audio/mp3",
+        "audio/mp4",
         "audio/ogg",
+        "audio/webm",
         "audio/flac",
     }
 )

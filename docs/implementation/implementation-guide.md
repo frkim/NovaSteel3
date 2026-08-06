@@ -32,7 +32,8 @@ The repository is a single monorepo, matching the buildable repository topology 
 /
 ├── apps/
 │   ├── portal-shell/                 # C# / Blazor WebAssembly host: MSAL, routing, theme/locale, typed interop bridge
-│   └── analytics-mfe/                # TypeScript / React: MUI + D3, virtualized tables, optional Power BI embed
+│   ├── analytics-mfe/                # TypeScript / React: MUI + D3, virtualized tables, optional Power BI embed
+│   └── operator-capture-mfe/         # TypeScript / React: installable mobile-first PWA, operator voice capture → Knowledge Hub
 ├── services/
 │   ├── bff-api/                      # Python / FastAPI: authz, query adapters, SSE, audit initiation, capacity mediation
 │   ├── optimizer-worker/             # Python: deterministic constraint solver, energy dispatch recommendation
@@ -150,6 +151,7 @@ This restates and operationalizes `solution-architecture.md` §5.2 and §6 as bu
 |---|---|---|---|---|
 | `portal-shell` | C# / Blazor WebAssembly | MSAL sign-in, token acquisition, global chrome (top bar, nav, theme, locale), routing between persona sections, typed host↔MFE interop bridge, Fabric-capacity control panel UI (calls BFF only) | Business/domain logic, direct Fabric/Foundry calls, storing any workload credential | `analytics-mfe` (interop), `bff-api` (HTTPS) |
 | `analytics-mfe` | TypeScript / React + MUI + D3 | KPI cards, D3 charts, `TBL-STD` virtualized/filterable tables (see `api-contracts.md` §5), optional Power BI embed, SSE alert consumption, the Dockview Copilot chat dock (`dashboard-specification.md` §9.6) | Authentication, storing a service/API token beyond a host-brokered short-lived reference, direct Fabric/Foundry calls, floating/undocked chat windows | `portal-shell` (interop), `bff-api` (HTTPS, token via host broker) |
+| `operator-capture-mfe` | TypeScript / React + MUI (installable PWA) | Shop-floor voice capture on phone or desktop: GDPR consent gate, `MediaRecorder` capture with live level meter, local review/retake, multipart audio upload, IndexedDB retry when offline, transcript polling, `DRAFT` creation and submit-for-review into the Knowledge Hub | Authentication, approving or publishing a procedure, transcribing locally, caching audio/transcript responses in the service worker, uploading before explicit consent and explicit operator confirmation | `bff-api` (HTTPS, token via host broker) |
 | `bff-api` | Python / FastAPI | Entra token validation, persona/plant authorization, `/v1` route surface (`api-contracts.md`), response shaping, SSE fan-out, audit-event initiation, capacity request mediation, Power BI embed token mediation | Direct browser-to-Fabric credentials, direct PLC/MES control, authorization decisions based only on hidden UI state | Fabric query adapters, `optimizer-worker`, `scoring-worker`, `knowledge-orchestrator`, `capacity-operator` logic, Key Vault |
 | `optimizer-worker` | Python | Price/constraint validation, deterministic feasible energy schedule, what-if simulation, recommendation persistence to gold facts | Autonomous schedule commit, relaxing a hard constraint silently | Gold Lakehouse tables, `bff-api` |
 | `scoring-worker` | Python | Approved RUL/quality scoring, model-version capture, drift metrics, evaluation logging | Retraining/promotion without Responsible-AI review-board sign-off | Silver/gold features, model registry, `bff-api` |
