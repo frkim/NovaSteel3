@@ -10,10 +10,10 @@
 # contexts. The main context stays the app folder so each app's own
 # .dockerignore is honoured.
 #
-# The portal "reporoot" context supplies the npm workspace root files
-# (package.json, package-lock.json, .npmrc) and NuGet.Config. It defaults to the
-# repository root; build-images.ps1 overrides REPOROOT_CONTEXT with a minimal
-# staged directory so the large root node_modules is never transferred.
+# The "reporoot" context supplies the npm workspace root files (package.json,
+# package-lock.json, .npmrc) and NuGet.Config. It defaults to the repository
+# root; build-images.ps1 overrides REPOROOT_CONTEXT with a minimal staged
+# directory so the large root node_modules is never transferred.
 #
 # pip and NuGet restores resolve ONLY from the Microsoft protected feeds (no
 # public fallback) as enforced by the Dockerfiles, pip.conf and NuGet.Config.
@@ -30,7 +30,7 @@ function "ref" {
 }
 
 group "default" {
-  targets = ["bff", "portal"]
+  targets = ["bff", "portal", "capture"]
 }
 
 target "bff" {
@@ -58,5 +58,18 @@ target "portal" {
     VITE_BFF_BASE_URL = VITE_BFF_BASE_URL
   }
   tags      = [ref("portal")]
+  platforms = ["linux/amd64"]
+}
+
+# Standalone installable PWA for shop-floor operators (voice procedure capture).
+# The BFF origin is injected at container start, so no build arg is needed here.
+target "capture" {
+  context    = "apps/operator-capture-mfe"
+  dockerfile = "Dockerfile"
+  contexts = {
+    contracts = "contracts"
+    reporoot  = REPOROOT_CONTEXT
+  }
+  tags      = [ref("capture")]
   platforms = ["linux/amd64"]
 }

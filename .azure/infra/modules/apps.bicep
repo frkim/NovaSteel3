@@ -10,6 +10,15 @@ param bffImage string
 param portalOrigin string
 param portalBffBaseUrl string
 
+@description('Full immutable operator-capture PWA image reference. Empty skips the capture Container App entirely, so the estate stays deployable before that image exists.')
+param captureImage string = ''
+
+@description('HTTPS origin of the deployed capture PWA, appended to the BFF CORS allowlist. The PWA is served from its own origin, so without this every capture API call is blocked by the browser.')
+param captureOrigin string = ''
+
+@description('HTTPS BFF base URL injected into the capture PWA at container start.')
+param captureBffBaseUrl string = ''
+
 @description('Foundry account inference endpoint. Empty keeps the knowledge/Copilot agents on deterministic local fallbacks.')
 param foundryEndpoint string = ''
 
@@ -39,6 +48,11 @@ var keyVaultUri = 'https://${resourcePrefix}-kv-${nameSuffix}${environment().suf
 var storageAccountName = '${resourcePrefix}st${nameSuffix}'
 var eventHubsNamespace = '${resourcePrefix}-eh-${nameSuffix}'
 var fabricCapacityName = '${resourcePrefix}fabric'
+var deployCaptureApp = !empty(captureImage)
+
+// The browser enforces CORS per origin, and the capture PWA is served from its
+// own Container App hostname, so both origins must be allowlisted on the BFF.
+var corsOrigins = empty(captureOrigin) ? portalOrigin : '${portalOrigin},${captureOrigin}'
 
 resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' existing = {
   name: '${resourcePrefix}-cae'
@@ -205,7 +219,7 @@ resource bffApp 'Microsoft.App/containerApps@2024-03-01' = {
             }
             {
               name: 'BFF_CORS_ORIGINS'
-              value: portalOrigin
+              value: corsOrigins
             }
             {
               name: 'BFF_ENVIRONMENT'
@@ -336,7 +350,117 @@ resource bffApp 'Microsoft.App/containerApps@2024-03-01' = {
   }
 }
 
+// Standalone installable PWA for shop-floor operators (voice procedure capture).
+// It is a purely static nginx image whose only Azure data-plane need is pulling
+// from ACR, so it reuses the portal identity rather than adding another managed
+// identity and AcrPull assignment for the same privilege.
+resource captureApp 'Microsoft.App/containerApps@2024-03-01' = if (deployCaptureApp) {
+  name: '${resourcePrefix}-capture'
+  location: location
+  tags: tags
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${portalIdentity.id}': {}
+    }
+  }
+  properties: {
+    environmentId: containerAppsEnvironment.id
+    configuration: {
+      activeRevisionsMode: 'Single'
+      ingress: {
+        external: true
+        targetPort: 8080
+        transport: 'auto'
+        allowInsecure: false
+      }
+      registries: [
+        {
+          server: acrLoginServer
+          identity: portalIdentity.id
+        }
+      ]
+    }
+    template: {
+      containers: [
+        {
+          name: 'capture'
+          image: captureImage
+          resources: {
+            cpu: json('0.25')
+            memory: '0.5Gi'
+          }
+          env: [
+            {
+              name: 'AZURE_CLIENT_ID'
+              value: portalIdentity.properties.clientId
+            }
+            // Consumed by runtime/inject-config.sh, which rewrites config.js
+            // before nginx starts. Empty leaves the PWA in synthetic demo mode.
+            {
+              name: 'CAPTURE_BFF_BASE_URL'
+              value: captureBffBaseUrl
+            }
+            {
+              name: 'BFF_BASE_URL'
+              value: captureBffBaseUrl
+            }
+          ]
+          probes: [
+            {
+              type: 'startup'
+              httpGet: {
+                path: '/healthz'
+                port: 8080
+              }
+              initialDelaySeconds: 0
+              periodSeconds: 10
+              failureThreshold: 30
+            }
+            {
+              type: 'liveness'
+              httpGet: {
+                path: '/healthz'
+                port: 8080
+              }
+              initialDelaySeconds: 10
+              periodSeconds: 30
+              failureThreshold: 3
+            }
+            {
+              type: 'readiness'
+              httpGet: {
+                path: '/healthz'
+                port: 8080
+              }
+              initialDelaySeconds: 5
+              periodSeconds: 10
+              failureThreshold: 3
+            }
+          ]
+        }
+      ]
+      scale: {
+        minReplicas: 1
+        maxReplicas: 2
+        rules: [
+          {
+            name: 'http'
+            http: {
+              metadata: {
+                concurrentRequests: '20'
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
+
 output portalAppId string = portalApp.id
 output portalFqdn string = portalApp.properties.configuration.ingress.fqdn
 output bffAppId string = bffApp.id
 output bffFqdn string = bffApp.properties.configuration.ingress.fqdn
+output captureAppId string = deployCaptureApp ? captureApp!.id : ''
+output captureFqdn string = deployCaptureApp ? captureApp!.properties.configuration.ingress.fqdn : ''

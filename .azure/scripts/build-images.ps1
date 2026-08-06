@@ -1,16 +1,17 @@
 <#
 .SYNOPSIS
-  Build the NovaSteel v3 portal and BFF production container images locally with
-  Docker Desktop + BuildKit, using immutable tags.
+  Build the NovaSteel v3 portal, BFF and operator-capture production container
+  images locally with Docker Desktop + BuildKit, using immutable tags.
 
 .DESCRIPTION
-  Both applications depend on sibling source trees, so the images are built with
+  The applications depend on sibling source trees, so the images are built with
   BuildKit named build contexts (the main context stays the app folder so its
   own .dockerignore is honoured):
 
-    BFF    (services/bff-api)     + optimizer-worker, scoring-worker, knowledge,
-                                  device-simulator
-    Portal (apps/portal-shell)    + analytics-mfe, contracts, reporoot
+    BFF     (services/bff-api)              + optimizer-worker, scoring-worker,
+                                             knowledge, device-simulator
+    Portal  (apps/portal-shell)             + analytics-mfe, contracts, reporoot
+    Capture (apps/operator-capture-mfe)     + contracts, reporoot
 
   Python (pip) and .NET (NuGet) restores resolve ONLY from the Microsoft
   protected feeds with no public fallback (enforced in the Dockerfiles,
@@ -27,7 +28,7 @@
   images are also tagged <registry>/novasteelv3/<name>:<tag>.
 
 .PARAMETER Target
-  bff | portal | all (default all).
+  bff | portal | capture | all (default all).
 
 .PARAMETER Push
   Push the immutable image(s) to -Registry. Off by default (packaging only).
@@ -42,7 +43,7 @@ param(
     [string]$Tag,
     [string]$Registry = "",
     [string]$RepoNamespace = "novasteelv3",
-    [ValidateSet("bff", "portal", "all")]
+    [ValidateSet("bff", "portal", "capture", "all")]
     [string]$Target = "all",
     [string]$ViteBffBaseUrl = "",
     [string]$LocalAlias = "local",
@@ -100,7 +101,7 @@ Push-Location $RepoRoot
 try {
     # Stage the minimal npm workspace root + NuGet config for the 'reporoot'
     # context, so the portal build never transfers the 160 MB root node_modules.
-    if ($Target -in @("portal", "all")) {
+    if ($Target -in @("portal", "capture", "all")) {
         Remove-Item -Recurse -Force $StageDir -ErrorAction SilentlyContinue
         New-Item -ItemType Directory -Force -Path $RepoRootStage | Out-Null
         foreach ($f in @("package.json", "package-lock.json", ".npmrc", "NuGet.Config")) {
@@ -139,6 +140,20 @@ try {
         Invoke-Buildx -BuildArgs $buildxArgs -Name "portal"
         $results["portal"] = $ref
     }
+
+    if ($Target -in @("capture", "all")) {
+        $ref = Get-Ref "capture" $Tag $Registry
+        $buildxArgs = @(
+            "--build-context", "contracts=contracts",
+            "--build-context", "reporoot=$RepoRootStage",
+            "-t", $ref
+        )
+        if (-not $Push -and -not $NoLoad -and $LocalAlias) { $buildxArgs += @("-t", (Get-Ref "capture" $LocalAlias "")) }
+        if ($outputArg) { $buildxArgs += $outputArg }
+        $buildxArgs += "apps/operator-capture-mfe"
+        Invoke-Buildx -BuildArgs $buildxArgs -Name "capture"
+        $results["capture"] = $ref
+    }
 }
 finally {
     Remove-Item -Recurse -Force $StageDir -ErrorAction SilentlyContinue
@@ -159,8 +174,8 @@ foreach ($name in $results.Keys) {
     Write-Host ("{0,-8} {1,-60} {2}" -f $name, $ref, $id)
 }
 Write-Host ""
-Write-Host "Ports: portal -> 8080 (SPA), bff -> 8080 (/health/live, /health/ready)."
+Write-Host "Ports: portal -> 8080 (SPA), capture -> 8080 (SPA, /healthz), bff -> 8080 (/health/live, /health/ready)."
 if (-not $Push) {
-    Write-Host "Local convenience tags: $RepoNamespace/bff:$LocalAlias, $RepoNamespace/portal:$LocalAlias"
+    Write-Host "Local convenience tags: $RepoNamespace/bff:$LocalAlias, $RepoNamespace/portal:$LocalAlias, $RepoNamespace/capture:$LocalAlias"
     Write-Host "Immutable deploy tag  : $Tag  (push later with -Registry -Push)"
 }

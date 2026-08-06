@@ -23,6 +23,7 @@ on:
           - ingest-relay
           - knowledge-orchestrator
           - portal-shell
+          - operator-capture-mfe
       image:
         description: Immutable approved container image digest
         required: true
@@ -80,7 +81,7 @@ jobs:
             *) echo "Unknown environment: $TARGET_ENVIRONMENT" >&2; exit 1 ;;
           esac
           case "$SERVICE" in
-            bff-api|optimizer-worker|scoring-worker|ingest-relay|knowledge-orchestrator|portal-shell) ;;
+            bff-api|optimizer-worker|scoring-worker|ingest-relay|knowledge-orchestrator|portal-shell|operator-capture-mfe) ;;
             *) echo "Unknown service: $SERVICE" >&2; exit 1 ;;
           esac
       - name: Keep automatic promotion on demo
@@ -118,6 +119,7 @@ jobs:
       INGEST_RELAY_CONTAINER_APP: ${{ vars.INGEST_RELAY_CONTAINER_APP }}
       KNOWLEDGE_CONTAINER_APP: ${{ vars.KNOWLEDGE_CONTAINER_APP }}
       PORTAL_CONTAINER_APP: ${{ vars.PORTAL_CONTAINER_APP }}
+      CAPTURE_CONTAINER_APP: ${{ vars.CAPTURE_CONTAINER_APP }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
@@ -141,6 +143,7 @@ jobs:
             ingest-relay) app="$INGEST_RELAY_CONTAINER_APP" ;;
             knowledge-orchestrator) app="$KNOWLEDGE_CONTAINER_APP" ;;
             portal-shell) app="$PORTAL_CONTAINER_APP" ;;
+            operator-capture-mfe) app="$CAPTURE_CONTAINER_APP" ;;
           esac
           test -n "$CONTAINER_RESOURCE_GROUP"
           test -n "$app"

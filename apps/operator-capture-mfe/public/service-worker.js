@@ -36,6 +36,12 @@ function isApiRequest(url) {
   return url.pathname.includes('/v1/knowledge/')
 }
 
+// The container rewrites /config.js on every start with the environment's BFF
+// origin. Caching it would pin the app to a previous deployment's backend.
+function isRuntimeConfig(url) {
+  return url.pathname === '/config.js'
+}
+
 self.addEventListener('fetch', (event) => {
   const request = event.request
   if (request.method !== 'GET') {
@@ -44,8 +50,9 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(request.url)
 
-  if (isApiRequest(url)) {
-    // Network-only, no caching for consent-bound API data.
+  if (isApiRequest(url) || isRuntimeConfig(url)) {
+    // Network-only: consent-bound API data, and runtime config that must track
+    // the deployed environment rather than whatever was cached last time.
     return
   }
 
