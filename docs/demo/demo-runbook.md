@@ -80,24 +80,26 @@ This order is binding with the six demo moments in [solution requirements](../sp
 
 The script below was re-allocated from the earlier 15-minute plan to a **10-minute** budget by tightening every moment (roughly a two-thirds compression) rather than dropping any moment: all six DM moments and their proof points survive, only shorter. The most **cuttable** elements, in order, if you fall behind the clock, are: the optional Copilot grounding beat (04:10 slot), the Dockview workspace beat (§4.1), and the Help Assistant beat (§4.2) — none carries a headline claim. Protect DM-2 (energy numbers), DM-3 (RUL band) and DM-5 (knowledge governance); those are the moments the panel remembers.
 
+Each row links to an annotated screen cue card (**S1**-**S16**) in [§4.3](#43-annotated-screen-cue-cards); the optional Device Operations beats carry their own cards (**S17**-**S19**) inline in [§11](#11-device-operations-demo-beats-wave-3). On every cue card a **red frame** marks the exact region to point at, and the numbered red tab states what that region proves. Rehearse against the cue cards, not from memory: the frames are the only things the audience must actually see.
+
 | Time | Persona/tab and action | Presenter narrative | Proof point / fallback |
 |---|---|---|---|
-| 00:00-00:40 | **AxelorMetal public site**, then **Plant Manager**. Show `company-website/home`, name AxelorMetal as the fictitious steel producer, then enter the Command Center and select Moselle Integrated Works. | “AxelorMetal is the plant operator; NovaSteel is the decision-support platform we are defending. NovaSteel unifies production, energy, emissions, quality, maintenance, and operator knowledge. Everything shown is deterministic synthetic data.” Point out energy at 35% of modeled production cost and the four target outcomes. | If the website is slow, use cached home/company screenshots; if the dashboard is slow, use cached fleet overview. Do not wait more than 10 seconds. |
-| 00:40-01:20 | **Fabric Core**. Show live Eventstream input, bronze-to-silver-to-gold lineage, freshness, and contract status. | “Captors publish event-time data through the edge; Fabric retains the immutable envelope, deduplicates and normalizes units, and serves one governed semantic layer.” Point to synthetic labels, schema version, and quarantine count. | Use a pre-recorded 20-second Fabric clip or architecture screenshot; continue speaking while switching. |
-| 01:20-02:00 | **Demo Control**, then **Energy Manager**. Unpause at 60x and show day-ahead price with the baseline dispatch. | “We are accelerating time, not fabricating UI updates. Sequence, event time, lineage, and seed remain reproducible. The urgent automotive coil is fixed; only eligible reheat batches have flexibility.” | If stream is unavailable, start local replay; otherwise use the cached `evening-scarcity` price curve. |
-| 02:00-03:00 | **Energy Manager**. Run or reveal the optimized schedule and constraint report. Rearrange a supporting panel, maximize the schedule/chart group, then reset the layout from the header. | Compare baseline and optimized Gantt charts. "The optimizer preserves soak times, delivery commitments, equipment capacity, and planned tonnage. This is a simulated/shadow approval, not a production schedule write." Use the dock beat to show that the workspace adapts to the presenter/operator without changing the data. Show 7.25% modeled cost reduction, 7.89% peak reduction (56.0→51.58 MW), and 3.29% CO₂ reduction (whole-dispatch basis). Tonnage conserved at 960 t. | Reveal cached feasible solution after 5 seconds; show the saved result and constraint table. If the panel drag is awkward, use maximize + reset only. |
-| 03:00-03:40 | **Reliability Engineer**. Open `LUX-BF-01`, hearth sector 07 thermal map. | “A localized warm zone is developing. Neighboring thermocouples, cooling-water ΔT, and heat-flux residual agree, so this is unlike a single bad sensor.” | Static thermal-map sequence has healthy, emerging, and degraded frames. |
-| 03:40-04:10 | Continue the reliability trend and trigger the threshold. | Show 45-day thermal history compressed into seconds. Point to rising 6-hour slope and slower post-tap cooling; avoid claiming certainty. | Use cached animated chart; manually advance three frames if animation stalls. |
-| 04:10-04:30 | *(optional beat — cut first if behind)* Open **Copilot Chat** from the header (docks right) and ask **“What is the risk?”** without naming the metric. | “I never said which risk. The assistant sees that I am on Furnace Health, so it answers on lining risk, defines it, and shows the sources it used — a glossary entry and this screen. It has no tools and no database access: it explains what you are looking at, it does not fetch new numbers.” Point at the green shield and say history is in-process, never written to Fabric. | If the chat errors, the question is restored in the composer — retype and resend once. If Foundry is unreachable it answers locally from the same grounding and the sources are identical; say so rather than hiding it. |
-| 04:30-04:50 | Open the alert drawer, acknowledge it, and create/link the synthetic work-order record. | "The model estimates P50 remaining life at **~20 days** with a tight P10/P90 band (18.7–20.6). The engineer remains accountable: the platform recommends verification and records a synthetic work order; it does not actuate the furnace." | Open saved alert JSON and pre-created `WO-DEMO-LUX-1042`; ensure risk ≥0.80 and confidence ≥0.70. |
-| 04:50-05:20 | **Quality Engineer**. Open `NS-AUTO-DP780` genealogy and drift panel. | “Coiling temperature and force balance are drifting together. The model warns before the first off-spec lab result and traces the affected heat, slab, coil, and process settings.” | Cached coil `COIL-LUX-260725-017` has complete genealogy. |
-| 05:20-06:10 | Run the bounded quality what-if. | “A bounded what-if returns predicted first-pass yield from about 88% to 95%—roughly the target 8% relative improvement—without changing the grade recipe.” Toggle predicted versus measured labels; no setpoint is written. | Use cached what-if result; do not imply an automatic control write-back. |
-| 06:10-06:50 | **Operator Knowledge**. Start interview or play fallback synthetic audio. Ask: “What do you check when hearth sector temperature rises but cooling flow appears normal?” | Show STT confidence and speaker labels. State that the operator has consented in this synthetic workflow and that the voice/persona is fictional. | If microphone/STT fails, play the approved WAV; if audio fails, paste the approved transcript and say it is replay mode. |
-| 06:50-07:30 | Show extracted knowledge. | Highlight trigger, observations, checks, rationale, cautions, and source citations. Convert it to a draft procedure: verify neighboring sensors, compare water ΔT, inspect flow restriction, escalate for ultrasound. | Load pre-extracted fact JSON. Keep status `DRAFT — EXPERT REVIEW REQUIRED`. |
-| 07:30-07:50 | Show the reviewer boundary. | “The Foundry draft cannot publish. A Knowledge Engineer reviews, edits, and approves a version before it enters retrieval.” | Use the saved approval-queue view; do not simulate an unreviewed procedure as published. |
-| 07:50-08:40 | **Plant Manager / Sustainability view**. Show CO₂ trajectory, ETS exposure, and the energy-decision lineage. | “The carbon target and any financial claim remain targets. Here the semantic model rolls up synthetic emissions and connects a recommendation to its evidence.” | Use the cached sustainability/ETS report or the optional internal Power BI report tab. |
-| 08:40-09:30 | **Executive / audit view**. Show portfolio targets, ROI roll-up, and one append-only decision record. | “Every recommendation links inputs, model/version, confidence, human decision, and outcome. The 14/22/21/8 figures are targets; the screen is synthetic evidence of traceability.” | Use exported audit JSON/PDF and cached board-report view. |
-| 09:30-10:00 | **Plant Manager**, then briefly **Fabric Core**. | Recap: “One Fabric core connects streaming operations, governed history, models, decisions, and human knowledge.” End on lineage/freshness and the next-step invitation. | If any tab is unstable, finish on cached summary slide. Stop at 10:00 rather than debugging live. |
+| 00:00-00:40 | **AxelorMetal public site**, then **Plant Manager**. Show `company-website/home`, name AxelorMetal as the fictitious steel producer, then enter the Command Center and select Moselle Integrated Works. [S1](#s1) · [S2](#s2) | “AxelorMetal is the plant operator; NovaSteel is the decision-support platform we are defending. NovaSteel unifies production, energy, emissions, quality, maintenance, and operator knowledge. Everything shown is deterministic synthetic data.” Point out energy at 35% of modeled production cost and the four target outcomes. | If the website is slow, use cached home/company screenshots; if the dashboard is slow, use cached fleet overview. Do not wait more than 10 seconds. |
+| 00:40-01:20 | **Fabric Core**. Show live Eventstream input, bronze-to-silver-to-gold lineage, freshness, and contract status. [S3](#s3) | “Captors publish event-time data through the edge; Fabric retains the immutable envelope, deduplicates and normalizes units, and serves one governed semantic layer.” Point to synthetic labels, schema version, and quarantine count. | Use a pre-recorded 20-second Fabric clip or architecture screenshot; continue speaking while switching. |
+| 01:20-02:00 | **Demo Control**, then **Energy Manager**. Unpause at 60x and show day-ahead price with the baseline dispatch. [S4](#s4) | “We are accelerating time, not fabricating UI updates. Sequence, event time, lineage, and seed remain reproducible. The urgent automotive coil is fixed; only eligible reheat batches have flexibility.” | If stream is unavailable, start local replay; otherwise use the cached `evening-scarcity` price curve. |
+| 02:00-03:00 | **Energy Manager**. Run or reveal the optimized schedule and constraint report. Rearrange a supporting panel, maximize the schedule/chart group, then reset the layout from the header. [S5](#s5) | Compare baseline and optimized Gantt charts. "The optimizer preserves soak times, delivery commitments, equipment capacity, and planned tonnage. This is a simulated/shadow approval, not a production schedule write." Use the dock beat to show that the workspace adapts to the presenter/operator without changing the data. Show 7.25% modeled cost reduction, 7.89% peak reduction (56.0→51.58 MW), and 3.29% CO₂ reduction (whole-dispatch basis). Tonnage conserved at 960 t. | Reveal cached feasible solution after 5 seconds; show the saved result and constraint table. If the panel drag is awkward, use maximize + reset only. |
+| 03:00-03:40 | **Reliability Engineer**. Open `LUX-BF-01`, hearth sector 07 thermal map. [S6](#s6) | “A localized warm zone is developing. Neighboring thermocouples, cooling-water ΔT, and heat-flux residual agree, so this is unlike a single bad sensor.” | Static thermal-map sequence has healthy, emerging, and degraded frames. |
+| 03:40-04:10 | Continue the reliability trend and trigger the threshold. [S6](#s6) · [S7](#s7) | Show 45-day thermal history compressed into seconds. Point to rising 6-hour slope and slower post-tap cooling; avoid claiming certainty. | Use cached animated chart; manually advance three frames if animation stalls. |
+| 04:10-04:30 | *(optional beat — cut first if behind)* Open **Copilot Chat** from the header (docks right) and ask **“What is the risk?”** without naming the metric. [S8](#s8) | “I never said which risk. The assistant sees that I am on Furnace Health, so it answers on lining risk, defines it, and shows the sources it used — a glossary entry and this screen. It has no tools and no database access: it explains what you are looking at, it does not fetch new numbers.” Point at the green shield and say history is in-process, never written to Fabric. | If the chat errors, the question is restored in the composer — retype and resend once. If Foundry is unreachable it answers locally from the same grounding and the sources are identical; say so rather than hiding it. |
+| 04:30-04:50 | Open the alert drawer, acknowledge it, and create/link the synthetic work-order record. [S7](#s7) · [S9](#s9) | "The model estimates P50 remaining life at **~20 days** with a tight P10/P90 band (18.7–20.6). The engineer remains accountable: the platform recommends verification and records a synthetic work order; it does not actuate the furnace." | Open saved alert JSON and pre-created `WO-DEMO-LUX-1042`; ensure risk ≥0.80 and confidence ≥0.70. |
+| 04:50-05:20 | **Quality Engineer**. Open `NS-AUTO-DP780` genealogy and drift panel. [S10](#s10) | “Coiling temperature and force balance are drifting together. The model warns before the first off-spec lab result and traces the affected heat, slab, coil, and process settings.” | Cached coil `COIL-LUX-260725-017` has complete genealogy. |
+| 05:20-06:10 | Run the bounded quality what-if. [S11](#s11) | “A bounded what-if returns predicted first-pass yield from about 88% to 95%—roughly the target 8% relative improvement—without changing the grade recipe.” Toggle predicted versus measured labels; no setpoint is written. | Use cached what-if result; do not imply an automatic control write-back. |
+| 06:10-06:50 | **Operator Knowledge**. Start interview or play fallback synthetic audio. Ask: “What do you check when hearth sector temperature rises but cooling flow appears normal?” [S12](#s12) | Show STT confidence and speaker labels. State that the operator has consented in this synthetic workflow and that the voice/persona is fictional. | If microphone/STT fails, play the approved WAV; if audio fails, paste the approved transcript and say it is replay mode. |
+| 06:50-07:30 | Show extracted knowledge. [S12](#s12) | Highlight trigger, observations, checks, rationale, cautions, and source citations. Convert it to a draft procedure: verify neighboring sensors, compare water ΔT, inspect flow restriction, escalate for ultrasound. | Load pre-extracted fact JSON. Keep status `DRAFT — EXPERT REVIEW REQUIRED`. |
+| 07:30-07:50 | Show the reviewer boundary. [S12](#s12) | “The Foundry draft cannot publish. A Knowledge Engineer reviews, edits, and approves a version before it enters retrieval.” | Use the saved approval-queue view; do not simulate an unreviewed procedure as published. |
+| 07:50-08:40 | **Plant Manager / Sustainability view**. Show CO₂ trajectory, ETS exposure, and the energy-decision lineage. [S13](#s13) | “The carbon target and any financial claim remain targets. Here the semantic model rolls up synthetic emissions and connects a recommendation to its evidence.” | Use the cached sustainability/ETS report or the optional internal Power BI report tab. |
+| 08:40-09:30 | **Executive / audit view**. Show portfolio targets, ROI roll-up, and one append-only decision record. [S14](#s14) · [S15](#s15) | “Every recommendation links inputs, model/version, confidence, human decision, and outcome. The 14/22/21/8 figures are targets; the screen is synthetic evidence of traceability.” | Use exported audit JSON/PDF and cached board-report view. |
+| 09:30-10:00 | **Plant Manager**, then briefly **Fabric Core**. [S2](#s2) · [S3](#s3) | Recap: “One Fabric core connects streaming operations, governed history, models, decisions, and human knowledge.” End on lineage/freshness and the next-step invitation. | If any tab is unstable, finish on cached summary slide. Stop at 10:00 rather than debugging live. |
 
 ### 4.1 Dockview workspace beat
 
@@ -123,9 +125,172 @@ Use this as an insert during DM-2 (after the Energy Manager KPIs are visible), o
 
 **Point being made:** The platform is self-teaching for non-expert users, which matters for a jury that does not know the steel domain. The engineering story is that topic resolution is DOM-based (`resolveHelpTarget.ts`), not a per-screen registry: three shared primitives (`KpiCard`, `ChartContainer`, `DataTable`) plus structural detection of dock tabs and table rows mean any new screen built from those components is explainable for free.
 
-**Fallback:** If the popup does not appear on the first click, click a KPI tile (they always resolve). If explain mode fails to activate at all, say: "The help system resolves topics from the DOM — here is the popup from a rehearsal screenshot," show the cached help-popup screenshot from the fallback pack, and continue.
+**Fallback:** If the popup does not appear on the first click, click a KPI tile (they always resolve). If explain mode fails to activate at all, say: "The help system resolves topics from the DOM — here is the popup from a rehearsal screenshot," show the cached help-popup screenshot from the fallback pack, and continue. The annotated cue card for this beat is [S16](#s16).
 
 **Optional aside (10 seconds, only if timing allows and a juror asks "how does steel get made?"):** While on the AxelorMetal corporate website tab (Steel Knowledge page), point at the process diagrams and say: "These three diagrams map the entire steelmaking route. Click one to magnify it to 400 %." Do not open the lightbox unless a juror explicitly asks — it is slower to close than it is worth in a timed demo.
+
+### 4.3 Annotated screen cue cards
+
+One card per beat. The **red frame** is the only thing you must point at on that screen; the numbered red tab is the claim that frame supports. Everything outside a frame is context — do not narrate it.
+
+Sources are the committed application captures in `docs/presentation/assets/app-guide/screenshots/`; the annotated derivatives are regenerated with `python tools\presentation\annotate_demo_screenshots.py` (see [§4.4](#44-regenerating-the-cue-cards)). All captures carry the **Synthetic demo data — not for operational control** banner; keep it visible on the projector.
+
+<a id="s1"></a>
+
+#### S1 — AxelorMetal public site (00:00-00:40)
+
+![AxelorMetal public site with the site navigation and hero statement framed in red](screenshots/s1-axelormetal-home.png)
+
+1. Public-site tabs (Home, Company, Products & Markets, Steel Knowledge, Contact) — the fictitious company frame.
+2. Hero statement — AxelorMetal operates the plant, NovaSteel is the platform being defended.
+
+<a id="s2"></a>
+
+#### S2 — Command Center (00:00-00:40 and 09:30-10:00)
+
+![Command Center with the site status strip and the KPI band framed in red](screenshots/s2-command-center.png)
+
+1. Site status strip — select **LU · Moselle Integrated Works** (`Critical`, 8 open alerts · 1 critical).
+2. KPI band — energy consumption, CO₂ Scope 2, furnace lining RUL (21 d P50), high-grade yield, open alerts. This is the recap screen at 09:30 as well.
+
+<a id="s3"></a>
+
+#### S3 — Fabric core and edge boundary (00:40-01:20 and 09:30-10:00)
+
+![Adaptive-cloud architecture with the edge capture layer and the Fabric core framed in red](screenshots/s3-fabric-core.png)
+
+1. Edge capture — the event-time envelope is preserved before anything reaches the cloud.
+2. One governed Fabric core — Real-Time Intelligence, RTI dashboard, IQ ontology, operations agent.
+
+<a id="s4"></a>
+
+#### S4 — Spot price and baseline dispatch (01:20-02:00)
+
+![Energy Optimization spot price screen with the peak-price KPI and the evening peak on the chart framed in red](screenshots/s4-energy-spot-price.png)
+
+1. **Peak price today 280 €/MWh**, flagged `evening scarcity`.
+2. The evening interval on the price/load chart — baseline dispatch still sits on top of the peak.
+
+<a id="s5"></a>
+
+#### S5 — Optimized dispatch (02:00-03:00)
+
+![Load-shift simulator with the savings KPI band and the baseline-versus-optimized chart framed in red](screenshots/s5-energy-optimized.png)
+
+1. Savings KPIs — estimated/confirmed saving, peak reduction, and **Hard violations 0**. Say the number of hard violations out loud; it is the constraint claim.
+2. Baseline versus optimized bars plus the caption: cost €37,109 → €33,761, peak 56 → 51.58 MW, **960 t tonnage conserved**.
+
+<a id="s6"></a>
+
+#### S6 — Thermal explorer (03:00-04:10)
+
+![Furnace thermal explorer with the SECTOR-07 heat-map row and the sector trend chart framed in red](screenshots/s6-thermal-explorer.png)
+
+1. The SECTOR-07 row of the hearth heat map — ▲ marks cells at or above 700 °C.
+2. The SECTOR-07 trend panel — neighbouring thermocouples, cooling-water ΔT and heat-flux residual agree, so this is unlike a single failing sensor.
+
+<a id="s7"></a>
+
+#### S7 — Lining forecast and RUL band (03:40-04:50)
+
+![Lining forecast with the RUL KPIs, the threshold crossing and the work-order button framed in red](screenshots/s7-lining-forecast.png)
+
+1. **Days to threshold 19.7 d** and **P10–P90 18.69–20.61** — quote the band, never a single date.
+2. Where the risk curve crosses the **0.8** threshold, with the P10–P90 shading around it.
+3. **Plan inspection work order** — the hand-off is a synthetic record; the platform never actuates the furnace.
+
+<a id="s8"></a>
+
+#### S8 — Copilot grounding (04:10-04:30, optional)
+
+![Copilot panel docked on the right with the panel header and the grounding footer framed in red](screenshots/s8-copilot-grounding.png)
+
+1. Copilot docks to the right and answers about the screen you are on — enterprise data protection is stated in the panel itself.
+2. The grounding footer and glossary — answers come from synthetic demo data and the screen context, with no tool calls and no database access.
+
+<a id="s9"></a>
+
+#### S9 — Maintenance planner and work order (04:30-04:50)
+
+![Maintenance planner with the urgent/relining KPIs and the WO-DEMO-LUX-1042 row framed in red](screenshots/s9-maintenance-workorder.png)
+
+1. **Urgent 1** and **Relining window 18–24 d**, aligned to the RUL P50.
+2. `WO-DEMO-LUX-1042` — synthetic planned inspection on `LUX-BF-01 / HEARTH-SECTOR-07`, status `PLANNED_INSPECTION`.
+
+<a id="s10"></a>
+
+#### S10 — Quality genealogy (04:50-05:20)
+
+![Batch quality screen with the yield KPIs, the yield-trend excursion and the batch table framed in red](screenshots/s10-quality-genealogy.png)
+
+1. High-grade yield and predicted first-pass yield against their targets.
+2. The downward excursion in the yield trend — the model warns before the first off-spec lab result.
+3. The batch table — heat, coil, coiling bias, risk and result in one genealogy (`COIL-LUX-260725-017`, `NS-AUTO-DP780`).
+
+<a id="s11"></a>
+
+#### S11 — Defect analytics / SPC (05:20-06:10)
+
+![SPC screen with the Cpk KPIs and the out-of-control point framed in red](screenshots/s11-quality-spc.png)
+
+1. **Process Cpk 1.18** against a target of ≥1.33, with one out-of-control point.
+2. The point breaching the upper control limit — coiling-temperature drift dominates the Pareto beside it.
+
+<a id="s12"></a>
+
+#### S12 — Knowledge capture and reviewer gate (06:10-07:50)
+
+![Knowledge Hub capture status with the in-review procedure card and the workflow pipeline framed in red](screenshots/s12-knowledge-capture.png)
+
+1. The `IN_REVIEW` card — extracted from the interview, `source: interview`, with **Approve / Reject** actions. It stays a draft.
+2. The workflow pipeline and the **Human-in-the-loop gate**: no procedure is published to operators until a domain expert approves it.
+
+<a id="s13"></a>
+
+#### S13 — Sustainability and ETS exposure (07:50-08:40)
+
+![ETS exposure screen with the KPI band and the allowance projection crossing the cap framed in red](screenshots/s13-sustainability-ets.png)
+
+1. Allowances used, ETS price, projected overage and exposure — modeled synthetic figures, not financial commitments.
+2. Where cumulative allowance use is projected to breach the cap (around month 5), against the 85% guidance line.
+
+<a id="s14"></a>
+
+#### S14 — Audit and decision evidence (08:40-09:30)
+
+![Audit and reports screen with the immutability KPIs and a decision record row framed in red](screenshots/s14-audit-trail.png)
+
+1. **Model-linked** and **Immutability 100%** — input → model → decision, append-only, no inline edit.
+2. A single decision record: time, actor, action, domain, entity, model version, correlation id and audit ref.
+
+<a id="s15"></a>
+
+#### S15 — Executive overview (08:40-09:30)
+
+![Executive overview with the target KPI band and the target-versus-actual panel framed in red](screenshots/s15-executive-overview.png)
+
+1. −14% energy, −22% CO₂, +8% yield, 21-day advance warning — say **targets**, not measured outcomes.
+2. The target-versus-actual roll-up with its `OUT-0x` proof badges.
+
+<a id="s16"></a>
+
+#### S16 — Help assistant / explain mode (§4.2 insert)
+
+![Furnace health screen in explain mode with the banner, the header toggle and a KPI tile framed in red](screenshots/s16-help-explain-mode.png)
+
+1. The blue **Explain mode — click any element** banner confirms the mode is active.
+2. The **What's this?** toggle in the dashboard header is what turned it on.
+3. Any KPI tile, chart or table row resolves a topic popup — KPI tiles always resolve, so click one first.
+
+### 4.4 Regenerating the cue cards
+
+The cue cards are derivatives of the committed first-party captures — no third-party imagery is involved (see [`../presentation/assets/PROVENANCE.md`](../presentation/assets/PROVENANCE.md)).
+
+1. Re-capture the source screens if the UI changed, following the app-guide instructions in [`../presentation/assets/app-guide/en/README.md`](../presentation/assets/app-guide/en/README.md).
+2. Adjust the crop and highlight rectangles in `tools\presentation\annotate_demo_screenshots.py` (coordinates are in source-capture pixels).
+3. Run `python tools\presentation\annotate_demo_screenshots.py` and re-check every frame before rehearsal.
+
+Pillow is the only dependency and must be restored from the Microsoft-protected feed only — see [`../tech/security_requirement.md`](../tech/security_requirement.md).
 
 ## 5. Expected cue sheet
 
@@ -164,6 +329,7 @@ Do not spend more than 10 seconds diagnosing during the 10-minute presentation. 
 Store the pack in an access-controlled, offline-capable demo folder and verify checksums:
 
 - fleet overview and persona screenshots;
+- the annotated cue cards `docs/demo/screenshots/s1-*.png` … `s19-*.png` (§4.3, §11) — they double as the static proof pack;
 - 45-day thermal trend and three-frame hearth map;
 - `model-inference` and alert-lifecycle JSON;
 - baseline and optimized schedule/results;
@@ -274,6 +440,13 @@ These beats are optional supplementary demonstrations for audiences specifically
 
 Navigate to **Device Operations → Device Fleet** (`/lu/device-operations/fleet`).
 
+<a id="s17"></a>
+
+![Device fleet with the KPI band and the degraded LUX-BF-01 row framed in red](screenshots/s17-device-fleet.png)
+
+1. KPI band — 6 devices, 5 healthy, 1 degraded, mean health score 99.4%, active incidents.
+2. The `LUX-BF-01` row, already `degraded` because demo-mode auto-seeding pre-armed the lining-wear incident.
+
 | Time | Action | Presenter narrative | Proof point / fallback |
 |---|---|---|---|
 | +0:00 | Open Device Fleet | Show the KPI band: 6 devices, X healthy, X degraded, mean health score, active incidents, sensors online. | "Six devices, 34 sensors, all deterministic and synthetic. The health scores derive from individual sensor alarm/warning states — no manual override." |
@@ -283,6 +456,13 @@ Navigate to **Device Operations → Device Fleet** (`/lu/device-operations/fleet
 ### 11.2 Sensor Explorer + chart (~1.5 min)
 
 Stay on **Device Operations → Sensor Explorer** (pre-filtered to LUX-BF-01).
+
+<a id="s18"></a>
+
+![Sensor explorer with the device filters and the status/trend/deviation columns framed in red](screenshots/s18-sensor-explorer.png)
+
+1. The device and status filters — arrive here pre-filtered to `LUX-BF-01` from the fleet link.
+2. The status, trend and deviation % columns — the approach-band rule fires before a clamped waveform ever reaches its limit.
 
 | Time | Action | Presenter narrative | Proof point / fallback |
 |---|---|---|---|
@@ -297,6 +477,14 @@ Stay on **Device Operations → Sensor Explorer** (pre-filtered to LUX-BF-01).
 Navigate to **Device Operations → Device Simulator** (`/lu/device-operations/simulator`).
 
 > **Prerequisites:** the BFF must be running. The presenter must hold `Platform.Capacity.Manage` (or use the local demo header).
+
+<a id="s19"></a>
+
+![Simulator control with the KPI band, active incidents and available incidents framed in red](screenshots/s19-device-simulator.png)
+
+1. Simulator state, scenario `demo-full`, speed and seed — the run is deterministic.
+2. Active incidents with their progress bars and **Clear** action.
+3. The **Trigger** buttons: they act on the in-process ring buffer only — no OT system, PLC or historian is reachable from here.
 
 | Time | Action | Presenter narrative | Proof point / fallback |
 |---|---|---|---|
