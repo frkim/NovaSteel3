@@ -220,7 +220,11 @@ Request body requires a `reasonCode` from a closed enum (`FR-ENE-05` in `solutio
 
 ### 4.7 Knowledge capture
 
-**`POST /v1/knowledge/interviews`** — knowledge workflow role and recorded consent. Request: `{ "operatorRef": "OP-DEMO-014", "language": "en", "consent": {"granted": true, "scope": "knowledge-capture", "retentionDays": 30} }`. Creates a consent-bound session; response `data.sessionId` is used by the STT/orchestration flow in §10.
+**`POST /v1/knowledge/interviews`** — knowledge capture role (`Knowledge.Publisher` or `Knowledge.Contributor`) and recorded consent. Request: `{ "operatorRef": "OP-DEMO-014", "language": "en", "consent": {"granted": true, "scope": "knowledge-capture", "retentionDays": 30} }`. Creates a consent-bound session; response `data.sessionId` is used by the STT/orchestration flow in §10.
+
+**`POST /v1/knowledge/interviews/{sessionId}/audio`** — knowledge capture role, `GRANTED` consent required. `multipart/form-data` with `file` (audio blob), `durationSeconds` and `language`. Max 25 MB. Returns `202 { "sessionId", "status", "audioRef", "auditRef" }`. This is the path the operator capture PWA uses to submit a real shop-floor recording; see §10.3.
+
+**`POST /v1/knowledge/interviews/{sessionId}/draft`** — knowledge capture role, `Idempotency-Key` required. Request `{ "title", "domain" }`. Extracts the grounded `DRAFT` procedure from the session transcript and returns `201 { "procedureId", "status": "DRAFT", "auditRef" }`.
 
 **`GET /v1/knowledge/procedures?q=&status=&page=&size=`** — any authenticated user with knowledge-read access. List envelope; `status` filters `DRAFT|IN_REVIEW|APPROVED|REJECTED`.
 
@@ -471,7 +475,9 @@ query semantics in §5; they are advisory/read-only and plant-scoped.
 | `/v1/quality/what-if` | POST | `ProcessEngineer.Contribute` | no (simulation only) | no |
 | `/v1/sustainability/summary` | GET | persona reader | no | no |
 | `/v1/sustainability/emissions` | GET | persona reader | no | no |
-| `/v1/knowledge/interviews` | POST | knowledge role + consent | yes | **yes** |
+| `/v1/knowledge/interviews` | POST | knowledge capture role + consent | yes | **yes** |
+| `/v1/knowledge/interviews/{id}/audio` | POST | knowledge capture role + `GRANTED` consent | yes (audio bytes) | **yes** |
+| `/v1/knowledge/interviews/{id}/draft` | POST | knowledge capture role | yes | **yes** |
 | `/v1/knowledge/procedures` | GET | knowledge read | no | no |
 | `/v1/knowledge/procedures/{id}:approve` | POST | `Knowledge.Publisher` | yes | **yes** |
 | `/v1/knowledge/search` | GET | any authenticated | no | no |
@@ -955,13 +961,17 @@ Publishing (`POST /v1/knowledge/procedures/{id}:approve`) is exclusively a `Know
 
 ### 10.3 Speech Fast Transcription contract
 
-**Internal flow** (not directly browser-callable; mediated by `knowledge-orchestrator` and exposed to the browser only through `/v1/knowledge/interviews`):
+**Internal flow** (the Speech data plane is never browser-callable; the browser reaches it only through the `/v1/knowledge/interviews` routes, mediated by `knowledge-orchestrator`):
 
 1. `POST /v1/knowledge/interviews` creates a consent-bound session (§4.7) and returns `sessionId`.
-2. `knowledge-orchestrator` submits the recorded/streamed audio to Azure Speech **Fast Transcription** using the session's language/consent metadata, in Sweden Central.
-3. Transcription result is stored classified `Highly Confidential` until de-identified/approved (`solution-architecture.md` §4.3 item 5), keyed to `sessionId`.
-4. `GET /v1/knowledge/interviews/{sessionId}/transcript` — knowledge workflow role only — returns the transcript with `speakerLabels`, `confidence`, and segment timestamps once available; returns `202`-style `{"status": "PROCESSING"}` while transcription is in flight (polled, not SSE, since this is a bounded one-shot operation rather than a continuous stream).
-5. The extraction step separates `observation`, `recommended_check`, `rationale`, and `safety_boundary` fields with source-segment citations, per `demo-runbook.md` §7, and is written as a `DRAFT` procedure via the knowledge agent's `write_draft_procedure` tool (§10.2) — never auto-published.
+2. `POST /v1/knowledge/interviews/{sessionId}/audio` — `multipart/form-data` with `file`, `durationSeconds` and `language` (`en|fr|de|nl|es`). Used by the operator capture PWA (`apps/operator-capture-mfe`) to upload a recording made with `MediaRecorder`. The BFF enforces a 25 MB cap (`413 PAYLOAD_TOO_LARGE`), an allow-list of audio content types (`400`), and the `GRANTED` consent state (`403`); it persists the blob through the `AudioStorageAdapter` port and returns an **opaque** `audioRef` — never a SAS URL. Responds `202 {"status": "PROCESSING"|"COMPLETED", "audioRef", "auditRef"}`.
+3. `knowledge-orchestrator` submits the stored audio to Azure Speech **Fast Transcription** using the session's language/consent metadata, in Sweden Central. Adapter selection is environment-driven: `SPEECH_ENDPOINT` (+ optional `SPEECH_REGION`) activates `AzureSpeechFastTranscriptionAdapter`; unset — or `KNOWLEDGE_SPEECH_MODE=local` — falls back to the local fixture adapter so demo mode runs with zero cloud dependencies. Audio storage selects the same way on `AUDIO_STORAGE_ACCOUNT_URL` / `KNOWLEDGE_AUDIO_MODE`.
+4. Transcription result is stored classified `Highly Confidential` until de-identified/approved (`solution-architecture.md` §4.3 item 5), keyed to `sessionId`.
+5. `GET /v1/knowledge/interviews/{sessionId}/transcript` — knowledge capture role only — returns the transcript with `speakerLabels`, `confidence`, and segment timestamps once available; returns `202`-style `{"status": "PROCESSING"}` while transcription is in flight (polled, not SSE, since this is a bounded one-shot operation rather than a continuous stream).
+6. `POST /v1/knowledge/interviews/{sessionId}/draft` (`Idempotency-Key` required, body `{title, domain}`) runs the extraction step, which separates `observation`, `recommended_check`, `rationale`, and `safety_boundary` fields with source-segment citations, per `demo-runbook.md` §7, and is written as a `DRAFT` procedure via the knowledge agent's `write_draft_procedure` tool (§10.2) — never auto-published. Returns `201 {"procedureId", "status": "DRAFT"}`.
+7. The capturing operator may `POST /v1/knowledge/procedures/{procedureId}:submit` to move their own draft to `IN_REVIEW`. **Only `Knowledge.Publisher` can `:approve` or `:reject`** — requesting review is not approval, so the human-in-the-loop gate is preserved.
+
+Raw audio bytes and transcript text never reach audit records or logs; `bff-api/audit.py` redacts the `audio` and `transcript` keys.
 
 ### 10.4 Foundry/Speech error handling
 

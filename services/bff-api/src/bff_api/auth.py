@@ -24,6 +24,7 @@ READER_ROLES = frozenset(
         "Compliance.Auditor",
         "Platform.Capacity.Manage",
         "Knowledge.Publisher",
+        "Knowledge.Contributor",
     }
 )
 
@@ -36,6 +37,7 @@ _PERSONAS = {
     "Compliance.Auditor": "ComplianceAuditor",
     "Platform.Capacity.Manage": "PlatformOperator",
     "Knowledge.Publisher": "KnowledgeEngineer",
+    "Knowledge.Contributor": "KnowledgeContributor",
 }
 
 _ACTIONS = {
@@ -62,6 +64,12 @@ _ACTIONS = {
         "knowledge.read",
         "knowledge.capture",
         "knowledge.publish",
+    },
+    # Shop-floor operators may record interviews and extract drafts, but not
+    # publish/approve procedures — that stays a Knowledge.Publisher gate.
+    "Knowledge.Contributor": {
+        "knowledge.read",
+        "knowledge.capture",
     },
 }
 

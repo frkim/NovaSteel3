@@ -9,6 +9,7 @@ description = "NovaSteel browser-facing FastAPI BFF with advisory analytics"
 requires-python = ">=3.13"
 dependencies = [
   "fastapi==0.139.2",
+  "python-multipart==0.0.20",
   "uvicorn==0.51.0"
 ]
 

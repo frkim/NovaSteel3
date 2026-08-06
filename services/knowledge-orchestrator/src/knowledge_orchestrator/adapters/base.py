@@ -24,6 +24,27 @@ class SpeechTranscriptionAdapter(abc.ABC):
         raise NotImplementedError
 
 
+class AudioStorageAdapter(abc.ABC):
+    """Port for durable storage of consent-approved interview audio.
+
+    ``store`` returns an **opaque** reference (never a raw SAS URL): the reference
+    is what the orchestrator hands to the Speech adapter and records in the audit
+    log, so it must not leak a directly fetchable, credentialed URL. ``delete``
+    supports the raw-audio deletion directive emitted on consent withdrawal
+    (security §13 / GDPR Art. 17).
+    """
+
+    @abc.abstractmethod
+    def store(self, *, session_id: str, data: bytes, content_type: str) -> str:
+        """Persist raw audio bytes and return an opaque storage reference."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def delete(self, audio_ref: str) -> None:
+        """Erase the audio behind ``audio_ref``; a no-op if it does not exist."""
+        raise NotImplementedError
+
+
 @dataclass(frozen=True)
 class AgentResult:
     """Result of a knowledge-capture agent turn."""
