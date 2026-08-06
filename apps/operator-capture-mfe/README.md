@@ -11,7 +11,8 @@ on a phone at the furnace, not at a desk, and needs the app to survive a flaky n
 1. **Consent gate** — GDPR Art. 6(1)(a) consent + retention period. Recording controls stay disabled until
    consent is granted, mirroring the wording already used in the Knowledge Hub capture dialog.
 2. **Record** — `getUserMedia` + `MediaRecorder`, large thumb-reachable controls, live elapsed timer and
-   input-level meter, pause/resume, auto-pause when the tab is backgrounded.
+   input-level meter, pause/resume, auto-pause when the tab is backgrounded. **Or import an existing audio
+   file** instead (see below).
 3. **Review** — local playback and discard/retake. Nothing leaves the device until the operator confirms.
 4. **Upload** — multipart upload with progress, cancel and retry. A failed upload is persisted to
    **IndexedDB** so a recording is never silently lost.
@@ -40,6 +41,38 @@ nothing an operator records becomes an operational instruction without a domain 
 `public/service-worker.js` is hand-written (no build plugin). It caches the app shell so the UI loads on a
 weak shop-floor network, and **explicitly bypasses every `/v1/knowledge/` request** — audio and transcript
 traffic is `Highly Confidential` and is never written to the cache.
+
+## Importing an audio file
+
+Not every procedure is captured live: handovers get recorded on a plant dictaphone, and some tablets have
+no usable microphone at all. The record step therefore also offers **Import an audio file**, which feeds the
+file into exactly the same review → upload → transcript → draft path as a live recording. The import
+affordance is shown even when the recorder reports `unsupported` or a permission error, because that is
+precisely when an operator needs it.
+
+`src/audio/audioFile.ts` normalises the file before it is accepted:
+
+- Content types are folded onto the five the BFF allows (`audio/webm`, `audio/ogg`, `audio/wav`,
+  `audio/mpeg`, `audio/mp4`). The same `.wav` arrives as `audio/wav`, `audio/x-wav` or `audio/wave`
+  depending on the platform, and iOS often reports `application/octet-stream`, in which case the filename
+  extension decides.
+- Non-audio, empty and over-25 MB files are refused in the browser rather than after a long upload.
+- Duration is probed from a detached media element for the review screen, defaulting to 0 rather than
+  failing the import if the browser cannot read the header.
+
+### Sample interview
+
+`public/samples/blast-furnace-hearth-cooling-en.wav` (~68 s, 16 kHz mono) ships with the app and is
+reachable from the record step via **Load the sample interview**, so the whole flow can be demonstrated
+without a microphone or a quiet room.
+
+It narrates `services/knowledge-orchestrator/fixtures/interview_transcript.json` verbatim — the same
+fixture the backend returns when it transcribes in demo mode — so the transcript you see afterwards matches
+the audio you just heard. The interview is synthetic (fictional persona OP-DEMO-014, blast-furnace hearth
+cooling) and contains no real personal data.
+
+Regenerate it with `pwsh -File scripts/generate-sample-audio.ps1` after editing the fixture, so audio and
+transcript never drift apart.
 
 ## Deployment
 

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { MAX_AUDIO_FILE_BYTES, normalizeAudioType, probeAudioDuration } from '../audio/audioFile'
 
 export type RecorderState =
   | 'unsupported'
@@ -6,21 +7,35 @@ export type RecorderState =
   | 'requesting'
   | 'recording'
   | 'paused'
+  | 'importing'
   | 'stopped'
   | 'error'
 
-export type RecorderErrorKind = 'permission' | 'no-mic' | 'unsupported' | 'unknown'
+export type RecorderErrorKind =
+  | 'permission'
+  | 'no-mic'
+  | 'unsupported'
+  | 'unknown'
+  | 'file-type'
+  | 'file-size'
+  | 'file-empty'
 
 export interface RecorderError {
   kind: RecorderErrorKind
   message: string
 }
 
+/** Where the audio came from; imported files skip the microphone entirely. */
+export type RecorderSource = 'microphone' | 'file'
+
 export interface RecorderResult {
   blob: Blob
   url: string
   durationSeconds: number
   mimeType: string
+  source: RecorderSource
+  /** Name of the imported file, absent for live recordings. */
+  fileName?: string
 }
 
 export interface RecorderController {
@@ -35,6 +50,8 @@ export interface RecorderController {
   pause: () => void
   resume: () => void
   stop: () => void
+  /** Accept an existing audio file instead of recording one. */
+  importFile: (file: File) => Promise<void>
   reset: () => void
 }
 
@@ -78,6 +95,12 @@ function classifyError(err: unknown): RecorderError {
  * (idle→recording→paused→stopped) plus a live elapsed timer and an input-level
  * meter driven by a Web Audio AnalyserNode. Backgrounding the tab auto-pauses
  * so a recording never keeps running unseen.
+ *
+ * `importFile` feeds an existing audio file into the same `stopped` + `result`
+ * outcome, so the rest of the wizard (review, upload, transcript) is identical
+ * whether the audio was spoken live or picked from the device. It deliberately
+ * works even when `isSupported` is false: a tablet with no usable microphone can
+ * still contribute a procedure recorded elsewhere.
  */
 export function useRecorder(): RecorderController {
   const supported = detectSupport()
@@ -206,6 +229,7 @@ export function useRecorder(): RecorderController {
           url,
           durationSeconds: accumulatedRef.current / 1000,
           mimeType: type,
+          source: 'microphone',
         })
         setState('stopped')
         stopMeter()
@@ -253,6 +277,59 @@ export function useRecorder(): RecorderController {
       recorder.stop()
     }
   }, [stopTimer])
+
+  const importFile = useCallback(
+    async (file: File) => {
+      const mimeType = normalizeAudioType(file.type, file.name)
+      if (!mimeType) {
+        setError({ kind: 'file-type', message: `${file.name} is not an audio file this app can send.` })
+        setState('error')
+        return
+      }
+      if (file.size === 0) {
+        setError({ kind: 'file-empty', message: `${file.name} is empty.` })
+        setState('error')
+        return
+      }
+      if (file.size > MAX_AUDIO_FILE_BYTES) {
+        setError({ kind: 'file-size', message: `${file.name} is larger than the 25 MB limit.` })
+        setState('error')
+        return
+      }
+
+      // Abandon anything the microphone path left running before adopting the file.
+      const recorder = recorderRef.current
+      if (recorder && recorder.state !== 'inactive') {
+        recorder.onstop = null
+        recorder.stop()
+      }
+      recorderRef.current = null
+      chunksRef.current = []
+      accumulatedRef.current = 0
+      stopTimer()
+      stopMeter()
+      teardownStream()
+
+      setError(null)
+      setResult(null)
+      setState('importing')
+
+      // Re-wrap when the reported type is an alias so the multipart part carries
+      // a content type the BFF's allow-list recognises.
+      const blob = file.type === mimeType ? file : file.slice(0, file.size, mimeType)
+      const url = typeof URL !== 'undefined' && URL.createObjectURL ? URL.createObjectURL(blob) : ''
+      if (resultUrlRef.current) {
+        URL.revokeObjectURL(resultUrlRef.current)
+      }
+      resultUrlRef.current = url
+
+      const durationSeconds = url ? await probeAudioDuration(url) : 0
+      setElapsedMs(Math.round(durationSeconds * 1000))
+      setResult({ blob, url, durationSeconds, mimeType, source: 'file', fileName: file.name })
+      setState('stopped')
+    },
+    [stopTimer, stopMeter, teardownStream],
+  )
 
   const reset = useCallback(() => {
     stopTimer()
@@ -307,6 +384,7 @@ export function useRecorder(): RecorderController {
     pause,
     resume,
     stop,
+    importFile,
     reset,
   }
 }

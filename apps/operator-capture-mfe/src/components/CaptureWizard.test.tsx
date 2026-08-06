@@ -5,10 +5,31 @@ import { CaptureClient } from '../api/captureClient'
 import { renderWithApp } from '../test/renderWithApp'
 import { installMediaMocks } from '../test/mediaMocks'
 
+// jsdom never loads media, so the real probe would sit on its timeout.
+vi.mock('../audio/audioFile', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../audio/audioFile')>()),
+  probeAudioDuration: vi.fn(async () => 67.9),
+}))
+
 function fillConsent(): void {
   fireEvent.change(screen.getByLabelText(/procedure title/i), { target: { value: 'Tap the furnace' } })
   fireEvent.change(screen.getByLabelText(/operator/i), { target: { value: 'op-9' } })
   fireEvent.click(screen.getByRole('checkbox'))
+}
+
+async function reachRecordStep(client: CaptureClient): Promise<void> {
+  renderWithApp(<CaptureWizard client={client} />)
+  fillConsent()
+  fireEvent.click(screen.getByRole('button', { name: /continue to recording/i }))
+  await screen.findByRole('button', { name: /^start recording$/i })
+}
+
+function fileInput(): HTMLInputElement {
+  const input = document.querySelector('input[type="file"]')
+  if (!input) {
+    throw new Error('file input not rendered')
+  }
+  return input as HTMLInputElement
 }
 
 describe('CaptureWizard integration', () => {
@@ -70,6 +91,78 @@ describe('CaptureWizard integration', () => {
 
     // Human-in-the-loop confirmation is surfaced.
     expect(await screen.findByRole('button', { name: /capture another procedure/i })).toBeInTheDocument()
+
+    mocks.restore()
+  })
+
+  it('accepts an imported audio file, plays it back and uploads it', async () => {
+    const mocks = installMediaMocks()
+    const client = new CaptureClient({ http: null })
+    const uploadAudio = vi.spyOn(client, 'uploadAudio')
+
+    await reachRecordStep(client)
+
+    const file = new File(['audio-bytes'], 'hearth-cooling.wav', { type: 'audio/wav' })
+    await act(async () => {
+      fireEvent.change(fileInput(), { target: { files: [file] } })
+    })
+
+    // Review step: the operator can hear the file before anything is sent.
+    expect(await screen.findByText(/review the imported audio/i)).toBeInTheDocument()
+    expect(screen.getByText('hearth-cooling.wav')).toBeInTheDocument()
+    expect(document.querySelector('audio')).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: /upload audio/i }))
+
+    await waitFor(() => expect(uploadAudio).toHaveBeenCalled())
+    const [, request] = uploadAudio.mock.calls[0]
+    expect(request.blob.type).toBe('audio/wav')
+    expect(request.durationSeconds).toBeCloseTo(67.9)
+
+    mocks.restore()
+  })
+
+  it('loads the bundled sample interview through the same import path', async () => {
+    const mocks = installMediaMocks()
+    const client = new CaptureClient({ http: null })
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      blob: async () => new Blob(['sample-bytes'], { type: 'audio/wav' }),
+    }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    await reachRecordStep(client)
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /load the sample interview/i }))
+    })
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining('/samples/blast-furnace-hearth-cooling-en.wav'),
+      expect.anything(),
+    )
+    expect(await screen.findByText(/review the imported audio/i)).toBeInTheDocument()
+    expect(screen.getByText('blast-furnace-hearth-cooling-en.wav')).toBeInTheDocument()
+
+    vi.unstubAllGlobals()
+    mocks.restore()
+  })
+
+  it('rejects a file that is not audio without leaving the record step', async () => {
+    const mocks = installMediaMocks()
+    const client = new CaptureClient({ http: null })
+
+    await reachRecordStep(client)
+
+    const file = new File(['%PDF-'], 'procedure.pdf', { type: 'application/pdf' })
+    await act(async () => {
+      fireEvent.change(fileInput(), { target: { files: [file] } })
+    })
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/not an audio format/i)
+    // The import affordance stays available so the operator can pick again.
+    expect(screen.getByRole('button', { name: /import an audio file/i })).toBeInTheDocument()
 
     mocks.restore()
   })

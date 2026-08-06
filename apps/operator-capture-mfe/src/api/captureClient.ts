@@ -1,10 +1,11 @@
 import { demoHeaders, demoMode, resolveBffBaseUrl } from '../config'
+import { audioExtensionFor, MAX_AUDIO_FILE_BYTES } from '../audio/audioFile'
 import type { CaptureLanguage } from '../types'
 import type { SingleEnvelope } from './envelope'
 import { DataClientError } from './envelope'
 import { HttpClient, type UploadOptions } from './httpClient'
 
-export const MAX_AUDIO_BYTES = 25 * 1024 * 1024
+export const MAX_AUDIO_BYTES = MAX_AUDIO_FILE_BYTES
 
 export interface Consent {
   granted: boolean
@@ -168,7 +169,9 @@ export class CaptureClient {
       return { sessionId, status: 'PROCESSING', audioRef: 'demo-audio', auditRef: 'demo-audit' }
     }
     const form = new FormData()
-    const filename = `capture-${sessionId}.webm`
+    // Extension must match the blob's content type: the BFF allow-lists the
+    // multipart content type, and imported files are not always WebM.
+    const filename = `capture-${sessionId}.${audioExtensionFor(req.blob.type)}`
     form.append('file', req.blob, filename)
     form.append('durationSeconds', String(Math.round(req.durationSeconds)))
     form.append('language', req.language)
