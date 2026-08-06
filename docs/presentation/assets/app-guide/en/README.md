@@ -97,6 +97,7 @@ Every screen is documented with the same seven blocks, so you always know where 
 | This guide (English) | `docs/presentation/assets/app-guide/en/` |
 | This guide (French) | `docs/presentation/assets/app-guide/fr/` |
 | Screenshots (37 PNG) | `docs/presentation/assets/app-guide/screenshots/` |
+| Annotated demo cue cards (19 PNG) | `docs/demo/screenshots/` |
 | Requirement catalog (source of truth) | `apps/analytics-mfe/src/proof/proofCatalog.ts` |
 | Use-case brief | `docs/usecase/usecase.md` |
 | Proof-of-execution document | `docs/presentation/proof_of_execution.md` |
