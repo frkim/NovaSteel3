@@ -6,6 +6,10 @@ into the Knowledge Hub as a `DRAFT` awaiting human approval.
 It is a standalone app rather than a screen inside `analytics-mfe`: the operator persona works one-handed
 on a phone at the furnace, not at a desk, and needs the app to survive a flaky network.
 
+It carries the DM-5 knowledge beat of the 10-minute demo — see
+[§4.5 of the demo runbook](../../docs/demo/demo-runbook.md#45-operator-voice-capture-beat-dm-5) for the
+presenter script, cue cards **S20**-**S25**, and the fallbacks.
+
 ## Flow
 
 1. **Consent gate** — GDPR Art. 6(1)(a) consent + retention period. Recording controls stay disabled until

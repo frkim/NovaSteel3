@@ -96,8 +96,8 @@ Every screen is documented with the same seven blocks, so you always know where 
 |---|---|
 | This guide (English) | `docs/presentation/assets/app-guide/en/` |
 | This guide (French) | `docs/presentation/assets/app-guide/fr/` |
-| Screenshots (37 PNG) | `docs/presentation/assets/app-guide/screenshots/` |
-| Annotated demo cue cards (19 PNG) | `docs/demo/screenshots/` |
+| Screenshots (43 PNG) | `docs/presentation/assets/app-guide/screenshots/` |
+| Annotated demo cue cards (25 PNG) | `docs/demo/screenshots/` |
 | Requirement catalog (source of truth) | `apps/analytics-mfe/src/proof/proofCatalog.ts` |
 | Use-case brief | `docs/usecase/usecase.md` |
 | Proof-of-execution document | `docs/presentation/proof_of_execution.md` |
@@ -118,6 +118,13 @@ The screenshots were captured from the running application, not mocked. To refre
 2. Build the React bundle if you changed it: `npm run build:analytics`.
 3. Start the shell: `dotnet run --project apps\portal-shell\PortalShell.csproj` (serves `http://localhost:5266`).
 4. Visit each route `/{site}/{section}/{subView}` and capture the full page at a 1680 px-wide viewport, saving to `docs/presentation/assets/app-guide/screenshots/<screen-slug>.png`.
+
+The six `operator-capture-*.png` files are different: they are portrait captures of the operator
+voice-capture PWA, not portal routes. Walk the six wizard steps at a 430x932 CSS viewport against a
+deployment that has a real BFF configured (the demo Container App, or `npm --workspace
+@novasteel/operator-capture-mfe run dev` pointed at a local BFF), use **Load the sample interview** so the
+transcript is deterministic, and downscale the result to 860 px wide. See
+[`apps/operator-capture-mfe/README.md`](../../../../../apps/operator-capture-mfe/README.md).
 
 Package restores must use the Microsoft-protected feeds only — see
 [`docs/tech/security_requirement.md`](../../../../tech/security_requirement.md).

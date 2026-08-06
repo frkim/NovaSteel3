@@ -17,6 +17,10 @@ Keep these browser tabs open and ordered:
 7. **Fabric Core** — Eventstream, lakehouse/warehouse lineage, freshness, quarantine.
 8. **Demo Control** — scenario, accelerated clock, health, reset and fallback controls.
 
+Plus one device that is not a tab: the demo phone running the **Voice Procedure Capture** PWA for DM-5
+([§4.5](#45-operator-voice-capture-beat-dm-5)). Keep it charged, unlocked, mirrored, and on the same consent
+step you rehearsed.
+
 Use a separate browser profile with notifications disabled, zoom at 90-100%, no personal bookmarks, and no production tenant tabs.
 
 ## 3. Preflight
@@ -71,6 +75,8 @@ Ideally, install nothing on demo day.
   restart the BFF with `DEMO_CLOCK_REBASE=false` and say that timestamps are
   pinned to the fixture pack.
 - Put the AxelorMetal website home tab on screen; keep the Plant Manager route ready for the handoff.
+- Open the **Voice Procedure Capture** PWA on the demo phone, grant the microphone permission, and leave it
+  parked on the consent step with the DM-5 fields already filled ([§4.5](#45-operator-voice-capture-beat-dm-5)).
 - Start a visible 10-minute presenter timer.
 - Have the reset operator and presenter agree on the hand signal for switching to fallback.
 
@@ -80,7 +86,7 @@ This order is binding with the six demo moments in [solution requirements](../sp
 
 The script below was re-allocated from the earlier 15-minute plan to a **10-minute** budget by tightening every moment (roughly a two-thirds compression) rather than dropping any moment: all six DM moments and their proof points survive, only shorter. The most **cuttable** elements, in order, if you fall behind the clock, are: the optional Copilot grounding beat (04:10 slot), the Dockview workspace beat (§4.1), and the Help Assistant beat (§4.2) — none carries a headline claim. Protect DM-2 (energy numbers), DM-3 (RUL band) and DM-5 (knowledge governance); those are the moments the panel remembers.
 
-Each row links to an annotated screen cue card (**S1**-**S16**) in [§4.3](#43-annotated-screen-cue-cards); the optional Device Operations beats carry their own cards (**S17**-**S19**) inline in [§11](#11-device-operations-demo-beats-wave-3). On every cue card a **red frame** marks the exact region to point at, and the numbered red tab states what that region proves. Rehearse against the cue cards, not from memory: the frames are the only things the audience must actually see.
+Each row links to an annotated screen cue card in [§4.3](#43-annotated-screen-cue-cards): **S1**-**S16** for the desktop portal and **S20**-**S25** for the operator voice-capture PWA used in DM-5. The optional Device Operations beats carry their own cards (**S17**-**S19**) inline in [§11](#11-device-operations-demo-beats-wave-3). On every cue card a **red frame** marks the exact region to point at, and the numbered red tab states what that region proves. Rehearse against the cue cards, not from memory: the frames are the only things the audience must actually see.
 
 | Time | Persona/tab and action | Presenter narrative | Proof point / fallback |
 |---|---|---|---|
@@ -94,9 +100,9 @@ Each row links to an annotated screen cue card (**S1**-**S16**) in [§4.3](#43-a
 | 04:30-04:50 | Open the alert drawer, acknowledge it, and create/link the synthetic work-order record. [S7](#s7) · [S9](#s9) | "The model estimates P50 remaining life at **~20 days** with a tight P10/P90 band (18.7–20.6). The engineer remains accountable: the platform recommends verification and records a synthetic work order; it does not actuate the furnace." | Open saved alert JSON and pre-created `WO-DEMO-LUX-1042`; ensure risk ≥0.80 and confidence ≥0.70. |
 | 04:50-05:20 | **Quality Engineer**. Open `NS-AUTO-DP780` genealogy and drift panel. [S10](#s10) | “Coiling temperature and force balance are drifting together. The model warns before the first off-spec lab result and traces the affected heat, slab, coil, and process settings.” | Cached coil `COIL-LUX-260725-017` has complete genealogy. |
 | 05:20-06:10 | Run the bounded quality what-if. [S11](#s11) | “A bounded what-if returns predicted first-pass yield from about 88% to 95%—roughly the target 8% relative improvement—without changing the grade recipe.” Toggle predicted versus measured labels; no setpoint is written. | Use cached what-if result; do not imply an automatic control write-back. |
-| 06:10-06:50 | **Operator Knowledge**. Start interview or play fallback synthetic audio. Ask: “What do you check when hearth sector temperature rises but cooling flow appears normal?” [S12](#s12) | Show STT confidence and speaker labels. State that the operator has consented in this synthetic workflow and that the voice/persona is fictional. | If microphone/STT fails, play the approved WAV; if audio fails, paste the approved transcript and say it is replay mode. |
-| 06:50-07:30 | Show extracted knowledge. [S12](#s12) | Highlight trigger, observations, checks, rationale, cautions, and source citations. Convert it to a draft procedure: verify neighboring sensors, compare water ΔT, inspect flow restriction, escalate for ultrasound. | Load pre-extracted fact JSON. Keep status `DRAFT — EXPERT REVIEW REQUIRED`. |
-| 07:30-07:50 | Show the reviewer boundary. [S12](#s12) | “The Foundry draft cannot publish. A Knowledge Engineer reviews, edits, and approves a version before it enters retrieval.” | Use the saved approval-queue view; do not simulate an unreviewed procedure as published. |
+| 06:10-06:50 | **Operator Knowledge**, on a phone. Open the **Voice Procedure Capture** PWA, complete the consent step, then record — or tap **Load the sample interview** — the answer to: “What do you check when hearth sector temperature rises but cooling flow appears normal?” See [§4.5](#45-operator-voice-capture-beat-dm-5). [S20](#s20) · [S21](#s21) · [S22](#s22) · [S23](#s23) | “Knowledge capture has to start where the knowledge is: on the floor, on a phone, in the operator’s own language. Explicit GDPR consent and a retention period are set *before* the recorder unlocks, and nothing leaves the device until the operator plays the audio back and confirms it.” State that the operator persona, the voice and the audio are synthetic. | If the microphone is blocked or the room is noisy, tap **Load the sample interview** — that is the rehearsed path and uses the committed `blast-furnace-hearth-cooling-en.wav`. If the PWA cannot reach the BFF, narrate over cue cards S20-S23 and continue on the desktop Knowledge Hub. |
+| 06:50-07:30 | Show the returned transcript — suggested domain, confidentiality class, speaker labels, per-segment confidence — then **Save to Knowledge Hub**. [S24](#s24) · [S12](#s12) | Highlight trigger, observations, checks, rationale, cautions, and source citations. “Speech-to-text and extraction keep every segment cited and confidence-scored, so a reviewer can trace each sentence back to the audio.” The draft procedure is the same content: verify neighboring sensors, compare water ΔT, inspect flow restriction, escalate for ultrasound. | Load pre-extracted fact JSON. Keep status `DRAFT — EXPERT REVIEW REQUIRED`. |
+| 07:30-07:50 | Create the draft (`PROC-IV-*`, `IN_REVIEW`), then show the reviewer boundary on the desktop Knowledge Hub. [S25](#s25) · [S12](#s12) | “The operator can contribute and submit, but cannot publish — the app says so on screen before the draft even exists. A Knowledge Publisher reviews, edits and approves a version before it enters retrieval.” | Use the saved approval-queue view; do not simulate an unreviewed procedure as published. |
 | 07:50-08:40 | **Plant Manager / Sustainability view**. Show CO₂ trajectory, ETS exposure, and the energy-decision lineage. [S13](#s13) | “The carbon target and any financial claim remain targets. Here the semantic model rolls up synthetic emissions and connects a recommendation to its evidence.” | Use the cached sustainability/ETS report or the optional internal Power BI report tab. |
 | 08:40-09:30 | **Executive / audit view**. Show portfolio targets, ROI roll-up, and one append-only decision record. [S14](#s14) · [S15](#s15) | “Every recommendation links inputs, model/version, confidence, human decision, and outcome. The 14/22/21/8 figures are targets; the screen is synthetic evidence of traceability.” | Use exported audit JSON/PDF and cached board-report view. |
 | 09:30-10:00 | **Plant Manager**, then briefly **Fabric Core**. [S2](#s2) · [S3](#s3) | Recap: “One Fabric core connects streaming operations, governed history, models, decisions, and human knowledge.” End on lineage/freshness and the next-step invitation. | If any tab is unstable, finish on cached summary slide. Stop at 10:00 rather than debugging live. |
@@ -282,15 +288,109 @@ Sources are the committed application captures in `docs/presentation/assets/app-
 2. The **What's this?** toggle in the dashboard header is what turned it on.
 3. Any KPI tile, chart or table row resolves a topic popup — KPI tiles always resolve, so click one first.
 
+The next six cards are the **operator voice-capture PWA** (§4.5). They are portrait phone screens and the app is hardcoded dark, so they look deliberately different from the desktop cards above.
+
+<a id="s20"></a>
+
+#### S20 — Capture consent (06:10-06:50)
+
+![Voice Procedure Capture consent step with the retention period field and the explicit consent checkbox framed in red](screenshots/s20-capture-consent.png)
+
+1. **Retention period (days)** is chosen before recording, not afterwards — GDPR Art. 5(1)(e) storage limitation is a field on the form.
+2. The explicit consent checkbox (GDPR Art. 6(1)(a)) gates the recorder: **Continue to recording** does nothing until it is ticked.
+
+<a id="s21"></a>
+
+#### S21 — Recorder, idle (06:10-06:50)
+
+![Record step with the start-recording control and the import / sample-interview actions framed in red](screenshots/s21-capture-record.png)
+
+1. One thumb-sized **Start recording** control above the live input meter — designed for a gloved hand on a plant floor.
+2. **Import an audio file** (WAV, MP3, M4A, OGG or WebM, max 25 MB) and **Load the sample interview** — the second one is the rehearsed demo path.
+
+<a id="s22"></a>
+
+#### S22 — Recorder, active (06:10-06:50)
+
+![Record step while recording, with the recording chip and timer and the pause/stop controls framed in red](screenshots/s22-capture-recording.png)
+
+1. The **Recording** chip, elapsed timer and live input level — the operator can see the phone is actually hearing them.
+2. **Pause** and **Stop** stay thumb-reachable at the bottom of the screen.
+
+<a id="s23"></a>
+
+#### S23 — Local review before upload (06:10-06:50)
+
+![Review step with the "nothing is sent until you confirm" notice and the local audio player framed in red](screenshots/s23-capture-review.png)
+
+1. “Nothing is sent until you confirm.” — the audio stays on the device until the operator explicitly uploads it.
+2. The file name, duration and a local player: the operator checks it is the right recording first. On the sample path this is `blast-furnace-hearth-cooling-en.wav`, 01:08.
+
+<a id="s24"></a>
+
+#### S24 — Transcript and confidence (06:50-07:30)
+
+![Transcript step with the suggested domain and confidentiality chip and a speaker-labelled segment framed in red](screenshots/s24-capture-transcript.png)
+
+1. **Suggested domain** and the confidentiality classification — proposed by the platform, still the reviewer’s to confirm.
+2. Every segment carries a speaker label (`interviewer` / `operator`) and its own **Confidence** score, so a reviewer knows which sentences to re-listen to.
+
+<a id="s25"></a>
+
+#### S25 — Draft created, not published (07:30-07:50)
+
+![Store step with the human-in-the-loop notice and the PROC-IV draft id with IN_REVIEW status framed in red](screenshots/s25-capture-store.png)
+
+1. The on-screen human-in-the-loop gate: “this draft is not operational. A Knowledge Publisher must review and approve it before operators can use it.”
+2. The created draft id (`PROC-IV-*`) and its status: **submitted for review**, not published. The operator role can contribute and submit; only a Knowledge Publisher can approve.
+
 ### 4.4 Regenerating the cue cards
 
 The cue cards are derivatives of the committed first-party captures — no third-party imagery is involved (see [`../presentation/assets/PROVENANCE.md`](../presentation/assets/PROVENANCE.md)).
 
-1. Re-capture the source screens if the UI changed, following the app-guide instructions in [`../presentation/assets/app-guide/en/README.md`](../presentation/assets/app-guide/en/README.md).
+1. Re-capture the source screens if the UI changed, following the app-guide instructions in [`../presentation/assets/app-guide/en/README.md`](../presentation/assets/app-guide/en/README.md). The **S20**-**S25** sources are portrait phone captures of the deployed Voice Procedure Capture PWA (430x932 CSS viewport), not portal screens.
 2. Adjust the crop and highlight rectangles in `tools\presentation\annotate_demo_screenshots.py` (coordinates are in source-capture pixels).
 3. Run `python tools\presentation\annotate_demo_screenshots.py` and re-check every frame before rehearsal.
 
 Pillow is the only dependency and must be restored from the Microsoft-protected feed only — see [`../tech/security_requirement.md`](../tech/security_requirement.md).
+
+### 4.5 Operator voice capture beat (DM-5)
+
+The 06:10-07:50 block runs in the **Voice Procedure Capture** PWA
+(<https://novasteelv3-capture.calmbeach-dbad72b1.swedencentral.azurecontainerapps.io>), not in the desktop
+portal. Run it on a real phone and mirror the screen if you can — the point of the beat is that capture
+happens on the floor. A phone-sized browser window works as a substitute. See
+[`../../apps/operator-capture-mfe/README.md`](../../apps/operator-capture-mfe/README.md) for the app itself.
+
+Six steps, roughly 100 seconds:
+
+1. **Consent** — title `Hearth cooling check when sector temperature rises`, operator reference `OP-DEMO-014`,
+   domain **Blast Furnace**, retention `365` days. Tick the consent box, then **Continue to recording**. [S20](#s20)
+2. **Record** — either **Start recording** and answer the question yourself, or tap **Load the sample
+   interview**. Use the sample unless the room is quiet and you have rehearsed the answer. [S21](#s21) · [S22](#s22)
+3. **Review** — play a few seconds back. Say the line on screen out loud: nothing is sent until the operator
+   confirms. Then **Upload audio**. [S23](#s23)
+4. **Upload** — transcription. Usually too fast to narrate; do not build a sentence around it.
+5. **Transcript** — point at the suggested domain, the confidentiality chip, and one segment's speaker label
+   and confidence score. Then **Save to Knowledge Hub**. [S24](#s24)
+6. **Store** — read the human-in-the-loop notice, **Create draft procedure**, then **Submit for review**.
+   Land on `PROC-IV-*` / `IN_REVIEW`. [S25](#s25)
+
+**Preflight for this beat:** open the URL on the phone, grant the microphone permission once, and complete a
+full rehearsal run so the service worker has cached the bundle and the sample WAV. Each rehearsal creates a
+real draft procedure in the demo estate, which is expected — they queue up in the Knowledge Hub as
+`IN_REVIEW` and are exactly what the reviewer beat shows.
+
+**Honesty notes:**
+
+- The persona, the voice and the audio are synthetic. Say so before you press record.
+- The sample interview narrates the backend's own transcript fixture, so audio and transcript agree.
+- If the app is opened with **no BFF configured**, it falls back to a client-side stub whose transcript is a
+  *Continuous Casting* example that does **not** match the hearth-cooling audio. Never run the beat that way.
+  If you end up there by accident, stop and switch to the cue cards rather than reading a transcript that
+  contradicts what the room just heard.
+- The app submits with a contributor identity. Submitting is allowed; approving and publishing are not. That
+  asymmetry is the demo claim, so do not log in as a publisher to "make it work".
 
 ## 5. Expected cue sheet
 
@@ -305,6 +405,7 @@ Pillow is the only dependency and must be restored from the Microsoft-protected 
 | Quality coil | `COIL-LUX-260725-017`, `NS-AUTO-DP780` |
 | Quality outcome | Predicted first-pass yield approximately 88% -> 95% |
 | Knowledge status | Draft, cited to transcript, expert review required |
+| Capture draft | New `PROC-IV-*` id, status `IN_REVIEW`, `Submitted for review.` confirmation on the phone |
 | Fabric health | Bronze/silver/gold current; quarantine only intentional negative tests |
 | Copilot answer | Question “What is the risk?” on Furnace Health resolves to lining risk; answer cites at least one glossary source and the screen; `resolvedReasoning` shown in the footer |
 
@@ -329,7 +430,7 @@ Do not spend more than 10 seconds diagnosing during the 10-minute presentation. 
 Store the pack in an access-controlled, offline-capable demo folder and verify checksums:
 
 - fleet overview and persona screenshots;
-- the annotated cue cards `docs/demo/screenshots/s1-*.png` … `s19-*.png` (§4.3, §11) — they double as the static proof pack;
+- the annotated cue cards `docs/demo/screenshots/s1-*.png` … `s25-*.png` (§4.3, §11) — they double as the static proof pack;
 - 45-day thermal trend and three-frame hearth map;
 - `model-inference` and alert-lifecycle JSON;
 - baseline and optimized schedule/results;
@@ -345,6 +446,8 @@ The fallback pack must contain no credentials, production endpoints, real custom
 ## 7. Operator interview script
 
 Use a fictional identifier, for example `OP-DEMO-014`, role “Senior Blast Furnace Operator (synthetic).”
+This is the content the capture PWA records in [§4.5](#45-operator-voice-capture-beat-dm-5); the shipped
+sample interview (`blast-furnace-hearth-cooling-en.wav`, ~68 s) is question 1 and its answer.
 
 Presenter questions:
 
@@ -372,6 +475,8 @@ The extraction must retain source segment citations and separate `observation`, 
 | Model endpoint slow | Reveal saved inference | “For a predictable demo we cache the signed result from this exact seed.” |
 | Optimizer infeasible | Load known feasible result; show constraints | “The platform never relaxes hard production constraints silently.” |
 | STT fails | Play WAV, then paste approved transcript | “We support offline replay; the review workflow is unchanged.” |
+| Capture PWA microphone blocked | Tap **Load the sample interview** (or **Import an audio file**) and continue on the same path | “The recorder is one input among several — the review and approval path is identical whichever way the audio arrives.” |
+| Capture PWA cannot reach the BFF | Do **not** continue in the client-side stub; narrate cue cards [S20](#s20)-[S25](#s25) and resume on the desktop Knowledge Hub | “The phone is offline, so here is the same flow from our rehearsal, and the draft it produced is already in the review queue.” |
 | Browser crashes | Reopen direct URL or static summary | “The data and decisions are persisted; the presentation client is replaceable.” |
 | Incorrect cue/value | Stop stream and load expected manifest result | “The live run differs from the rehearsed seed, so I’m switching to the validated scenario.” |
 | Copilot returns an error | Resend once; if it fails again, skip the beat and continue | “The assistant deliberately refuses to invent an answer when it cannot reach its grounding, so it surfaces the error instead of guessing.” |
