@@ -191,6 +191,7 @@ PPTX. See the [presentation folder index](presentation/README.md).
 
 | Area | Primary artifacts |
 |---|---|
+| **Artifact set (one-page summaries)** | [Artifact index](artifacts/README.md) — [glossary](artifacts/glossary.md), [diagrams](artifacts/diagrams/README.md), [solution architecture](artifacts/solution-architecture.md), [data baseline](artifacts/data-baseline.md), [AI design](artifacts/ai-design.md), [security baseline](artifacts/security-baseline.md), [compliance](artifacts/compliance.md), [operating model](artifacts/operating-model.md), [test strategy](artifacts/test-strategy.md), [business value](artifacts/business-value-assessment.md) |
 | Business | [Use case](usecase/usecase.md), [requirements](business/solution-requirements.md), [personas](business/personas-and-journeys.md) |
 | Business & compliance | [Regulatory compliance analyses](business/compliance/README.md) — [EU AI Act](business/compliance/eu-ai-act.md), [EU ETS](business/compliance/eu-ets.md), [IEC 62443](business/compliance/iec-62443.md), [other regulations](business/compliance/other-regulations.md), [roadmap](business/compliance/compliance-roadmap.md) |
 | Delivery method | [Implementation process](business/implementation-process.md), [agentic development and SDLC](business/agentic-development.md) |

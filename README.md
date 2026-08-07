@@ -1,4 +1,36 @@
-# NovaSteel — final local demonstration handoff
+# NovaSteel — EU decision-support platform for steel operations
+
+<!-- Build and quality -->
+[![CI](https://github.com/frkim/NovaSteel3/actions/workflows/ci.yml/badge.svg)](https://github.com/frkim/NovaSteel3/actions/workflows/ci.yml)
+[![CI build service images](https://github.com/frkim/NovaSteel3/actions/workflows/ci-build-services.yml/badge.svg)](https://github.com/frkim/NovaSteel3/actions/workflows/ci-build-services.yml)
+[![CodeQL](https://github.com/frkim/NovaSteel3/actions/workflows/codeql.yml/badge.svg)](https://github.com/frkim/NovaSteel3/actions/workflows/codeql.yml)
+[![CD infrastructure](https://github.com/frkim/NovaSteel3/actions/workflows/cd-infra.yml/badge.svg)](https://github.com/frkim/NovaSteel3/actions/workflows/cd-infra.yml)
+[![CD services](https://github.com/frkim/NovaSteel3/actions/workflows/cd-services.yml/badge.svg)](https://github.com/frkim/NovaSteel3/actions/workflows/cd-services.yml)
+[![CD Fabric items](https://github.com/frkim/NovaSteel3/actions/workflows/cd-fabric-items.yml/badge.svg)](https://github.com/frkim/NovaSteel3/actions/workflows/cd-fabric-items.yml)
+[![Presentation](https://github.com/frkim/NovaSteel3/actions/workflows/presentation.yml/badge.svg)](https://github.com/frkim/NovaSteel3/actions/workflows/presentation.yml)
+
+<!-- Objectives -->
+[![Objective: energy cost](https://img.shields.io/badge/Objective-Energy%20cost%20%E2%88%9214%25-0F6CBD)](docs/artifacts/business-value-assessment.md)
+[![Objective: CO2](https://img.shields.io/badge/Objective-CO%E2%82%82%20%E2%88%9222%25-107C10)](docs/artifacts/business-value-assessment.md)
+[![Objective: failure warning](https://img.shields.io/badge/Objective-21--day%20failure%20warning-8661C5)](docs/artifacts/business-value-assessment.md)
+[![Objective: yield](https://img.shields.io/badge/Objective-Yield%20%2B8%25-B146C2)](docs/artifacts/business-value-assessment.md)
+
+<!-- Goals -->
+[![Goal: decision support only](https://img.shields.io/badge/Goal-Decision%20support%20only-D13438)](docs/artifacts/security-baseline.md)
+[![Goal: EU data residency](https://img.shields.io/badge/Goal-EU%20data%20residency-005A9E)](docs/artifacts/compliance.md)
+[![Goal: human in the loop](https://img.shields.io/badge/Goal-Human%20in%20the%20loop-4F6BED)](docs/artifacts/ai-design.md)
+[![Goal: offline reproducible](https://img.shields.io/badge/Goal-Offline%20reproducible-498205)](docs/artifacts/test-strategy.md)
+
+<!-- Platform and status -->
+[![Azure](https://img.shields.io/badge/Azure-Sweden%20Central-0078D4?logo=microsoftazure&logoColor=white)](docs/artifacts/diagrams/deployment-and-region.md)
+[![Microsoft Fabric](https://img.shields.io/badge/Microsoft%20Fabric-OneLake%20%7C%20Eventhouse-742774)](docs/artifacts/data-baseline.md)
+[![.NET](https://img.shields.io/badge/.NET-10.0.302-512BD4?logo=dotnet&logoColor=white)](global.json)
+[![Python](https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white)](services)
+[![React](https://img.shields.io/badge/React-MUI%20%7C%20D3%20%7C%20Dockview-61DAFB?logo=react&logoColor=black)](apps/analytics-mfe)
+[![Tests](https://img.shields.io/badge/Tests-1%2C139%20passing-2EA043)](docs/artifacts/test-strategy.md)
+[![Validation gates](https://img.shields.io/badge/Validation%20gates-19%2F19-2EA043)](tools/validation)
+[![Data](https://img.shields.io/badge/Data-Synthetic%20%7C%20non--personal-8A8886)](docs/artifacts/data-baseline.md)
+[![Package feeds](https://img.shields.io/badge/Package%20feeds-Microsoft%20protected-6B2D8C)](docs/tech/security_requirement.md)
 
 > **Delivery status:** runnable demonstration; source, tests, Bicep IaC, Fabric definitions, CI gates, and defense assets are present.  
 > **Cloud status:** **deployed** to Azure Sweden Central (`rg-novasteelv3-demo-sc`). Fabric, Foundry Agent Service, Speech, and OT/tenant integrations remain gated production work.
@@ -19,6 +51,91 @@ MILP energy optimiser, a physics-informed RUL regressor, and a knowledge
 orchestrator with a critic loop and agent handoff), and synthetic simulator
 fixtures. Every service runs fully offline against deterministic fixtures as a
 demonstration fallback.
+
+## The project in one minute
+
+AxelorMetal operates four European steel sites (Luxembourg HQ, Germany,
+Belgium, Spain). Energy is its largest controllable cost and its largest
+emissions driver; refractory lining failures are its most expensive unplanned
+stoppages; quality escapes are found too late; and three decades of operator
+know-how sit in unsearchable documents. Each plant has its own historian and its
+own spreadsheets, so nobody sees the estate as one system.
+
+NovaSteel puts a **governed analytics core** (Microsoft Fabric) and an
+**advisory AI layer** in front of that estate, and delivers the result to five
+operating personas as one role-scoped workspace. It answers four questions:
+
+| Question | Capability | Persona |
+|---|---|---|
+| When should we run energy-hungry loads, and at what cost and CO₂? | MILP dispatch optimiser (PuLP/CBC) | Energy Manager |
+| How long will this refractory lining last, and how sure are we? | Physics-informed RUL regressor with a P10/P50/P90 band | Reliability Engineer |
+| Which batches are at risk, and what would fix them? | Bounded synthetic what-if on batch genealogy | Quality Engineer |
+| What did we do last time this happened? | Grounded RAG with a critic loop and citation enforcement | Knowledge Engineer / Operators |
+
+Everything it produces is a **recommendation with evidence**, presented to a
+named human who approves or rejects it. There is no OT control write on any
+path, in any environment.
+
+## Objectives and goals
+
+### Business objectives (pilot targets)
+
+| # | Objective | Target | How NovaSteel pursues it |
+|---|---|---|---|
+| O1 | Reduce energy cost | **−14 %** | Price-aware MILP dispatch of movable loads against day-ahead spot prices |
+| O2 | Reduce CO₂ intensity | **−22 %** | Carbon-intensity-aware scheduling and an auditable emissions ledger |
+| O3 | Anticipate refractory failure | **21-day** warning | Physics-informed RUL forecast with an explicit uncertainty band |
+| O4 | Improve first-pass yield | **+8 %** | Early quality-risk scoring and batch genealogy traceability |
+| O5 | Make know-how retrievable | Sub-minute answer | Grounded, cited retrieval over procedures and interview capture |
+
+> These are **pilot targets**, not realized outcomes. The measured
+> synthetic-scenario results are reported separately and are smaller in scope —
+> see [Business Value Assessment](docs/artifacts/business-value-assessment.md).
+
+### Engineering goals (non-negotiable)
+
+| # | Goal | Meaning |
+|---|---|---|
+| G1 | **Decision support only** | No PLC, interlock, furnace, recipe, setpoint, schedule-commit, or CMMS write exists on any code path |
+| G2 | **Human in the loop** | Every recommendation terminates at a named human approval step |
+| G3 | **EU data residency** | Primary region Sweden Central; recovery posture is tested, not automatic |
+| G4 | **Identity, not secrets** | Entra managed identity and OIDC; the browser receives an opaque token reference |
+| G5 | **Honest by construction** | The UI always states its data source; synthetic data is labelled unconditionally |
+| G6 | **Offline reproducible** | The full demonstration runs against committed deterministic fixtures with no tenant dependency |
+| G7 | **Protected supply chain** | Python and NuGet restores go only through Microsoft-protected feeds |
+| G8 | **Evidence over assertion** | Every claim is backed by a test, a validation gate, or a captured artifact |
+
+## Artifact documentation set
+
+The condensed, one-page artifact set lives in
+[`docs/artifacts/`](docs/artifacts/README.md). Each page summarises one review
+dimension and links to its authoritative long-form source.
+
+| # | Artifact | Audience | Answers |
+|---|---|---|---|
+| 1 | [Glossary](docs/artifacts/glossary.md) | All | What does this term mean? |
+| 2 | [Diagrams](docs/artifacts/diagrams/README.md) | Architects | What does the system look like? |
+| 3 | [Solution Architecture](docs/artifacts/solution-architecture.md) | Architects, engineering | How is it built, and why? |
+| 4 | [Data Baseline](docs/artifacts/data-baseline.md) | Data engineering, governance | What data, at what grain, under what contract? |
+| 5 | [AI Design](docs/artifacts/ai-design.md) | Data science, risk | What do the models and agents do? |
+| 6 | [Security Baseline](docs/artifacts/security-baseline.md) | Security, risk | How is it protected? |
+| 7 | [Compliance](docs/artifacts/compliance.md) | Legal, compliance, DPO | Which regulations apply? |
+| 8 | [Operating Model](docs/artifacts/operating-model.md) | Operations, platform team | Who runs it, and to what SLO? |
+| 9 | [Test Strategy](docs/artifacts/test-strategy.md) | QA, engineering | How do we know it works? |
+| 10 | [Business Value Assessment](docs/artifacts/business-value-assessment.md) | Executives, sponsors | Is it worth doing? |
+
+### Diagram pages
+
+| Diagram | Shows |
+|---|---|
+| [System Context (C4)](docs/artifacts/diagrams/system-context.md) | Actors, systems, and trust boundaries |
+| [Medallion data flow](docs/artifacts/diagrams/medallion-data-flow.md) | Bronze / silver / gold path through Fabric |
+| [Agents orchestration](docs/artifacts/diagrams/agents-orchestration.md) | Knowledge orchestration, critic loop, grounding boundary |
+| [Deployment and region](docs/artifacts/diagrams/deployment-and-region.md) | Azure topology, EU residency, recovery posture |
+| [Key persona sequence](docs/artifacts/diagrams/key-persona-sequence.md) | End-to-end decision journeys per persona |
+
+Editable diagram masters (Excalidraw) are in
+[`docs/architecture/diagrams/`](docs/architecture/diagrams/README.md).
 
 ## Architecture and safety boundary
 
@@ -258,6 +375,7 @@ Other frequently used entry points:
 
 | Topic | Document |
 |---|---|
+| **Artifact set (one-page summaries)** | [`docs\artifacts\README.md`](docs/artifacts/README.md) |
 | Business brief | [`docs\usecase\usecase.md`](docs/usecase/usecase.md) |
 | Requirement register / proof of execution | [`docs\presentation\proof_of_execution.md`](docs/presentation/proof_of_execution.md) |
 | Oral-defense material (deck, plan, FAQ, app guide) | [`docs\presentation\README.md`](docs/presentation/README.md) |
