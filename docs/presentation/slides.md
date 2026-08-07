@@ -323,26 +323,6 @@ That boundary is not a future intention; it is an architectural rule: AI advises
 
 ---
 
-# Guardrails we will not trade away
-
-<div class="cards four">
-<div class="card teal"><div class="card-num">01</div><h3>Decision support only</h3><p>No write to PLC, interlock, furnace, or setpoint (ADR-007)</p></div>
-<div class="card purple"><div class="card-num">02</div><h3>EU-only processing</h3><p>Sweden Central; Foundry Data Zone (EU) — ADR-003</p></div>
-<div class="card green"><div class="card-num">03</div><h3>Append-only audit</h3><p>Every consequential AI output is replayable</p></div>
-<div class="card orange"><div class="card-num">04</div><h3>Secure by design</h3><p>Zero Trust, least privilege, no standing secrets</p></div>
-</div>
-
-> Existing OT safety-instrumented systems stay authoritative. The platform advises; a human decides.
-
-<!-- ⏱ 1:30 · Four guardrails are non-negotiable and they constrain everything else.
-First and most important: this is decision support. No application, agent, rule, pipeline, or demo control writes to a PLC, a safety interlock, a furnace, or a production setpoint — existing OT safety systems stay authoritative. That is ADR-007.
-Second, EU-only processing: Sweden Central, with Foundry in the EU Data Zone.
-Third, every consequential AI output is auditable end to end — inputs, model version, confidence, rationale, the human decision, and the outcome, append-only.
-Fourth, secure by design: Zero Trust and least privilege throughout, with no standing secret anywhere to steal. Every identity is scoped to exactly one job, so a compromised identity has a contained blast radius.
-If any of these is a problem for you, stop me now, because I won't trade them away. -->
-
----
-
 <!-- _class: tight -->
 <!-- _header: '' -->
 <!-- _footer: '' -->
@@ -439,6 +419,8 @@ Azure services exist only for integration, APIs, and domain compute Fabric doesn
 
 ---
 
+<!-- _class: tight ot-signal -->
+
 # From OT Signal to Trustworthy Data
 
 <div class="split">
@@ -461,9 +443,26 @@ Azure services exist only for integration, APIs, and domain compute Fabric doesn
 </div>
 </div>
 
-<!-- ⏱ 1:45 · Trust starts at ingestion. Every event arrives in an immutable bronze envelope with a UUIDv7 id, its original event time, a per-source sequence, and a schema version.
+## Guardrails we will not trade away
+
+<div class="cards four guardrails">
+<div class="card teal"><div class="card-num">01</div><h3>Decision support only</h3><p>No write to PLC, interlock, furnace, or setpoint (ADR-007)</p></div>
+<div class="card purple"><div class="card-num">02</div><h3>EU-only processing</h3><p>Sweden Central; Foundry Data Zone (EU) — ADR-003</p></div>
+<div class="card green"><div class="card-num">03</div><h3>Append-only audit</h3><p>Every consequential AI output is replayable</p></div>
+<div class="card orange"><div class="card-num">04</div><h3>Secure by design</h3><p>Zero Trust, least privilege, no standing secrets</p></div>
+</div>
+
+> Existing OT safety-instrumented systems stay authoritative. The platform advises; a human decides.
+
+<!-- ⏱ 2:40 · Trust starts at ingestion. Every event arrives in an immutable bronze envelope with a UUIDv7 id, its original event time, a per-source sequence, and a schema version.
 Silver is the single place we deduplicate and normalize units, so streaming and batch land on the same contract. Crucially, bad data is visible: late, duplicate, wrong-unit, or unknown-asset records are quarantined with a reason, never quietly fixed.
-On identity: Fabric's Event Hubs connector uses a shared key, which our security policy forbids — so we buffer in Event Hubs and use a managed-identity relay to a Custom Endpoint over Entra ID. The wider permission — workspace Contributor — is isolated in an ingress-only workspace with no access to curated, ML, or reporting data. That's ADR-005. -->
+On identity: Fabric's Event Hubs connector uses a shared key, which our security policy forbids — so we buffer in Event Hubs and use a managed-identity relay to a Custom Endpoint over Entra ID. The wider permission — workspace Contributor — is isolated in an ingress-only workspace with no access to curated, ML, or reporting data. That's ADR-005.
+The four guardrails along the bottom constrain everything built on top of that data, and they are non-negotiable.
+First and most important: this is decision support. No application, agent, rule, pipeline, or demo control writes to a PLC, a safety interlock, a furnace, or a production setpoint — existing OT safety systems stay authoritative. That is ADR-007.
+Second, EU-only processing: Sweden Central, with Foundry in the EU Data Zone.
+Third, every consequential AI output is auditable end to end — inputs, model version, confidence, rationale, the human decision, and the outcome, append-only.
+Fourth, secure by design: Zero Trust and least privilege throughout, with no standing secret to steal, so a compromised identity has a contained blast radius.
+If any of these is a problem for you, stop me now, because I won't trade them away. -->
 
 ---
 
@@ -492,6 +491,8 @@ On identity: Fabric's Event Hubs connector uses a shared key, which our security
 
 ---
 
+<!-- _class: tight four-capabilities -->
+
 # The Four AI Capabilities
 
 <div class="cards four">
@@ -501,11 +502,22 @@ On identity: Fabric's Event Hubs connector uses a shared key, which our security
 <div class="card green"><div class="card-num">KNOWLEDGE</div><h3>Knowledge Capture</h3><p>Azure Speech + Foundry Agent Service</p></div>
 </div>
 
-**ADR-006:** Python is authoritative for math · Foundry explains/retrieves, never decides or commits
+## The intelligence layer runs as agents in Azure AI Foundry (EU)
 
-<!-- ⏱ 1:10 · Four capabilities, one principle that I'll defend hard: the deterministic, testable Python services compute the answer — feasible dispatch, remaining useful life, quality risk.
-The generative agent explains, retrieves, and orchestrates approved tool calls; it never invents a schedule, relaxes a constraint, or makes a commitment.
-That's ADR-006, and it's why a language model being confidently wrong can't hurt a furnace here. -->
+<div class="foundry-why">
+<div><b>Governed by construction</b><span>Agents are a managed Azure resource: Entra identity, RBAC, private networking, content filters and Prompt Shields are platform features we configure — not middleware we write and must then defend</span></div>
+<div><b>Tools are the only exit</b><span>Each agent reaches the estate exclusively through a declared OpenAPI tool allow-list. Anything not published as a tool is unreachable, so the blast radius is an explicit, reviewable list</span></div>
+<div><b>Every call is evidence</b><span>Thread, model version, tool invocation and grounding are emitted natively — that is the append-only trail the EU AI Act asks for, generated by the runtime rather than reconstructed by us</span></div>
+<div><b>EU residency without a rebuild</b><span>Foundry Data Zone (EU) keeps prompts, files and traces in-region (ADR-003), and models are swapped by configuration as better ones ship</span></div>
+</div>
+
+<!-- ⏱ 1:25 · Four capabilities, one principle I'll defend hard: the deterministic, testable Python services compute the answer — feasible dispatch, remaining useful life, quality risk.
+The generative layer around them is deployed as agents in Azure AI Foundry, in the EU data zone, and I want to argue that choice rather than assert it.
+Governance is inherited, not invented: a Foundry agent is a first-class Azure resource with an Entra managed identity, RBAC scoping, private networking, content filters and Prompt Shields. Hand-rolling an orchestration service would mean writing — and then defending — all of that ourselves.
+The tool allow-list is the security boundary: an agent reaches the estate only through declared OpenAPI tools, so what it can do is a short list a reviewer reads in a minute.
+The platform emits the audit trail natively — thread, model version, every tool call, the grounding used — which is exactly the record the AI Act expects, produced by the runtime instead of reconstructed afterwards.
+And residency and model choice stay configuration: the EU Data Zone keeps prompts, files and traces in-region, and a better model is a deployment-name change.
+So the agent explains, retrieves and orchestrates approved tool calls. It never invents a schedule, relaxes a constraint, or makes a commitment — which is why a model being confidently wrong cannot hurt a furnace here. -->
 
 ---
 
@@ -759,6 +771,46 @@ This is where generative AI adds real value and where it's most tightly governed
 
 ---
 
+<!-- _class: tight compliance-slide -->
+
+# Compliance
+
+<div class="split">
+<div>
+
+| Regulation | Duty that binds us | Where it lands |
+|---|---|---|
+| **EU AI Act** (EU) 2024/1689 | Art. 12–15 · logging, oversight, robustness | Append-only audit chain · RAI board gate |
+| **EU ETS** 2003/87/EC · MRV 2018/2066 | Monitored, verifiable CO₂ lineage | Emission-factor lineage · allowance cost in dispatch |
+| **IEC 62443** ‑3‑2 / ‑3‑3 | Zones, conduits, target SL | Outbound-only DMZ · no write-back |
+| **NIS2** (EU) 2022/2555 | Art. 21 measures · Art. 23 24 h / 72 h | Sev-1 path · runbooks · registration |
+| **GDPR** (EU) 2016/679 | Art. 17 · 22 · 32 · 35 | Erasure · human decision · DPIA |
+
+</div>
+<div>
+
+- **CBAM** definitive period from 2026 — fed by the same emission lineage
+- **Machinery Reg. (EU) 2023/1230** out of scope while advisory-only
+- **IEC 61511** safety instrumented system stays fully independent
+- **CSRD / ESRS E1** still moving — we produce the data, not the assurance
+- **ISO/IEC 27001 · 42001** as the management-system frame
+
+</div>
+</div>
+
+<p class="compliance-gates"><span class="pill orange">🎯 OPEN GATES</span> Accredited ETS verifier · DPIA · Legal's AI Act classification</p>
+
+> We produce audit-grade **management information**, not a regulated filing. Full analysis: `docs/business/compliance/`
+
+<!-- ⏱ 2:00 · Compliance is not a slide we bolt on at the end; five regulatory regimes shaped the architecture itself.
+The EU AI Act drove the append-only audit chain — inputs, model version, confidence, rationale, the human decision and the outcome — and the Responsible AI board as a hard promotion gate.
+The Emissions Trading System drove emission-factor lineage: every tonne of CO₂ we report can be traced back to the meter reading and the factor version that produced it, and the allowance price sits inside the dispatch objective rather than in a spreadsheet next to it.
+IEC 62443 drove the zone-and-conduit design: the plant is a zone, the conduit is outbound-only, and there is no return path to a controller. That single decision is what keeps the Machinery Regulation and IEC 61511 out of scope — we are not a safety component, and the safety instrumented system remains completely independent of us.
+NIS2 applies because manufacture of basic metals is an important entity: twenty-four-hour early warning, seventy-two-hour notification, and management liability. GDPR applies to the operator data in the knowledge capture, so erasure, the Article 22 human-decision guarantee, and a DPIA are all in scope.
+Be clear about what we are not claiming. We produce audit-grade management information. An accredited verifier, a completed DPIA, and Legal's formal AI Act classification are open gates, and I will not pretend otherwise. -->
+
+---
+
 # Responsible AI & EU AI Act Governance
 
 <div class="split">
@@ -773,7 +825,7 @@ This is where generative AI adds real value and where it's most tightly governed
 
 - Prompt-injection defense: **Prompt Shields** (direct + indirect), tool allow-lists, full audit
 - Every output: inputs, model version, confidence, rationale, human decision, outcome — **append-only**
-- ADR-006: LLM explains; **Python decides**
+- Human approval required on **any** write path
 
 </div>
 </div>
@@ -795,11 +847,11 @@ A model response is never authorization. -->
 <div>
 
 <div class="security-principles">
-<div><b>Zero Trust</b><span>Never trust, always verify — every agent request is authenticated and authorized</span></div>
-<div><b>Least Privilege</b><span>Each agent has minimal permissions for its specific function</span></div>
-<div><b>Defense in Depth</b><span>Multiple security layers: network, identity, data and application</span></div>
-<div><b>Security Left Shift</b><span>Security checks run in the CI/CD pipeline, not just production</span></div>
-<div><b>Data Minimization</b><span>Agents access only the data required for their specific task</span></div>
+<div class="teal"><b>Zero Trust</b><span>Never trust, always verify — every agent request is authenticated and authorized</span></div>
+<div class="purple"><b>Least Privilege</b><span>Each agent has minimal permissions for its specific function</span></div>
+<div class="blue"><b>Defense in Depth</b><span>Multiple security layers: network, identity, data and application</span></div>
+<div class="green"><b>Security Left Shift</b><span>Security checks run in the CI/CD pipeline, not just production</span></div>
+<div class="orange"><b>Data Minimization</b><span>Agents access only the data required for their specific task</span></div>
 </div>
 
 </div>
@@ -897,46 +949,6 @@ So payback is well under a year even after large conservative haircuts. But I wi
 
 ---
 
-<!-- _class: tight compliance-slide -->
-
-# Compliance
-
-<div class="split">
-<div>
-
-| Regulation | Duty that binds us | Where it lands |
-|---|---|---|
-| **EU AI Act** (EU) 2024/1689 | Art. 12–15 · logging, oversight, robustness | Append-only audit chain · RAI board gate |
-| **EU ETS** 2003/87/EC · MRV 2018/2066 | Monitored, verifiable CO₂ lineage | Emission-factor lineage · allowance cost in dispatch |
-| **IEC 62443** ‑3‑2 / ‑3‑3 | Zones, conduits, target SL | Outbound-only DMZ · no write-back |
-| **NIS2** (EU) 2022/2555 | Art. 21 measures · Art. 23 24 h / 72 h | Sev-1 path · runbooks · registration |
-| **GDPR** (EU) 2016/679 | Art. 17 · 22 · 32 · 35 | Erasure · human decision · DPIA |
-
-</div>
-<div>
-
-- **CBAM** definitive period from 2026 — fed by the same emission lineage
-- **Machinery Reg. (EU) 2023/1230** out of scope while advisory-only
-- **IEC 61511** safety instrumented system stays fully independent
-- **CSRD / ESRS E1** still moving — we produce the data, not the assurance
-- **ISO/IEC 27001 · 42001** as the management-system frame
-
-</div>
-</div>
-
-<p class="compliance-gates"><span class="pill orange">🎯 OPEN GATES</span> Accredited ETS verifier · DPIA · Legal's AI Act classification</p>
-
-> We produce audit-grade **management information**, not a regulated filing. Full analysis: `docs/business/compliance/`
-
-<!-- ⏱ 2:00 · Compliance is not a slide we bolt on at the end; five regulatory regimes shaped the architecture itself.
-The EU AI Act drove the append-only audit chain — inputs, model version, confidence, rationale, the human decision and the outcome — and the Responsible AI board as a hard promotion gate.
-The Emissions Trading System drove emission-factor lineage: every tonne of CO₂ we report can be traced back to the meter reading and the factor version that produced it, and the allowance price sits inside the dispatch objective rather than in a spreadsheet next to it.
-IEC 62443 drove the zone-and-conduit design: the plant is a zone, the conduit is outbound-only, and there is no return path to a controller. That single decision is what keeps the Machinery Regulation and IEC 61511 out of scope — we are not a safety component, and the safety instrumented system remains completely independent of us.
-NIS2 applies because manufacture of basic metals is an important entity: twenty-four-hour early warning, seventy-two-hour notification, and management liability. GDPR applies to the operator data in the knowledge capture, so erasure, the Article 22 human-decision guarantee, and a DPIA are all in scope.
-Be clear about what we are not claiming. We produce audit-grade management information. An accredited verifier, a completed DPIA, and Legal's formal AI Act classification are open gates, and I will not pretend otherwise. -->
-
----
-
 <!-- _class: lead chapter blue -->
 <!-- _paginate: false -->
 
@@ -1005,6 +1017,15 @@ Be clear about what we are not claiming. We produce audit-grade management infor
 <div class="card green"><div class="card-num">04 · Delegate</div><h3>Specialized GitHub agents</h3><p>Coding, QA, security, research and docs agents own bounded branches and PRs</p></div>
 </div>
 
+## Structured by a framework per discipline — agents inherit the method, not our mood
+
+<div class="frameworks">
+<div class="purple"><b>Spec-driven · GitHub Spec Kit</b><span>Constitution → specify → plan → tasks. Acceptance criteria are written before code, so an agent has a testable definition of done</span></div>
+<div class="blue"><b>Skills · Superpowers</b><span>BMAD-Method, HVE and peers, packaged as reusable skills: brainstorm, TDD, systematic debugging, review — invoked, never re-explained</span></div>
+<div class="orange"><b>Business · McKinsey method</b><span>MECE issue trees, hypothesis-first analysis and the Pyramid Principle shape the value case, cost model and this defense narrative</span></div>
+<div class="teal"><b>Architecture · C4 Model</b><span>Context → container → component → code, plus ADRs. One shared vocabulary for humans, diagrams and agents</span></div>
+</div>
+
 <div class="chain">
 <div class="node purple"><b>Specify</b><span>intent + constraints</span></div>
 <div class="step">›</div>
@@ -1015,7 +1036,8 @@ Be clear about what we are not claiming. We produce audit-grade management infor
 <div class="node green"><b>Prove in GitHub</b><span>CI + reviews + PR</span></div>
 </div>
 
-<!-- ⏱ 0:35 · We treated agentic development as an organized engineering system, not ad-hoc prompting. GitHub Spec Kit turns intent into a constitution, specification, plan, tasks, and acceptance criteria. Superpowers adds reusable skills for brainstorming, test-driven development, debugging, and review. GitHub Copilot then executes the same governed workflow across VS Code, Copilot CLI, and the GitHub Copilot app. Specialized coding, QA, security, research, and documentation agents own bounded branches and pull requests; automated gates prove the work, and a human approves the plan and the merge. -->
+<!-- ⏱ 0:55 · We treated agentic development as an organized engineering system, not ad-hoc prompting. GitHub Spec Kit turns intent into a constitution, specification, plan, tasks, and acceptance criteria. Superpowers adds reusable skills for brainstorming, test-driven development, debugging, and review. GitHub Copilot then executes the same governed workflow across VS Code, Copilot CLI, and the GitHub Copilot app. Specialized coding, QA, security, research, and documentation agents own bounded branches and pull requests; automated gates prove the work, and a human approves the plan and the merge.
+The second band matters: we did not invent a method, we adopted an established framework per discipline, so quality does not depend on who wrote the prompt that morning. Spec Kit governs the spec-driven loop. Superpowers packages methods such as BMAD-Method and HVE as skills an agent invokes instead of instructions we retype. The business analysis follows the McKinsey approach — MECE issue trees, hypothesis-first, and the Pyramid Principle, which is literally the structure of this defense. The architecture is described in C4, with ADRs for anything consequential. A framework is a shared vocabulary: when the specification, the diagram, the business case and the agent instruction use the same words, work parallelizes safely and a reviewer can audit the reasoning, not just the diff. -->
 
 ---
 
@@ -1117,20 +1139,20 @@ And the distinction I have kept all morning: what you just watched is evidence t
 
 ---
 
-<!-- _class: tight -->
+<!-- _class: tight next-steps -->
 
 # Next Steps
 
 <div class="split">
 <div>
 
-**Immediate — next 30 days**
+<p class="phase-head">Immediate — next 30 days</p>
 
 1. **Assumption workshop** — replace our seven cost assumptions with AxelorMetal actuals
 2. **Site selection** for the Phase 1 pilot (~0.3 Mt line)
 3. **Open the governance gates**: DPIA kick-off, Legal's EU AI Act classification, accredited ETS verifier engagement
 
-**Phase 1 — one-site pilot**
+<p class="phase-head">Phase 1 — one-site pilot</p>
 
 - Read-only integration: historian, MES, CMMS, market feed
 - Shadow scoring, fully logged, **zero operational effect**
@@ -1203,7 +1225,7 @@ The decision I'm asking for today is narrow: approve the pilot scope and open th
 
 <!-- _class: tight backup -->
 
-# Backup — Are the headline numbers proven?
+# Appendix — Are the headline numbers proven?
 
 <div class="split">
 <div>
@@ -1233,7 +1255,39 @@ Realized savings get proven in a one-site pilot via an auditable savings ledger.
 
 <!-- _class: tight backup -->
 
-# Backup — Why Microsoft Fabric, Not Databricks or Snowflake?
+# Appendix — Why We Do Not Write to the Furnace
+
+<div class="split">
+<div>
+
+**Design choice, not missing feature**
+
+- Furnace setpoints and interlocks remain in OT safety layers (Purdue L0-L2)
+- Outbound-only IEC 62443 zone boundary
+- Cloud-to-OT direct actuation would cross that boundary by design
+
+</div>
+<div>
+
+**What the platform writes today**
+
+- Approved dispatch decisions
+- CMMS work orders from lining alerts
+- Approved knowledge procedures
+- Append-only, hash-chained audit facts
+
+<span class="pill green">SAFETY</span> The platform advises and records decisions; OT control systems stay authoritative.
+
+</div>
+</div>
+
+<!-- ⏱ 0:00 · Appendix slide. This is an intentional safety boundary. We automate decision quality and traceability, but direct furnace actuation stays with existing OT control and safety systems. -->
+
+---
+
+<!-- _class: tight backup -->
+
+# Appendix — Why Microsoft Fabric, Not Databricks or Snowflake?
 
 <div class="split">
 <div>
@@ -1265,126 +1319,32 @@ A parallel lake is explicitly rejected in **ADR-001**.
 
 <!-- _class: tight backup -->
 
-# Backup — What Stops a Hallucinating LLM From Causing Harm?
+# Appendix — Why Not Azure IoT Hub — or IoT Operations?
 
 <div class="split">
 <div>
 
-**Q: What stops a hallucinating LLM from causing harm?**
+**Current baseline (this solution)**
 
-Architecture, not hope:
-
-- Python computes every authoritative answer
-- LLM only explains, retrieves, calls allow-listed tools (ADR-006)
-- Cannot relax a constraint, make a commitment, or be sole calculation
+- Event Hubs + identity relay + Fabric Eventstream
+- Optimized for analytics ingestion, governance, and deterministic replay
+- Lowest integration overhead for the current advisory-only scope
 
 </div>
 <div>
 
-- Tools are read/simulate by default
-- "Commit" endpoint separately policy-gated
-- A model response is **never** authorization
-- Full tool-call input/output logging
-- Human-in-the-loop for any write action
+**When IoT Hub / IoT Operations becomes the right choice**
+
+- Need bidirectional device command and control loops
+- Need edge-native protocol mediation and local autonomy
+- Need fleet operations with device twins, jobs, and lifecycle orchestration
+
+Today they are roadmap capabilities, not required for the validated MVP boundary.
 
 </div>
 </div>
 
-<!-- ⏱ 0:00 · Backup slide. The architecture separates computation from explanation. Python decides; the LLM explains within an allow-listed, audited, human-approved envelope. It cannot relax constraints or make commitments. A model response is never authorization. -->
-
----
-
-<!-- _class: tight backup -->
-
-# Backup — Where Are the Secrets?
-
-<div class="split">
-<div>
-
-**Q: Where are the secrets / connection strings?**
-
-There are **no standing application secrets**.
-
-- Humans: Entra user tokens
-- Workloads: separate managed identities
-- GitHub: OIDC/workload-identity federation
-
-</div>
-<div>
-
-- Public registries prohibited (protected feeds only)
-- Every build emits an SBOM
-- Breach notification: 72 hours
-- Audit logs: 1 year hot + 6 years archive
-- Blast radius contained: four separate auth planes
-
-</div>
-</div>
-
-<!-- ⏱ 0:00 · Backup slide. No standing secrets exist. Humans use Entra tokens, workloads use managed identities, deployment uses GitHub OIDC federation. Public package registries are blocked; every build produces an SBOM. If one identity is compromised, blast radius is contained across four separate authorization planes. -->
-
----
-
-<!-- _class: tight backup -->
-
-# Backup — Why We Do Not Write to the Furnace
-
-<div class="split">
-<div>
-
-**Q: Isn't advisory-only just a dashboard?**
-
-Not writing is **designed, not missing**:
-
-- Setpoints and interlocks at Purdue L0–L2 under IEC 61511
-- Outbound-only IEC 62443 zone boundary
-- EU AI Act high-risk duties cannot be evidenced on synthetic data
-
-</div>
-<div>
-
-The platform **is not read-only** — it writes decisions:
-
-- `POST /v1/energy/recommendations/{id}:approve`
-- `POST /v1/workorders` from lining alert
-- `POST /v1/knowledge/procedures/{id}:approve`
-- Append-only hash-chained audit trail
-
-Phase 2: guarded write-back to CMMS/MES — human-approved, bounded, reversible.
-
-</div>
-</div>
-
-<!-- ⏱ 0:00 · Backup slide. Not writing to the furnace is a designed acceptance boundary, not a missing feature. Existing safety-instrumented functions stay authoritative. The platform does write decisions — approved dispatches, work orders, published procedures, and audit trails. Phase 2 adds guarded CMMS write-back, never direct control. -->
-
----
-
-<!-- _class: tight backup -->
-
-# Backup — Honest Limitations
-
-<div class="split">
-<div>
-
-**Q: What are the honest limitations of today's demo?**
-
-1. All data is **synthetic** — four targets are not realized results
-2. Pilot RUL scoring is **daily**, not real-time
-3. Custom Endpoint requires **Contributor** role — mitigated by isolation, not eliminated
-
-</div>
-<div>
-
-4. **No automatic Fabric BCDR** in Sweden Central
-5. **No production €/hour cost** — needs measured pilot load
-6. Real-plant accuracy needs pilot validation against actual relines and lab results
-
-> This discipline *is* the trustworthiness.
-
-</div>
-</div>
-
-<!-- ⏱ 0:00 · Backup slide. We name limitations unprompted: synthetic-only data, daily not real-time scoring, Contributor role mitigated by isolation, no automatic BCDR, no cost figure, and real accuracy needs pilot validation. This honesty discipline is the trustworthiness — a vendor who converts every synthetic result into banked savings is the one to distrust. -->
+<!-- ⏱ 0:00 · Appendix slide. We did not reject IoT Hub or IoT Operations as bad options; we deferred them because this release is advisory-first and analytics-centric. They become first-class in vNext closed-loop control. -->
 
 ---
 
@@ -1431,45 +1391,6 @@ Phase 2: guarded write-back to CMMS/MES — human-approved, bounded, reversible.
 
 <!-- _class: tight backup -->
 
-# Appendix — Cost Model & Sensitivity
-
-<div class="split">
-<div>
-
-**Assumptions to challenge first**
-
-| # | Assumption | Value |
-|---|---|--:|
-| A1 | Annual production, in-scope site | ~1.0 Mt/yr |
-| A1b | Pilot line (Phase 1) | ~0.3 Mt/yr |
-| A2 | Production cost | ~€500/t |
-| A3 | Energy share | 35% → ~€175/t |
-| A5 | EU ETS carbon price | ~€70/tCO₂ |
-| A7 | Furnace failure cost | ~€8M/event |
-| A8 | Failure frequency (pilot line) | 1 per 2–3 yr |
-
-</div>
-<div>
-
-**What changes the answer**
-
-| Driver | If lower than assumed | Mitigation |
-|---|---|---|
-| Energy saving < 14% | Benefit shrinks, stays large | Pilot proves the real % first |
-| CO₂ reduction < 22% | Smaller ETS avoidance | Validate by shadow scoring |
-| Failures less frequent | O3 benefit smaller | Treat O3 as upside, not base case |
-| Yield uplift < 8% | O4 smaller | Prove via SPC before crediting |
-| Azure cost higher | Run cost up | Reservations, right-sizing, FinOps cadence |
-
-</div>
-</div>
-
-<!-- ⏱ 0:00 · Appendix slide. Every euro on the business-case slide derives from these seven assumptions, and each is meant to be replaced by AxelorMetal actuals in a design workshop. The right-hand table is the honest downside: if the percentages come in lower, the case shrinks and stays positive, and no lever is load-bearing on its own. -->
-
----
-
-<!-- _class: tight backup -->
-
 # Appendix — Phased Delivery Roadmap
 
 | Dimension | Demonstration — defense | Phase 1 — one-site pilot | Phase 2+ — production |
@@ -1504,6 +1425,107 @@ Phase 2: guarded write-back to CMMS/MES — human-approved, bounded, reversible.
 <span class="pill gray">R responsible · A accountable · C consulted · I informed</span>
 
 <!-- ⏱ 0:00 · Appendix slide. Governance only works if a name sits behind each control. Two rows matter most: model promotion and agent tool-scope changes are both accountable to the Responsible AI board, not to the team that wants to ship. OT network segmentation stays with the OT engineers, who can veto. -->
+
+---
+
+<!-- _class: tight backup -->
+
+# Appendix — What Stops a Hallucinating LLM From Causing Harm?
+
+<div class="split">
+<div>
+
+**Q: What stops a hallucinating LLM from causing harm?**
+
+Architecture, not hope:
+
+- Python computes every authoritative answer
+- LLM only explains, retrieves, calls allow-listed tools (ADR-006)
+- Cannot relax a constraint, make a commitment, or be sole calculation
+
+</div>
+<div>
+
+- Tools are read/simulate by default
+- "Commit" endpoint separately policy-gated
+- A model response is **never** authorization
+- Full tool-call input/output logging
+- Human-in-the-loop for any write action
+
+</div>
+</div>
+
+<!-- ⏱ 0:00 · Backup slide. The architecture separates computation from explanation. Python decides; the LLM explains within an allow-listed, audited, human-approved envelope. It cannot relax constraints or make commitments. A model response is never authorization. -->
+
+---
+
+<!-- _class: tight backup -->
+
+# Appendix — Where Are the Secrets?
+
+<div class="split">
+<div>
+
+**Q: Where are the secrets / connection strings?**
+
+There are **no standing application secrets**.
+
+- Humans: Entra user tokens
+- Workloads: separate managed identities
+- GitHub: OIDC/workload-identity federation
+
+</div>
+<div>
+
+- Public registries prohibited (protected feeds only)
+- Every build emits an SBOM
+- Breach notification: 72 hours
+- Audit logs: 1 year hot + 6 years archive
+- Blast radius contained: four separate auth planes
+
+</div>
+</div>
+
+<!-- ⏱ 0:00 · Backup slide. No standing secrets exist. Humans use Entra tokens, workloads use managed identities, deployment uses GitHub OIDC federation. Public package registries are blocked; every build produces an SBOM. If one identity is compromised, blast radius is contained across four separate authorization planes. -->
+
+---
+
+<!-- _class: tight backup -->
+
+# Appendix — Cost Model & Sensitivity
+
+<div class="split">
+<div>
+
+**Assumptions to challenge first**
+
+| # | Assumption | Value |
+|---|---|--:|
+| A1 | Annual production, in-scope site | ~1.0 Mt/yr |
+| A1b | Pilot line (Phase 1) | ~0.3 Mt/yr |
+| A2 | Production cost | ~€500/t |
+| A3 | Energy share | 35% → ~€175/t |
+| A5 | EU ETS carbon price | ~€70/tCO₂ |
+| A7 | Furnace failure cost | ~€8M/event |
+| A8 | Failure frequency (pilot line) | 1 per 2–3 yr |
+
+</div>
+<div>
+
+**What changes the answer**
+
+| Driver | If lower than assumed | Mitigation |
+|---|---|---|
+| Energy saving < 14% | Benefit shrinks, stays large | Pilot proves the real % first |
+| CO₂ reduction < 22% | Smaller ETS avoidance | Validate by shadow scoring |
+| Failures less frequent | O3 benefit smaller | Treat O3 as upside, not base case |
+| Yield uplift < 8% | O4 smaller | Prove via SPC before crediting |
+| Azure cost higher | Run cost up | Reservations, right-sizing, FinOps cadence |
+
+</div>
+</div>
+
+<!-- ⏱ 0:00 · Appendix slide. Every euro on the business-case slide derives from these seven assumptions, and each is meant to be replaced by AxelorMetal actuals in a design workshop. The right-hand table is the honest downside: if the percentages come in lower, the case shrinks and stays positive, and no lever is load-bearing on its own. -->
 
 ---
 
@@ -1544,144 +1566,30 @@ Burned error budget triggers a change freeze until root cause is addressed.
 
 <!-- _class: tight backup -->
 
-# Appendix — Reproducible Demonstration Evidence
+# Appendix — Honest Limitations
 
 <div class="split">
 <div>
 
-**Expected values — one 24 h scenario, seed `240725`**
+**Q: What are the honest limitations of today's demo?**
 
-| Output | Expected |
-|---|---|
-| Energy-cost cut | −7.25% |
-| Peak | 56.0 → 51.58 MW (−7.89%) |
-| CO₂ | −3.29% |
-| Planned tonnage | 960 t · zero violations |
-| RUL P50 / P10 / P90 | 19.65 / 18.69 / 20.61 d |
-| Risk · confidence | 0.90 · 0.78 (r² 0.88) |
-| Quality what-if | ~88% → ~95% first-pass |
+1. All data is **synthetic** — four targets are not realized results
+2. Pilot RUL scoring is **daily**, not real-time
+3. Custom Endpoint requires **Contributor** role — mitigated by isolation, not eliminated
 
 </div>
 <div>
 
-**Named scenarios**
+4. **No automatic Fabric BCDR** in Sweden Central
+5. **No production €/hour cost** — needs measured pilot load
+6. Real-plant accuracy needs pilot validation against actual relines and lab results
 
-`240727` energy spike · `240726` lining warning · `240728` quality drift · `240729` outage & recovery
-
-**Five-level fallback ladder**
-
-1. Cloud live
-2. Local deterministic replay
-3. Cached interactive
-4. Recorded 90-second flow
-5. Static proof pack — screenshots, JSON, transcripts
+> This discipline *is* the trustworthiness.
 
 </div>
 </div>
 
-<!-- ⏱ 0:00 · Appendix slide. Every number I quote on stage is pinned to a seed and reproducible bit-for-bit, so you can regenerate the run yourself. If the live environment misbehaves, there are five rehearsed fallback levels down to a static proof pack, and I will always tell you which level you are watching. -->
-
----
-
-<!-- _class: tight backup -->
-
-# Appendix — Reusing the NovaSteel Pattern for Glass Plants
-
-<div class="split">
-<div>
-
-**What stays the same (high reuse)**
-
-- Same two-stream data foundation: hot telemetry + governed history in Fabric
-- Same portal pattern: Blazor shell + React MFE + Power BI personas
-- Same compute pattern: Python scoring/optimizer workers + append-only audit
-- Same governance baseline: EU residency, managed identity, RAI gates, human approval
-
-**What changes for glass**
-
-- Asset model: furnaces, forehearth, lehr, forming lines
-- KPIs: kWh/ton glass, pull-rate stability, cullet ratio, defect ppm
-- Feature set: melt profile, viscosity proxies, annealing curve, vision defects
-
-</div>
-<div>
-
-| Steel capability | Glass equivalent |
-|---|---|
-| Lining RUL | Refractory campaign and forehearth wear forecasting |
-| Energy dispatch | Electric boosting + batch timing optimization |
-| In-line quality risk | Bubble/cord/thickness/optical defect risk |
-| Knowledge capture | Shift handover + troubleshooting playbooks |
-
-<span class="pill blue">REUSE</span> Platform and controls stay; process models and KPIs are swapped to glass physics.
-
-</div>
-</div>
-
-<!-- ⏱ 0:00 · Appendix slide. The point is reuse by architecture pattern: keep the governed data core, deterministic compute, portal experience and control framework, then swap only industry semantics — assets, KPIs and physics features. For glass the same blueprint supports forehearth wear, pull-rate stability, energy dispatch, and defect prevention without redesigning the platform. -->
-
----
-
-<!-- _class: tight backup -->
-
-# Appendix — Why We Do Not Write to the Furnace
-
-<div class="split">
-<div>
-
-**Design choice, not missing feature**
-
-- Furnace setpoints and interlocks remain in OT safety layers (Purdue L0-L2)
-- Cloud-to-OT direct actuation would cross the IEC 62443 boundary by design
-- With synthetic data, we cannot evidence high-risk control duties to production standard
-
-</div>
-<div>
-
-**What the platform writes today**
-
-- Approved dispatch decisions
-- CMMS work orders from lining alerts
-- Approved knowledge procedures
-- Append-only, hash-chained audit facts
-
-<span class="pill green">SAFETY</span> The platform advises and records decisions; OT control systems stay authoritative.
-
-</div>
-</div>
-
-<!-- ⏱ 0:00 · Appendix slide. This is an intentional safety boundary. We automate decision quality and traceability, but direct furnace actuation stays with existing OT control and safety systems. -->
-
----
-
-<!-- _class: tight backup -->
-
-# Appendix — Why Not Azure IoT Hub — or IoT Operations?
-
-<div class="split">
-<div>
-
-**Current baseline (this solution)**
-
-- Event Hubs + identity relay + Fabric Eventstream
-- Optimized for analytics ingestion, governance, and deterministic replay
-- Lowest integration overhead for the current advisory-only scope
-
-</div>
-<div>
-
-**When IoT Hub / IoT Operations becomes the right choice**
-
-- Need bidirectional device command and control loops
-- Need edge-native protocol mediation and local autonomy
-- Need fleet operations with device twins, jobs, and lifecycle orchestration
-
-Today they are roadmap capabilities, not required for the validated MVP boundary.
-
-</div>
-</div>
-
-<!-- ⏱ 0:00 · Appendix slide. We did not reject IoT Hub or IoT Operations as bad options; we deferred them because this release is advisory-first and analytics-centric. They become first-class in vNext closed-loop control. -->
+<!-- ⏱ 0:00 · Backup slide. We name limitations unprompted: synthetic-only data, daily not real-time scoring, Contributor role mitigated by isolation, no automatic BCDR, no cost figure, and real accuracy needs pilot validation. This honesty discipline is the trustworthiness — a vendor who converts every synthetic result into banked savings is the one to distrust. -->
 
 ---
 

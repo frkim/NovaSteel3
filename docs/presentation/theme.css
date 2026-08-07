@@ -1367,6 +1367,51 @@ section.security-slide .split {
   line-height: 1.25;
 }
 
+.security-principles div.teal {
+  border-left-color: var(--ns-teal);
+  background: var(--ns-teal-soft);
+}
+
+.security-principles div.teal b {
+  color: var(--ns-teal);
+}
+
+.security-principles div.purple {
+  border-left-color: var(--ns-purple);
+  background: var(--ns-purple-soft);
+}
+
+.security-principles div.purple b {
+  color: var(--ns-purple);
+}
+
+.security-principles div.blue {
+  border-left-color: var(--ns-blue);
+  background: var(--ns-blue-soft);
+}
+
+.security-principles div.blue b {
+  color: var(--ns-blue);
+}
+
+.security-principles div.green {
+  border-left-color: var(--ns-green);
+  background: var(--ns-green-soft);
+}
+
+.security-principles div.green b {
+  color: var(--ns-green);
+}
+
+.security-principles div.orange {
+  border-left-color: var(--ns-molten);
+  background: var(--ns-molten-soft);
+}
+
+.security-principles div.orange b {
+  color: var(--ns-molten);
+}
+
 section.security-slide table {
   margin-top: 0;
   font-size: 15px;
@@ -1476,4 +1521,292 @@ section.agent-swarm .chain .node span {
 
 section.agent-swarm .chain .step {
   font-size: 28px;
+}
+
+/* --- OT signal + merged guardrails ------------------------------------- */
+/* This slide carries the ingestion contract AND the four non-negotiable
+   guardrails, so every band is deliberately denser than the global scale. */
+
+section.ot-signal .split {
+  gap: 26px;
+  margin-bottom: 4px;
+}
+
+section.ot-signal .split li {
+  font-size: 17px;
+  line-height: 1.28;
+  margin-bottom: 5px;
+}
+
+section.ot-signal .split p {
+  font-size: 17px;
+  line-height: 1.28;
+  margin: 8px 0 0;
+}
+
+section.ot-signal h2 {
+  font-size: 23px;
+  color: var(--ns-ink);
+  margin: 12px 0 0;
+}
+
+section.ot-signal .cards.guardrails {
+  margin-top: 10px;
+  gap: 11px;
+}
+
+section.ot-signal .cards.guardrails .card {
+  padding: 9px 11px;
+  border-top-width: 3px;
+  border-radius: 8px;
+}
+
+section.ot-signal .cards.guardrails .card-num {
+  font-size: 11px;
+  margin-bottom: 3px;
+}
+
+section.ot-signal .cards.guardrails h3 {
+  font-size: 15px;
+  margin: 0 0 3px;
+  line-height: 1.2;
+}
+
+section.ot-signal .cards.guardrails p {
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+section.ot-signal blockquote {
+  margin-top: 11px;
+  padding: 8px 16px;
+}
+
+section.ot-signal blockquote p {
+  font-size: 16px;
+  line-height: 1.25;
+  margin: 0;
+}
+
+/* --- four AI capabilities: why the agents live in Foundry --------------- */
+
+section.four-capabilities .cards.four {
+  margin-top: 6px;
+  gap: 12px;
+}
+
+section.four-capabilities .cards.four .card {
+  padding: 11px 13px;
+}
+
+section.four-capabilities .cards.four h3 {
+  font-size: 18px;
+}
+
+section.four-capabilities .cards.four p {
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+section.four-capabilities h2 {
+  font-size: 24px;
+  color: var(--ns-ink);
+  margin: 16px 0 0;
+}
+
+.foundry-why {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.foundry-why > div {
+  padding: 9px 12px;
+  border: 1px solid var(--ns-line);
+  border-left: 5px solid var(--ns-purple);
+  border-radius: 8px;
+  background: var(--ns-purple-soft);
+}
+
+.foundry-why > div:nth-child(2) {
+  border-left-color: var(--ns-teal);
+  background: var(--ns-teal-soft);
+}
+
+.foundry-why > div:nth-child(3) {
+  border-left-color: var(--ns-green);
+  background: var(--ns-green-soft);
+}
+
+.foundry-why > div:nth-child(4) {
+  border-left-color: var(--ns-blue);
+  background: var(--ns-blue-soft);
+}
+
+.foundry-why b,
+.foundry-why span {
+  display: block;
+}
+
+.foundry-why b {
+  margin-bottom: 3px;
+  font-size: 16px;
+  color: var(--ns-purple);
+}
+
+.foundry-why > div:nth-child(2) b {
+  color: var(--ns-teal);
+}
+
+.foundry-why > div:nth-child(3) b {
+  color: var(--ns-green);
+}
+
+.foundry-why > div:nth-child(4) b {
+  color: var(--ns-blue);
+}
+
+.foundry-why span {
+  font-size: 13px;
+  line-height: 1.28;
+  color: #334155;
+}
+
+/* --- agent swarm: framework band --------------------------------------- */
+/* Adding the framework band means the original cards and chain must give
+   back vertical space, so this slide overrides the swarm defaults. */
+
+section.agent-swarm .subtitle {
+  margin-bottom: 4px;
+}
+
+section.agent-swarm .cards {
+  margin-top: 10px;
+}
+
+section.agent-swarm .card {
+  min-height: 0;
+  padding: 10px 12px;
+}
+
+section.agent-swarm .card h3 {
+  font-size: 17px;
+  margin: 0 0 3px;
+}
+
+section.agent-swarm .card p {
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+section.agent-swarm .card-num {
+  font-size: 11px;
+  margin-bottom: 3px;
+}
+
+section.agent-swarm h2 {
+  font-size: 21px;
+  color: var(--ns-ink);
+  margin: 14px 0 0;
+}
+
+.frameworks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin-top: 9px;
+}
+
+.frameworks > div {
+  padding: 8px 11px;
+  border: 1px solid var(--ns-line);
+  border-left: 5px solid var(--ns-purple);
+  border-radius: 8px;
+  background: var(--ns-purple-soft);
+}
+
+.frameworks > div.blue {
+  border-left-color: var(--ns-blue);
+  background: var(--ns-blue-soft);
+}
+
+.frameworks > div.orange {
+  border-left-color: var(--ns-molten);
+  background: var(--ns-molten-soft);
+}
+
+.frameworks > div.teal {
+  border-left-color: var(--ns-teal);
+  background: var(--ns-teal-soft);
+}
+
+.frameworks b,
+.frameworks span {
+  display: block;
+}
+
+.frameworks b {
+  margin-bottom: 2px;
+  font-size: 15px;
+  color: var(--ns-purple);
+}
+
+.frameworks > div.blue b {
+  color: var(--ns-blue);
+}
+
+.frameworks > div.orange b {
+  color: var(--ns-molten);
+}
+
+.frameworks > div.teal b {
+  color: var(--ns-teal);
+}
+
+.frameworks span {
+  font-size: 12.5px;
+  line-height: 1.25;
+  color: #334155;
+}
+
+section.agent-swarm .chain {
+  margin-top: 12px;
+  gap: 10px;
+}
+
+section.agent-swarm .chain .node {
+  padding: 7px 11px;
+}
+
+section.agent-swarm .chain .node b {
+  font-size: 15px;
+}
+
+section.agent-swarm .chain .node span {
+  font-size: 12.5px;
+}
+
+section.agent-swarm .chain .step {
+  font-size: 20px;
+}
+
+/* --- next steps: phase headings ---------------------------------------- */
+
+section.next-steps .phase-head {
+  margin: 0 0 8px;
+  color: var(--ns-molten);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+section.next-steps .phase-head + ol,
+section.next-steps .phase-head + ul {
+  margin-top: 0;
+}
+
+section.next-steps ol + .phase-head,
+section.next-steps ul + .phase-head {
+  margin-top: 16px;
 }
