@@ -389,7 +389,7 @@ At the top, Python services do the math and read Fabric read-only, and Foundry a
 
 ![NovaSteel architecture](images/novasteel-architecture.png)
 
-<!-- ⏱ 0:25 · Here is the same platform as one picture: sources on the left, ingestion through IoT Hub, Event Hubs and Data Factory, then Fabric with Real-Time Intelligence and the medallion lakehouse at the centre, Foundry and the apps on the right, and identity, security and governance underneath all of it. -->
+<!-- ⏱ 0:25 · Here is the same platform as one picture: sources on the left, ingestion through IoT Hub, Event Hubs and Data Factory, then Fabric with Real-Time Intelligence at the centre — raw bronze, curated silver, trusted gold — Foundry and the apps on the right, and one identity, security and governance layer beneath all of it: Entra ID, Defender, Purview, Sentinel, Front Door, Firewall, Key Vault and Monitor. -->
 
 ---
 
