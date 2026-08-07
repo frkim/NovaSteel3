@@ -161,7 +161,7 @@ See [the rehearsal report](../artifacts/demo-validation/rehearsal-report.md),
 | Audience | Start here | Then read |
 |---|---|---|
 | Newcomer to the app or to steel making | [Illustrated application guide (EN)](presentation/assets/app-guide/en/README.md) / [(FR)](presentation/assets/app-guide/fr/LISEZMOI.md) | [Use case](usecase/usecase.md), [proof of execution](presentation/proof_of_execution.md) |
-| Defense panel / presenter | [Root handoff](../README.md) and the [defense material index](presentation/README.md) | [Proof of execution](presentation/proof_of_execution.md), [technical analysis](tech/technical-analysis.md), [runbook](demo/demo-runbook.md), [slide plan](presentation/archives/oral-defense-and-slide-plan.md), [FAQ](presentation/faq.md) |
+| Defense panel / presenter | [Root handoff](../README.md) and the [defense material index](presentation/README.md) | [Proof of execution](presentation/proof_of_execution.md), [technical analysis](tech/technical-analysis.md), [runbook](demo/demo-runbook.md), [slide plan](presentation/archives/oral-defense-and-slide-plan.md), [FAQ](presentation/faq.md), [Q&A by persona](presentation/qa-by-persona.md) |
 | Product owner | [Requirements](business/solution-requirements.md) | [Personas](business/personas-and-journeys.md), [UX specification](ux/dashboard-specification.md) |
 | Solution/data architect | [Solution architecture](architecture/solution-architecture.md) | [Deployment topology](architecture/deployment-topology.md), [Fabric assets](../fabric/README.md) |
 | Application engineer | [Root quick start](../README.md) | [API contracts](tech/api-contracts.md), [implementation guide](implementation/implementation-guide.md) |
@@ -175,7 +175,7 @@ See [the rehearsal report](../artifacts/demo-validation/rehearsal-report.md),
 |---|---|---|
 | 00:00–35:00 | Architecture, value and compliance narrative | [Plan](presentation/archives/oral-defense-and-slide-plan.md) and `docs\presentation\archives\NovaSteel-Oral-Defense.pptx` |
 | 35:00–45:00 | Six-moment deterministic persona demo | [Runbook](demo/demo-runbook.md) and `..\artifacts\demo-validation\drive_demo.py` |
-| 45:00–60:00 | Moderated FAQ / validation-gate discussion | [FAQ](presentation/faq.md), [proof of execution](presentation/proof_of_execution.md) and [technical analysis](tech/technical-analysis.md) |
+| 45:00–60:00 | Moderated FAQ / validation-gate discussion | [FAQ](presentation/faq.md), [Q&A by persona](presentation/qa-by-persona.md), [proof of execution](presentation/proof_of_execution.md) and [technical analysis](tech/technical-analysis.md) |
 
 The delivered PowerPoint has 28 slides: 20 primary narrative/demo-handoff slides
 and eight FAQ backup slides. The package validator found no placeholders and
@@ -199,7 +199,7 @@ PPTX. See the [presentation folder index](presentation/README.md).
 | Implementation | [Root quick start](../README.md), [implementation guide](implementation/implementation-guide.md), [API contracts](tech/api-contracts.md) |
 | Data/Fabric | [Synthetic data](data/synthetic-data-and-simulators.md), [Fabric README](../fabric/README.md), [Fabric research](research/fabric-platform.md), [Fabric-Brain mapping](architecture/fabric-brain-mapping.md) |
 | Experience | [Illustrated application guide](presentation/assets/app-guide/en/README.md), [UX spec §9.7](ux/dashboard-specification.md#97-dockview-workspace-model-all-screens), [UX spec §12.11](ux/dashboard-specification.md#1211-axelormetal-corporate-website-company-website-s-24), [Solution architecture ADR-014](architecture/solution-architecture.md#adr-014--two-level-dockview-workspace-with-jsx-derived-panels) |
-| Defense / presentation | [Folder index](presentation/README.md), [slide plan](presentation/archives/oral-defense-and-slide-plan.md), [FAQ](presentation/faq.md), [proof of execution](presentation/proof_of_execution.md), [Marp deck source](presentation/slides.md), [French executive summary](presentation/resume-executif-fr.md) |
+| Defense / presentation | [Folder index](presentation/README.md), [slide plan](presentation/archives/oral-defense-and-slide-plan.md), [FAQ](presentation/faq.md), [Q&A by persona](presentation/qa-by-persona.md), [proof of execution](presentation/proof_of_execution.md), [Marp deck source](presentation/slides.md), [French executive summary](presentation/resume-executif-fr.md) |
 | Device Operations | [Synthetic data §13](data/synthetic-data-and-simulators.md#13-device-simulator-estate), [UX spec §12.9–12.10](ux/dashboard-specification.md), [API contracts §4.12](tech/api-contracts.md#412-device-operations), [Operations §12](operations/operations-and-cost.md) |
 | Security/operations | [Security governance](tech/security-governance-and-threat-model.md), [operations](operations/operations-and-cost.md), [package-feed policy](tech/security_requirement.md) |
 | Rating grid | [Rubric](usecase/rating_grid.md), [technical analysis](tech/technical-analysis.md), in-app **Technical Requirements** screen (`/{site}/technical-requirements/criteria`) |

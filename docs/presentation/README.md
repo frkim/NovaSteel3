@@ -8,7 +8,8 @@ application guide, and the Marp source that builds the deck itself.
 | Document | Role |
 |---|---|
 | [`oral-defense-and-slide-plan.md`](oral-defense-and-slide-plan.md) | Authoritative slide-by-slide narrative script with timings. `slides.md` is its rendered deck. |
-| [`faq.md`](faq.md) | Prepared answers for the 15-minute moderated FAQ. |
+| [`faq.md`](faq.md) | Prepared answers for the 15-minute moderated FAQ, organised by topic (90 questions, sections A–T). |
+| [`qa-by-persona.md`](qa-by-persona.md) | Companion Q&A organised by **persona** (business, technical, governance) plus one section per rating-grid criterion, deployment, evolution and curveball questions. |
 | [`proof_of_execution.md`](proof_of_execution.md) | Requirement register — every requirement mapped to the artifact that evidences it. |
 | [`fiche-repetition-presentateur.md`](fiche-repetition-presentateur.md) | Presenter rehearsal sheet (FR). |
 | [`resume-executif-fr.md`](resume-executif-fr.md) | French executive summary. |
