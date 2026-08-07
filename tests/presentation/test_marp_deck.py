@@ -305,12 +305,13 @@ def test_fabric_diagrams_and_architecture_labels_are_present() -> None:
     assert "# High Level Architecture" in text
     assert "Decision Center App" in text
     assert "Python FastAPI BFF" not in text
-    assert "images/fabric-architecture-diagram.webp" in text
+    assert "images/novasteel-architecture.png" in text
+    assert "# NovaSteel Architecture" in text
     assert "images/fabric-rti-diagram.webp" in text
     assert "# Appendix — Why Fabric — and Why Not a Parallel Lake" not in text
 
     sync_script = _read(PRESENTATION / "scripts" / "sync-images.mjs")
-    assert 'join(diagramDir, "fabric-architecture-diagram.webp")' in sync_script
+    assert 'join(diagramDir, "NovaSteel Architecture.png")' in sync_script
     assert 'join(diagramDir, "fabric-rti-diagram.webp")' in sync_script
     assert "Fabric Architecture Diagram.png" not in sync_script
     assert "Fabric RTI Diagram.png" not in sync_script

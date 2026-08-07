@@ -57,6 +57,9 @@ class Shot:
     source: str
     crop_bottom: int | None = None
     boxes: tuple[Box, ...] = field(default_factory=tuple)
+    # Portrait phone captures are already narrow; upscaling them to the landscape
+    # width would only blur the text, so they render at their own width.
+    target_width: int = TARGET_WIDTH
 
 
 SHOTS: tuple[Shot, ...] = (
@@ -235,6 +238,68 @@ SHOTS: tuple[Shot, ...] = (
             Box("3 · Trigger and Clear act on synthetic signals only", 320, 1570, 2060, 1910),
         ),
     ),
+    # Operator capture PWA. These are portrait phone captures from the deployed
+    # app, so they keep their own width instead of being upscaled.
+    Shot(
+        "s20-capture-consent",
+        "operator-capture-consent.png",
+        None,
+        (
+            Box("1 · Retention period is set before recording", 59, 1130, 803, 1335),
+            Box("2 · Explicit GDPR consent gates the recorder", 70, 1700, 800, 1800),
+        ),
+        target_width=860,
+    ),
+    Shot(
+        "s21-capture-record",
+        "operator-capture-record.png",
+        None,
+        (
+            Box("1 · One thumb-sized control starts the recording", 20, 665, 840, 990),
+            Box("2 · Or import a file / load the sample interview", 20, 1245, 840, 1470),
+        ),
+        target_width=860,
+    ),
+    Shot(
+        "s22-capture-recording",
+        "operator-capture-recording.png",
+        None,
+        (
+            Box("1 · Recording state, elapsed time and live input level", 20, 560, 840, 818),
+            Box("2 · Pause and Stop stay thumb-reachable", 20, 856, 840, 1112),
+        ),
+        target_width=860,
+    ),
+    Shot(
+        "s23-capture-review",
+        "operator-capture-review.png",
+        None,
+        (
+            Box("1 · Nothing leaves the phone until the operator confirms", 45, 518, 820, 618),
+            Box("2 · Play it back locally first", 45, 655, 820, 930, below=True),
+        ),
+        target_width=860,
+    ),
+    Shot(
+        "s24-capture-transcript",
+        "operator-capture-transcript.png",
+        1400,
+        (
+            Box("1 · Suggested domain and confidentiality class", 40, 530, 360, 645),
+            Box("2 · Speaker label and per-segment confidence", 40, 670, 820, 1085, below=True),
+        ),
+        target_width=860,
+    ),
+    Shot(
+        "s25-capture-store",
+        "operator-capture-store.png",
+        None,
+        (
+            Box("1 · The draft is explicitly not operational", 50, 600, 815, 810),
+            Box("2 · Draft ID and IN_REVIEW — submitted, not published", 50, 855, 815, 1120),
+        ),
+        target_width=860,
+    ),
 )
 
 
@@ -277,8 +342,8 @@ def render(shot: Shot) -> Path:
     bottom = min(shot.crop_bottom or height, height)
     image = image.crop((0, 0, width, bottom))
 
-    scale = TARGET_WIDTH / width
-    image = image.resize((TARGET_WIDTH, round(bottom * scale)), Image.LANCZOS)
+    scale = shot.target_width / width
+    image = image.resize((shot.target_width, round(bottom * scale)), Image.LANCZOS)
     draw = ImageDraw.Draw(image)
 
     for box in shot.boxes:

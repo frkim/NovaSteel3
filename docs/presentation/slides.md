@@ -363,13 +363,13 @@ At the top, Python services do the math and read Fabric read-only, and Foundry a
 
 ---
 
-<!-- _class: diagram diagram-title-in-image -->
+<!-- _class: diagram -->
 
-# Fabric Architecture
+# NovaSteel Architecture
 
-![Fabric architecture](images/fabric-architecture-diagram.webp)
+![NovaSteel architecture](images/novasteel-architecture.png)
 
-<!-- ⏱ 0:25 · This diagram expands the Fabric core: Real-Time Intelligence handles the operational clock, OneLake and the Lakehouse preserve governed history, and a shared semantic layer serves analytics and decision experiences without creating a parallel data estate. -->
+<!-- ⏱ 0:25 · Here is the same platform as one picture: sources on the left, ingestion through IoT Hub, Event Hubs and Data Factory, then Fabric with Real-Time Intelligence at the centre — raw bronze, curated silver, trusted gold — Foundry and the apps on the right, and one identity, security and governance layer beneath all of it: Entra ID, Defender, Purview, Sentinel, Front Door, Firewall, Key Vault and Monitor. -->
 
 ---
 
