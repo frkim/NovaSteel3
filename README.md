@@ -386,6 +386,7 @@ Other frequently used entry points:
 | Implementation process | [`docs\business\implementation-process.md`](docs/business/implementation-process.md) |
 | Agentic development and SDLC | [`docs\business\agentic-development.md`](docs/business/agentic-development.md) |
 | Package-feed security policy | [`docs\tech\security_requirement.md`](docs/tech/security_requirement.md) |
+| CI/CD, OIDC, and environment configuration | [`.github\CONFIGURATION.md`](.github/CONFIGURATION.md) |
 
 ## Oral-defense handoff — 35 + 10 + 15 minutes
 

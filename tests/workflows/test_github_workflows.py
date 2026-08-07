@@ -218,10 +218,10 @@ def test_ci_change_filters_match_directories_that_still_exist() -> None:
 
 
 def test_every_workflow_is_documented() -> None:
-    documentation = (ROOT / ".github" / "README.md").read_text(encoding="utf-8")
+    documentation = (ROOT / ".github" / "CONFIGURATION.md").read_text(encoding="utf-8")
     for path in WORKFLOW_FILES:
         assert path.name in documentation, (
-            f"{path.name} is not described in .github/README.md"
+            f"{path.name} is not described in .github/CONFIGURATION.md"
         )
 
 

@@ -1,5 +1,9 @@
 # GitHub configuration required by the workflows
 
+> Renamed from `.github/README.md` so that the repository landing page renders
+> the project [`README.md`](../README.md) instead of this operations note.
+> GitHub gives `.github/README.md` precedence over the root file.
+
 Configure protected branches so `verify-protected-feeds`, `security-gates`,
 `CodeQL Python and TypeScript`, and `CodeQL CSharp` are required before merge.
 Require code-owner review for `contracts/`, `fabric/`, and `infra/`.

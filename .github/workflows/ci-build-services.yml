@@ -70,7 +70,7 @@ jobs:
           [ -n "${SUBSCRIPTION_ID:-}" ] || missing+=(AZURE_SUBSCRIPTION_ID)
           [ -n "${LOGIN_SERVER:-}" ] || missing+=(ACR_LOGIN_SERVER)
           if [ "${#missing[@]}" -gt 0 ]; then
-            echo "::error::Missing repository variables: ${missing[*]}. Image builds push to ACR via workload identity federation; see .github/README.md."
+            echo "::error::Missing repository variables: ${missing[*]}. Image builds push to ACR via workload identity federation; see .github/CONFIGURATION.md."
             exit 1
           fi
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
