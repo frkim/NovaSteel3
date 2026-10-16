@@ -146,7 +146,7 @@ jobs:
         run: az acr login --name "${REGISTRY%%.*}"
       - name: Build and push bff-api
         id: build
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: services/bff-api
           build-contexts: |
@@ -193,7 +193,7 @@ jobs:
         run: az acr login --name "${REGISTRY%%.*}"
       - name: Build and push optimizer-worker
         id: build
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: services/optimizer-worker
           push: ${{ github.event_name != 'pull_request' }}
@@ -235,7 +235,7 @@ jobs:
         run: az acr login --name "${REGISTRY%%.*}"
       - name: Build and push scoring-worker
         id: build
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: services/scoring-worker
           push: ${{ github.event_name != 'pull_request' }}
@@ -277,7 +277,7 @@ jobs:
         run: az acr login --name "${REGISTRY%%.*}"
       - name: Build and push ingest-relay
         id: build
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: services/ingest-relay
           push: ${{ github.event_name != 'pull_request' }}
@@ -319,7 +319,7 @@ jobs:
         run: az acr login --name "${REGISTRY%%.*}"
       - name: Build and push knowledge-orchestrator
         id: build
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: services/knowledge-orchestrator
           push: ${{ github.event_name != 'pull_request' }}
@@ -361,7 +361,7 @@ jobs:
         run: az acr login --name "${REGISTRY%%.*}"
       - name: Build and push portal-shell
         id: build
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: apps/portal-shell
           build-contexts: |
@@ -407,7 +407,7 @@ jobs:
         run: az acr login --name "${REGISTRY%%.*}"
       - name: Build and push operator-capture-mfe
         id: build
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: apps/operator-capture-mfe
           build-contexts: |
